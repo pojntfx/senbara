@@ -18,10 +18,10 @@
   </div>
 
   <nav>
+    {{ if ne .LogoutURL "" }}
     <a href="/contacts">Contacts</a>
     <a href="/journal">Journal</a>
 
-    {{ if ne .LogoutURL "" }}
     <details>
       <summary>Account</summary>
 
@@ -62,6 +62,8 @@
         >
       </nav>
     </details>
+    {{ else }}
+    <a href="/login">Login</a>
     {{ end }}
   </nav>
 </header>
