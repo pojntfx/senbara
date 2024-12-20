@@ -3,9 +3,14 @@ package persisters
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"sync"
 
 	"github.com/pojntfx/senbara/senbara-forms/pkg/models"
+)
+
+var (
+	ErrContactDoesNotExist = errors.New("contact does not exist")
 )
 
 func (p *Persister) GetUserData(
@@ -193,6 +198,33 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 			Nickname:  contact.Nickname,
 			Email:     contact.Email,
 			Pronouns:  contact.Pronouns,
+
+			Namespace: namespace,
+		}); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	createDebt = func(debt models.ExportedDebt) error {
+		journalEntryIDMapLock.Lock()
+		defer journalEntryIDMapLock.Unlock()
+
+		if !debt.ContactID.Valid {
+			return ErrContactDoesNotExist
+		}
+
+		actualContactID, ok := journalEntryIDMap[debt.ContactID.Int32]
+		if !ok {
+			return ErrContactDoesNotExist
+		}
+
+		if _, err := qtx.CreateDebt(ctx, models.CreateDebtParams{
+			ID:          actualContactID,
+			Amount:      debt.Amount,
+			Currency:    debt.Currency,
+			Description: debt.Description,
 
 			Namespace: namespace,
 		}); err != nil {
