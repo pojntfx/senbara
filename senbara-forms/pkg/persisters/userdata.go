@@ -234,6 +234,33 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 		return nil
 	}
 
+	createActivity = func(activity models.ExportedActivity) error {
+		journalEntryIDMapLock.Lock()
+		defer journalEntryIDMapLock.Unlock()
+
+		if !activity.ContactID.Valid {
+			return ErrContactDoesNotExist
+		}
+
+		actualContactID, ok := journalEntryIDMap[activity.ContactID.Int32]
+		if !ok {
+			return ErrContactDoesNotExist
+		}
+
+		if _, err := qtx.CreateActivity(ctx, models.CreateActivityParams{
+			ID:          actualContactID,
+			Name:        activity.Name,
+			Date:        activity.Date,
+			Description: activity.Description,
+
+			Namespace: namespace,
+		}); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
 	commit = tx.Commit
 	rollback = tx.Rollback
 
