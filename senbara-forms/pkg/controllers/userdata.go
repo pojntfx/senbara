@@ -237,7 +237,7 @@ func (b *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	http.Redirect(w, r, "/contacts", http.StatusFound)
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func (b *Controller) HandleDeleteUserData(w http.ResponseWriter, r *http.Request) {

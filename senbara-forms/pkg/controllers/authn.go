@@ -144,6 +144,21 @@ type redirectData struct {
 	Href string
 }
 
+func (b *Controller) HandleLogin(w http.ResponseWriter, r *http.Request) {
+	redirected, _, status, err := b.authorize(w, r)
+	if err != nil {
+		log.Println(err)
+
+		http.Error(w, err.Error(), status)
+
+		return
+	} else if redirected {
+		return
+	}
+
+	http.Redirect(w, r, r.Header.Get("Referer"), http.StatusFound)
+}
+
 func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 	locale, err := b.localize(r)
 	if err != nil {

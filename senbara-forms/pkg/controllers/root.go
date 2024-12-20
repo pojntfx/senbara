@@ -40,6 +40,10 @@ const (
 	refreshTokenKey = "refresh_token"
 )
 
+type indexData struct {
+	pageData
+}
+
 type Controller struct {
 	tpl       *template.Template
 	persister *persisters.Persister
@@ -128,26 +132,29 @@ func (b *Controller) Init(ctx context.Context) error {
 }
 
 func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
-	if err != nil {
-		log.Println(err)
+	if r.Method == http.MethodGet && r.URL.Path == "/" {
+		locale, err := b.localize(r)
+		if err != nil {
+			log.Println(errCouldNotLocalize, err)
 
-		http.Error(w, err.Error(), status)
+			http.Error(w, errCouldNotLocalize.Error(), http.StatusInternalServerError)
 
-		return
-	} else if redirected {
-		return
-	}
+			return
+		}
 
-	if r.URL.Path != "/" {
-		w.WriteHeader(http.StatusNotFound)
+		// TODO: Check if user is authorized (but don't automatically redirect them to the authorization page if they aren't),
+		// and if they are then pass `userData` below
 
-		if err := b.tpl.ExecuteTemplate(w, "404.html", pageData{
-			userData: userData,
+		if err := b.tpl.ExecuteTemplate(w, "index.html", indexData{
+			pageData: pageData{
+				userData: userData{
+					Locale: locale,
+				},
 
-			Page:       "Page not found",
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
+				Page:       "Home",
+				PrivacyURL: b.privacyURL,
+				ImprintURL: b.imprintURL,
+			},
 		}); err != nil {
 			log.Println(errCouldNotRenderTemplate, err)
 
@@ -159,5 +166,28 @@ func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/contacts", http.StatusFound)
+	redirected, userData, status, err := b.authorize(w, r)
+	if err != nil {
+		log.Println(err)
+
+		http.Error(w, err.Error(), status)
+
+		return
+	} else if redirected {
+		return
+	}
+
+	if err := b.tpl.ExecuteTemplate(w, "404.html", pageData{
+		userData: userData,
+
+		Page:       "Page not found",
+		PrivacyURL: b.privacyURL,
+		ImprintURL: b.imprintURL,
+	}); err != nil {
+		log.Println(errCouldNotRenderTemplate, err)
+
+		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
+
+		return
+	}
 }
