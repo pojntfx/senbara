@@ -28,6 +28,66 @@ type userData struct {
 	Locale *gotext.Locale
 }
 
+func (b *Controller) getUser(r *http.Request) (userData, int, error) {
+	locale, err := b.localize(r)
+	if err != nil {
+		return userData{}, http.StatusInternalServerError, errors.Join(errCouldNotLocalize, err)
+	}
+
+	if _, err := r.Cookie(refreshTokenKey); err != nil {
+		return userData{
+			Locale: locale,
+		}, http.StatusOK, nil
+	}
+
+	it, err := r.Cookie(idTokenKey)
+	if err != nil {
+		return userData{
+			Locale: locale,
+		}, http.StatusOK, nil
+	}
+
+	id, err := b.verifier.Verify(r.Context(), it.Value)
+	if err != nil {
+		return userData{
+			Locale: locale,
+		}, http.StatusOK, nil
+	}
+
+	var claims struct {
+		Email         string `json:"email"`
+		EmailVerified bool   `json:"email_verified"`
+	}
+	if err := id.Claims(&claims); err != nil {
+		return userData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+	}
+
+	if !claims.EmailVerified {
+		return userData{
+			Locale: locale,
+		}, http.StatusOK, nil
+	}
+
+	logoutURL, err := url.Parse(b.oidcIssuer)
+	if err != nil {
+		return userData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+	}
+
+	q := logoutURL.Query()
+	q.Set("id_token_hint", it.Value)
+	q.Set("post_logout_redirect_uri", b.oidcRedirectURL)
+	logoutURL.RawQuery = q.Encode()
+
+	logoutURL = logoutURL.JoinPath("oidc", "logout")
+
+	return userData{
+		Email:     claims.Email,
+		LogoutURL: logoutURL.String(),
+
+		Locale: locale,
+	}, http.StatusOK, nil
+}
+
 func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, userData, int, error) {
 	locale, err := b.localize(r)
 	if err != nil {

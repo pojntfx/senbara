@@ -5,9 +5,7 @@ import (
 	"context"
 	"errors"
 	"html/template"
-	"log"
 	"math"
-	"net/http"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/pojntfx/senbara/senbara-forms/pkg/persisters"
@@ -129,65 +127,4 @@ func (b *Controller) Init(ctx context.Context) error {
 	})
 
 	return nil
-}
-
-func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet && r.URL.Path == "/" {
-		locale, err := b.localize(r)
-		if err != nil {
-			log.Println(errCouldNotLocalize, err)
-
-			http.Error(w, errCouldNotLocalize.Error(), http.StatusInternalServerError)
-
-			return
-		}
-
-		// TODO: Check if user is authorized (but don't automatically redirect them to the authorization page if they aren't),
-		// and if they are then pass `userData` below
-
-		if err := b.tpl.ExecuteTemplate(w, "index.html", indexData{
-			pageData: pageData{
-				userData: userData{
-					Locale: locale,
-				},
-
-				Page:       "Home",
-				PrivacyURL: b.privacyURL,
-				ImprintURL: b.imprintURL,
-			},
-		}); err != nil {
-			log.Println(errCouldNotRenderTemplate, err)
-
-			http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
-
-			return
-		}
-
-		return
-	}
-
-	redirected, userData, status, err := b.authorize(w, r)
-	if err != nil {
-		log.Println(err)
-
-		http.Error(w, err.Error(), status)
-
-		return
-	} else if redirected {
-		return
-	}
-
-	if err := b.tpl.ExecuteTemplate(w, "404.html", pageData{
-		userData: userData,
-
-		Page:       "Page not found",
-		PrivacyURL: b.privacyURL,
-		ImprintURL: b.imprintURL,
-	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
-
-		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
-
-		return
-	}
 }
