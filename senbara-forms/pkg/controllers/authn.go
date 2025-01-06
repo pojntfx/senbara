@@ -204,22 +204,9 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, us
 
 type redirectData struct {
 	pageData
-	Href string
-}
 
-func (b *Controller) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	redirected, _, status, err := b.authorize(w, r)
-	if err != nil {
-		log.Println(err)
-
-		http.Error(w, err.Error(), status)
-
-		return
-	} else if redirected {
-		return
-	}
-
-	http.Redirect(w, r, r.Header.Get("Referer"), http.StatusFound)
+	Href                  string
+	RequiresPrivacyPolicy bool
 }
 
 func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
@@ -258,6 +245,7 @@ func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 				PrivacyURL: b.privacyURL,
 				ImprintURL: b.imprintURL,
 			},
+
 			Href: "/",
 		}); err != nil {
 			log.Println(errCouldNotRenderTemplate, err)
@@ -319,6 +307,7 @@ func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 			PrivacyURL: b.privacyURL,
 			ImprintURL: b.imprintURL,
 		},
+
 		Href: "/",
 	}); err != nil {
 		log.Println(errCouldNotRenderTemplate, err)

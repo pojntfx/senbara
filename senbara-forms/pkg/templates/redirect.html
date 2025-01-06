@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="{{ .Locale.GetLanguage }}">
+  {{ if .RequiresPrivacyPolicy }}
+  {{ template "header.html" . }}
+  {{ else }}
   {{ template "header_redirect.html" . }}
+  {{ end }}
 
   <body>
     {{ template "nav.html" . }}
@@ -8,8 +12,27 @@
     <header>
       <h2>{{ .Page }}.</h2>
 
+      {{ if ne .RequiresPrivacyPolicy }}
       <a href="{{ .Href }}">Continue manually</a>
+      {{ end }}
     </header>
+
+    {{ if .RequiresPrivacyPolicy }}
+    <main>
+      <form id="privacy" action="{{ .Href }}" method="get">
+        <label for="body"
+          >I have read and understood the <a href="{{ .PrivacyURL }}" target="_blank">privacy policy</a></label
+        >
+        <br />
+      </form>
+
+      <div>
+        <input type="submit" value="Continue" form="privacy" />
+
+        <a href="/">Cancel</a>
+      </div>
+    </main>
+    {{ end }}
 
     {{ template "footer.html" . }}
   </body>
