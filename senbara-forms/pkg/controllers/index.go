@@ -7,7 +7,7 @@ import (
 
 func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet && r.URL.Path == "/" {
-		userData, status, err := b.getUser(r)
+		_, userData, status, err := b.authorize(nil, r)
 		if err != nil {
 			log.Println(err)
 
