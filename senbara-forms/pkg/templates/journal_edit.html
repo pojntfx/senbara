@@ -86,13 +86,11 @@
 {{ .Entry.Body }}</textarea
         >
         <br />
-      </form>
 
-      <div>
-        <input type="submit" value="Save changes" form="update" />
+        <input type="submit" value="Save changes" />
 
         <a href="/journal/view?id={{ .Entry.ID }}">Cancel</a>
-      </div>
+      </form>
     </main>
 
     {{ template "footer.html" . }}

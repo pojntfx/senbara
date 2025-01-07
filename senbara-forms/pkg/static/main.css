@@ -151,7 +151,7 @@ body {
 
 main form,
 details > nav > form {
-  > *:not(label):not(:last-child) {
+  > *:not(label):not(input[type="submit"]):not(:last-child) {
     margin-bottom: 1rem;
   }
 
@@ -186,4 +186,8 @@ nav {
 
 input[type="submit"] {
   margin-right: 0.5rem;
+}
+
+form:has(input[type="submit"]:only-child) {
+  display: inline;
 }

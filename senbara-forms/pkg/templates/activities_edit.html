@@ -51,13 +51,11 @@
 {{ .Entry.Description }}</textarea
         >
         <br />
-      </form>
 
-      <div>
-        <input type="submit" value="Save changes" form="update" />
+        <input type="submit" value="Save changes" />
 
         <a href="/contacts/view?id={{ .Entry.ContactID }}">Cancel</a>
-      </div>
+      </form>
     </main>
 
     {{ template "footer.html" . }}

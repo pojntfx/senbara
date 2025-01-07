@@ -27,13 +27,11 @@
         action="/journal/delete?id={{ .Entry.ID }}"
         method="post"
         onsubmit="return confirm('Are you sure you want to delete this entry?')"
-      ></form>
-
-      <div>
-        <input type="submit" value="Delete" form="delete" />
+      >
+        <input type="submit" value="Delete" />
 
         <a href="/journal/edit?id={{ .Entry.ID }}">Edit</a>
-      </div>
+      </form>
     </main>
 
     {{ template "footer.html" . }}

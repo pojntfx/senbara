@@ -26,16 +26,14 @@
         action="/activities/delete?id={{ .Entry.ActivityID }}"
         method="post"
         onsubmit="return confirm('Are you sure you want to delete this activity?')"
-      ></form>
+      >
+        <input type="submit" value="Delete" />
+      </form>
 
-      <div>
-        <input type="submit" value="Delete" form="delete" />
-
-        <a
-          href="/activities/edit?id={{ .Entry.ActivityID }}&contact_id={{ .Entry.ContactID }}"
-          >Edit</a
-        >
-      </div>
+      <a
+        href="/activities/edit?id={{ .Entry.ActivityID }}&contact_id={{ .Entry.ContactID }}"
+        >Edit</a
+      >
     </main>
 
     {{ template "footer.html" . }}
