@@ -1,27 +1,26 @@
 <!DOCTYPE html>
 <html lang="{{ .Locale.GetLanguage }}">
-  {{ if .RequiresPrivacyPolicy }}
-  {{ template "header.html" . }}
-  {{ else }}
-  {{ template "header_redirect.html" . }}
-  {{ end }}
+  {{ if .RequiresPrivacyPolicyConsent }} {{ template "header.html" . }} {{ else }} {{
+  template "header_redirect.html" . }} {{ end }}
 
   <body>
     {{ template "nav.html" . }}
 
     <header>
-      <h2>{{ .Page }}.</h2>
+      <h2>{{ .Page }}</h2>
 
-      {{ if ne .RequiresPrivacyPolicy }}
+      {{ if not .RequiresPrivacyPolicyConsent }}
       <a href="{{ .Href }}">Continue manually</a>
       {{ end }}
     </header>
 
-    {{ if .RequiresPrivacyPolicy }}
+    {{ if .RequiresPrivacyPolicyConsent }}
     <main>
-      <form id="privacy" action="{{ .Href }}" method="get">
-        <label for="body"
-          >I have read and understood the <a href="{{ .PrivacyURL }}" target="_blank">privacy policy</a></label
+      <form id="privacy" {{ if ne .Href "" }}action="{{ .Href }}"{{ end }} method="get">
+        <input type="checkbox" id="consent" name="consent" required />
+        <label for="consent"
+          >I have read and understood the
+          <a href="{{ .PrivacyURL }}" target="_blank">privacy policy</a></label
         >
         <br />
       </form>
@@ -32,8 +31,6 @@
         <a href="/">Cancel</a>
       </div>
     </main>
-    {{ end }}
-
-    {{ template "footer.html" . }}
+    {{ end }} {{ template "footer.html" . }}
   </body>
 </html>

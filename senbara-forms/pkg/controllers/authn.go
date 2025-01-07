@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/leonelquinteros/gotext"
@@ -100,7 +101,28 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, us
 	rt, err := r.Cookie(refreshTokenKey)
 	if err != nil {
 		if errors.Is(err, http.ErrNoCookie) {
-			http.Redirect(w, r, b.config.AuthCodeURL(b.oidcRedirectURL), http.StatusFound)
+			privacyPolicyConsent := r.FormValue("consent")
+			if strings.TrimSpace(privacyPolicyConsent) == "on" {
+				http.Redirect(w, r, b.config.AuthCodeURL(b.oidcRedirectURL), http.StatusFound)
+
+				return true, userData{}, http.StatusTemporaryRedirect, nil
+			}
+
+			if err := b.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
+				pageData: pageData{
+					userData: userData{
+						Locale: locale,
+					},
+
+					Page:       "Privacy Policy Consent",
+					PrivacyURL: b.privacyURL,
+					ImprintURL: b.imprintURL,
+				},
+
+				RequiresPrivacyPolicyConsent: true,
+			}); err != nil {
+				return false, userData{}, http.StatusInternalServerError, errors.Join(errCouldNotRenderTemplate, err)
+			}
 
 			return true, userData{}, http.StatusTemporaryRedirect, nil
 		}
@@ -112,7 +134,28 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, us
 	it, err := r.Cookie(idTokenKey)
 	if err != nil {
 		if errors.Is(err, http.ErrNoCookie) {
-			http.Redirect(w, r, b.config.AuthCodeURL(b.oidcRedirectURL), http.StatusFound)
+			privacyPolicyConsent := r.FormValue("consent")
+			if strings.TrimSpace(privacyPolicyConsent) == "on" {
+				http.Redirect(w, r, b.config.AuthCodeURL(b.oidcRedirectURL), http.StatusFound)
+
+				return true, userData{}, http.StatusTemporaryRedirect, nil
+			}
+
+			if err := b.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
+				pageData: pageData{
+					userData: userData{
+						Locale: locale,
+					},
+
+					Page:       "Privacy Policy Consent",
+					PrivacyURL: b.privacyURL,
+					ImprintURL: b.imprintURL,
+				},
+
+				RequiresPrivacyPolicyConsent: true,
+			}); err != nil {
+				return false, userData{}, http.StatusInternalServerError, errors.Join(errCouldNotRenderTemplate, err)
+			}
 
 			return true, userData{}, http.StatusTemporaryRedirect, nil
 		}
@@ -205,8 +248,23 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, us
 type redirectData struct {
 	pageData
 
-	Href                  string
-	RequiresPrivacyPolicy bool
+	Href                         string
+	RequiresPrivacyPolicyConsent bool
+}
+
+func (b *Controller) HandleLogin(w http.ResponseWriter, r *http.Request) {
+	redirected, _, status, err := b.authorize(w, r)
+	if err != nil {
+		log.Println(err)
+
+		http.Error(w, err.Error(), status)
+
+		return
+	} else if redirected {
+		return
+	}
+
+	http.Redirect(w, r, r.Header.Get("Referer"), http.StatusFound)
 }
 
 func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
