@@ -75,7 +75,7 @@ msgid "jdoe"
 msgstr "jdoe"
 
 msgid "Email"
-msgstr "Email"
+msgstr "Courriel"
 
 msgid "jean@doe.com"
 msgstr "jean@doe.com"
@@ -165,7 +165,7 @@ msgid "Home"
 msgstr "Accueil"
 
 msgid "Add a Journal Entry"
-msgstr "Ajouter une note de journal"
+msgstr "Ajouter une écriture de journal"
 
 msgid "How was your day?"
 msgstr "Comment s'est passée votre journée ?"
@@ -186,7 +186,7 @@ msgid "Body"
 msgstr "Corps"
 
 msgid "Add entry"
-msgstr "Ajouter la note"
+msgstr "Ajouter l'écriture"
 
 msgid "Edit \"%v\""
 msgstr "Modifier « %v »"
@@ -195,16 +195,16 @@ msgid "Your day was:"
 msgstr "Votre journée était :"
 
 msgid "Are you sure you want to delete this entry?"
-msgstr "Voulez-vous vraiment supprimer cette note ?"
+msgstr "Voulez-vous vraiment supprimer cette écriture ?"
 
 msgid "Journal"
 msgstr "Journal"
 
 msgid "Add a journal entry"
-msgstr "Ajouter une note de journal"
+msgstr "Ajouter une écriture de journal"
 
 msgid "No journal entries yet."
-msgstr "Aucune note dans le journal pour le moment."
+msgstr "Aucune écriture dans le journal pour le moment."
 
 msgid "Senbara Forms logo"
 msgstr "Logo de Formulaires Senbara"

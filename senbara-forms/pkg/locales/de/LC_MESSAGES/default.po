@@ -1,3 +1,288 @@
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Birthday"
+msgstr "Geburtstag"
+
+msgid "Page not found"
+msgstr "Diese Seite konnte nicht gefunden werden"
+
+msgid "Add a New Activity For %v %v"
+msgstr "Neue Aktivität mit %v %v hinzufügen"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "Description"
+msgstr "Beschreibung"
+
+msgid "(you can use"
+msgstr "(Sie können"
+
+msgid ")"
+msgstr " verwenden)"
+
+msgid "Add Activity"
+msgstr "Aktivität hinzufügen"
+
+msgid "Edit Activity for %v %v"
+msgstr "Aktivität mit %v %v bearbeiten"
+
+msgid "Save changes"
+msgstr "Änderungen speichern"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Activity %v for %v %v"
+msgstr "Aktivität %v mit %v %v"
+
+msgid "Date:"
+msgstr "Datum:"
+
+msgid "Are you sure you want to delete this activity?"
+msgstr "Möchten Sie diese Aktivität wirklich löschen?"
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "Edit"
+msgstr "Bearbeiten"
+
+msgid "Add a Contact"
+msgstr "Kontakt hinzufügen"
+
+msgid "First Name"
+msgstr "Vorname"
+
+msgid "Jean"
+msgstr "Jean"
+
+msgid "Last Name"
+msgstr "Nachname"
+
+msgid "Doe"
+msgstr "Doe"
+
+msgid "Nickname (optional)"
+msgstr "Spitzname (optional)"
+
+msgid "jdoe"
+msgstr "jdoe"
+
+msgid "Email"
+msgstr "E-Mail"
+
+msgid "jean@doe.com"
+msgstr "jean@doe.com"
+
+msgid "Pronouns"
+msgstr "Pronomen"
+
+msgid "they/them"
+msgstr "sie/ihr"
+
+msgid "Add contact"
+msgstr "Kontakt hinzufügen"
+
+msgid "Edit %v %v"
+msgstr "%v %v bearbeiten"
+
+msgid "Birthday (optional)"
+msgstr "Geburtstag (optional)"
+
+msgid "Address (optional)"
+msgstr "Adresse (optional)"
+
+msgid "Notes (optional)"
+msgstr "Notizen (optional)"
+
+msgid "Contacts"
+msgstr "Kontakte"
+
+msgid "Are you sure you want to delete this contact?"
+msgstr "Möchten Sie diesen Kontakt wirklich löschen?"
+
+msgid "No contacts yet."
+msgstr "Noch keine Kontakte vorhanden."
+
+msgid "Add a New Debt For %v %v"
+msgstr "Neue Schuld für %v %v hinzufügen"
+
+msgid "You owe %v"
+msgstr "Sie schulden %v"
+
+msgid "You owe %v %v %v"
+msgstr "Sie schulden %v %v %v"
+
+msgid "%v owes you"
+msgstr "%v schuldet Ihnen"
+
+msgid "%v owes you %v %v"
+msgstr "%v schuldet Ihnen %v %v"
+
+msgid "Amount"
+msgstr "Betrag"
+
+msgid "50"
+msgstr "50"
+
+msgid "Currency"
+msgstr "Währung"
+
+msgid "USD"
+msgstr "US-Dollar"
+
+msgid "Description (optional)"
+msgstr "Beschreibung (optional)"
+
+msgid "Add debt"
+msgstr "Schuld hinzufügen"
+
+msgid "Edit Debt for %v %v"
+msgstr "Schuld für %v %v bearbeiten"
+
+msgid "© 2024 Felicitas Pojtinger and contributors (AGPL-3.0)"
+msgstr "© 2024 Felicitas Pojtinger und Mitwirkende (AGPL-3.0)"
+
+msgid "Code"
+msgstr "Code"
+
+msgid "Privacy"
+msgstr "Datenschutzerklärung"
+
+msgid "Imprint"
+msgstr "Impressum"
+
+msgid "%v | Senbara Forms"
+msgstr "%v | Senbara-Formulare"
+
+msgid "Home"
+msgstr "Startseite"
+
+msgid "Add a Journal Entry"
+msgstr "Tagebucheintrag hinzufügen"
+
+msgid "How was your day?"
+msgstr "Wie war dein Tag?"
+
+msgid "Great"
+msgstr "Super"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Bad"
+msgstr "Schlecht"
+
+msgid "Title"
+msgstr "Titel"
+
+msgid "Body"
+msgstr "Inhalt"
+
+msgid "Add entry"
+msgstr "Eintrag hinzufügen"
+
+msgid "Edit \"%v\""
+msgstr "„%v“ bearbeiten"
+
+msgid "Your day was:"
+msgstr "Dein Tag war:"
+
+msgid "Are you sure you want to delete this entry?"
+msgstr "Möchten Sie diesen Eintrag wirklich löschen?"
+
+msgid "Journal"
+msgstr "Tagebuch"
+
+msgid "Add a journal entry"
+msgstr "Tagebucheintrag hinzufügen"
+
+msgid "No journal entries yet."
+msgstr "Noch keine Tagebucheinträge vorhanden."
+
+msgid "Senbara Forms logo"
+msgstr "Senbara-Formulare Logo"
+
+msgid "Go back"
+msgstr "Zurück"
+
+msgid "Account"
+msgstr "Konto"
+
+msgid "Export your data"
+msgstr "Benutzerdaten exportieren"
+
+msgid "Are you sure you want to import this user data into your account?"
+msgstr "Möchten Sie diese Benutzerdaten wirklich in Ihr Konto importieren?"
+
+msgid "User data"
+msgstr "Benutzerdaten"
+
+msgid "Import user data"
+msgstr "Benutzerdaten importieren"
+
+msgid "Are you sure you want to delete your data and your account?"
+msgstr "Möchten Sie Ihre Benutzerdaten und Ihr Konto wirklich löschen?"
+
+msgid "Delete your data"
+msgstr "Benutzerdaten löschen"
+
+msgid "Are you sure you want to log out?"
+msgstr "Möchten Sie sich wirklich abmelden?"
+
+msgid "Login"
+msgstr "Anmelden"
+
+msgid "Logout"
+msgstr "Abmelden"
+
+msgid "Continue manually"
+msgstr "Manuell fortfahren"
+
+msgid "I have read and understood the "
+msgstr "Ich habe die "
+
+msgid "privacy policy"
+msgstr "Datenschutzerklärung"
+
+msgid "Continue"
+msgstr "Weiter"
+
+msgid "Markdown"
+msgstr "Markdown"
+
+msgid "Settle debt"
+msgstr "Schuld begleichen"
+
+msgid "Edit debt"
+msgstr "Schuld bearbeiten"
+
+msgid "Edit activity"
+msgstr "Aktivität bearbeiten"
+
+msgid "Delete activity"
+msgstr "Aktivität löschen"
+
+msgid "Edit activity"
+msgstr "Aktivität bearbeiten"
+
+msgid "Add activity"
+msgstr "Aktivität hinzufügen"
+
+msgid "Debts"
+msgstr "Schulden"
+
+msgid "Activities"
+msgstr "Aktivitäten"
+
+msgid "Are you sure you want to settle this debt?"
+msgstr "Möchten Sie diese Schuld wirklich als beglichen markieren?"
+
+msgid "privacy policy consent suffix"
+msgstr " gelesen und zur Kenntnis genommen"
