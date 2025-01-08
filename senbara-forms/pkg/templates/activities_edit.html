@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-<html lang="{{ .Locale.GetLanguage }}">
+<html lang="{{ $.Locale.GetLanguage }}">
   {{ template "header.html" . }}
 
   <body>
     {{ template "nav.html" . }}
 
     <header>
-      <h2>Edit Activity for {{ .Entry.FirstName }} {{ .Entry.LastName }}</h2>
+      <h2>
+        {{ $.Locale.Get "Edit Activity for %v %v" .Entry.FirstName
+        .Entry.LastName }}
+      </h2>
     </header>
 
     <main>
@@ -25,7 +28,7 @@
           value="{{ .Entry.ContactID }}"
         />
 
-        <label for="name">Name</label>
+        <label for="name">{{ $.Locale.Get "Name" }}</label>
         <input
           type="text"
           name="name"
@@ -36,25 +39,28 @@
         />
         <br />
 
-        <label for="date">Date</label>
+        <label for="date">{{ $.Locale.Get "Date" }}</label>
         <input type="date" name="date" id="date" required value="{{
         .Entry.Date.Format "2006-01-02" }}" />
         <br />
 
-        <label for="description"
-          >{{ .Locale.Get "Description" }} (you can use
+        <label for="description">
+          {{ $.Locale.Get "Description" }} {{ $.Locale.Get "(you can use" }}
           <a href="https://en.wikipedia.org/wiki/Markdown" target="_blank"
-            >Markdown</a
-          >)</label
+            >{{ $.Locale.Get "Markdown" }}</a
+          >{{ $.Locale.Get ")" }}<!--
+          --></label
         >
         <textarea name="description" id="description" rows="10">
 {{ .Entry.Description }}</textarea
         >
         <br />
 
-        <input type="submit" value="Save changes" />
+        <input type="submit" value="{{ $.Locale.Get "Save changes" }}" />
 
-        <a href="/contacts/view?id={{ .Entry.ContactID }}">Cancel</a>
+        <a href="/contacts/view?id={{ .Entry.ContactID }}">
+          {{ $.Locale.Get "Cancel" }}
+        </a>
       </form>
     </main>
 

@@ -1,61 +1,42 @@
 <!DOCTYPE html>
-<html lang="{{ .Locale.GetLanguage }}">
+<html lang="{{ $.Locale.GetLanguage }}">
   {{ template "header.html" . }}
 
   <body>
     {{ template "nav.html" . }}
 
     <header>
-      <h2>Add a Contact</h2>
+      <h2>{{ $.Locale.Get "Add a Contact" }}</h2>
     </header>
 
     <main>
       <form action="/contacts" method="post">
-        <label for="first_name">First Name</label>
-        <input
-          type="text"
-          name="first_name"
-          id="first_name"
-          placeholder="Jean"
-          required
-          autofocus
-        />
+        <label for="first_name">{{ $.Locale.Get "First Name" }}</label>
+        <input type="text" name="first_name" id="first_name" placeholder="{{
+        $.Locale.Get "Jean" }}" required autofocus />
         <br />
 
-        <label for="last_name">Last Name</label>
-        <input
-          type="text"
-          name="last_name"
-          id="last_name"
-          placeholder="Doe"
-          required
-        />
+        <label for="last_name">{{ $.Locale.Get "Last Name" }}</label>
+        <input type="text" name="last_name" id="last_name" placeholder="{{
+        $.Locale.Get "Doe" }}" required />
         <br />
 
-        <label for="nickname">Nickname (optional)</label>
-        <input type="text" name="nickname" id="nickname" placeholder="jdoe" />
+        <label for="nickname">{{ $.Locale.Get "Nickname (optional)" }}</label>
+        <input type="text" name="nickname" id="nickname" placeholder="{{
+        $.Locale.Get "jdoe" }}" />
         <br />
 
-        <label for="email">Email</label>
-        <input
-          type="email"
-          name="email"
-          id="email"
-          placeholder="jean@doe.com"
-        />
+        <label for="email">{{ $.Locale.Get "Email" }}</label>
+        <input type="email" name="email" id="email" placeholder="{{ $.Locale.Get
+        "jean@doe.com" }}" />
         <br />
 
-        <label for="pronouns">Pronouns</label>
-        <input
-          type="text"
-          name="pronouns"
-          id="pronouns"
-          placeholder="they/them"
-          required
-        />
+        <label for="pronouns">{{ $.Locale.Get "Pronouns" }}</label>
+        <input type="text" name="pronouns" id="pronouns" placeholder="{{
+        $.Locale.Get "they/them" }}" required />
         <br />
 
-        <input type="submit" value="Add contact" />
+        <input type="submit" value="{{ $.Locale.Get "Add contact" }}" />
       </form>
     </main>
 

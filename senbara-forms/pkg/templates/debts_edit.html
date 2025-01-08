@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-<html lang="{{ .Locale.GetLanguage }}">
+<html lang="{{ $.Locale.GetLanguage }}">
   {{ template "header.html" . }}
 
   <body>
     {{ template "nav.html" . }}
 
     <header>
-      <h2>Edit Debt for {{ .Entry.FirstName }} {{ .Entry.LastName }}</h2>
+      <h2>
+        {{ $.Locale.Get "Edit Debt for %v %v" .Entry.FirstName .Entry.LastName
+        }}
+      </h2>
     </header>
 
     <main>
@@ -23,7 +26,6 @@
         <fieldset>
           <input
             type="radio"
-            .
             id="you-owe"
             name="you_owe"
             value="1"
@@ -36,7 +38,9 @@
             end
             -}}
           />
-          <label for="you-owe">You owe {{ .Entry.FirstName }}</label>
+          <label for="you-owe"
+            >{{ $.Locale.Get "You owe %v" .Entry.FirstName }}</label
+          >
 
           <input
             type="radio"
@@ -52,41 +56,35 @@
             end
             -}}
           />
-          <label for="owed-to-you">{{ .Entry.FirstName }} owes you</label>
+          <label for="owed-to-you"
+            >{{ $.Locale.Get "%v owes you" .Entry.FirstName }}</label
+          >
         </fieldset>
 
-        <label for="amount">Amount</label>
-        <input
-          type="number"
-          name="amount"
-          id="amount"
-          placeholder="50"
-          required
-          autofocus
-          value="{{ Abs .Entry.Amount }}"
+        <label for="amount">{{ $.Locale.Get "Amount" }}</label>
+        <input type="number" name="amount" id="amount" placeholder="{{
+        $.Locale.Get "50" }}" required autofocus value="{{ Abs .Entry.Amount }}"
         />
         <br />
 
-        <label for="currency">Currency</label>
-        <input
-          type="text"
-          name="currency"
-          id="currency"
-          placeholder="Dollar"
-          required
-          value="{{ .Entry.Currency }}"
-        />
+        <label for="currency">{{ $.Locale.Get "Currency" }}</label>
+        <input type="text" name="currency" id="currency" placeholder="{{
+        $.Locale.Get "USD" }}" required value="{{ .Entry.Currency }}" />
         <br />
 
-        <label for="description">Description (optional)</label>
+        <label for="description"
+          >{{ $.Locale.Get "Description (optional)" }}</label
+        >
         <textarea name="description" id="description" rows="10">
 {{ .Entry.Description }}</textarea
         >
         <br />
 
-        <input type="submit" value="Save changes" />
+        <input type="submit" value="{{ $.Locale.Get "Save changes" }}" />
 
-        <a href="/contacts/view?id={{ .Entry.ContactID }}">Cancel</a>
+        <a href="/contacts/view?id={{ .Entry.ContactID }}">
+          {{ $.Locale.Get "Cancel" }}
+        </a>
       </form>
     </main>
 

@@ -1,11 +1,11 @@
 <footer>
-  <a href="https://github.com/pojntfx/senbara#license" target="_blank"
-    >© 2024 Felicitas Pojtinger and contributors (AGPL-3.0)</a
-  >
+  <a href="https://github.com/pojntfx/senbara#license" target="_blank">
+    {{ $.Locale.Get "© 2024 Felicitas Pojtinger and contributors (AGPL-3.0)" }}
+  </a>
 
   <nav>
-    <a href="/code">Code</a>
-    <a href="{{ .PrivacyURL }}" target="_blank">Privacy</a>
-    <a href="{{ .ImprintURL }}" target="_blank">Imprint</a>
+    <a href="/code">{{ $.Locale.Get "Code" }}</a>
+    <a href="{{ .PrivacyURL }}" target="_blank">{{ $.Locale.Get "Privacy" }}</a>
+    <a href="{{ .ImprintURL }}" target="_blank">{{ $.Locale.Get "Imprint" }}</a>
   </nav>
 </footer>

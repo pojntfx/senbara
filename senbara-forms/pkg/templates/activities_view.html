@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ .Locale.GetLanguage }}">
+<html lang="{{ $.Locale.GetLanguage }}">
   {{ template "header.html" . }}
 
   <body>
@@ -8,13 +8,12 @@
     <header>
       <div>
         <h2>
-          Activity {{ .Entry.Name }} for {{ .Entry.FirstName }} {{
-          .Entry.LastName }}
+          {{ $.Locale.Get "Activity %v for %v %v" .Entry.Name .Entry.FirstName .Entry.LastName }}
         </h2>
       </div>
 
       <div>
-        <div>Date: {{ .Entry.Date.Format "2006-01-02" }}</div>
+        <div>{{ $.Locale.Get "Date:" }} {{ .Entry.Date.Format "2006-01-02" }}</div>
       </div>
     </header>
 
@@ -25,14 +24,14 @@
         id="delete"
         action="/activities/delete?id={{ .Entry.ActivityID }}"
         method="post"
-        onsubmit="return confirm('Are you sure you want to delete this activity?')"
+        onsubmit="return confirm('{{ $.Locale.Get "Are you sure you want to delete this activity?" }}')"
       >
-        <input type="submit" value="Delete" />
+        <input type="submit" value="{{ $.Locale.Get "Delete" }}" />
       </form>
 
       <a
         href="/activities/edit?id={{ .Entry.ActivityID }}&contact_id={{ .Entry.ContactID }}"
-        >Edit</a
+        >{{ $.Locale.Get "Edit" }}</a
       >
     </main>
 

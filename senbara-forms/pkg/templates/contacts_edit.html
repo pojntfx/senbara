@@ -1,93 +1,67 @@
 <!DOCTYPE html>
-<html lang="{{ .Locale.GetLanguage }}">
+<html lang="{{ $.Locale.GetLanguage }}">
   {{ template "header.html" . }}
 
   <body>
     {{ template "nav.html" . }}
 
     <header>
-      <h2>Edit {{ .Entry.FirstName }} {{ .Entry.LastName }}</h2>
+      <h2>{{ $.Locale.Get "Edit %v %v" .Entry.FirstName .Entry.LastName }}</h2>
     </header>
 
     <main>
       <form id="update" action="/contacts/update" method="post">
         <input type="hidden" name="id" id="id" value="{{ .Entry.ID }}" />
 
-        <label for="first_name">First Name</label>
-        <input
-          type="text"
-          name="first_name"
-          id="first_name"
-          placeholder="Jean"
-          required
-          autofocus
-          value="{{ .Entry.FirstName }}"
+        <label for="first_name">{{ $.Locale.Get "First Name" }}</label>
+        <input type="text" name="first_name" id="first_name" placeholder="{{
+        $.Locale.Get "Jean" }}" required autofocus value="{{ .Entry.FirstName }}"
         />
         <br />
 
-        <label for="last_name">Last Name</label>
-        <input
-          type="text"
-          name="last_name"
-          id="last_name"
-          placeholder="Doe"
-          required
-          value="{{ .Entry.LastName }}"
-        />
+        <label for="last_name">{{ $.Locale.Get "Last Name" }}</label>
+        <input type="text" name="last_name" id="last_name" placeholder="{{
+        $.Locale.Get "Doe" }}" required value="{{ .Entry.LastName }}" />
         <br />
 
-        <label for="nickname">Nickname (optional)</label>
-        <input
-          type="text"
-          name="nickname"
-          id="nickname"
-          placeholder="jdoe"
-          value="{{ .Entry.Nickname }}"
-        />
+        <label for="nickname">{{ $.Locale.Get "Nickname (optional)" }}</label>
+        <input type="text" name="nickname" id="nickname" placeholder="{{
+        $.Locale.Get "jdoe" }}" value="{{ .Entry.Nickname }}" />
         <br />
 
-        <label for="email">Email</label>
-        <input
-          type="email"
-          name="email"
-          id="email"
-          placeholder="jean@doe.com"
-          value="{{ .Entry.Email }}"
-        />
+        <label for="email">{{ $.Locale.Get "Email" }}</label>
+        <input type="email" name="email" id="email" placeholder="{{ $.Locale.Get
+        "jean@doe.com" }}" value="{{ .Entry.Email }}" />
         <br />
 
-        <label for="pronouns">Pronouns</label>
-        <input
-          type="text"
-          name="pronouns"
-          id="pronouns"
-          placeholder="they/them"
-          required
-          value="{{ .Entry.Pronouns }}"
-        />
+        <label for="pronouns">{{ $.Locale.Get "Pronouns" }}</label>
+        <input type="text" name="pronouns" id="pronouns" placeholder="{{
+        $.Locale.Get "they/them" }}" required value="{{ .Entry.Pronouns }}" />
         <br />
 
-        <label for="birthday">Birthday (optional)</label>
+        <label for="birthday">{{ $.Locale.Get "Birthday (optional)" }}</label>
         <input type="date" name="birthday" id="birthday" {{ if
-        .Entry.Birthday.Valid }}value="{{ .Entry.Birthday.Value.Format
-        "2006-01-02" }}"{{ end }} />
+        .Entry.Birthday.Valid }} value="{{ .Entry.Birthday.Value.Format
+        "2006-01-02" }}" {{ end }} />
         <br />
 
-        <label for="address">Address (optional)</label>
+        <label for="address">{{ $.Locale.Get "Address (optional)" }}</label>
         <textarea name="address" id="address" rows="3">
 {{ .Entry.Address }}</textarea
         >
         <br />
 
-        <label for="notes">Notes (optional)</label>
+        <label for="notes">{{ $.Locale.Get "Notes (optional)" }}</label>
         <textarea name="notes" id="notes" rows="10">
 {{ .Entry.Notes }}</textarea
         >
         <br />
 
-        <input type="submit" value="Save changes" />
+        <input type="submit" value="{{ $.Locale.Get "Save changes" }}" />
 
-        <a href="/contacts/view?id={{ .Entry.ID }}">Cancel</a>
+        <a href="/contacts/view?id={{ .Entry.ID }}">
+          {{ $.Locale.Get "Cancel" }}
+        </a>
       </form>
     </main>
 

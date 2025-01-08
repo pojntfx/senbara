@@ -1,27 +1,3 @@
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
-
-msgid "Birthday"
-msgstr "Birthday"
-
-msgid "Page not found"
-msgstr "Page not found"
-
-msgid "Page not found"
-msgstr "Page not found"
-
-msgid "Add a New Activity For %s %s"
-msgstr "Add a New Activity For %s %s"
-
-msgid "Name"
-msgstr "Name"
-
-msgid "Date"
-msgstr "Date"
-
-msgid "Description"
-msgstr "Description"
-
-msgid "Add Activity"
-msgstr "Add Activity"

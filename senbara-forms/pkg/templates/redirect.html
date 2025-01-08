@@ -1,7 +1,10 @@
 <!DOCTYPE html>
-<html lang="{{ .Locale.GetLanguage }}">
-  {{ if .RequiresPrivacyPolicyConsent }} {{ template "header.html" . }} {{ else }} {{
-  template "header_redirect.html" . }} {{ end }}
+<html lang="{{ $.Locale.GetLanguage }}">
+  {{ if .RequiresPrivacyPolicyConsent }} 
+  {{ template "header.html" . }} 
+  {{ else }} 
+  {{ template "header_redirect.html" . }} 
+  {{ end }}
 
   <body>
     {{ template "nav.html" . }}
@@ -10,7 +13,7 @@
       <h2>{{ .Page }}</h2>
 
       {{ if not .RequiresPrivacyPolicyConsent }}
-      <a href="{{ .Href }}">Continue manually</a>
+      <a href="{{ .Href }}">{{ $.Locale.Get "Continue manually" }}</a>
       {{ end }}
     </header>
 
@@ -18,17 +21,18 @@
     <main>
       <form id="privacy" {{ if ne .Href "" }}action="{{ .Href }}"{{ end }} method="get">
         <input type="checkbox" id="consent" name="consent" required />
-        <label for="consent"
-          >I have read and understood the
-          <a href="{{ .PrivacyURL }}" target="_blank">privacy policy</a></label
-        >
+        <label for="consent">
+          {{ $.Locale.Get "I have read and understood the " }}
+          <a href="{{ .PrivacyURL }}" target="_blank">{{ $.Locale.Get "privacy policy" }}</a>
+        </label>
         <br />
 
-        <input type="submit" value="Continue" />
+        <input type="submit" value="{{ $.Locale.Get "Continue" }}" />
 
-        <a href="/">Cancel</a>
+        <a href="/">{{ $.Locale.Get "Cancel" }}</a>
       </form>
     </main>
-    {{ end }} {{ template "footer.html" . }}
+    {{ end }} 
+    {{ template "footer.html" . }}
   </body>
 </html>

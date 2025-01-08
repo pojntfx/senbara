@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ .Locale.GetLanguage }}">
+<html lang="{{ $.Locale.GetLanguage }}">
   {{ template "header.html" . }}
 
   <body>
@@ -8,14 +8,12 @@
     <header>
       <div>
         <h2>
-          {{ .Entry.FirstName }} {{ .Entry.LastName }} {{ if ne .Entry.Nickname
-          ""}} ({{ .Entry.Nickname }}) {{ end }}
+          {{ .Entry.FirstName }} {{ .Entry.LastName }} {{ if ne .Entry.Nickname "" }} ({{ .Entry.Nickname }}) {{ end }}
         </h2>
       </div>
 
       <div>
-        {{ .Entry.Email }} {{if and (ne .Entry.Email "") (ne .Entry.Pronouns
-        "")}}|{{end}} {{ .Entry.Pronouns}}
+        {{ .Entry.Email }} {{ if and (ne .Entry.Email "") (ne .Entry.Pronouns "") }}|{{ end }} {{ .Entry.Pronouns }}
       </div>
     </header>
 
@@ -23,13 +21,15 @@
       <section>
         <dl>
           {{ if .Entry.Birthday.Valid }}
-          <dt>{{ .Locale.Get "Birthday" }}</dt>
+          <dt>{{ $.Locale.Get "Birthday" }}</dt>
           <dd>{{ .Entry.Birthday.Value.Format "2006-01-02" }}</dd>
-          {{ end }} {{ if .Entry.Address }}
-          <dt>Address</dt>
+          {{ end }}
+          {{ if .Entry.Address }}
+          <dt>{{ $.Locale.Get "Address" }}</dt>
           <dd>{{ .Entry.Address }}</dd>
-          {{ end }} {{ if .Entry.Notes }}
-          <dt>Notes</dt>
+          {{ end }}
+          {{ if .Entry.Notes }}
+          <dt>{{ $.Locale.Get "Notes" }}</dt>
           <dd>{{ .Entry.Notes }}</dd>
           {{ end }}
         </dl>
@@ -38,48 +38,45 @@
       <section>
         <header>
           <div>
-            <h3>Debts</h3>
+            <h3>{{ $.Locale.Get "Debts" }}</h3>
           </div>
 
           <div>
-            <a href="/debts/add?id={{ .Entry.ID }}">Add debt</a>
+            <a href="/debts/add?id={{ .Entry.ID }}">{{ $.Locale.Get "Add debt" }}</a>
           </div>
         </header>
 
         <main>
           {{ if eq (len .Debts) 0 }}
           <div>
-            Manage debts you owe to {{ .Entry.FirstName }} or {{
-            .Entry.FirstName }} owes you
+            {{ $.Locale.Get "Manage debts you owe to %v or %v owes you" .Entry.FirstName .Entry.FirstName }}
           </div>
           {{ else }}
           <ul>
             {{ range .Debts }}
             <li>
-              {{ if le .Amount 0.0 }}You owe {{ $.Entry.FirstName }} {{ Abs
-              .Amount }} {{ .Currency }}{{ else }}{{ $.Entry.FirstName }} owes
-              you {{ Abs .Amount }} {{ .Currency }}{{ end }}{{ if .Description
-              }}: {{ .Description }}{{ else }}.{{ end }}
+              {{ if le .Amount 0.0 }}
+              {{ $.Locale.Get "You owe %v %v %v" $.Entry.FirstName (Abs .Amount) .Currency }}
+              {{ else }}
+              {{ $.Locale.Get "%v owes you %v %v" $.Entry.FirstName (Abs .Amount) .Currency }}
+              {{ end }}
+              {{ if .Description }}: {{ .Description }}{{ else }}.{{ end }}
 
               <div>
                 <form
                   action="/debts/settle"
                   method="post"
-                  onsubmit="return confirm('Are you sure you want to settle this debt?')"
+                  onsubmit="return confirm('{{ $.Locale.Get "Are you sure you want to settle this debt?" }}')"
                 >
-                  <input
-                    type="hidden"
-                    name="contact_id"
-                    value="{{ $.Entry.ID }}"
-                  />
+                  <input type="hidden" name="contact_id" value="{{ $.Entry.ID }}" />
                   <input type="hidden" name="id" value="{{ .ID }}" />
 
-                  <input type="submit" value="Settle debt" />
+                  <input type="submit" value="{{ $.Locale.Get "Settle debt" }}" />
                 </form>
 
-                <a href="/debts/edit?id={{ .ID }}&contact_id={{ $.Entry.ID }}"
-                  >Edit debt</a
-                >
+                <a href="/debts/edit?id={{ .ID }}&contact_id={{ $.Entry.ID }}">
+                  {{ $.Locale.Get "Edit debt" }}
+                </a>
               </div>
             </li>
             {{ end }}
@@ -91,17 +88,17 @@
       <section>
         <header>
           <div>
-            <h3>Activities</h3>
+            <h3>{{ $.Locale.Get "Activities" }}</h3>
           </div>
 
           <div>
-            <a href="/activities/add?id={{ .Entry.ID }}">Add activity</a>
+            <a href="/activities/add?id={{ .Entry.ID }}">{{ $.Locale.Get "Add activity" }}</a>
           </div>
         </header>
 
         <main>
           {{ if eq (len .Activities) 0 }}
-          <div>No activities with {{ .Entry.FirstName }} yet.</div>
+          <div>{{ $.Locale.Get "No activities with %v yet." .Entry.FirstName }}</div>
           {{ else }}
           <ul>
             {{ range .Activities }}
@@ -121,22 +118,17 @@
                 <form
                   action="/activities/delete"
                   method="post"
-                  onsubmit="return confirm('Are you sure you want to delete this activity?')"
+                  onsubmit="return confirm('{{ $.Locale.Get "Are you sure you want to delete this activity?" }}')"
                 >
-                  <input
-                    type="hidden"
-                    name="contact_id"
-                    value="{{ $.Entry.ID }}"
-                  />
+                  <input type="hidden" name="contact_id" value="{{ $.Entry.ID }}" />
                   <input type="hidden" name="id" value="{{ .ID }}" />
 
-                  <input type="submit" value="Delete activity" />
+                  <input type="submit" value="{{ $.Locale.Get "Delete activity" }}" />
                 </form>
 
-                <a
-                  href="/activities/edit?id={{ .ID }}&contact_id={{ $.Entry.ID }}"
-                  >Edit activity</a
-                >
+                <a href="/activities/edit?id={{ .ID }}&contact_id={{ $.Entry.ID }}">
+                  {{ $.Locale.Get "Edit activity" }}
+                </a>
               </div>
             </li>
             {{ end }}
@@ -149,12 +141,12 @@
         id="delete"
         action="/contacts/delete?id={{ .Entry.ID }}"
         method="post"
-        onsubmit="return confirm('Are you sure you want to delete this contact?')"
+        onsubmit="return confirm('{{ $.Locale.Get "Are you sure you want to delete this contact?" }}')"
       >
-        <input type="submit" value="Delete" />
+        <input type="submit" value="{{ $.Locale.Get "Delete" }}" />
       </form>
 
-      <a href="/contacts/edit?id={{ .Entry.ID }}">Edit</a>
+      <a href="/contacts/edit?id={{ .Entry.ID }}">{{ $.Locale.Get "Edit" }}</a>
     </main>
 
     {{ template "footer.html" . }}

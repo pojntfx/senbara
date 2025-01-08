@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="{{ .Locale.GetLanguage }}">
+<html lang="{{ $.Locale.GetLanguage }}">
   {{ template "header.html" . }}
 
   <body>
     {{ template "nav.html" . }}
 
     <header>
-      <h2>Contacts</h2>
+      <h2>{{ $.Locale.Get "Contacts" }}</h2>
 
-      <a href="/contacts/add">Add a contact</a>
+      <a href="/contacts/add">{{ $.Locale.Get "Add a Contact" }}</a>
     </header>
 
     <ul>
@@ -16,15 +16,13 @@
       <li>
         <div>
           <h3>
-            <a href="/contacts/view?id={{ .ID }}"
-              >{{ .FirstName }} {{ .LastName }} {{ if ne .Nickname ""}} ({{
-              .Nickname }}) {{ end }}</a
-            >
+            <a href="/contacts/view?id={{ .ID }}">
+              {{ .FirstName }} {{ .LastName }} {{ if ne .Nickname "" }} ({{ .Nickname }}) {{ end }}
+            </a>
           </h3>
 
           <div>
-            {{ .Email }} {{if and (ne .Email "") (ne .Pronouns "")}}|{{end}} {{
-            .Pronouns}}
+            {{ .Email }} {{ if and (ne .Email "") (ne .Pronouns "") }}|{{ end }} {{ .Pronouns }}
           </div>
         </div>
 
@@ -32,16 +30,16 @@
           <form
             action="/contacts/delete?id={{ .ID }}"
             method="post"
-            onsubmit="return confirm('Are you sure you want to delete this contact?')"
+            onsubmit="return confirm('{{ $.Locale.Get "Are you sure you want to delete this contact?" }}')"
           >
-            <input type="submit" value="Delete" />
+            <input type="submit" value="{{ $.Locale.Get "Delete" }}" />
           </form>
 
-          <a href="/contacts/edit?id={{ .ID }}">Edit</a>
+          <a href="/contacts/edit?id={{ .ID }}">{{ $.Locale.Get "Edit" }}</a>
         </div>
       </li>
       {{ else }}
-      <li>No contacts yet.</li>
+      <li>{{ $.Locale.Get "No contacts yet." }}</li>
       {{ end }}
     </ul>
 

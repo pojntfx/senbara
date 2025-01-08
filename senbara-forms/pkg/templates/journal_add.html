@@ -1,38 +1,38 @@
 <!DOCTYPE html>
-<html lang="{{ .Locale.GetLanguage }}">
+<html lang="{{ $.Locale.GetLanguage }}">
   {{ template "header.html" . }}
 
   <body>
     {{ template "nav.html" . }}
 
     <header>
-      <h2>Add a Journal Entry</h2>
+      <h2>{{ $.Locale.Get "Add a Journal Entry" }}</h2>
     </header>
 
     <main>
       <form action="/journal" method="post">
         <fieldset>
-          <legend>How as your day?</legend>
+          <legend>{{ $.Locale.Get "How was your day?" }}</legend>
 
           <input type="radio" id="great" name="rating" value="3" checked />
-          <label for="great">Great</label>
+          <label for="great">{{ $.Locale.Get "Great" }}</label>
 
           <input type="radio" id="ok" name="rating" value="2" />
-          <label for="ok">OK</label>
+          <label for="ok">{{ $.Locale.Get "OK" }}</label>
 
           <input type="radio" id="bad" name="rating" value="1" />
-          <label for="bad">Bad</label>
+          <label for="bad">{{ $.Locale.Get "Bad" }}</label>
         </fieldset>
 
-        <label for="title">Title</label>
+        <label for="title">{{ $.Locale.Get "Title" }}</label>
         <input type="text" name="title" id="title" required autofocus />
         <br />
 
-        <label for="body">Body</label>
+        <label for="body">{{ $.Locale.Get "Body" }}</label>
         <textarea name="body" id="body" required rows="20"></textarea>
         <br />
 
-        <input type="submit" value="Add entry" />
+        <input type="submit" value="{{ $.Locale.Get "Add entry" }}" />
       </form>
     </main>
 

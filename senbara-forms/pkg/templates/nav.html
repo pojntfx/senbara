@@ -7,34 +7,34 @@
             srcset="/static/logo-dark.png"
             media="(prefers-color-scheme: dark)"
           />
-          <img src="/static/logo-light.png" alt="Senbara Forms logo" />
+          <img src="/static/logo-light.png" alt="{{ $.Locale.Get "Senbara Forms logo" }}" />
         </picture>
       </a>
     </h1>
 
     {{ if ne .BackURL "" }}
-    <a href="{{ .BackURL }}">Go back</a>
+    <a href="{{ .BackURL }}">{{ $.Locale.Get "Go back" }}</a>
     {{ end }}
   </div>
 
   <nav>
     {{ if ne .LogoutURL "" }}
-    <a href="/contacts">Contacts</a>
-    <a href="/journal">Journal</a>
+    <a href="/contacts">{{ $.Locale.Get "Contacts" }}</a>
+    <a href="/journal">{{ $.Locale.Get "Journal" }}</a>
 
     <details>
-      <summary>Account</summary>
+      <summary>{{ $.Locale.Get "Account" }}</summary>
 
       <nav>
-        <a href="/userdata">Export your data</a>
+        <a href="/userdata">{{ $.Locale.Get "Export your data" }}</a>
 
         <form
           action="/userdata"
           method="post"
           enctype="multipart/form-data"
-          onsubmit="return confirm('Are you sure you want to import this user data into your account?')"
+          onsubmit="return confirm('{{ $.Locale.Get "Are you sure you want to import this user data into your account?" }}')"
         >
-          <label for="userData">User data</label>
+          <label for="userData">{{ $.Locale.Get "User data" }}</label>
           <input
             type="file"
             name="userData"
@@ -44,26 +44,25 @@
           />
           <br />
 
-          <input type="submit" value="Import user data" />
+          <input type="submit" value="{{ $.Locale.Get "Import user data" }}" />
         </form>
 
         <form
           action="/userdata/delete"
           method="post"
-          onsubmit="return confirm('Are you sure you want to delete your data and your account?')"
+          onsubmit="return confirm('{{ $.Locale.Get "Are you sure you want to delete your data and your account?" }}')"
         >
-          <input type="submit" value="Delete your data" />
+          <input type="submit" value="{{ $.Locale.Get "Delete your data" }}" />
         </form>
 
         <a
           href="{{ .LogoutURL }}"
-          onclick="return confirm('Are you sure you want to log out?')"
-          >Logout</a
-        >
+          onclick="return confirm('{{ $.Locale.Get "Are you sure you want to log out?" }}')"
+          >{{ $.Locale.Get "Logout" }}</a>
       </nav>
     </details>
     {{ else }}
-    <a href="/login">Login</a>
+    <a href="/login">{{ $.Locale.Get "Login" }}</a>
     {{ end }}
   </nav>
 </header>

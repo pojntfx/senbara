@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="{{ .Locale.GetLanguage }}">
+<html lang="{{ $.Locale.GetLanguage }}">
   {{ template "header.html" . }}
 
   <body>
     {{ template "nav.html" . }}
 
     <header>
-      <h2>Edit "{{ .Entry.Title }}"</h2>
+      <h2>{{ $.Locale.Get "Edit \"%v\"" .Entry.Title }}</h2>
     </header>
 
     <main>
@@ -14,7 +14,7 @@
         <input type="hidden" name="id" id="id" value="{{ .Entry.ID }}" />
 
         <fieldset>
-          <legend>How as your day?</legend>
+          <legend>{{ $.Locale.Get "How was your day?" }}</legend>
 
           <input
             type="radio"
@@ -30,7 +30,7 @@
             end
             -}}
           />
-          <label for="great">Great</label>
+          <label for="great">{{ $.Locale.Get "Great" }}</label>
 
           <input
             type="radio"
@@ -46,7 +46,7 @@
             end
             -}}
           />
-          <label for="ok">OK</label>
+          <label for="ok">{{ $.Locale.Get "OK" }}</label>
 
           <input
             type="radio"
@@ -62,10 +62,10 @@
             end
             -}}
           />
-          <label for="bad">Bad</label>
+          <label for="bad">{{ $.Locale.Get "Bad" }}</label>
         </fieldset>
 
-        <label for="title">Title</label>
+        <label for="title">{{ $.Locale.Get "Title" }}</label>
         <input
           type="text"
           name="title"
@@ -76,20 +76,23 @@
         />
         <br />
 
-        <label for="body"
-          >Body (you can use
+        <label for="body">
+          {{ $.Locale.Get "Body" }} {{ $.Locale.Get "(you can use" }}
           <a href="https://en.wikipedia.org/wiki/Markdown" target="_blank"
-            >Markdown</a
-          >)</label
+            >{{ $.Locale.Get "Markdown" }}</a
+          >{{ $.Locale.Get ")" }}<!--
+          --></label
         >
-        <textarea name="body" id="body" required rows="20">
+        <textarea name="body" id="body" required rows="21">
 {{ .Entry.Body }}</textarea
         >
         <br />
 
-        <input type="submit" value="Save changes" />
+        <input type="submit" value="{{ $.Locale.Get "Save changes" }}" />
 
-        <a href="/journal/view?id={{ .Entry.ID }}">Cancel</a>
+        <a href="/journal/view?id={{ .Entry.ID }}">
+          {{ $.Locale.Get "Cancel" }}
+        </a>
       </form>
     </main>
 

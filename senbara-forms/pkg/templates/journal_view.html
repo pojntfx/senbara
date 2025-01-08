@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ .Locale.GetLanguage }}">
+<html lang="{{ $.Locale.GetLanguage }}">
   {{ template "header.html" . }}
 
   <body>
@@ -13,8 +13,14 @@
       <div>
         <div>{{ .Entry.Date.Format "2006-01-02 15:04" }}</div>
         <div>
-          Your day was: {{if eq .Entry.Rating 3}}Great{{else if eq .Entry.Rating
-          2}}OK{{else if eq .Entry.Rating 1}}Bad{{end}}
+          {{ $.Locale.Get "Your day was:" }}
+          {{ if eq .Entry.Rating 3 }}
+            {{ $.Locale.Get "Great" }}
+          {{ else if eq .Entry.Rating 2 }}
+            {{ $.Locale.Get "OK" }}
+          {{ else if eq .Entry.Rating 1 }}
+            {{ $.Locale.Get "Bad" }}
+          {{ end }}
         </div>
       </div>
     </header>
@@ -26,11 +32,11 @@
         id="delete"
         action="/journal/delete?id={{ .Entry.ID }}"
         method="post"
-        onsubmit="return confirm('Are you sure you want to delete this entry?')"
+        onsubmit="return confirm('{{ $.Locale.Get "Are you sure you want to delete this entry?" }}')"
       >
-        <input type="submit" value="Delete" />
+        <input type="submit" value="{{ $.Locale.Get "Delete" }}" />
 
-        <a href="/journal/edit?id={{ .Entry.ID }}">Edit</a>
+        <a href="/journal/edit?id={{ .Entry.ID }}">{{ $.Locale.Get "Edit" }}</a>
       </form>
     </main>
 
