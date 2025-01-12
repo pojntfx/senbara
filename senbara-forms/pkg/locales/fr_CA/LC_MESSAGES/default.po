@@ -285,4 +285,4 @@ msgid "Are you sure you want to settle this debt?"
 msgstr "Voulez-vous vraiment marquer cette dette comme réglée ?"
 
 msgid "privacy policy consent suffix"
-msgstr ""
+msgstr " "
