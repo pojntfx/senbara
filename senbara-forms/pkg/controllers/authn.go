@@ -134,28 +134,11 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, us
 	it, err := r.Cookie(idTokenKey)
 	if err != nil {
 		if errors.Is(err, http.ErrNoCookie) {
-			privacyPolicyConsent := r.FormValue("consent")
-			if strings.TrimSpace(privacyPolicyConsent) == "on" {
-				http.Redirect(w, r, b.config.AuthCodeURL(b.oidcRedirectURL), http.StatusFound)
-
-				return true, userData{}, http.StatusTemporaryRedirect, nil
-			}
-
-			if err := b.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
-				pageData: pageData{
-					userData: userData{
-						Locale: locale,
-					},
-
-					Page:       "Privacy Policy Consent",
-					PrivacyURL: b.privacyURL,
-					ImprintURL: b.imprintURL,
-				},
-
-				RequiresPrivacyPolicyConsent: true,
-			}); err != nil {
-				return false, userData{}, http.StatusInternalServerError, errors.Join(errCouldNotRenderTemplate, err)
-			}
+			// Here, the user has still got a refresh token, so they've accepted the privacy policy already,
+			// meaning we can re-authorize them immediately without redirecting them back to the consent page.
+			// For updating privacy policies this is not an issue since we can simply invalidate the refresh
+			// tokens in Auth0, which requires users to re-read and re-accept the privacy policy
+			http.Redirect(w, r, b.config.AuthCodeURL(b.oidcRedirectURL), http.StatusFound)
 
 			return true, userData{}, http.StatusTemporaryRedirect, nil
 		}
