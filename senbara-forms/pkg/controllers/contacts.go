@@ -49,7 +49,7 @@ func (b *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
 		pageData: pageData{
 			userData: userData,
 
-			Page:       "Contacts",
+			Page:       userData.Locale.Get("Contacts"),
 			PrivacyURL: b.privacyURL,
 			ImprintURL: b.imprintURL,
 		},
@@ -78,7 +78,7 @@ func (b *Controller) HandleAddContact(w http.ResponseWriter, r *http.Request) {
 	if err := b.tpl.ExecuteTemplate(w, "contacts_add.html", pageData{
 		userData: userData,
 
-		Page:       "Add Contact",
+		Page:       userData.Locale.Get("Add a contact"),
 		PrivacyURL: b.privacyURL,
 		ImprintURL: b.imprintURL,
 	}); err != nil {
@@ -458,7 +458,7 @@ func (b *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {
 		pageData: pageData{
 			userData: userData,
 
-			Page:       "Edit Contact",
+			Page:       userData.Locale.Get("Edit contact"),
 			PrivacyURL: b.privacyURL,
 			ImprintURL: b.imprintURL,
 		},

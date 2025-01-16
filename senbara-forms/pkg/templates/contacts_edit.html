@@ -13,13 +13,13 @@
       <form id="update" action="/contacts/update" method="post">
         <input type="hidden" name="id" id="id" value="{{ .Entry.ID }}" />
 
-        <label for="first_name">{{ $.Locale.Get "First Name" }}</label>
+        <label for="first_name">{{ $.Locale.Get "First name" }}</label>
         <input type="text" name="first_name" id="first_name" placeholder="{{
         $.Locale.Get "Jean" }}" required autofocus value="{{ .Entry.FirstName }}"
         />
         <br />
 
-        <label for="last_name">{{ $.Locale.Get "Last Name" }}</label>
+        <label for="last_name">{{ $.Locale.Get "Last name" }}</label>
         <input type="text" name="last_name" id="last_name" placeholder="{{
         $.Locale.Get "Doe" }}" required value="{{ .Entry.LastName }}" />
         <br />

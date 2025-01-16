@@ -59,7 +59,7 @@ func (b *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
 		pageData: pageData{
 			userData: userData,
 
-			Page:       "Add Activity",
+			Page:       userData.Locale.Get("Add an activity"),
 			PrivacyURL: b.privacyURL,
 			ImprintURL: b.imprintURL,
 		},
@@ -398,7 +398,7 @@ func (b *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) 
 		pageData: pageData{
 			userData: userData,
 
-			Page:       "Edit Activity",
+			Page:       userData.Locale.Get("Edit activity"),
 			PrivacyURL: b.privacyURL,
 			ImprintURL: b.imprintURL,
 		},

@@ -8,7 +8,7 @@ msgstr "Anniversaire"
 msgid "Page not found"
 msgstr "Page introuvable"
 
-msgid "Add a New Activity For %v %v"
+msgid "Add a new activity for %v %v"
 msgstr "Ajouter une nouvelle activité pour %v %v"
 
 msgid "Name"
@@ -26,10 +26,10 @@ msgstr "(vous pouvez utiliser"
 msgid ")"
 msgstr ")"
 
-msgid "Add Activity"
+msgid "Add an activity"
 msgstr "Ajouter l'activité"
 
-msgid "Edit Activity for %v %v"
+msgid "Edit activity for %v %v"
 msgstr "Modifier l'activité pour %v %v"
 
 msgid "Save changes"
@@ -53,16 +53,16 @@ msgstr "Supprimer"
 msgid "Edit"
 msgstr "Modifier"
 
-msgid "Add a Contact"
+msgid "Add a contact"
 msgstr "Ajouter un contact"
 
-msgid "First Name"
+msgid "First name"
 msgstr "Prénom"
 
 msgid "Jean"
 msgstr "Jean"
 
-msgid "Last Name"
+msgid "Last name"
 msgstr "Nom"
 
 msgid "Doe"
@@ -110,7 +110,7 @@ msgstr "Voulez-vous vraiment supprimer ce contact ?"
 msgid "No contacts yet."
 msgstr "Aucun contact pour le moment."
 
-msgid "Add a New Debt For %v %v"
+msgid "Add a new debt for %v %v"
 msgstr "Ajouter une nouvelle dette pour %v %v"
 
 msgid "You owe %v"
@@ -140,10 +140,10 @@ msgstr "Dollar américain"
 msgid "Description (optional)"
 msgstr "Description (facultatif)"
 
-msgid "Add debt"
+msgid "Add a debt"
 msgstr "Ajouter une dette"
 
-msgid "Edit Debt for %v %v"
+msgid "Edit debt for %v %v"
 msgstr "Modifier la dette pour %v %v"
 
 msgid "© 2024 Felicitas Pojtinger and contributors (AGPL-3.0)"
@@ -164,7 +164,7 @@ msgstr "%v | Formulaires Senbara"
 msgid "Home"
 msgstr "Accueil"
 
-msgid "Add a Journal Entry"
+msgid "Add a journal entry"
 msgstr "Ajouter une note de journal"
 
 msgid "How was your day?"
@@ -272,7 +272,7 @@ msgstr "Supprimer l'activité"
 msgid "Edit activity"
 msgstr "Modifier l'activité"
 
-msgid "Add activity"
+msgid "Add an activity"
 msgstr "Ajouter une activité"
 
 msgid "Debts"
@@ -284,5 +284,20 @@ msgstr "Activités"
 msgid "Are you sure you want to settle this debt?"
 msgstr "Voulez-vous vraiment marquer cette dette comme réglée ?"
 
-msgid "privacy policy consent suffix"
+msgid "Privacy policy consent suffix"
 msgstr " "
+
+msgid "Privacy policy consent"
+msgstr "Consentement à la politique de confidentialité"
+
+msgid "Signing you out ..."
+msgstr "Déconnexion en cours ..."
+
+msgid "Signing you in ..."
+msgstr "Connexion en cours ..."
+
+msgid "Edit contact"
+msgstr "Modifier le contact"
+
+msgid "Edit journal entry"
+msgstr "Modifier la note de journal"

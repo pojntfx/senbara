@@ -8,7 +8,7 @@ msgstr "Geburtstag"
 msgid "Page not found"
 msgstr "Diese Seite konnte nicht gefunden werden"
 
-msgid "Add a New Activity For %v %v"
+msgid "Add a new activity for %v %v"
 msgstr "Neue Aktivität mit %v %v hinzufügen"
 
 msgid "Name"
@@ -26,10 +26,10 @@ msgstr "(Sie können"
 msgid ")"
 msgstr " verwenden)"
 
-msgid "Add Activity"
+msgid "Add an activity"
 msgstr "Aktivität hinzufügen"
 
-msgid "Edit Activity for %v %v"
+msgid "Edit activity for %v %v"
 msgstr "Aktivität mit %v %v bearbeiten"
 
 msgid "Save changes"
@@ -53,16 +53,16 @@ msgstr "Löschen"
 msgid "Edit"
 msgstr "Bearbeiten"
 
-msgid "Add a Contact"
+msgid "Add a contact"
 msgstr "Kontakt hinzufügen"
 
-msgid "First Name"
+msgid "First name"
 msgstr "Vorname"
 
 msgid "Jean"
 msgstr "Jean"
 
-msgid "Last Name"
+msgid "Last name"
 msgstr "Nachname"
 
 msgid "Doe"
@@ -86,7 +86,7 @@ msgstr "Pronomen"
 msgid "they/them"
 msgstr "sie/ihr"
 
-msgid "Add contact"
+msgid "Add a contact"
 msgstr "Kontakt hinzufügen"
 
 msgid "Edit %v %v"
@@ -110,7 +110,7 @@ msgstr "Möchten Sie diesen Kontakt wirklich löschen?"
 msgid "No contacts yet."
 msgstr "Noch keine Kontakte vorhanden."
 
-msgid "Add a New Debt For %v %v"
+msgid "Add a new debt for %v %v"
 msgstr "Neue Schuld für %v %v hinzufügen"
 
 msgid "You owe %v"
@@ -140,10 +140,10 @@ msgstr "US-Dollar"
 msgid "Description (optional)"
 msgstr "Beschreibung (optional)"
 
-msgid "Add debt"
+msgid "Add a debt"
 msgstr "Schuld hinzufügen"
 
-msgid "Edit Debt for %v %v"
+msgid "Edit debt for %v %v"
 msgstr "Schuld für %v %v bearbeiten"
 
 msgid "© 2024 Felicitas Pojtinger and contributors (AGPL-3.0)"
@@ -164,7 +164,7 @@ msgstr "%v | Senbara-Formulare"
 msgid "Home"
 msgstr "Startseite"
 
-msgid "Add a Journal Entry"
+msgid "Add a journal entry"
 msgstr "Tagebucheintrag hinzufügen"
 
 msgid "How was your day?"
@@ -272,7 +272,7 @@ msgstr "Aktivität löschen"
 msgid "Edit activity"
 msgstr "Aktivität bearbeiten"
 
-msgid "Add activity"
+msgid "Add an activity"
 msgstr "Aktivität hinzufügen"
 
 msgid "Debts"
@@ -284,5 +284,20 @@ msgstr "Aktivitäten"
 msgid "Are you sure you want to settle this debt?"
 msgstr "Möchten Sie diese Schuld wirklich als beglichen markieren?"
 
-msgid "privacy policy consent suffix"
+msgid "Privacy policy consent suffix"
 msgstr " gelesen und zur Kenntnis genommen"
+
+msgid "Privacy policy consent"
+msgstr "Einwilligung zur Datenschutzerklärung"
+
+msgid "Signing you out ..."
+msgstr "Abmeldung läuft ..."
+
+msgid "Signing you in ..."
+msgstr "Anmeldung läuft ..."
+
+msgid "Edit contact"
+msgstr "Kontakt bearbeiten"
+
+msgid "Edit journal entry"
+msgstr "Tagebucheintrag bearbeiten"

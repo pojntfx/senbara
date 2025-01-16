@@ -45,7 +45,7 @@ func (b *Controller) HandleJournal(w http.ResponseWriter, r *http.Request) {
 		pageData: pageData{
 			userData: userData,
 
-			Page:       "Journal",
+			Page:       userData.Locale.Get("Journal"),
 			PrivacyURL: b.privacyURL,
 			ImprintURL: b.imprintURL,
 		},
@@ -74,7 +74,7 @@ func (b *Controller) HandleAddJournal(w http.ResponseWriter, r *http.Request) {
 	if err := b.tpl.ExecuteTemplate(w, "journal_add.html", pageData{
 		userData: userData,
 
-		Page:       "Add Journal Entry",
+		Page:       userData.Locale.Get("Add a journal entry"),
 		PrivacyURL: b.privacyURL,
 		ImprintURL: b.imprintURL,
 	}); err != nil {
@@ -246,7 +246,7 @@ func (b *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
 		pageData: pageData{
 			userData: userData,
 
-			Page:       "Edit Journal Entry",
+			Page:       userData.Locale.Get("Edit journal entry"),
 			PrivacyURL: b.privacyURL,
 			ImprintURL: b.imprintURL,
 		},

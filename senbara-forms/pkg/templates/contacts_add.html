@@ -6,17 +6,17 @@
     {{ template "nav.html" . }}
 
     <header>
-      <h2>{{ $.Locale.Get "Add a Contact" }}</h2>
+      <h2>{{ $.Locale.Get "Add a contact" }}</h2>
     </header>
 
     <main>
       <form action="/contacts" method="post">
-        <label for="first_name">{{ $.Locale.Get "First Name" }}</label>
+        <label for="first_name">{{ $.Locale.Get "First name" }}</label>
         <input type="text" name="first_name" id="first_name" placeholder="{{
         $.Locale.Get "Jean" }}" required autofocus />
         <br />
 
-        <label for="last_name">{{ $.Locale.Get "Last Name" }}</label>
+        <label for="last_name">{{ $.Locale.Get "Last name" }}</label>
         <input type="text" name="last_name" id="last_name" placeholder="{{
         $.Locale.Get "Doe" }}" required />
         <br />

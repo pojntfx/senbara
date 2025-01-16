@@ -114,7 +114,7 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, us
 						Locale: locale,
 					},
 
-					Page:       "Privacy Policy Consent",
+					Page:       locale.Get("Privacy policy consent"),
 					PrivacyURL: b.privacyURL,
 					ImprintURL: b.imprintURL,
 				},
@@ -282,7 +282,7 @@ func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 					Locale: locale,
 				},
 
-				Page:       "Signing You Out ...",
+				Page:       locale.Get("Signing you out ..."),
 				PrivacyURL: b.privacyURL,
 				ImprintURL: b.imprintURL,
 			},
@@ -344,7 +344,7 @@ func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 				Locale: locale,
 			},
 
-			Page:       "Signing You In ...",
+			Page:       locale.Get("Signing you in ..."),
 			PrivacyURL: b.privacyURL,
 			ImprintURL: b.imprintURL,
 		},

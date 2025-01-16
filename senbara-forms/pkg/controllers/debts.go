@@ -59,7 +59,7 @@ func (b *Controller) HandleAddDebt(w http.ResponseWriter, r *http.Request) {
 		pageData: pageData{
 			userData: userData,
 
-			Page:       "Add Debt",
+			Page:       userData.Locale.Get("Add a debt"),
 			PrivacyURL: b.privacyURL,
 			ImprintURL: b.imprintURL,
 		},
@@ -450,7 +450,7 @@ func (b *Controller) HandleEditDebt(w http.ResponseWriter, r *http.Request) {
 		pageData: pageData{
 			userData: userData,
 
-			Page:       "Edit Debt",
+			Page:       userData.Locale.Get("Edit debt"),
 			PrivacyURL: b.privacyURL,
 			ImprintURL: b.imprintURL,
 		},

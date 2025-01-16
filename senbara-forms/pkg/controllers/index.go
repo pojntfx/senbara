@@ -20,7 +20,7 @@ func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 			pageData: pageData{
 				userData: userData,
 
-				Page:       "Home",
+				Page:       userData.Locale.Get("Home"),
 				PrivacyURL: b.privacyURL,
 				ImprintURL: b.imprintURL,
 			},
@@ -49,7 +49,7 @@ func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 	if err := b.tpl.ExecuteTemplate(w, "404.html", pageData{
 		userData: userData,
 
-		Page:       "Page not found",
+		Page:       userData.Locale.Get("Page not found"),
 		PrivacyURL: b.privacyURL,
 		ImprintURL: b.imprintURL,
 	}); err != nil {

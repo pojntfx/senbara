@@ -8,8 +8,8 @@ msgstr "Birthday"
 msgid "Page not found"
 msgstr "Page not found"
 
-msgid "Add a New Activity For %v %v"
-msgstr "Add a New Activity For %v %v"
+msgid "Add a new activity for %v %v"
+msgstr "Add a new activity for %v %v"
 
 msgid "Name"
 msgstr "Name"
@@ -26,11 +26,11 @@ msgstr "(you can use"
 msgid ")"
 msgstr ")"
 
-msgid "Add Activity"
-msgstr "Add Activity"
+msgid "Add an activity"
+msgstr "Add an activity"
 
-msgid "Edit Activity for %v %v"
-msgstr "Edit Activity for %v %v"
+msgid "Edit activity for %v %v"
+msgstr "Edit activity for %v %v"
 
 msgid "Save changes"
 msgstr "Save changes"
@@ -53,17 +53,17 @@ msgstr "Delete"
 msgid "Edit"
 msgstr "Edit"
 
-msgid "Add a Contact"
-msgstr "Add a Contact"
+msgid "Add a contact"
+msgstr "Add a contact"
 
-msgid "First Name"
-msgstr "First Name"
+msgid "First name"
+msgstr "First name"
 
 msgid "Jean"
 msgstr "Jean"
 
-msgid "Last Name"
-msgstr "Last Name"
+msgid "Last name"
+msgstr "Last name"
 
 msgid "Doe"
 msgstr "Doe"
@@ -110,8 +110,8 @@ msgstr "Are you sure you want to delete this contact?"
 msgid "No contacts yet."
 msgstr "No contacts yet."
 
-msgid "Add a New Debt For %v %v"
-msgstr "Add a New Debt For %v %v"
+msgid "Add a new debt for %v %v"
+msgstr "Add a new debt for %v %v"
 
 msgid "You owe %v"
 msgstr "You owe %v"
@@ -140,11 +140,11 @@ msgstr "USD"
 msgid "Description (optional)"
 msgstr "Description (optional)"
 
-msgid "Add debt"
-msgstr "Add debt"
+msgid "Add a debt"
+msgstr "Add a debt"
 
-msgid "Edit Debt for %v %v"
-msgstr "Edit Debt for %v %v"
+msgid "Edit debt for %v %v"
+msgstr "Edit debt for %v %v"
 
 msgid "© 2024 Felicitas Pojtinger and contributors (AGPL-3.0)"
 msgstr "© 2024 Felicitas Pojtinger and contributors (AGPL-3.0)"
@@ -164,8 +164,8 @@ msgstr "%v | Senbara Forms"
 msgid "Home"
 msgstr "Home"
 
-msgid "Add a Journal Entry"
-msgstr "Add a Journal Entry"
+msgid "Add a journal entry"
+msgstr "Add a journal entry"
 
 msgid "How was your day?"
 msgstr "How was your day?"
@@ -272,8 +272,8 @@ msgstr "Delete activity"
 msgid "Edit activity"
 msgstr "Edit activity"
 
-msgid "Add activity"
-msgstr "Add activity"
+msgid "Add an activity"
+msgstr "Add an activity"
 
 msgid "Debts"
 msgstr "Debts"
@@ -284,5 +284,20 @@ msgstr "Activities"
 msgid "Are you sure you want to settle this debt?"
 msgstr "Are you sure you want to settle this debt?"
 
-msgid "privacy policy consent suffix"
+msgid "Privacy policy consent suffix"
 msgstr " "
+
+msgid "Privacy policy consent"
+msgstr "Privacy policy consent"
+
+msgid "Signing you out ..."
+msgstr "Signing you out ..."
+
+msgid "Signing you in ..."
+msgstr "Signing you in ..."
+
+msgid "Edit contact"
+msgstr "Edit contact"
+
+msgid "Edit journal entry"
+msgstr "Edit journal entry"
