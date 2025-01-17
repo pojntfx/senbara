@@ -33,6 +33,11 @@ type userData struct {
 // If `w` is not nil and a user is not authorized yet, authorize will redirect the user to
 // the sign in URL.
 func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, userData, int, error) {
+	returnURL := r.Header.Get("Referer")
+	if strings.TrimSpace(returnURL) == "" {
+		returnURL = "/"
+	}
+
 	if w == nil {
 		locale, err := b.localize(r)
 		if err != nil {
@@ -103,7 +108,7 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, us
 		if errors.Is(err, http.ErrNoCookie) {
 			privacyPolicyConsent := r.FormValue("consent")
 			if strings.TrimSpace(privacyPolicyConsent) == "on" {
-				http.Redirect(w, r, b.config.AuthCodeURL(b.oidcRedirectURL), http.StatusFound)
+				http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
 				return true, userData{}, http.StatusTemporaryRedirect, nil
 			}
@@ -137,8 +142,12 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, us
 			// Here, the user has still got a refresh token, so they've accepted the privacy policy already,
 			// meaning we can re-authorize them immediately without redirecting them back to the consent page.
 			// For updating privacy policies this is not an issue since we can simply invalidate the refresh
-			// tokens in Auth0, which requires users to re-read and re-accept the privacy policy
-			http.Redirect(w, r, b.config.AuthCodeURL(b.oidcRedirectURL), http.StatusFound)
+			// tokens in Auth0, which requires users to re-read and re-accept the privacy policy.
+			// Here, we don't use the HTTP Referer header, but instead the current URL, since we don't redirect
+			// with "redirect.html"
+			returnURL := r.URL.String()
+
+			http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
 			return true, userData{}, http.StatusTemporaryRedirect, nil
 		}
@@ -153,7 +162,7 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, us
 			RefreshToken: refreshToken,
 		}).Token()
 		if err != nil {
-			http.Redirect(w, r, b.config.AuthCodeURL(b.oidcRedirectURL), http.StatusFound)
+			http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
 			return true, userData{}, http.StatusOK, nil
 		}
@@ -161,14 +170,14 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, us
 		var ok bool
 		idToken, ok = oauth2Token.Extra("id_token").(string)
 		if !ok {
-			http.Redirect(w, r, b.config.AuthCodeURL(b.oidcRedirectURL), http.StatusFound)
+			http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
 			return true, userData{}, http.StatusOK, nil
 		}
 
 		id, err = b.verifier.Verify(r.Context(), idToken)
 		if err != nil {
-			http.Redirect(w, r, b.config.AuthCodeURL(b.oidcRedirectURL), http.StatusFound)
+			http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
 			return true, userData{}, http.StatusOK, nil
 		}
@@ -261,9 +270,15 @@ func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 	}
 
 	authCode := r.URL.Query().Get("code")
+	state := r.URL.Query().Get("state")
+
+	returnURL, err := url.QueryUnescape(state)
+	if err != nil || strings.TrimSpace(returnURL) == "" {
+		returnURL = "/"
+	}
 
 	// Sign out
-	if authCode == "" {
+	if strings.TrimSpace(authCode) == "" {
 		http.SetCookie(w, &http.Cookie{
 			Name:   refreshTokenKey,
 			Value:  "",
@@ -287,7 +302,7 @@ func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 				ImprintURL: b.imprintURL,
 			},
 
-			Href: "/",
+			Href: returnURL,
 		}); err != nil {
 			log.Println(errCouldNotRenderTemplate, err)
 
@@ -349,7 +364,7 @@ func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 			ImprintURL: b.imprintURL,
 		},
 
-		Href: "/",
+		Href: returnURL,
 	}); err != nil {
 		log.Println(errCouldNotRenderTemplate, err)
 
