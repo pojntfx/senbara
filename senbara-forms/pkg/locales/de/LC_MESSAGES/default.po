@@ -1,13 +1,21 @@
 msgid ""
 msgstr ""
+"PO-Revision-Date: 2025-01-18 15:07+0000\n"
+"Last-Translator: Felicitas Pojtinger <felicitas@pojtinger.com>\n"
+"Language-Team: German <https://hosted.weblate.org/projects/senbara/"
+"senbara-forms/de/>\n"
+"Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.10-dev\n"
+"Content-Transfer-Encoding: 8bit\n"
 
 # Authn
 msgid "Account"
 msgstr "Konto"
 
 msgid "Login"
-msgstr "Anmelden"
+msgstr "Annnmeldeeeeeen"
 
 msgid "Logout"
 msgstr "Abmelden"
