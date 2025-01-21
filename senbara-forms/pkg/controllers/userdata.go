@@ -18,7 +18,7 @@ const (
 )
 
 func (b *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -85,7 +85,7 @@ func (b *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -241,7 +241,7 @@ func (b *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 }
 
 func (b *Controller) HandleDeleteUserData(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 

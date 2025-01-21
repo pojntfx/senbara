@@ -25,7 +25,7 @@ type contactData struct {
 }
 
 func (b *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -64,7 +64,7 @@ func (b *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *Controller) HandleAddContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -91,7 +91,7 @@ func (b *Controller) HandleAddContact(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -169,7 +169,7 @@ func (b *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 }
 
 func (b *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -218,7 +218,7 @@ func (b *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request)
 }
 
 func (b *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -297,7 +297,7 @@ func (b *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -416,7 +416,7 @@ func (b *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 }
 
 func (b *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 

@@ -17,7 +17,7 @@ type activityData struct {
 }
 
 func (b *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -74,7 +74,7 @@ func (b *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -159,7 +159,7 @@ func (b *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 }
 
 func (b *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -233,7 +233,7 @@ func (b *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 }
 
 func (b *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -338,7 +338,7 @@ func (b *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 }
 
 func (b *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -413,7 +413,7 @@ func (b *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) 
 }
 
 func (b *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 

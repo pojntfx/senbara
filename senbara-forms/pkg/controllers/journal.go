@@ -21,7 +21,7 @@ type journalEntryData struct {
 }
 
 func (b *Controller) HandleJournal(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -60,7 +60,7 @@ func (b *Controller) HandleJournal(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *Controller) HandleAddJournal(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -87,7 +87,7 @@ func (b *Controller) HandleAddJournal(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -155,7 +155,7 @@ func (b *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request)
 }
 
 func (b *Controller) HandleDeleteJournal(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -204,7 +204,7 @@ func (b *Controller) HandleDeleteJournal(w http.ResponseWriter, r *http.Request)
 }
 
 func (b *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -261,7 +261,7 @@ func (b *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -346,7 +346,7 @@ func (b *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 }
 
 func (b *Controller) HandleViewJournal(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 

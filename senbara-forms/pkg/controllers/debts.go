@@ -17,7 +17,7 @@ type debtData struct {
 }
 
 func (b *Controller) HandleAddDebt(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -74,7 +74,7 @@ func (b *Controller) HandleAddDebt(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -185,7 +185,7 @@ func (b *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -259,7 +259,7 @@ func (b *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -390,7 +390,7 @@ func (b *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *Controller) HandleEditDebt(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 

@@ -7,7 +7,7 @@ import (
 
 func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet && r.URL.Path == "/" {
-		_, userData, status, err := b.authorize(nil, r)
+		_, userData, status, err := b.authorize(w, r, false)
 		if err != nil {
 			log.Println(err)
 
@@ -35,7 +35,7 @@ func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redirected, userData, status, err := b.authorize(w, r)
+	redirected, userData, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 

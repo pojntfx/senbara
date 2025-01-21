@@ -29,73 +29,14 @@ type userData struct {
 	Locale *gotext.Locale
 }
 
-// authorize authorizes a user based on a request and returns their data if it's available.
-// If `w` is not nil and a user is not authorized yet, authorize will redirect the user to
-// the sign in URL.
-func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, userData, int, error) {
+// authorize authorizes a user based on a request and returns their data if it's available. If a user has been
+// previously signed in, but their session has expired, authorize refresh their session. If `loginIfSignedOut` is set
+// and a user has not signed in, authorize will redirect the user to the sign in URL instead - else, authorize will return
+// only the data is has available on the user, without signing them in.
+func (b *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSignedOut bool) (bool, userData, int, error) {
 	returnURL := r.Header.Get("Referer")
 	if strings.TrimSpace(returnURL) == "" {
 		returnURL = "/"
-	}
-
-	if w == nil {
-		locale, err := b.localize(r)
-		if err != nil {
-			return false, userData{}, http.StatusInternalServerError, errors.Join(errCouldNotLocalize, err)
-		}
-
-		if _, err := r.Cookie(refreshTokenKey); err != nil {
-			return false, userData{
-				Locale: locale,
-			}, http.StatusOK, nil
-		}
-
-		it, err := r.Cookie(idTokenKey)
-		if err != nil {
-			return false, userData{
-				Locale: locale,
-			}, http.StatusOK, nil
-		}
-
-		id, err := b.verifier.Verify(r.Context(), it.Value)
-		if err != nil {
-			return false, userData{
-				Locale: locale,
-			}, http.StatusOK, nil
-		}
-
-		var claims struct {
-			Email         string `json:"email"`
-			EmailVerified bool   `json:"email_verified"`
-		}
-		if err := id.Claims(&claims); err != nil {
-			return false, userData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
-		}
-
-		if !claims.EmailVerified {
-			return false, userData{
-				Locale: locale,
-			}, http.StatusOK, nil
-		}
-
-		logoutURL, err := url.Parse(b.oidcIssuer)
-		if err != nil {
-			return false, userData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
-		}
-
-		q := logoutURL.Query()
-		q.Set("id_token_hint", it.Value)
-		q.Set("post_logout_redirect_uri", b.oidcRedirectURL)
-		logoutURL.RawQuery = q.Encode()
-
-		logoutURL = logoutURL.JoinPath("oidc", "logout")
-
-		return false, userData{
-			Email:     claims.Email,
-			LogoutURL: logoutURL.String(),
-
-			Locale: locale,
-		}, http.StatusOK, nil
 	}
 
 	locale, err := b.localize(r)
@@ -103,58 +44,105 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, us
 		return false, userData{}, http.StatusInternalServerError, errors.Join(errCouldNotLocalize, err)
 	}
 
-	rt, err := r.Cookie(refreshTokenKey)
-	if err != nil {
-		if errors.Is(err, http.ErrNoCookie) {
-			privacyPolicyConsent := r.FormValue("consent")
-			if strings.TrimSpace(privacyPolicyConsent) == "on" {
-				http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
+	var refreshToken, idToken string
+	if loginIfSignedOut {
+		rt, err := r.Cookie(refreshTokenKey)
+		if err != nil {
+			if errors.Is(err, http.ErrNoCookie) {
+				privacyPolicyConsent := r.FormValue("consent")
+				if strings.TrimSpace(privacyPolicyConsent) == "on" {
+					http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
-				return true, userData{}, http.StatusTemporaryRedirect, nil
-			}
-
-			if err := b.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
-				pageData: pageData{
-					userData: userData{
+					return true, userData{
 						Locale: locale,
+					}, http.StatusTemporaryRedirect, nil
+				}
+
+				if err := b.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
+					pageData: pageData{
+						userData: userData{
+							Locale: locale,
+						},
+
+						Page:       locale.Get("Privacy policy consent"),
+						PrivacyURL: b.privacyURL,
+						ImprintURL: b.imprintURL,
 					},
 
-					Page:       locale.Get("Privacy policy consent"),
-					PrivacyURL: b.privacyURL,
-					ImprintURL: b.imprintURL,
-				},
+					RequiresPrivacyPolicyConsent: true,
+				}); err != nil {
+					return false, userData{
+						Locale: locale,
+					}, http.StatusInternalServerError, errors.Join(errCouldNotRenderTemplate, err)
+				}
 
-				RequiresPrivacyPolicyConsent: true,
-			}); err != nil {
-				return false, userData{}, http.StatusInternalServerError, errors.Join(errCouldNotRenderTemplate, err)
+				return true, userData{
+					Locale: locale,
+				}, http.StatusTemporaryRedirect, nil
 			}
 
-			return true, userData{}, http.StatusTemporaryRedirect, nil
+			return false, userData{
+				Locale: locale,
+			}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
 		}
+		refreshToken = rt.Value
 
-		return false, userData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
-	}
-	refreshToken := rt.Value
+		it, err := r.Cookie(idTokenKey)
+		if err != nil {
+			if errors.Is(err, http.ErrNoCookie) {
+				// Here, the user has still got a refresh token, so they've accepted the privacy policy already,
+				// meaning we can re-authorize them immediately without redirecting them back to the consent page.
+				// For updating privacy policies this is not an issue since we can simply invalidate the refresh
+				// tokens in Auth0, which requires users to re-read and re-accept the privacy policy.
+				// Here, we don't use the HTTP Referer header, but instead the current URL, since we don't redirect
+				// with "redirect.html"
+				returnURL := r.URL.String()
 
-	it, err := r.Cookie(idTokenKey)
-	if err != nil {
-		if errors.Is(err, http.ErrNoCookie) {
-			// Here, the user has still got a refresh token, so they've accepted the privacy policy already,
-			// meaning we can re-authorize them immediately without redirecting them back to the consent page.
-			// For updating privacy policies this is not an issue since we can simply invalidate the refresh
-			// tokens in Auth0, which requires users to re-read and re-accept the privacy policy.
-			// Here, we don't use the HTTP Referer header, but instead the current URL, since we don't redirect
-			// with "redirect.html"
-			returnURL := r.URL.String()
+				http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
-			http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
+				return true, userData{
+					Locale: locale,
+				}, http.StatusTemporaryRedirect, nil
+			}
 
-			return true, userData{}, http.StatusTemporaryRedirect, nil
+			return false, userData{
+				Locale: locale,
+			}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
 		}
+		idToken = it.Value
+	} else {
+		rt, err := r.Cookie(refreshTokenKey)
+		if err != nil {
+			return false, userData{
+				Locale: locale,
+			}, http.StatusOK, nil
+		}
+		refreshToken = rt.Value
 
-		return false, userData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+		it, err := r.Cookie(idTokenKey)
+		if err != nil {
+			if errors.Is(err, http.ErrNoCookie) {
+				// Here, the user has still got a refresh token, so they've accepted the privacy policy already,
+				// meaning we can re-authorize them immediately without redirecting them back to the consent page.
+				// For updating privacy policies this is not an issue since we can simply invalidate the refresh
+				// tokens in Auth0, which requires users to re-read and re-accept the privacy policy.
+				// Here, we don't use the HTTP Referer header, but instead the current URL, since we don't redirect
+				// with "redirect.html"
+				returnURL := r.URL.String()
+
+				http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
+
+				return true, userData{
+					Locale: locale,
+				}, http.StatusTemporaryRedirect, nil
+			}
+
+			return false, userData{
+				Locale: locale,
+			}, http.StatusOK, nil
+		}
+		idToken = it.Value
 	}
-	idToken := it.Value
 
 	id, err := b.verifier.Verify(r.Context(), idToken)
 	if err != nil {
@@ -164,7 +152,9 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, us
 		if err != nil {
 			http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
-			return true, userData{}, http.StatusOK, nil
+			return true, userData{
+				Locale: locale,
+			}, http.StatusOK, nil
 		}
 
 		var ok bool
@@ -172,14 +162,18 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, us
 		if !ok {
 			http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
-			return true, userData{}, http.StatusOK, nil
+			return true, userData{
+				Locale: locale,
+			}, http.StatusOK, nil
 		}
 
 		id, err = b.verifier.Verify(r.Context(), idToken)
 		if err != nil {
 			http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
-			return true, userData{}, http.StatusOK, nil
+			return true, userData{
+				Locale: locale,
+			}, http.StatusOK, nil
 		}
 
 		if refreshToken = oauth2Token.RefreshToken; refreshToken != "" {
@@ -210,16 +204,22 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request) (bool, us
 		EmailVerified bool   `json:"email_verified"`
 	}
 	if err := id.Claims(&claims); err != nil {
-		return false, userData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+		return false, userData{
+			Locale: locale,
+		}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
 	}
 
 	if !claims.EmailVerified {
-		return false, userData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, errEmailNotVerified)
+		return false, userData{
+			Locale: locale,
+		}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, errEmailNotVerified)
 	}
 
 	logoutURL, err := url.Parse(b.oidcIssuer)
 	if err != nil {
-		return false, userData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+		return false, userData{
+			Locale: locale,
+		}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
 	}
 
 	q := logoutURL.Query()
@@ -245,7 +245,7 @@ type redirectData struct {
 }
 
 func (b *Controller) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	redirected, _, status, err := b.authorize(w, r)
+	redirected, _, status, err := b.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
