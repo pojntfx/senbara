@@ -260,3 +260,9 @@ msgstr "%v | Senbara-Formulare"
 
 msgid "Page not found"
 msgstr "Diese Seite konnte nicht gefunden werden"
+
+msgid "Senbara Forms"
+msgstr "Senbara-Formulare"
+
+msgid "Simple personal ERP web application built with HTML\nforms, OpenID Connect authentication and PostgreSQL data storage.\nDesigned as a reference for modern JS-free Web 2.0 development with Go."
+msgstr "Einfache persönliche ERP-Webanwendung, erstellt mit HTML-Formularen, OpenID-Connect-Authentifizierung und PostgreSQL. Konzipiert als Referenz für moderne JS-freie Web-2.0-Entwicklung mit Go."

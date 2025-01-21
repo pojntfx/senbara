@@ -6,7 +6,13 @@
     {{ template "nav.html" . }}
 
     <header>
-      <h2>{{ $.Locale.Get "Home" }}</h2>
+      <h2>{{ $.Locale.Get "Senbara Forms" }}</h2>
+      <h3>
+        {{ $.Locale.Get `Simple personal ERP web application built with HTML
+forms, OpenID Connect authentication and PostgreSQL data storage.
+Designed as a reference for modern JS-free Web 2.0 development with Go.`
+        }}
+      </h3>
     </header>
 
     {{ template "footer.html" . }}
