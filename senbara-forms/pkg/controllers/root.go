@@ -38,10 +38,6 @@ const (
 	refreshTokenKey = "refresh_token"
 )
 
-type indexData struct {
-	pageData
-}
-
 type Controller struct {
 	tpl       *template.Template
 	persister *persisters.Persister

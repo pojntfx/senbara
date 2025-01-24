@@ -179,6 +179,9 @@ msgstr "Schlecht"
 msgid "No journal entries yet."
 msgstr "Noch keine Tagebucheinträge vorhanden."
 
+msgid "Journal entries"
+msgstr "Tagebucheinträge"
+
 # Forms
 msgid "Name"
 msgstr "Name"
@@ -217,9 +220,12 @@ msgstr "Zurück"
 msgid "Home"
 msgstr "Startseite"
 
+msgid "Summary"
+msgstr "Zusammenfassung"
+
 # Legal
-msgid "© 2024 Felicitas Pojtinger and contributors (AGPL-3.0)"
-msgstr "© 2024 Felicitas Pojtinger und Mitwirkende (AGPL-3.0)"
+msgid "© 2025 Felicitas Pojtinger and contributors (AGPL-3.0)"
+msgstr "© 2025 Felicitas Pojtinger und Mitwirkende (AGPL-3.0)"
 
 msgid "Code"
 msgstr "Code"

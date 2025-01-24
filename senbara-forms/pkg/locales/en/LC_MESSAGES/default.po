@@ -179,6 +179,9 @@ msgstr "Bad"
 msgid "No journal entries yet."
 msgstr "No journal entries yet."
 
+msgid "Journal entries"
+msgstr "Journal entries"
+
 # Forms
 msgid "Name"
 msgstr "Name"
@@ -217,9 +220,12 @@ msgstr "Go back"
 msgid "Home"
 msgstr "Home"
 
+msgid "Summary"
+msgstr "Summary"
+
 # Legal
-msgid "© 2024 Felicitas Pojtinger and contributors (AGPL-3.0)"
-msgstr "© 2024 Felicitas Pojtinger and contributors (AGPL-3.0)"
+msgid "© 2025 Felicitas Pojtinger and contributors (AGPL-3.0)"
+msgstr "© 2025 Felicitas Pojtinger and contributors (AGPL-3.0)"
 
 msgid "Code"
 msgstr "Code"

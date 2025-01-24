@@ -98,3 +98,7 @@ func (p *Persister) UpdateContact(
 		Notes:     notes,
 	})
 }
+
+func (p *Persister) CountContacts(ctx context.Context, namespace string) (int64, error) {
+	return p.queries.CountContacts(ctx, namespace)
+}

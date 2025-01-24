@@ -10,6 +10,19 @@ import (
 	"time"
 )
 
+const countJournalEntries = `-- name: CountJournalEntries :one
+select count(*)
+from journal_entries
+where namespace = $1
+`
+
+func (q *Queries) CountJournalEntries(ctx context.Context, namespace string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countJournalEntries, namespace)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createJournalEntry = `-- name: CreateJournalEntry :one
 insert into journal_entries (title, body, rating, namespace)
 values ($1, $2, $3, $4)

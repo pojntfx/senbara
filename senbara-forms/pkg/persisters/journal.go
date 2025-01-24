@@ -42,3 +42,7 @@ func (p *Persister) UpdateJournalEntry(ctx context.Context, id int32, title, bod
 		Rating:    rating,
 	})
 }
+
+func (p *Persister) CountJournalEntries(ctx context.Context, namespace string) (int64, error) {
+	return p.queries.CountJournalEntries(ctx, namespace)
+}

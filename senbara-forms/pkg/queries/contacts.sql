@@ -44,3 +44,7 @@ select 'contacts' as table_name,
 from contacts
 where namespace = $1
 order by first_name desc;
+-- name: CountContacts :one
+select count(*)
+from contacts
+where namespace = $1;

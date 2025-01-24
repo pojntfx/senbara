@@ -10,6 +10,19 @@ import (
 	"database/sql"
 )
 
+const countContacts = `-- name: CountContacts :one
+select count(*)
+from contacts
+where namespace = $1
+`
+
+func (q *Queries) CountContacts(ctx context.Context, namespace string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countContacts, namespace)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createContact = `-- name: CreateContact :one
 insert into contacts (
         first_name,

@@ -32,3 +32,7 @@ select 'journal_entries' as table_name,
 from journal_entries
 where namespace = $1
 order by date desc;
+-- name: CountJournalEntries :one
+select count(*)
+from journal_entries
+where namespace = $1;
