@@ -1,0 +1,8 @@
+{
+  "redirects": [
+    {
+      "source": "/((?!api/senbara-forms).*)",
+      "destination": "/api/senbara-forms?path=/$1"
+    }
+  ]
+}
