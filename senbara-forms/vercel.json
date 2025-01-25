@@ -4,5 +4,11 @@
       "source": "/((?!api/senbara-forms).*)",
       "destination": "/api/senbara-forms?path=/$1"
     }
+  ],
+  "builds": [
+    {
+      "src": "api/senbara-forms/*.go",
+      "use": "@vercel/go"
+    }
   ]
 }
