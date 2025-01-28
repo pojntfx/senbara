@@ -281,15 +281,23 @@ func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 	// Sign out
 	if strings.TrimSpace(authCode) == "" {
 		http.SetCookie(w, &http.Cookie{
-			Name:   refreshTokenKey,
-			Value:  "",
-			MaxAge: -1,
+			Name:     refreshTokenKey,
+			Value:    "",
+			MaxAge:   -1,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteStrictMode,
+			Path:     "/",
 		})
 
 		http.SetCookie(w, &http.Cookie{
-			Name:   idTokenKey,
-			Value:  "",
-			MaxAge: -1,
+			Name:     idTokenKey,
+			Value:    "",
+			MaxAge:   -1,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteStrictMode,
+			Path:     "/",
 		})
 
 		if err := b.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
