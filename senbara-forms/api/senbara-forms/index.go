@@ -1,6 +1,9 @@
 package senbaraForms
 
+//go:generate tar czf code.tar.gz --exclude .git -C ../.. .
+
 import (
+	_ "embed"
 	"net/http"
 	"os"
 
@@ -10,6 +13,9 @@ import (
 	"github.com/pojntfx/senbara/senbara-forms/pkg/persisters"
 	"github.com/pojntfx/senbara/senbara-forms/pkg/static"
 )
+
+//go:embed code.tar.gz
+var code []byte
 
 var (
 	p *persisters.Persister
@@ -66,7 +72,9 @@ func SenbaraFormsHandler(
 	mux.HandleFunc("GET /login", c.HandleLogin)
 	mux.HandleFunc("GET /authorize", c.HandleAuthorize)
 
-	// mux.Handle("GET /code/", http.StripPrefix("/code/", http.FileServer(http.FS(senbaraForms.FS))))
+	mux.HandleFunc("GET /code/", func(w http.ResponseWriter, r *http.Request) {
+		c.HandleCode(w, r, code)
+	})
 
 	mux.HandleFunc("/", c.HandleIndex)
 
