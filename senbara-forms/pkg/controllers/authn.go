@@ -44,13 +44,14 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSi
 		return false, userData{}, http.StatusInternalServerError, errors.Join(errCouldNotLocalize, err)
 	}
 
+	privacyPolicyConsent := r.FormValue("consent") == "on"
+
 	var refreshToken, idToken string
-	if loginIfSignedOut {
+	if loginIfSignedOut || privacyPolicyConsent {
 		rt, err := r.Cookie(refreshTokenKey)
 		if err != nil {
 			if errors.Is(err, http.ErrNoCookie) {
-				privacyPolicyConsent := r.FormValue("consent")
-				if strings.TrimSpace(privacyPolicyConsent) == "on" {
+				if privacyPolicyConsent {
 					http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
 					return true, userData{
