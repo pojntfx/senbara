@@ -6,8 +6,6 @@ import (
 
 	_ "github.com/lib/pq"
 
-	// senbaraForms "github.com/pojntfx/senbara/senbara-forms"
-
 	"github.com/pojntfx/senbara/senbara-forms/pkg/controllers"
 	"github.com/pojntfx/senbara/senbara-forms/pkg/persisters"
 	"github.com/pojntfx/senbara/senbara-forms/pkg/static"
