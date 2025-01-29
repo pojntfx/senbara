@@ -1,6 +1,6 @@
 package senbaraForms
 
-//go:generate tar czf code.tar.gz --exclude .git -C ../.. .
+//go:generate tar czf code.tar.gz --exclude .git -C ../../.. .
 
 import (
 	_ "embed"
@@ -9,8 +9,8 @@ import (
 
 	_ "github.com/lib/pq"
 
+	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
 	"github.com/pojntfx/senbara/senbara-forms/pkg/controllers"
-	"github.com/pojntfx/senbara/senbara-forms/pkg/persisters"
 	"github.com/pojntfx/senbara/senbara-forms/pkg/static"
 )
 

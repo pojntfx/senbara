@@ -8,7 +8,7 @@ import (
 	"math"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/pojntfx/senbara/senbara-forms/pkg/persisters"
+	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
 	"github.com/pojntfx/senbara/senbara-forms/pkg/templates"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"

@@ -1,6 +1,6 @@
 package models
 
-import "github.com/pojntfx/senbara/senbara-forms/pkg/tables"
+import "github.com/pojntfx/senbara/senbara-common/pkg/tables"
 
 type (
 	CreateJournalEntryParams = tables.CreateJournalEntryParams

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/pojntfx/senbara/senbara-forms/pkg/models"
+	"github.com/pojntfx/senbara/senbara-common/pkg/models"
 )
 
 func (p *Persister) GetContacts(ctx context.Context, namespace string) ([]models.Contact, error) {

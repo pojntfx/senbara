@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pojntfx/senbara/senbara-forms/pkg/models"
+	"github.com/pojntfx/senbara/senbara-common/pkg/models"
 )
 
 type activityData struct {

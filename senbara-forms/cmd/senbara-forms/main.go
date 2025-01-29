@@ -11,9 +11,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
 	senbaraForms "github.com/pojntfx/senbara/senbara-forms/api/senbara-forms"
 	"github.com/pojntfx/senbara/senbara-forms/pkg/controllers"
-	"github.com/pojntfx/senbara/senbara-forms/pkg/persisters"
 )
 
 var (

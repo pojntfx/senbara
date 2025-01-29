@@ -3,7 +3,7 @@ package persisters
 import (
 	"context"
 
-	"github.com/pojntfx/senbara/senbara-forms/pkg/models"
+	"github.com/pojntfx/senbara/senbara-common/pkg/models"
 )
 
 func (p *Persister) GetJournalEntries(ctx context.Context, namespace string) ([]models.JournalEntry, error) {

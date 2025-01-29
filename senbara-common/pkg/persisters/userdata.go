@@ -6,7 +6,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/pojntfx/senbara/senbara-forms/pkg/models"
+	"github.com/pojntfx/senbara/senbara-common/pkg/models"
 )
 
 var (

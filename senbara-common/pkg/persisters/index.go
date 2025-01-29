@@ -5,8 +5,8 @@ package persisters
 import (
 	"database/sql"
 
-	"github.com/pojntfx/senbara/senbara-forms/pkg/migrations"
-	"github.com/pojntfx/senbara/senbara-forms/pkg/tables"
+	"github.com/pojntfx/senbara/senbara-common/pkg/migrations"
+	"github.com/pojntfx/senbara/senbara-common/pkg/tables"
 	"github.com/pressly/goose/v3"
 )
 

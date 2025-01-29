@@ -2,42 +2,43 @@ package persisters
 
 import (
 	"context"
+	"time"
 
-	"github.com/pojntfx/senbara/senbara-forms/pkg/models"
+	"github.com/pojntfx/senbara/senbara-common/pkg/models"
 )
 
-func (p *Persister) CreateDebt(
+func (p *Persister) CreateActivity(
 	ctx context.Context,
 
-	amount float64,
-	currency,
+	name string,
+	date time.Time,
 	description string,
 
 	contactID int32,
 	namespace string,
 ) (int32, error) {
-	return p.queries.CreateDebt(ctx, models.CreateDebtParams{
+	return p.queries.CreateActivity(ctx, models.CreateActivityParams{
 		ID:          contactID,
 		Namespace:   namespace,
-		Amount:      amount,
-		Currency:    currency,
+		Name:        name,
+		Date:        date,
 		Description: description,
 	})
 }
 
-func (p *Persister) GetDebts(
+func (p *Persister) GetActivities(
 	ctx context.Context,
 
 	contactID int32,
 	namespace string,
-) ([]models.GetDebtsRow, error) {
-	return p.queries.GetDebts(ctx, models.GetDebtsParams{
+) ([]models.GetActivitiesRow, error) {
+	return p.queries.GetActivities(ctx, models.GetActivitiesParams{
 		ID:        contactID,
 		Namespace: namespace,
 	})
 }
 
-func (p *Persister) SettleDebt(
+func (p *Persister) DeleteActivity(
 	ctx context.Context,
 
 	id int32,
@@ -45,7 +46,7 @@ func (p *Persister) SettleDebt(
 	contactID int32,
 	namespace string,
 ) error {
-	return p.queries.SettleDebt(ctx, models.SettleDebtParams{
+	return p.queries.DeleteActivity(ctx, models.DeleteActivityParams{
 		ID_2: id,
 
 		ID:        contactID,
@@ -53,15 +54,15 @@ func (p *Persister) SettleDebt(
 	})
 }
 
-func (p *Persister) GetDebtAndContact(
+func (p *Persister) GetActivityAndContact(
 	ctx context.Context,
 
 	id int32,
 
 	contactID int32,
 	namespace string,
-) (models.GetDebtAndContactRow, error) {
-	return p.queries.GetDebtAndContact(ctx, models.GetDebtAndContactParams{
+) (models.GetActivityAndContactRow, error) {
+	return p.queries.GetActivityAndContact(ctx, models.GetActivityAndContactParams{
 		ID_2: id,
 
 		ID:        contactID,
@@ -69,7 +70,7 @@ func (p *Persister) GetDebtAndContact(
 	})
 }
 
-func (p *Persister) UpdateDebt(
+func (p *Persister) UpdateActivity(
 	ctx context.Context,
 
 	id int32,
@@ -77,18 +78,18 @@ func (p *Persister) UpdateDebt(
 	contactID int32,
 	namespace string,
 
-	amount float64,
-	currency,
+	name string,
+	date time.Time,
 	description string,
 ) error {
-	return p.queries.UpdateDebt(ctx, models.UpdateDebtParams{
+	return p.queries.UpdateActivity(ctx, models.UpdateActivityParams{
 		ID_2: id,
 
 		ID:        contactID,
 		Namespace: namespace,
 
-		Amount:      amount,
-		Currency:    currency,
+		Name:        name,
+		Date:        date,
 		Description: description,
 	})
 }
