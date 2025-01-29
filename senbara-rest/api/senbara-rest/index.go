@@ -57,6 +57,8 @@ func SenbaraRESTHandler(
 		c.HandleCode(w, r, code)
 	})
 
+	mux.HandleFunc("/", c.HandleIndex)
+
 	mux.ServeHTTP(w, r)
 }
 
