@@ -1,23 +1,23 @@
 package controllers
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/pojntfx/senbara/senbara-common/pkg/models"
 )
 
 func (b *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(r)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
@@ -74,7 +74,7 @@ func (b *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 
 	description := r.FormValue("description")
 
-	if _, err := b.persister.CreateActivity(
+	id, err := b.persister.CreateActivity(
 		r.Context(),
 
 		name,
@@ -82,8 +82,9 @@ func (b *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 		description,
 
 		int32(contactID),
-		userData.Email,
-	); err != nil {
+		email,
+	)
+	if err != nil {
 		log.Println(errCouldNotInsertIntoDB, err)
 
 		http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
@@ -91,18 +92,28 @@ func (b *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", contactID), http.StatusFound)
+	if err := json.NewEncoder(w).Encode(models.GetActivitiesRow{
+		ID: id,
+
+		Name:        name,
+		Date:        date,
+		Description: description,
+	}); err != nil {
+		log.Println(errCouldNotWriteResponse, err)
+
+		http.Error(w, errCouldNotWriteResponse.Error(), http.StatusInternalServerError)
+
+		return
+	}
 }
 
 func (b *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(r)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
@@ -156,7 +167,7 @@ func (b *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 		int32(id),
 
 		int32(contactID),
-		userData.Email,
+		email,
 	); err != nil {
 		log.Println(errCouldNotUpdateInDB, err)
 
@@ -165,18 +176,22 @@ func (b *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", contactID), http.StatusFound)
+	if err := json.NewEncoder(w).Encode(id); err != nil {
+		log.Println(errCouldNotWriteResponse, err)
+
+		http.Error(w, errCouldNotWriteResponse.Error(), http.StatusInternalServerError)
+
+		return
+	}
 }
 
 func (b *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
@@ -257,7 +272,7 @@ func (b *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 		int32(id),
 
 		int32(contactID),
-		userData.Email,
+		email,
 
 		name,
 		date,
@@ -270,18 +285,28 @@ func (b *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", contactID), http.StatusFound)
+	if err := json.NewEncoder(w).Encode(models.GetActivitiesRow{
+		ID: int32(id),
+
+		Name:        name,
+		Date:        date,
+		Description: description,
+	}); err != nil {
+		log.Println(errCouldNotWriteResponse, err)
+
+		http.Error(w, errCouldNotWriteResponse.Error(), http.StatusInternalServerError)
+
+		return
+	}
 }
 
 func (b *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
@@ -321,7 +346,7 @@ func (b *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	activityAndContact, err := b.persister.GetActivityAndContact(r.Context(), int32(id), int32(contactID), userData.Email)
+	activityAndContact, err := b.persister.GetActivityAndContact(r.Context(), int32(id), int32(contactID), email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -330,23 +355,11 @@ func (b *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "activities_view.html", activityData{
-		pageData: pageData{
-			userData: userData,
+	if err := json.NewEncoder(w).Encode(activityAndContact); err != nil {
+		log.Println(errCouldNotWriteResponse, err)
 
-			Page:       activityAndContact.Name,
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
-
-			BackURL: fmt.Sprintf("/contacts/view?id=%v", contactID),
-		},
-		Entry: activityAndContact,
-	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
-
-		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
+		http.Error(w, errCouldNotWriteResponse.Error(), http.StatusInternalServerError)
 
 		return
 	}
-
 }

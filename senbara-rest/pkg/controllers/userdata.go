@@ -18,14 +18,12 @@ const (
 )
 
 func (b *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
@@ -37,7 +35,7 @@ func (b *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 	if err := b.persister.GetUserData(
 		r.Context(),
 
-		userData.Email,
+		email,
 
 		func(journalEntry models.ExportedJournalEntry) error {
 			journalEntry.ExportedEntityIdentifier.EntityName = EntityNameExportedJournalEntry
@@ -85,14 +83,12 @@ func (b *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
@@ -116,7 +112,7 @@ func (b *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 		commit,
 		rollback,
 
-		err := b.persister.CreateUserData(r.Context(), userData.Email)
+		err := b.persister.CreateUserData(r.Context(), email)
 	if err != nil {
 		log.Println(errCouldNotStartTransaction, err)
 
@@ -236,29 +232,23 @@ func (b *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 
 		return
 	}
-
-	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func (b *Controller) HandleDeleteUserData(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
-	if err := b.persister.DeleteUserData(r.Context(), userData.Email); err != nil {
+	if err := b.persister.DeleteUserData(r.Context(), email); err != nil {
 		log.Println(errCouldNotDeleteFromDB, err)
 
 		http.Error(w, errCouldNotDeleteFromDB.Error(), http.StatusInternalServerError)
 
 		return
 	}
-
-	http.Redirect(w, r, userData.LogoutURL, http.StatusFound)
 }

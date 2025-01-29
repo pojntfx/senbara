@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"math"
 	"net/http"
@@ -11,20 +11,13 @@ import (
 	"github.com/pojntfx/senbara/senbara-common/pkg/models"
 )
 
-type debtData struct {
-	pageData
-	Entry models.GetDebtAndContactRow
-}
-
 func (b *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
@@ -107,7 +100,7 @@ func (b *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 
 	description := r.FormValue("description")
 
-	if _, err := b.persister.CreateDebt(
+	id, err := b.persister.CreateDebt(
 		r.Context(),
 
 		amount,
@@ -115,8 +108,9 @@ func (b *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 		description,
 
 		int32(contactID),
-		userData.Email,
-	); err != nil {
+		email,
+	)
+	if err != nil {
 		log.Println(errCouldNotInsertIntoDB, err)
 
 		http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
@@ -124,18 +118,28 @@ func (b *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", contactID), http.StatusFound)
+	if err := json.NewEncoder(w).Encode(models.GetDebtsRow{
+		ID: id,
+
+		Amount:      amount,
+		Currency:    currency,
+		Description: description,
+	}); err != nil {
+		log.Println(errCouldNotWriteResponse, err)
+
+		http.Error(w, errCouldNotWriteResponse.Error(), http.StatusInternalServerError)
+
+		return
+	}
 }
 
 func (b *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
@@ -189,7 +193,7 @@ func (b *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 		int32(id),
 
 		int32(contactID),
-		userData.Email,
+		email,
 	); err != nil {
 		log.Println(errCouldNotUpdateInDB, err)
 
@@ -198,18 +202,22 @@ func (b *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", contactID), http.StatusFound)
+	if err := json.NewEncoder(w).Encode(id); err != nil {
+		log.Println(errCouldNotWriteResponse, err)
+
+		http.Error(w, errCouldNotWriteResponse.Error(), http.StatusInternalServerError)
+
+		return
+	}
 }
 
 func (b *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
@@ -316,7 +324,7 @@ func (b *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 		int32(id),
 
 		int32(contactID),
-		userData.Email,
+		email,
 
 		amount,
 		currency,
@@ -329,5 +337,17 @@ func (b *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", contactID), http.StatusFound)
+	if err := json.NewEncoder(w).Encode(models.GetDebtsRow{
+		ID: int32(id),
+
+		Amount:      amount,
+		Currency:    currency,
+		Description: description,
+	}); err != nil {
+		log.Println(errCouldNotWriteResponse, err)
+
+		http.Error(w, errCouldNotWriteResponse.Error(), http.StatusInternalServerError)
+
+		return
+	}
 }

@@ -1,7 +1,8 @@
 package controllers
 
 import (
-	"fmt"
+	"database/sql"
+	"encoding/json"
 	"log"
 	"net/http"
 	"net/mail"
@@ -12,31 +13,23 @@ import (
 	"github.com/pojntfx/senbara/senbara-common/pkg/models"
 )
 
-type contactsData struct {
-	pageData
-	Entries []models.Contact
-}
-
 type contactData struct {
-	pageData
 	Entry      models.Contact
 	Debts      []models.GetDebtsRow
 	Activities []models.GetActivitiesRow
 }
 
 func (b *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
-	contacts, err := b.persister.GetContacts(r.Context(), userData.Email)
+	contacts, err := b.persister.GetContacts(r.Context(), email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -45,33 +38,22 @@ func (b *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "contacts.html", contactsData{
-		pageData: pageData{
-			userData: userData,
+	if err := json.NewEncoder(w).Encode(contacts); err != nil {
+		log.Println(errCouldNotWriteResponse, err)
 
-			Page:       userData.Locale.Get("Contacts"),
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
-		},
-		Entries: contacts,
-	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
-
-		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
+		http.Error(w, errCouldNotWriteResponse.Error(), http.StatusInternalServerError)
 
 		return
 	}
 }
 
 func (b *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
@@ -101,8 +83,8 @@ func (b *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	email := r.FormValue("email")
-	if _, err := mail.ParseAddress(email); err != nil {
+	newEmail := r.FormValue("email")
+	if _, err := mail.ParseAddress(newEmail); err != nil {
 		log.Println(err)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
@@ -126,9 +108,9 @@ func (b *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 		firstName,
 		lastName,
 		nickname,
-		email,
+		newEmail,
 		pronouns,
-		userData.Email,
+		email,
 	)
 	if err != nil {
 		log.Println(errCouldNotInsertIntoDB, err)
@@ -138,18 +120,30 @@ func (b *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", id), http.StatusFound)
+	if err := json.NewEncoder(w).Encode(models.Contact{
+		ID: id,
+
+		FirstName: firstName,
+		LastName:  lastName,
+		Nickname:  nickname,
+		Email:     newEmail,
+		Pronouns:  pronouns,
+	}); err != nil {
+		log.Println(errCouldNotWriteResponse, err)
+
+		http.Error(w, errCouldNotWriteResponse.Error(), http.StatusInternalServerError)
+
+		return
+	}
 }
 
 func (b *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
@@ -179,7 +173,7 @@ func (b *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if err := b.persister.DeleteContact(r.Context(), int32(id), userData.Email); err != nil {
+	if err := b.persister.DeleteContact(r.Context(), int32(id), email); err != nil {
 		log.Println(errCouldNotDeleteFromDB, err)
 
 		http.Error(w, errCouldNotDeleteFromDB.Error(), http.StatusInternalServerError)
@@ -187,18 +181,22 @@ func (b *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	http.Redirect(w, r, "/contacts", http.StatusFound)
+	if err := json.NewEncoder(w).Encode(id); err != nil {
+		log.Println(errCouldNotWriteResponse, err)
+
+		http.Error(w, errCouldNotWriteResponse.Error(), http.StatusInternalServerError)
+
+		return
+	}
 }
 
 func (b *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
@@ -220,7 +218,7 @@ func (b *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contact, err := b.persister.GetContact(r.Context(), int32(id), userData.Email)
+	contact, err := b.persister.GetContact(r.Context(), int32(id), email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -229,7 +227,7 @@ func (b *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	debts, err := b.persister.GetDebts(r.Context(), int32(id), userData.Email)
+	debts, err := b.persister.GetDebts(r.Context(), int32(id), email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -238,7 +236,7 @@ func (b *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	activities, err := b.persister.GetActivities(r.Context(), int32(id), userData.Email)
+	activities, err := b.persister.GetActivities(r.Context(), int32(id), email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -247,37 +245,26 @@ func (b *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "contacts_view.html", contactData{
-		pageData: pageData{
-			userData: userData,
-
-			Page:       contact.FirstName + " " + contact.LastName,
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
-
-			BackURL: "/contacts",
-		},
+	if err := json.NewEncoder(w).Encode(contactData{
 		Entry:      contact,
 		Debts:      debts,
 		Activities: activities,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Println(errCouldNotWriteResponse, err)
 
-		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
+		http.Error(w, errCouldNotWriteResponse.Error(), http.StatusInternalServerError)
 
 		return
 	}
 }
 
 func (b *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+	email, err := b.authorize(r)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), status)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 
-		return
-	} else if redirected {
 		return
 	}
 
@@ -325,8 +312,8 @@ func (b *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	email := r.FormValue("email")
-	if _, err := mail.ParseAddress(email); err != nil {
+	newEmail := r.FormValue("email")
+	if _, err := mail.ParseAddress(newEmail); err != nil {
 		log.Println(err)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
@@ -371,9 +358,9 @@ func (b *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 		firstName,
 		lastName,
 		nickname,
-		email,
+		newEmail,
 		pronouns,
-		userData.Email,
+		email,
 		birthday,
 		address,
 		notes,
@@ -385,5 +372,30 @@ func (b *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	http.Redirect(w, r, "/contacts/view?id="+rid, http.StatusFound)
+	var birthdayDate sql.NullTime
+	if birthday != nil {
+		birthdayDate = sql.NullTime{
+			Time:  *birthday,
+			Valid: true,
+		}
+	}
+
+	if err := json.NewEncoder(w).Encode(models.Contact{
+		ID: int32(id),
+
+		FirstName: firstName,
+		LastName:  lastName,
+		Nickname:  nickname,
+		Email:     newEmail,
+		Pronouns:  pronouns,
+		Birthday:  birthdayDate,
+		Address:   address,
+		Notes:     notes,
+	}); err != nil {
+		log.Println(errCouldNotWriteResponse, err)
+
+		http.Error(w, errCouldNotWriteResponse.Error(), http.StatusInternalServerError)
+
+		return
+	}
 }
