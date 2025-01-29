@@ -3,6 +3,7 @@ package controllers
 import (
 	"log"
 	"net/http"
+	"strings"
 )
 
 type indexData struct {
@@ -22,6 +23,27 @@ func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		var contactsCount, journalEntriesCount int64
+		if strings.TrimSpace(userData.Email) != "" {
+			contactsCount, err = b.persister.CountContacts(r.Context(), userData.Email)
+			if err != nil {
+				log.Println(errCouldNotFetchFromDB, err)
+
+				http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
+
+				return
+			}
+
+			journalEntriesCount, err = b.persister.CountJournalEntries(r.Context(), userData.Email)
+			if err != nil {
+				log.Println(errCouldNotFetchFromDB, err)
+
+				http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
+
+				return
+			}
+		}
+
 		if err := b.tpl.ExecuteTemplate(w, "index.html", indexData{
 			pageData: pageData{
 				userData: userData,
@@ -30,6 +52,8 @@ func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 				PrivacyURL: b.privacyURL,
 				ImprintURL: b.imprintURL,
 			},
+			ContactsCount:       contactsCount,
+			JournalEntriesCount: journalEntriesCount,
 		}); err != nil {
 			log.Println(errCouldNotRenderTemplate, err)
 
@@ -52,35 +76,14 @@ func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contactsCount, err := b.persister.CountContacts(r.Context(), userData.Email)
-	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+	if err := b.tpl.ExecuteTemplate(w, "404.html", pageData{
+		userData: userData,
 
-		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
-
-		return
-	}
-
-	journalEntriesCount, err := b.persister.CountJournalEntries(r.Context(), userData.Email)
-	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
-
-		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
-
-		return
-	}
-
-	if err := b.tpl.ExecuteTemplate(w, "404.html", indexData{
-		pageData: pageData{
-			userData: userData,
-
-			Page:       userData.Locale.Get("Page not found"),
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
-		},
-		ContactsCount:       contactsCount,
-		JournalEntriesCount: journalEntriesCount,
-	}); err != nil {
+		Page:       userData.Locale.Get("Page not found"),
+		PrivacyURL: b.privacyURL,
+		ImprintURL: b.imprintURL,
+	},
+	); err != nil {
 		log.Println(errCouldNotRenderTemplate, err)
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
