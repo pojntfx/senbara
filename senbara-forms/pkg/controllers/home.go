@@ -76,6 +76,8 @@ func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.WriteHeader(http.StatusNotFound)
+
 	if err := b.tpl.ExecuteTemplate(w, "404.html", pageData{
 		userData: userData,
 
