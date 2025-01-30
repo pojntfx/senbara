@@ -43,13 +43,11 @@ func (p *Persister) DeleteActivity(
 
 	id int32,
 
-	contactID int32,
 	namespace string,
 ) error {
 	return p.queries.DeleteActivity(ctx, models.DeleteActivityParams{
-		ID_2: id,
+		ID: id,
 
-		ID:        contactID,
 		Namespace: namespace,
 	})
 }
@@ -59,13 +57,11 @@ func (p *Persister) GetActivityAndContact(
 
 	id int32,
 
-	contactID int32,
 	namespace string,
 ) (models.GetActivityAndContactRow, error) {
 	return p.queries.GetActivityAndContact(ctx, models.GetActivityAndContactParams{
-		ID_2: id,
+		ID: id,
 
-		ID:        contactID,
 		Namespace: namespace,
 	})
 }
@@ -75,7 +71,6 @@ func (p *Persister) UpdateActivity(
 
 	id int32,
 
-	contactID int32,
 	namespace string,
 
 	name string,
@@ -83,9 +78,8 @@ func (p *Persister) UpdateActivity(
 	description string,
 ) error {
 	return p.queries.UpdateActivity(ctx, models.UpdateActivityParams{
-		ID_2: id,
+		ID: id,
 
-		ID:        contactID,
 		Namespace: namespace,
 
 		Name:        name,

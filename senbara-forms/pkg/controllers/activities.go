@@ -219,7 +219,6 @@ func (b *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 
 		int32(id),
 
-		int32(contactID),
 		userData.Email,
 	); err != nil {
 		log.Println(errCouldNotUpdateInDB, err)
@@ -320,7 +319,6 @@ func (b *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 
 		int32(id),
 
-		int32(contactID),
 		userData.Email,
 
 		name,
@@ -367,25 +365,7 @@ func (b *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	rcontactID := r.URL.Query().Get("contact_id")
-	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidQueryParam)
-
-		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
-
-		return
-	}
-
-	contactID, err := strconv.Atoi(rcontactID)
-	if err != nil {
-		log.Println(errInvalidQueryParam)
-
-		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
-
-		return
-	}
-
-	activityAndContact, err := b.persister.GetActivityAndContact(r.Context(), int32(id), int32(contactID), userData.Email)
+	activityAndContact, err := b.persister.GetActivityAndContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -460,7 +440,7 @@ func (b *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	activityAndContact, err := b.persister.GetActivityAndContact(r.Context(), int32(id), int32(contactID), userData.Email)
+	activityAndContact, err := b.persister.GetActivityAndContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 

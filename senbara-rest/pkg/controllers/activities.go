@@ -143,30 +143,11 @@ func (b *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	rcontactID := r.FormValue("contact_id")
-	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidForm)
-
-		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
-
-		return
-	}
-
-	contactID, err := strconv.Atoi(rcontactID)
-	if err != nil {
-		log.Println(errInvalidForm)
-
-		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
-
-		return
-	}
-
 	if err := b.persister.DeleteActivity(
 		r.Context(),
 
 		int32(id),
 
-		int32(contactID),
 		email,
 	); err != nil {
 		log.Println(errCouldNotUpdateInDB, err)
@@ -221,24 +202,6 @@ func (b *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	rcontactID := r.FormValue("contact_id")
-	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidForm)
-
-		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
-
-		return
-	}
-
-	contactID, err := strconv.Atoi(rcontactID)
-	if err != nil {
-		log.Println(errInvalidForm)
-
-		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
-
-		return
-	}
-
 	name := r.FormValue("name")
 	if strings.TrimSpace(name) == "" {
 		log.Println(errInvalidForm)
@@ -271,7 +234,6 @@ func (b *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 
 		int32(id),
 
-		int32(contactID),
 		email,
 
 		name,
@@ -328,25 +290,7 @@ func (b *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	rcontactID := r.URL.Query().Get("contact_id")
-	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidQueryParam)
-
-		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
-
-		return
-	}
-
-	contactID, err := strconv.Atoi(rcontactID)
-	if err != nil {
-		log.Println(errInvalidQueryParam)
-
-		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
-
-		return
-	}
-
-	activityAndContact, err := b.persister.GetActivityAndContact(r.Context(), int32(id), int32(contactID), email)
+	activityAndContact, err := b.persister.GetActivityAndContact(r.Context(), int32(id), email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 

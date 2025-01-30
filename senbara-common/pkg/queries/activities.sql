@@ -29,16 +29,10 @@ from contacts
     right join activities on activities.contact_id = contacts.id
 where contacts.id = $1
     and contacts.namespace = $2;
--- name: GetActivity :one
-select *
-from contacts
-where contacts.id = $1
-    and contacts.namespace = $2;
 -- name: DeleteActivity :exec
 delete from activities using contacts
-where activities.id = $3
+where activities.id = $1
     and activities.contact_id = contacts.id
-    and contacts.id = $1
     and contacts.namespace = $2;
 -- name: DeleteActivitesForContact :exec
 delete from activities using contacts
@@ -55,18 +49,16 @@ select activities.id as activity_id,
     contacts.last_name
 from contacts
     inner join activities on activities.contact_id = contacts.id
-where contacts.id = $1
-    and contacts.namespace = $2
-    and activities.id = $3;
+where activities.id = $1
+    and contacts.namespace = $2;
 -- name: UpdateActivity :exec
 update activities
-set name = $4,
-    date = $5,
-    description = $6
+set name = $3,
+    date = $4,
+    description = $5
 from contacts
-where contacts.id = $1
+where activities.id = $1
     and contacts.namespace = $2
-    and activities.id = $3
     and activities.contact_id = contacts.id;
 -- name: GetActivitiesExportForNamespace :many
 select 'activites' as table_name,

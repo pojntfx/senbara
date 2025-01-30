@@ -86,20 +86,18 @@ func (q *Queries) DeleteActivitiesForNamespace(ctx context.Context, namespace st
 
 const deleteActivity = `-- name: DeleteActivity :exec
 delete from activities using contacts
-where activities.id = $3
+where activities.id = $1
     and activities.contact_id = contacts.id
-    and contacts.id = $1
     and contacts.namespace = $2
 `
 
 type DeleteActivityParams struct {
 	ID        int32
 	Namespace string
-	ID_2      int32
 }
 
 func (q *Queries) DeleteActivity(ctx context.Context, arg DeleteActivityParams) error {
-	_, err := q.db.ExecContext(ctx, deleteActivity, arg.ID, arg.Namespace, arg.ID_2)
+	_, err := q.db.ExecContext(ctx, deleteActivity, arg.ID, arg.Namespace)
 	return err
 }
 
@@ -205,36 +203,6 @@ func (q *Queries) GetActivitiesExportForNamespace(ctx context.Context, namespace
 	return items, nil
 }
 
-const getActivity = `-- name: GetActivity :one
-select id, first_name, last_name, nickname, email, pronouns, namespace, birthday, address, notes
-from contacts
-where contacts.id = $1
-    and contacts.namespace = $2
-`
-
-type GetActivityParams struct {
-	ID        int32
-	Namespace string
-}
-
-func (q *Queries) GetActivity(ctx context.Context, arg GetActivityParams) (Contact, error) {
-	row := q.db.QueryRowContext(ctx, getActivity, arg.ID, arg.Namespace)
-	var i Contact
-	err := row.Scan(
-		&i.ID,
-		&i.FirstName,
-		&i.LastName,
-		&i.Nickname,
-		&i.Email,
-		&i.Pronouns,
-		&i.Namespace,
-		&i.Birthday,
-		&i.Address,
-		&i.Notes,
-	)
-	return i, err
-}
-
 const getActivityAndContact = `-- name: GetActivityAndContact :one
 select activities.id as activity_id,
     activities.name,
@@ -245,15 +213,13 @@ select activities.id as activity_id,
     contacts.last_name
 from contacts
     inner join activities on activities.contact_id = contacts.id
-where contacts.id = $1
+where activities.id = $1
     and contacts.namespace = $2
-    and activities.id = $3
 `
 
 type GetActivityAndContactParams struct {
 	ID        int32
 	Namespace string
-	ID_2      int32
 }
 
 type GetActivityAndContactRow struct {
@@ -267,7 +233,7 @@ type GetActivityAndContactRow struct {
 }
 
 func (q *Queries) GetActivityAndContact(ctx context.Context, arg GetActivityAndContactParams) (GetActivityAndContactRow, error) {
-	row := q.db.QueryRowContext(ctx, getActivityAndContact, arg.ID, arg.Namespace, arg.ID_2)
+	row := q.db.QueryRowContext(ctx, getActivityAndContact, arg.ID, arg.Namespace)
 	var i GetActivityAndContactRow
 	err := row.Scan(
 		&i.ActivityID,
@@ -283,20 +249,18 @@ func (q *Queries) GetActivityAndContact(ctx context.Context, arg GetActivityAndC
 
 const updateActivity = `-- name: UpdateActivity :exec
 update activities
-set name = $4,
-    date = $5,
-    description = $6
+set name = $3,
+    date = $4,
+    description = $5
 from contacts
-where contacts.id = $1
+where activities.id = $1
     and contacts.namespace = $2
-    and activities.id = $3
     and activities.contact_id = contacts.id
 `
 
 type UpdateActivityParams struct {
 	ID          int32
 	Namespace   string
-	ID_2        int32
 	Name        string
 	Date        time.Time
 	Description string
@@ -306,7 +270,6 @@ func (q *Queries) UpdateActivity(ctx context.Context, arg UpdateActivityParams) 
 	_, err := q.db.ExecContext(ctx, updateActivity,
 		arg.ID,
 		arg.Namespace,
-		arg.ID_2,
 		arg.Name,
 		arg.Date,
 		arg.Description,
