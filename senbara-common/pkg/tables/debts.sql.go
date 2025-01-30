@@ -93,15 +93,13 @@ select debts.id as debt_id,
     contacts.last_name
 from contacts
     inner join debts on debts.contact_id = contacts.id
-where contacts.id = $1
+where debts.id = $1
     and contacts.namespace = $2
-    and debts.id = $3
 `
 
 type GetDebtAndContactParams struct {
 	ID        int32
 	Namespace string
-	ID_2      int32
 }
 
 type GetDebtAndContactRow struct {
@@ -115,7 +113,7 @@ type GetDebtAndContactRow struct {
 }
 
 func (q *Queries) GetDebtAndContact(ctx context.Context, arg GetDebtAndContactParams) (GetDebtAndContactRow, error) {
-	row := q.db.QueryRowContext(ctx, getDebtAndContact, arg.ID, arg.Namespace, arg.ID_2)
+	row := q.db.QueryRowContext(ctx, getDebtAndContact, arg.ID, arg.Namespace)
 	var i GetDebtAndContactRow
 	err := row.Scan(
 		&i.DebtID,
@@ -233,39 +231,35 @@ func (q *Queries) GetDebtsExportForNamespace(ctx context.Context, namespace stri
 
 const settleDebt = `-- name: SettleDebt :exec
 delete from debts using contacts
-where debts.id = $3
+where debts.id = $1
     and debts.contact_id = contacts.id
-    and contacts.id = $1
     and contacts.namespace = $2
 `
 
 type SettleDebtParams struct {
 	ID        int32
 	Namespace string
-	ID_2      int32
 }
 
 func (q *Queries) SettleDebt(ctx context.Context, arg SettleDebtParams) error {
-	_, err := q.db.ExecContext(ctx, settleDebt, arg.ID, arg.Namespace, arg.ID_2)
+	_, err := q.db.ExecContext(ctx, settleDebt, arg.ID, arg.Namespace)
 	return err
 }
 
 const updateDebt = `-- name: UpdateDebt :exec
 update debts
-set amount = $4,
-    currency = $5,
-    description = $6
+set amount = $3,
+    currency = $4,
+    description = $5
 from contacts
-where contacts.id = $1
+where debts.id = $1
     and contacts.namespace = $2
-    and debts.id = $3
     and debts.contact_id = contacts.id
 `
 
 type UpdateDebtParams struct {
 	ID          int32
 	Namespace   string
-	ID_2        int32
 	Amount      float64
 	Currency    string
 	Description string
@@ -275,7 +269,6 @@ func (q *Queries) UpdateDebt(ctx context.Context, arg UpdateDebtParams) error {
 	_, err := q.db.ExecContext(ctx, updateDebt,
 		arg.ID,
 		arg.Namespace,
-		arg.ID_2,
 		arg.Amount,
 		arg.Currency,
 		arg.Description,

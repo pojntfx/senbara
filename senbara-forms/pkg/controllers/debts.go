@@ -245,7 +245,6 @@ func (b *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 
 		int32(id),
 
-		int32(contactID),
 		userData.Email,
 	); err != nil {
 		log.Println(errCouldNotUpdateInDB, err)
@@ -372,7 +371,6 @@ func (b *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 
 		int32(id),
 
-		int32(contactID),
 		userData.Email,
 
 		amount,
@@ -419,25 +417,7 @@ func (b *Controller) HandleEditDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rcontactID := r.URL.Query().Get("contact_id")
-	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidQueryParam)
-
-		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
-
-		return
-	}
-
-	contactID, err := strconv.Atoi(rcontactID)
-	if err != nil {
-		log.Println(errInvalidQueryParam)
-
-		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
-
-		return
-	}
-
-	debtAndContact, err := b.persister.GetDebtAndContact(r.Context(), int32(id), int32(contactID), userData.Email)
+	debtAndContact, err := b.persister.GetDebtAndContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 

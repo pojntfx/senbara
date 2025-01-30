@@ -74,7 +74,7 @@
                   <input type="submit" value="{{ $.Locale.Get "Settle debt" }}" />
                 </form>
 
-                <a href="/debts/edit?id={{ .ID }}&contact_id={{ $.Entry.ID }}">
+                <a href="/debts/edit?id={{ .ID }}">
                   {{ $.Locale.Get "Edit debt" }}
                 </a>
               </div>
@@ -126,7 +126,7 @@
                   <input type="submit" value="{{ $.Locale.Get "Delete activity" }}" />
                 </form>
 
-                <a href="/activities/edit?id={{ .ID }}&contact_id={{ $.Entry.ID }}">
+                <a href="/activities/edit?id={{ .ID }}">
                   {{ $.Locale.Get "Edit activity" }}
                 </a>
               </div>

@@ -31,9 +31,8 @@ where contacts.id = $1
     and contacts.namespace = $2;
 -- name: SettleDebt :exec
 delete from debts using contacts
-where debts.id = $3
+where debts.id = $1
     and debts.contact_id = contacts.id
-    and contacts.id = $1
     and contacts.namespace = $2;
 -- name: DeleteDebtsForContact :exec
 delete from debts using contacts
@@ -50,18 +49,16 @@ select debts.id as debt_id,
     contacts.last_name
 from contacts
     inner join debts on debts.contact_id = contacts.id
-where contacts.id = $1
-    and contacts.namespace = $2
-    and debts.id = $3;
+where debts.id = $1
+    and contacts.namespace = $2;
 -- name: UpdateDebt :exec
 update debts
-set amount = $4,
-    currency = $5,
-    description = $6
+set amount = $3,
+    currency = $4,
+    description = $5
 from contacts
-where contacts.id = $1
+where debts.id = $1
     and contacts.namespace = $2
-    and debts.id = $3
     and debts.contact_id = contacts.id;
 -- name: GetDebtsExportForNamespace :many
 select 'debts' as table_name,

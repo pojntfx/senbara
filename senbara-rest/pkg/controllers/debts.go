@@ -169,30 +169,11 @@ func (b *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rcontactID := r.FormValue("contact_id")
-	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidForm)
-
-		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
-
-		return
-	}
-
-	contactID, err := strconv.Atoi(rcontactID)
-	if err != nil {
-		log.Println(errInvalidForm)
-
-		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
-
-		return
-	}
-
 	if err := b.persister.SettleDebt(
 		r.Context(),
 
 		int32(id),
 
-		int32(contactID),
 		email,
 	); err != nil {
 		log.Println(errCouldNotUpdateInDB, err)
@@ -247,24 +228,6 @@ func (b *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rcontactID := r.FormValue("contact_id")
-	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidForm)
-
-		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
-
-		return
-	}
-
-	contactID, err := strconv.Atoi(rcontactID)
-	if err != nil {
-		log.Println(errInvalidForm)
-
-		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
-
-		return
-	}
-
 	ryouOwe := r.FormValue("you_owe")
 	if strings.TrimSpace(ryouOwe) == "" {
 		log.Println(errInvalidForm)
@@ -284,7 +247,7 @@ func (b *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ramount := r.FormValue("amount")
-	if strings.TrimSpace(rcontactID) == "" {
+	if strings.TrimSpace(ramount) == "" {
 		log.Println(errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
@@ -323,7 +286,6 @@ func (b *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 
 		int32(id),
 
-		int32(contactID),
 		email,
 
 		amount,

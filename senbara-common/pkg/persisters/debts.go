@@ -42,13 +42,11 @@ func (p *Persister) SettleDebt(
 
 	id int32,
 
-	contactID int32,
 	namespace string,
 ) error {
 	return p.queries.SettleDebt(ctx, models.SettleDebtParams{
-		ID_2: id,
+		ID: id,
 
-		ID:        contactID,
 		Namespace: namespace,
 	})
 }
@@ -58,13 +56,11 @@ func (p *Persister) GetDebtAndContact(
 
 	id int32,
 
-	contactID int32,
 	namespace string,
 ) (models.GetDebtAndContactRow, error) {
 	return p.queries.GetDebtAndContact(ctx, models.GetDebtAndContactParams{
-		ID_2: id,
+		ID: id,
 
-		ID:        contactID,
 		Namespace: namespace,
 	})
 }
@@ -74,7 +70,6 @@ func (p *Persister) UpdateDebt(
 
 	id int32,
 
-	contactID int32,
 	namespace string,
 
 	amount float64,
@@ -82,9 +77,8 @@ func (p *Persister) UpdateDebt(
 	description string,
 ) error {
 	return p.queries.UpdateDebt(ctx, models.UpdateDebtParams{
-		ID_2: id,
+		ID: id,
 
-		ID:        contactID,
 		Namespace: namespace,
 
 		Amount:      amount,
