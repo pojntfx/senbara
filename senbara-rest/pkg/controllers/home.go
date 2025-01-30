@@ -17,7 +17,7 @@ func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(err)
 
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
 
 			return
 		}

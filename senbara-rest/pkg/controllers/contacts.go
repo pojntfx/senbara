@@ -24,7 +24,7 @@ func (b *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
 
 		return
 	}
@@ -52,7 +52,7 @@ func (b *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
 
 		return
 	}
@@ -142,7 +142,7 @@ func (b *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
 
 		return
 	}
@@ -195,7 +195,7 @@ func (b *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
 
 		return
 	}
@@ -263,7 +263,7 @@ func (b *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		log.Println(err)
 
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
 
 		return
 	}

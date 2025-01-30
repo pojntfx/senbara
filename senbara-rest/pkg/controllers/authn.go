@@ -3,14 +3,11 @@ package controllers
 import (
 	"errors"
 	"net/http"
+	"strings"
 )
 
 func (b *Controller) authorize(r *http.Request) (string, error) {
-	it, err := r.Cookie(idTokenKey)
-	if err != nil {
-		return "", errors.Join(errCouldNotLogin, err)
-	}
-	idToken := it.Value
+	idToken := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 
 	id, err := b.verifier.Verify(r.Context(), idToken)
 	if err != nil {
