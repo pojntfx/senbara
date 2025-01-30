@@ -117,15 +117,7 @@ func (b *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := r.ParseForm(); err != nil {
-		log.Println(errCouldNotParseForm, err)
-
-		http.Error(w, errCouldNotParseForm.Error(), http.StatusInternalServerError)
-
-		return
-	}
-
-	rid := r.FormValue("id")
+	rid := r.PathValue("id")
 	if strings.TrimSpace(rid) == "" {
 		log.Println(errInvalidForm)
 
@@ -184,7 +176,7 @@ func (b *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	rid := r.FormValue("id")
+	rid := r.PathValue("id")
 	if strings.TrimSpace(rid) == "" {
 		log.Println(errInvalidForm)
 
@@ -272,7 +264,7 @@ func (b *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	rid := r.FormValue("id")
+	rid := r.PathValue("id")
 	if strings.TrimSpace(rid) == "" {
 		log.Println(errInvalidQueryParam)
 

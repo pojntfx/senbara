@@ -29,29 +29,29 @@ func SenbaraRESTHandler(
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /journal", c.HandleJournal)
-	mux.HandleFunc("GET /journal/view", c.HandleViewJournal)
+	mux.HandleFunc("GET /journal/{id}", c.HandleViewJournal)
 	mux.HandleFunc("POST /journal", c.HandleCreateJournal)
-	mux.HandleFunc("POST /journal/delete", c.HandleDeleteJournal)
-	mux.HandleFunc("POST /journal/update", c.HandleUpdateJournal)
+	mux.HandleFunc("DELETE /journal/{id}", c.HandleDeleteJournal)
+	mux.HandleFunc("PUT /journal/{id}", c.HandleUpdateJournal)
 
 	mux.HandleFunc("GET /contacts", c.HandleContacts)
-	mux.HandleFunc("GET /contacts/view", c.HandleViewContact)
+	mux.HandleFunc("GET /contacts/{id}", c.HandleViewContact)
 	mux.HandleFunc("POST /contacts", c.HandleCreateContact)
-	mux.HandleFunc("POST /contacts/delete", c.HandleDeleteContact)
-	mux.HandleFunc("POST /contacts/update", c.HandleUpdateContact)
+	mux.HandleFunc("DELETE /contacts/{id}", c.HandleDeleteContact)
+	mux.HandleFunc("PUT /contacts/{id}", c.HandleUpdateContact)
 
 	mux.HandleFunc("POST /debts", c.HandleCreateDebt)
-	mux.HandleFunc("POST /debts/settle", c.HandleSettleDebt)
-	mux.HandleFunc("POST /debts/update", c.HandleUpdateDebt)
+	mux.HandleFunc("DELETE /debts/{id}", c.HandleSettleDebt)
+	mux.HandleFunc("PUT /debts/{id}", c.HandleUpdateDebt)
 
-	mux.HandleFunc("GET /activities/view", c.HandleViewActivity)
+	mux.HandleFunc("GET /activities/{id}", c.HandleViewActivity)
 	mux.HandleFunc("POST /activities", c.HandleCreateActivity)
-	mux.HandleFunc("POST /activities/delete", c.HandleDeleteActivity)
-	mux.HandleFunc("POST /activities/update", c.HandleUpdateActivity)
+	mux.HandleFunc("DELETE /activities/{id}", c.HandleDeleteActivity)
+	mux.HandleFunc("PUT /activities/{id}", c.HandleUpdateActivity)
 
 	mux.HandleFunc("GET /userdata", c.HandleUserData)
 	mux.HandleFunc("POST /userdata", c.HandleCreateUserData)
-	mux.HandleFunc("POST /userdata/delete", c.HandleDeleteUserData)
+	mux.HandleFunc("DELETE /userdata", c.HandleDeleteUserData)
 
 	mux.HandleFunc("GET /code/", func(w http.ResponseWriter, r *http.Request) {
 		c.HandleCode(w, r, code)
