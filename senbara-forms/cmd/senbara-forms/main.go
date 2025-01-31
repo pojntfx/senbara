@@ -3,8 +3,7 @@ package main
 import (
 	"context"
 	"errors"
-	"flag"
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -14,6 +13,8 @@ import (
 	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
 	senbaraForms "github.com/pojntfx/senbara/senbara-forms/api/senbara-forms"
 	"github.com/pojntfx/senbara/senbara-forms/pkg/controllers"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -24,117 +25,118 @@ var (
 	errMissingImprintURL      = errors.New("missing imprint URL")
 )
 
+const (
+	laddrKey           = "laddr"
+	pgaddrKey          = "pgaddr"
+	oidcIssuerKey      = "oidc-issuer"
+	oidcClientIDKey    = "oidc-client-id"
+	oidcRedirectURLKey = "oidc-redirect-url"
+	privacyURLKey      = "privacy-url"
+	imprintURLKey      = "imprint-url"
+	verboseKey         = "verbose"
+)
+
 func main() {
-	laddr := flag.String("laddr", ":1337", "Listen address (port can also be set with `PORT` env variable)")
-	pgaddr := flag.String("pgaddr", "postgresql://postgres@localhost:5432/senbara_forms?sslmode=disable", "Database address (can also be set using `POSTGRES_URL` env variable)")
-	oidcIssuer := flag.String("oidc-issuer", "", "OIDC Issuer (i.e. https://pojntfx.eu.auth0.com/) (can also be set using the OIDC_ISSUER env variable)")
-	oidcClientID := flag.String("oidc-client-id", "", "OIDC Client ID (i.e. myoidcclientid) (can also be set using the OIDC_CLIENT_ID env variable)")
-	oidcRedirectURL := flag.String("oidc-redirect-url", "http://localhost:1337/authorize", "OIDC redirect URL (can also be set using the OIDC_REDIRECT_URL env variable)")
-	privacyURL := flag.String("privacy-url", "", "Privacy policy URL (can also be set using the PRIVACY_URL env variable)")
-	imprintURL := flag.String("imprint-url", "", "Imprint URL (can also be set using the IMPRINT_URL env variable)")
+	cmd := &cobra.Command{
+		Use:   "senbara-forms",
+		Short: "Personal ERP web app using HTML forms, OIDC and PostgreSQL",
+		Long: `Simple personal ERP web application built with HTML forms, OpenID Connect authentication and PostgreSQL data storage. Designed as a reference for modern JS-free "Web 2.0" development with Go.
 
-	flag.Parse()
+For more information, please visit https://github.com/pojntfx/senbara.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx, cancel := context.WithCancel(cmd.Context())
+			defer cancel()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+			opts := &slog.HandlerOptions{}
+			if viper.GetBool(verboseKey) {
+				opts.Level = slog.LevelDebug
+			}
+			log := slog.New(slog.NewJSONHandler(os.Stderr, opts))
 
-	if v := os.Getenv("PORT"); v != "" {
-		log.Println("Using port from PORT env variable")
+			if v := os.Getenv("PORT"); v != "" {
+				log.Info("Using port from PORT env variable")
 
-		la, err := net.ResolveTCPAddr("tcp", *laddr)
-		if err != nil {
-			panic(err)
-		}
+				la, err := net.ResolveTCPAddr("tcp", viper.GetString(laddrKey))
+				if err != nil {
+					return err
+				}
 
-		p, err := strconv.Atoi(v)
-		if err != nil {
-			panic(err)
-		}
+				p, err := strconv.Atoi(v)
+				if err != nil {
+					return err
+				}
 
-		la.Port = p
-		*laddr = la.String()
+				la.Port = p
+
+				viper.Set(laddrKey, la.String())
+			}
+
+			if strings.TrimSpace(viper.GetString(oidcIssuerKey)) == "" {
+				return errMissingOIDCIssuer
+			}
+
+			if strings.TrimSpace(viper.GetString(oidcClientIDKey)) == "" {
+				return errMissingOIDCClientID
+			}
+
+			if strings.TrimSpace(viper.GetString(oidcRedirectURLKey)) == "" {
+				return errMissingOIDCRedirectURL
+			}
+
+			if strings.TrimSpace(viper.GetString(privacyURLKey)) == "" {
+				return errMissingPrivacyURL
+			}
+
+			if strings.TrimSpace(viper.GetString(imprintURLKey)) == "" {
+				return errMissingImprintURL
+			}
+
+			p := persisters.NewPersister(viper.GetString(pgaddrKey))
+
+			if err := p.Init(); err != nil {
+				return err
+			}
+
+			c := controllers.NewController(
+				p,
+
+				viper.GetString(oidcIssuerKey),
+				viper.GetString(oidcClientIDKey),
+				viper.GetString(oidcRedirectURLKey),
+
+				viper.GetString(privacyURLKey),
+				viper.GetString(imprintURLKey),
+			)
+
+			if err := c.Init(ctx); err != nil {
+				return err
+			}
+
+			log.Info("Listening", "laddr", viper.GetString(laddrKey))
+
+			panic(http.ListenAndServe(viper.GetString(laddrKey), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				senbaraForms.SenbaraFormsHandler(w, r, c)
+			})))
+		},
 	}
 
-	if v := os.Getenv("POSTGRES_URL"); v != "" {
-		log.Println("Using database address from POSTGRES_URL env variable")
+	cmd.PersistentFlags().StringP(laddrKey, "l", ":1337", "Listen address (port can also be set with `PORT` env variable)")
+	cmd.PersistentFlags().StringP(pgaddrKey, "p", "postgresql://postgres@localhost:5432/senbara_forms?sslmode=disable", "Database address")
+	cmd.PersistentFlags().String(oidcIssuerKey, "", "OIDC Issuer (i.e. https://pojntfx.eu.auth0.com/)")
+	cmd.PersistentFlags().String(oidcClientIDKey, "", "OIDC Client ID (i.e. myoidcclientid))")
+	cmd.PersistentFlags().String(oidcRedirectURLKey, "http://localhost:1337/authorize", "OIDC redirect URL")
+	cmd.PersistentFlags().String(privacyURLKey, "", "Privacy policy URL")
+	cmd.PersistentFlags().String(imprintURLKey, "", "Imprint URL")
+	cmd.PersistentFlags().BoolP(verboseKey, "v", false, "Whether to enable verbose logging")
 
-		*pgaddr = v
-	}
-
-	if v := os.Getenv("OIDC_ISSUER"); v != "" {
-		log.Println("Using OIDC issuer from OIDC_ISSUER env variable")
-
-		*oidcIssuer = v
-	}
-
-	if v := os.Getenv("OIDC_CLIENT_ID"); v != "" {
-		log.Println("Using OIDC client ID from OIDC_CLIENT_ID env variable")
-
-		*oidcClientID = v
-	}
-
-	if v := os.Getenv("OIDC_REDIRECT_URL"); v != "" {
-		log.Println("Using OIDC redirect URL from OIDC_REDIRECT_URL env variable")
-
-		*oidcRedirectURL = v
-	}
-
-	if v := os.Getenv("PRIVACY_URL"); v != "" {
-		log.Println("Using privacy policy URL from PRIVACY_URL env variable")
-
-		*privacyURL = v
-	}
-
-	if v := os.Getenv("IMPRINT_URL"); v != "" {
-		log.Println("Using imprint URL from IMPRINT_URL env variable")
-
-		*imprintURL = v
-	}
-
-	if strings.TrimSpace(*oidcIssuer) == "" {
-		panic(errMissingOIDCIssuer)
-	}
-
-	if strings.TrimSpace(*oidcClientID) == "" {
-		panic(errMissingOIDCClientID)
-	}
-
-	if strings.TrimSpace(*oidcRedirectURL) == "" {
-		panic(errMissingOIDCRedirectURL)
-	}
-
-	if strings.TrimSpace(*privacyURL) == "" {
-		panic(errMissingPrivacyURL)
-	}
-
-	if strings.TrimSpace(*imprintURL) == "" {
-		panic(errMissingImprintURL)
-	}
-
-	p := persisters.NewPersister(*pgaddr)
-
-	if err := p.Init(); err != nil {
+	if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
 		panic(err)
 	}
 
-	c := controllers.NewController(
-		p,
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.AutomaticEnv()
 
-		*oidcIssuer,
-		*oidcClientID,
-		*oidcRedirectURL,
-
-		*privacyURL,
-		*imprintURL,
-	)
-
-	if err := c.Init(ctx); err != nil {
+	if err := cmd.Execute(); err != nil {
 		panic(err)
 	}
-
-	log.Println("Listening on", *laddr)
-
-	panic(http.ListenAndServe(*laddr, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		senbaraForms.SenbaraFormsHandler(w, r, c)
-	})))
 }
