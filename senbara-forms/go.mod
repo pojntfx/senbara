@@ -3,6 +3,7 @@ module github.com/pojntfx/senbara/senbara-forms
 go 1.23.5
 
 require (
+	github.com/adrg/xdg v0.5.3
 	github.com/coreos/go-oidc/v3 v3.12.0
 	github.com/leonelquinteros/gotext v1.7.0
 	github.com/lib/pq v1.10.9

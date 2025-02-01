@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/adrg/xdg"
 	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
 	senbaraForms "github.com/pojntfx/senbara/senbara-forms/api/senbara-forms"
 	"github.com/pojntfx/senbara/senbara-forms/pkg/controllers"
@@ -26,6 +27,8 @@ var (
 )
 
 const (
+	verboseKey         = "verbose"
+	configKey          = "config"
 	laddrKey           = "laddr"
 	pgaddrKey          = "pgaddr"
 	oidcIssuerKey      = "oidc-issuer"
@@ -33,7 +36,6 @@ const (
 	oidcRedirectURLKey = "oidc-redirect-url"
 	privacyURLKey      = "privacy-url"
 	imprintURLKey      = "imprint-url"
-	verboseKey         = "verbose"
 )
 
 func main() {
@@ -53,6 +55,19 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 			}
 			log := slog.New(slog.NewJSONHandler(os.Stderr, opts))
 
+			if viper.IsSet(configKey) {
+				viper.SetConfigFile(viper.GetString(configKey))
+				if err := viper.ReadInConfig(); err != nil {
+					return err
+				}
+			} else {
+				viper.SetConfigName(cmd.Use)
+				viper.AddConfigPath(xdg.ConfigHome)
+				if err := viper.ReadInConfig(); err != nil && !errors.As(err, &viper.ConfigFileNotFoundError{}) {
+					return err
+				}
+			}
+
 			if v := os.Getenv("PORT"); v != "" {
 				log.Info("Using port from PORT env variable")
 
@@ -71,23 +86,23 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				viper.Set(laddrKey, la.String())
 			}
 
-			if strings.TrimSpace(viper.GetString(oidcIssuerKey)) == "" {
+			if !viper.IsSet(oidcIssuerKey) {
 				return errMissingOIDCIssuer
 			}
 
-			if strings.TrimSpace(viper.GetString(oidcClientIDKey)) == "" {
+			if !viper.IsSet(oidcClientIDKey) {
 				return errMissingOIDCClientID
 			}
 
-			if strings.TrimSpace(viper.GetString(oidcRedirectURLKey)) == "" {
+			if !viper.IsSet(oidcRedirectURLKey) {
 				return errMissingOIDCRedirectURL
 			}
 
-			if strings.TrimSpace(viper.GetString(privacyURLKey)) == "" {
+			if !viper.IsSet(privacyURLKey) {
 				return errMissingPrivacyURL
 			}
 
-			if strings.TrimSpace(viper.GetString(imprintURLKey)) == "" {
+			if !viper.IsSet(imprintURLKey) {
 				return errMissingImprintURL
 			}
 
@@ -120,6 +135,8 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 		},
 	}
 
+	cmd.PersistentFlags().BoolP(verboseKey, "v", false, "Whether to enable verbose logging")
+	cmd.PersistentFlags().StringP(configKey, "c", "", "Config file to use (by default "+cmd.Use+".yaml in the XDG config directory is read if it exists)")
 	cmd.PersistentFlags().StringP(laddrKey, "l", ":1337", "Listen address (port can also be set with `PORT` env variable)")
 	cmd.PersistentFlags().StringP(pgaddrKey, "p", "postgresql://postgres@localhost:5432/senbara_forms?sslmode=disable", "Database address")
 	cmd.PersistentFlags().String(oidcIssuerKey, "", "OIDC Issuer (i.e. https://pojntfx.eu.auth0.com/)")
@@ -127,7 +144,6 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 	cmd.PersistentFlags().String(oidcRedirectURLKey, "http://localhost:1337/authorize", "OIDC redirect URL")
 	cmd.PersistentFlags().String(privacyURLKey, "", "Privacy policy URL")
 	cmd.PersistentFlags().String(imprintURLKey, "", "Imprint URL")
-	cmd.PersistentFlags().BoolP(verboseKey, "v", false, "Whether to enable verbose logging")
 
 	if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
 		panic(err)
