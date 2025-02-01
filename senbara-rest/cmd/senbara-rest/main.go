@@ -3,17 +3,19 @@ package main
 import (
 	"context"
 	"errors"
-	"flag"
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 
+	"github.com/adrg/xdg"
 	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
 	senbaraREST "github.com/pojntfx/senbara/senbara-rest/api/senbara-rest"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/controllers"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -22,92 +24,118 @@ var (
 	errMissingOIDCRedirectURL = errors.New("missing OIDC redirect URL")
 )
 
+const (
+	verboseKey         = "verbose"
+	configKey          = "config"
+	laddrKey           = "laddr"
+	pgaddrKey          = "pgaddr"
+	oidcIssuerKey      = "oidc-issuer"
+	oidcClientIDKey    = "oidc-client-id"
+	oidcRedirectURLKey = "oidc-redirect-url"
+)
+
 func main() {
-	laddr := flag.String("laddr", ":1337", "Listen address (port can also be set with `PORT` env variable)")
-	pgaddr := flag.String("pgaddr", "postgresql://postgres@localhost:5432/senbara_rest?sslmode=disable", "Database address (can also be set using `POSTGRES_URL` env variable)")
-	oidcIssuer := flag.String("oidc-issuer", "", "OIDC Issuer (i.e. https://pojntfx.eu.auth0.com/) (can also be set using the OIDC_ISSUER env variable)")
-	oidcClientID := flag.String("oidc-client-id", "", "OIDC Client ID (i.e. myoidcclientid) (can also be set using the OIDC_CLIENT_ID env variable)")
-	oidcRedirectURL := flag.String("oidc-redirect-url", "http://localhost:1337/authorize", "OIDC redirect URL (can also be set using the OIDC_REDIRECT_URL env variable)")
+	cmd := &cobra.Command{
+		Use:   "senbara-rest",
+		Short: "Personal ERP REST API using the Go stdlib, OIDC and PostgreSQL",
+		Long: `REST API for a simple personal ERP web application built with the Go standard library, OpenID Connect authentication and PostgreSQL data storage. Designed as a reference for modern REST API development with Go.
 
-	flag.Parse()
+For more information, please visit https://github.com/pojntfx/senbara.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx, cancel := context.WithCancel(cmd.Context())
+			defer cancel()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+			opts := &slog.HandlerOptions{}
+			if viper.GetBool(verboseKey) {
+				opts.Level = slog.LevelDebug
+			}
+			log := slog.New(slog.NewJSONHandler(os.Stderr, opts))
 
-	if v := os.Getenv("PORT"); v != "" {
-		log.Println("Using port from PORT env variable")
+			if viper.IsSet(configKey) {
+				viper.SetConfigFile(viper.GetString(configKey))
+				if err := viper.ReadInConfig(); err != nil {
+					return err
+				}
+			} else {
+				viper.SetConfigName(cmd.Use)
+				viper.AddConfigPath(xdg.ConfigHome)
+				if err := viper.ReadInConfig(); err != nil && !errors.As(err, &viper.ConfigFileNotFoundError{}) {
+					return err
+				}
+			}
 
-		la, err := net.ResolveTCPAddr("tcp", *laddr)
-		if err != nil {
-			panic(err)
-		}
+			if v := os.Getenv("PORT"); v != "" {
+				log.Info("Using port from PORT env variable")
 
-		p, err := strconv.Atoi(v)
-		if err != nil {
-			panic(err)
-		}
+				la, err := net.ResolveTCPAddr("tcp", viper.GetString(laddrKey))
+				if err != nil {
+					return err
+				}
 
-		la.Port = p
-		*laddr = la.String()
+				p, err := strconv.Atoi(v)
+				if err != nil {
+					return err
+				}
+
+				la.Port = p
+
+				viper.Set(laddrKey, la.String())
+			}
+
+			if !viper.IsSet(oidcIssuerKey) {
+				return errMissingOIDCIssuer
+			}
+
+			if !viper.IsSet(oidcClientIDKey) {
+				return errMissingOIDCClientID
+			}
+
+			if !viper.IsSet(oidcRedirectURLKey) {
+				return errMissingOIDCRedirectURL
+			}
+
+			p := persisters.NewPersister(viper.GetString(pgaddrKey))
+
+			if err := p.Init(); err != nil {
+				return err
+			}
+
+			c := controllers.NewController(
+				p,
+
+				viper.GetString(oidcIssuerKey),
+				viper.GetString(oidcClientIDKey),
+				viper.GetString(oidcRedirectURLKey),
+			)
+
+			if err := c.Init(ctx); err != nil {
+				return err
+			}
+
+			log.Info("Listening", "laddr", viper.GetString(laddrKey))
+
+			panic(http.ListenAndServe(viper.GetString(laddrKey), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				senbaraREST.SenbaraRESTHandler(w, r, c)
+			})))
+		},
 	}
 
-	if v := os.Getenv("POSTGRES_URL"); v != "" {
-		log.Println("Using database address from POSTGRES_URL env variable")
+	cmd.PersistentFlags().BoolP(verboseKey, "v", false, "Whether to enable verbose logging")
+	cmd.PersistentFlags().StringP(configKey, "c", "", "Config file to use (by default "+cmd.Use+".yaml in the XDG config directory is read if it exists)")
+	cmd.PersistentFlags().StringP(laddrKey, "l", ":1337", "Listen address (port can also be set with `PORT` env variable)")
+	cmd.PersistentFlags().StringP(pgaddrKey, "p", "postgresql://postgres@localhost:5432/senbara_rest?sslmode=disable", "Database address")
+	cmd.PersistentFlags().String(oidcIssuerKey, "", "OIDC Issuer (i.e. https://pojntfx.eu.auth0.com/)")
+	cmd.PersistentFlags().String(oidcClientIDKey, "", "OIDC Client ID (i.e. myoidcclientid))")
+	cmd.PersistentFlags().String(oidcRedirectURLKey, "http://localhost:1337/authorize", "OIDC redirect URL")
 
-		*pgaddr = v
-	}
-
-	if v := os.Getenv("OIDC_ISSUER"); v != "" {
-		log.Println("Using OIDC issuer from OIDC_ISSUER env variable")
-
-		*oidcIssuer = v
-	}
-
-	if v := os.Getenv("OIDC_CLIENT_ID"); v != "" {
-		log.Println("Using OIDC client ID from OIDC_CLIENT_ID env variable")
-
-		*oidcClientID = v
-	}
-
-	if v := os.Getenv("OIDC_REDIRECT_URL"); v != "" {
-		log.Println("Using OIDC redirect URL from OIDC_REDIRECT_URL env variable")
-
-		*oidcRedirectURL = v
-	}
-
-	if strings.TrimSpace(*oidcIssuer) == "" {
-		panic(errMissingOIDCIssuer)
-	}
-
-	if strings.TrimSpace(*oidcClientID) == "" {
-		panic(errMissingOIDCClientID)
-	}
-
-	if strings.TrimSpace(*oidcRedirectURL) == "" {
-		panic(errMissingOIDCRedirectURL)
-	}
-
-	p := persisters.NewPersister(*pgaddr)
-
-	if err := p.Init(); err != nil {
+	if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
 		panic(err)
 	}
 
-	c := controllers.NewController(
-		p,
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.AutomaticEnv()
 
-		*oidcIssuer,
-		*oidcClientID,
-		*oidcRedirectURL,
-	)
-
-	if err := c.Init(ctx); err != nil {
+	if err := cmd.Execute(); err != nil {
 		panic(err)
 	}
-
-	log.Println("Listening on", *laddr)
-
-	panic(http.ListenAndServe(*laddr, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		senbaraREST.SenbaraRESTHandler(w, r, c)
-	})))
 }
