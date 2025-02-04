@@ -4,6 +4,7 @@ package senbaraForms
 
 import (
 	_ "embed"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -85,9 +86,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	r.URL.Path = r.URL.Query().Get("path")
 
 	if p == nil {
-		p = persisters.NewPersister(os.Getenv("POSTGRES_URL"))
+		opts := &slog.HandlerOptions{}
+		if os.Getenv("VERBOSE") == "true" {
+			opts.Level = slog.LevelDebug
+		}
+		log := slog.New(slog.NewJSONHandler(os.Stderr, opts))
 
-		if err := p.Init(); err != nil {
+		p = persisters.NewPersister(log, os.Getenv("POSTGRES_URL"))
+
+		if err := p.Init(r.Context()); err != nil {
 			panic(err)
 		}
 	}

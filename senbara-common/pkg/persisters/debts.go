@@ -16,6 +16,8 @@ func (p *Persister) CreateDebt(
 	contactID int32,
 	namespace string,
 ) (int32, error) {
+	p.log.Debug("Creating debt", "amount", amount, "currency", currency, "contactID", contactID, "namespace", namespace)
+
 	return p.queries.CreateDebt(ctx, models.CreateDebtParams{
 		ID:          contactID,
 		Namespace:   namespace,
@@ -31,6 +33,8 @@ func (p *Persister) GetDebts(
 	contactID int32,
 	namespace string,
 ) ([]models.GetDebtsRow, error) {
+	p.log.Debug("Getting debts", "contactID", contactID, "namespace", namespace)
+
 	return p.queries.GetDebts(ctx, models.GetDebtsParams{
 		ID:        contactID,
 		Namespace: namespace,
@@ -44,6 +48,8 @@ func (p *Persister) SettleDebt(
 
 	namespace string,
 ) error {
+	p.log.Debug("Settling debt", "id", id, "namespace", namespace)
+
 	return p.queries.SettleDebt(ctx, models.SettleDebtParams{
 		ID: id,
 
@@ -58,6 +64,8 @@ func (p *Persister) GetDebtAndContact(
 
 	namespace string,
 ) (models.GetDebtAndContactRow, error) {
+	p.log.Debug("Getting debt and contact", "id", id, "namespace", namespace)
+
 	return p.queries.GetDebtAndContact(ctx, models.GetDebtAndContactParams{
 		ID: id,
 
@@ -76,6 +84,8 @@ func (p *Persister) UpdateDebt(
 	currency,
 	description string,
 ) error {
+	p.log.Debug("Updating debt", "id", id, "amount", amount, "currency", currency, "namespace", namespace)
+
 	return p.queries.UpdateDebt(ctx, models.UpdateDebtParams{
 		ID: id,
 

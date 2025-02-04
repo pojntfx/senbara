@@ -17,6 +17,8 @@ func (p *Persister) CreateActivity(
 	contactID int32,
 	namespace string,
 ) (int32, error) {
+	p.log.Debug("Creating activity", "name", name, "date", date, "contactID", contactID, "namespace", namespace)
+
 	return p.queries.CreateActivity(ctx, models.CreateActivityParams{
 		ID:          contactID,
 		Namespace:   namespace,
@@ -32,6 +34,8 @@ func (p *Persister) GetActivities(
 	contactID int32,
 	namespace string,
 ) ([]models.GetActivitiesRow, error) {
+	p.log.Debug("Getting activities", "contactID", contactID, "namespace", namespace)
+
 	return p.queries.GetActivities(ctx, models.GetActivitiesParams{
 		ID:        contactID,
 		Namespace: namespace,
@@ -45,6 +49,8 @@ func (p *Persister) DeleteActivity(
 
 	namespace string,
 ) error {
+	p.log.Debug("Deleting activity", "id", id, "namespace", namespace)
+
 	return p.queries.DeleteActivity(ctx, models.DeleteActivityParams{
 		ID: id,
 
@@ -59,6 +65,8 @@ func (p *Persister) GetActivityAndContact(
 
 	namespace string,
 ) (models.GetActivityAndContactRow, error) {
+	p.log.Debug("Getting activity and contact", "id", id, "namespace", namespace)
+
 	return p.queries.GetActivityAndContact(ctx, models.GetActivityAndContactParams{
 		ID: id,
 
@@ -77,6 +85,8 @@ func (p *Persister) UpdateActivity(
 	date time.Time,
 	description string,
 ) error {
+	p.log.Debug("Updating activity", "id", id, "name", name, "date", date, "namespace", namespace)
+
 	return p.queries.UpdateActivity(ctx, models.UpdateActivityParams{
 		ID: id,
 

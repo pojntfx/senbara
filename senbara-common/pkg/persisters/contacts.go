@@ -9,6 +9,8 @@ import (
 )
 
 func (p *Persister) GetContacts(ctx context.Context, namespace string) ([]models.Contact, error) {
+	p.log.Debug("Getting contacts", "namespace", namespace)
+
 	return p.queries.GetContacts(ctx, namespace)
 }
 
@@ -21,6 +23,8 @@ func (p *Persister) CreateContact(
 	pronouns string,
 	namespace string,
 ) (int32, error) {
+	p.log.Debug("Creating contact", "firstName", firstName, "lastName", lastName, "namespace", namespace)
+
 	return p.queries.CreateContact(ctx, models.CreateContactParams{
 		FirstName: firstName,
 		LastName:  lastName,
@@ -32,6 +36,8 @@ func (p *Persister) CreateContact(
 }
 
 func (p *Persister) GetContact(ctx context.Context, id int32, namespace string) (models.Contact, error) {
+	p.log.Debug("Getting contact", "id", id, "namespace", namespace)
+
 	return p.queries.GetContact(ctx, models.GetContactParams{
 		ID:        id,
 		Namespace: namespace,
@@ -39,6 +45,8 @@ func (p *Persister) GetContact(ctx context.Context, id int32, namespace string) 
 }
 
 func (p *Persister) DeleteContact(ctx context.Context, id int32, namespace string) error {
+	p.log.Debug("Deleting contact", "id", id, "namespace", namespace)
+
 	tx, err := p.db.Begin()
 	if err != nil {
 		return err
@@ -77,6 +85,8 @@ func (p *Persister) UpdateContact(
 	address,
 	notes string,
 ) error {
+	p.log.Debug("Updating contact", "id", id, "firstName", firstName, "lastName", lastName, "namespace", namespace)
+
 	var birthdayDate sql.NullTime
 	if birthday != nil {
 		birthdayDate = sql.NullTime{
@@ -100,5 +110,7 @@ func (p *Persister) UpdateContact(
 }
 
 func (p *Persister) CountContacts(ctx context.Context, namespace string) (int64, error) {
+	p.log.Debug("Counting contacts", "namespace", namespace)
+
 	return p.queries.CountContacts(ctx, namespace)
 }

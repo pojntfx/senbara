@@ -106,9 +106,9 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				return errMissingImprintURL
 			}
 
-			p := persisters.NewPersister(viper.GetString(pgaddrKey))
+			p := persisters.NewPersister(log, viper.GetString(pgaddrKey))
 
-			if err := p.Init(); err != nil {
+			if err := p.Init(ctx); err != nil {
 				return err
 			}
 

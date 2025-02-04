@@ -23,6 +23,8 @@ func (p *Persister) GetUserData(
 	onDebt func(debt models.ExportedDebt) error,
 	onActivity func(activity models.ExportedActivity) error,
 ) error {
+	p.log.Debug("Getting user data", "namespace", namespace)
+
 	tx, err := p.db.Begin()
 	if err != nil {
 		return err
@@ -37,6 +39,8 @@ func (p *Persister) GetUserData(
 	}
 
 	for _, journalEntry := range journalEntries {
+		p.log.Debug("Fetched journal entry", "journalEntryID", journalEntry.ID, "title", journalEntry.Title, "date", journalEntry.Date, "rating", journalEntry.Rating)
+
 		if err := onJournalEntry(models.ExportedJournalEntry{
 			ID:        journalEntry.ID,
 			Title:     journalEntry.Title,
@@ -55,6 +59,8 @@ func (p *Persister) GetUserData(
 	}
 
 	for _, contact := range contacts {
+		p.log.Debug("Fetched contact", "contactID", contact.ID, "firstName", contact.FirstName, "lastName", contact.LastName, "email", contact.Email)
+
 		if err := onContact(models.ExportedContact{
 			ID:        contact.ID,
 			FirstName: contact.FirstName,
@@ -77,6 +83,8 @@ func (p *Persister) GetUserData(
 	}
 
 	for _, debt := range debts {
+		p.log.Debug("Fetched debt", "debtID", debt.ID, "amount", debt.Amount, "currency", debt.Currency, "contactID", debt.ContactID)
+
 		if err := onDebt(models.ExportedDebt{
 			ID:          debt.ID,
 			Amount:      debt.Amount,
@@ -94,6 +102,8 @@ func (p *Persister) GetUserData(
 	}
 
 	for _, activity := range activities {
+		p.log.Debug("Fetched activity", "activityID", activity.ID, "name", activity.Name, "date", activity.Date, "contactID", activity.ContactID)
+
 		if err := onActivity(models.ExportedActivity{
 			ID:          activity.ID,
 			Name:        activity.Name,
@@ -109,6 +119,8 @@ func (p *Persister) GetUserData(
 }
 
 func (p *Persister) DeleteUserData(ctx context.Context, namespace string) error {
+	p.log.Debug("Deleting user data", "namespace", namespace)
+
 	tx, err := p.db.Begin()
 	if err != nil {
 		return err
@@ -147,6 +159,8 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 
 	err error,
 ) {
+	p.log.Debug("Creating user data", "namespace", namespace)
+
 	createJournalEntry = func(journalEntry models.ExportedJournalEntry) error { return nil }
 	createContact = func(contact models.ExportedContact) error { return nil }
 	createDebt = func(debt models.ExportedDebt) error { return nil }
@@ -169,6 +183,8 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 	)
 
 	createJournalEntry = func(journalEntry models.ExportedJournalEntry) error {
+		p.log.Debug("Creating journal entry", "title", journalEntry.Title, "date", journalEntry.Date, "rating", journalEntry.Rating)
+
 		id, err := qtx.CreateJournalEntry(ctx, models.CreateJournalEntryParams{
 			Title:  journalEntry.Title,
 			Body:   journalEntry.Body,
@@ -188,10 +204,9 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 		return nil
 	}
 
-	// TODO: Import debts and activities, use `journalEntryIDMap` to resolve external
-	// to internal/actual IDs
-
 	createContact = func(contact models.ExportedContact) error {
+		p.log.Debug("Creating contact", "firstName", contact.FirstName, "lastName", contact.LastName, "email", contact.Email)
+
 		if _, err := qtx.CreateContact(ctx, models.CreateContactParams{
 			FirstName: contact.FirstName,
 			LastName:  contact.LastName,
@@ -208,6 +223,8 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 	}
 
 	createDebt = func(debt models.ExportedDebt) error {
+		p.log.Debug("Creating debt", "amount", debt.Amount, "currency", debt.Currency, "contactID", debt.ContactID)
+
 		journalEntryIDMapLock.Lock()
 		defer journalEntryIDMapLock.Unlock()
 
@@ -235,6 +252,8 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 	}
 
 	createActivity = func(activity models.ExportedActivity) error {
+		p.log.Debug("Creating activity", "name", activity.Name, "date", activity.Date, "contactID", activity.ContactID)
+
 		journalEntryIDMapLock.Lock()
 		defer journalEntryIDMapLock.Unlock()
 
