@@ -16,8 +16,8 @@ type activityData struct {
 	Entry models.GetActivityAndContactRow
 }
 
-func (b *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -46,7 +46,12 @@ func (b *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contact, err := b.persister.GetContact(r.Context(), int32(id), userData.Email)
+	c.log.Debug("Getting contact for activity addition",
+		"id", id,
+		"email", userData.Email,
+	)
+
+	contact, err := c.persister.GetContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -55,13 +60,13 @@ func (b *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "activities_add.html", contactData{
+	if err := c.tpl.ExecuteTemplate(w, "activities_add.html", contactData{
 		pageData: pageData{
 			userData: userData,
 
 			Page:       userData.Locale.Get("Add an activity"),
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
+			PrivacyURL: c.privacyURL,
+			ImprintURL: c.imprintURL,
 		},
 		Entry: contact,
 	}); err != nil {
@@ -138,6 +143,13 @@ func (b *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 
 	description := r.FormValue("description")
 
+	b.log.Debug("Creating activity",
+		"contactID", contactID,
+		"name", name,
+		"date", date,
+		"email", userData.Email,
+	)
+
 	if _, err := b.persister.CreateActivity(
 		r.Context(),
 
@@ -213,6 +225,12 @@ func (b *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 
 		return
 	}
+
+	b.log.Debug("Deleting activity",
+		"id", id,
+		"contactID", contactID,
+		"email", userData.Email,
+	)
 
 	if err := b.persister.DeleteActivity(
 		r.Context(),
@@ -314,6 +332,13 @@ func (b *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 
 	description := r.FormValue("description")
 
+	b.log.Debug("Updating activity",
+		"id", id,
+		"name", name,
+		"date", date,
+		"email", userData.Email,
+	)
+
 	if err := b.persister.UpdateActivity(
 		r.Context(),
 
@@ -364,6 +389,11 @@ func (b *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) 
 
 		return
 	}
+
+	b.log.Debug("Getting activity and contact for edit",
+		"id", id,
+		"email", userData.Email,
+	)
 
 	activityAndContact, err := b.persister.GetActivityAndContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
@@ -440,6 +470,12 @@ func (b *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	b.log.Debug("Getting activity and contact for view",
+		"id", id,
+		"contactID", contactID,
+		"email", userData.Email,
+	)
+
 	activityAndContact, err := b.persister.GetActivityAndContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
@@ -467,5 +503,4 @@ func (b *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 
 		return
 	}
-
 }

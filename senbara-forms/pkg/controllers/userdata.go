@@ -17,8 +17,8 @@ const (
 	EntityNameExportedActivity     = "activity"
 )
 
-func (b *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -34,7 +34,7 @@ func (b *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 
 	encoder := json.NewEncoder(w)
 
-	if err := b.persister.GetUserData(
+	if err := c.persister.GetUserData(
 		r.Context(),
 
 		userData.Email,

@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"html/template"
+	"log/slog"
 	"math"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -39,6 +40,7 @@ const (
 )
 
 type Controller struct {
+	log       *slog.Logger
 	tpl       *template.Template
 	persister *persisters.Persister
 
@@ -54,6 +56,8 @@ type Controller struct {
 }
 
 func NewController(
+	log *slog.Logger,
+
 	persister *persisters.Persister,
 
 	oidcIssuer,
@@ -64,6 +68,8 @@ func NewController(
 	imprintURL string,
 ) *Controller {
 	return &Controller{
+		log: log,
+
 		persister: persister,
 
 		oidcIssuer:      oidcIssuer,
@@ -75,7 +81,7 @@ func NewController(
 	}
 }
 
-func (b *Controller) Init(ctx context.Context) error {
+func (c *Controller) Init(ctx context.Context) error {
 	md := goldmark.New(
 		goldmark.WithExtensions(extension.GFM),
 	)
@@ -104,22 +110,24 @@ func (b *Controller) Init(ctx context.Context) error {
 		return err
 	}
 
-	b.tpl = tpl
+	c.tpl = tpl
 
-	provider, err := oidc.NewProvider(ctx, b.oidcIssuer)
+	c.log.Info("Connecting to OIDC issuer", "oidcIssuer", c.oidcIssuer)
+
+	provider, err := oidc.NewProvider(ctx, c.oidcIssuer)
 	if err != nil {
 		return err
 	}
 
-	b.config = &oauth2.Config{
-		ClientID:    b.oidcClientID,
-		RedirectURL: b.oidcRedirectURL,
+	c.config = &oauth2.Config{
+		ClientID:    c.oidcClientID,
+		RedirectURL: c.oidcRedirectURL,
 		Endpoint:    provider.Endpoint(),
 		Scopes:      []string{oidc.ScopeOpenID, oidc.ScopeOfflineAccess, "email", "email_verified"},
 	}
 
-	b.verifier = provider.Verifier(&oidc.Config{
-		ClientID: b.oidcClientID,
+	c.verifier = provider.Verifier(&oidc.Config{
+		ClientID: c.oidcClientID,
 	})
 
 	return nil

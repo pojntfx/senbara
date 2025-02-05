@@ -24,8 +24,8 @@ type contactData struct {
 	Activities []models.GetActivitiesRow
 }
 
-func (b *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -36,7 +36,7 @@ func (b *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contacts, err := b.persister.GetContacts(r.Context(), userData.Email)
+	contacts, err := c.persister.GetContacts(r.Context(), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -45,13 +45,13 @@ func (b *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "contacts.html", contactsData{
+	if err := c.tpl.ExecuteTemplate(w, "contacts.html", contactsData{
 		pageData: pageData{
 			userData: userData,
 
 			Page:       userData.Locale.Get("Contacts"),
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
+			PrivacyURL: c.privacyURL,
+			ImprintURL: c.imprintURL,
 		},
 		Entries: contacts,
 	}); err != nil {

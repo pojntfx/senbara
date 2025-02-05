@@ -113,6 +113,8 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 			}
 
 			c := controllers.NewController(
+				log,
+
 				p,
 
 				viper.GetString(oidcIssuerKey),

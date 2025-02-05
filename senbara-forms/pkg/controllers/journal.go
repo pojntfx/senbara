@@ -20,8 +20,8 @@ type journalEntryData struct {
 	Entry models.JournalEntry
 }
 
-func (b *Controller) HandleJournal(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleJournal(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -32,7 +32,7 @@ func (b *Controller) HandleJournal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	journalEntries, err := b.persister.GetJournalEntries(r.Context(), userData.Email)
+	journalEntries, err := c.persister.GetJournalEntries(r.Context(), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -41,13 +41,13 @@ func (b *Controller) HandleJournal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "journal.html", journalData{
+	if err := c.tpl.ExecuteTemplate(w, "journal.html", journalData{
 		pageData: pageData{
 			userData: userData,
 
 			Page:       userData.Locale.Get("Journal"),
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
+			PrivacyURL: c.privacyURL,
+			ImprintURL: c.imprintURL,
 		},
 		Entries: journalEntries,
 	}); err != nil {

@@ -12,9 +12,9 @@ type indexData struct {
 	JournalEntriesCount int64
 }
 
-func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
+func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet && r.URL.Path == "/" {
-		_, userData, status, err := b.authorize(w, r, false)
+		_, userData, status, err := c.authorize(w, r, false)
 		if err != nil {
 			log.Println(err)
 
@@ -25,7 +25,7 @@ func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 
 		var contactsCount, journalEntriesCount int64
 		if strings.TrimSpace(userData.Email) != "" {
-			contactsCount, err = b.persister.CountContacts(r.Context(), userData.Email)
+			contactsCount, err = c.persister.CountContacts(r.Context(), userData.Email)
 			if err != nil {
 				log.Println(errCouldNotFetchFromDB, err)
 
@@ -34,7 +34,7 @@ func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			journalEntriesCount, err = b.persister.CountJournalEntries(r.Context(), userData.Email)
+			journalEntriesCount, err = c.persister.CountJournalEntries(r.Context(), userData.Email)
 			if err != nil {
 				log.Println(errCouldNotFetchFromDB, err)
 
@@ -44,13 +44,13 @@ func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		if err := b.tpl.ExecuteTemplate(w, "index.html", indexData{
+		if err := c.tpl.ExecuteTemplate(w, "index.html", indexData{
 			pageData: pageData{
 				userData: userData,
 
 				Page:       userData.Locale.Get("Home"),
-				PrivacyURL: b.privacyURL,
-				ImprintURL: b.imprintURL,
+				PrivacyURL: c.privacyURL,
+				ImprintURL: c.imprintURL,
 			},
 			ContactsCount:       contactsCount,
 			JournalEntriesCount: journalEntriesCount,
@@ -65,7 +65,7 @@ func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redirected, userData, status, err := b.authorize(w, r, true)
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -78,12 +78,12 @@ func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNotFound)
 
-	if err := b.tpl.ExecuteTemplate(w, "404.html", pageData{
+	if err := c.tpl.ExecuteTemplate(w, "404.html", pageData{
 		userData: userData,
 
 		Page:       userData.Locale.Get("Page not found"),
-		PrivacyURL: b.privacyURL,
-		ImprintURL: b.imprintURL,
+		PrivacyURL: c.privacyURL,
+		ImprintURL: c.imprintURL,
 	},
 	); err != nil {
 		log.Println(errCouldNotRenderTemplate, err)

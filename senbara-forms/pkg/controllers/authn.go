@@ -33,18 +33,27 @@ type userData struct {
 // previously signed in, but their session has expired, authorize refresh their session. If `loginIfSignedOut` is set
 // and a user has not signed in, authorize will redirect the user to the sign in URL instead - else, authorize will return
 // only the data is has available on the user, without signing them in.
-func (b *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSignedOut bool) (bool, userData, int, error) {
+func (c *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSignedOut bool) (bool, userData, int, error) {
 	returnURL := r.Header.Get("Referer")
 	if strings.TrimSpace(returnURL) == "" {
 		returnURL = "/"
 	}
 
-	locale, err := b.localize(r)
+	c.log.Debug("Starting auth flow",
+		"loginIfSignedOut", loginIfSignedOut,
+		"method", r.Method,
+		"path", r.URL.Path,
+		"returnURL", returnURL,
+	)
+
+	locale, err := c.localize(r)
 	if err != nil {
 		return false, userData{}, http.StatusInternalServerError, errors.Join(errCouldNotLocalize, err)
 	}
 
 	privacyPolicyConsent := r.FormValue("consent") == "on"
+
+	c.log.Debug("Checking auth state", "privacyPolicyConsent", privacyPolicyConsent)
 
 	var refreshToken, idToken string
 	if loginIfSignedOut || privacyPolicyConsent {
@@ -52,22 +61,24 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSi
 		if err != nil {
 			if errors.Is(err, http.ErrNoCookie) {
 				if privacyPolicyConsent {
-					http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
+					c.log.Debug("Refresh token cookie is missing and privacy policy consent is given, reauthenticating with auth provider")
+
+					http.Redirect(w, r, c.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
 					return true, userData{
 						Locale: locale,
 					}, http.StatusTemporaryRedirect, nil
 				}
 
-				if err := b.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
+				if err := c.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
 					pageData: pageData{
 						userData: userData{
 							Locale: locale,
 						},
 
 						Page:       locale.Get("Privacy policy consent"),
-						PrivacyURL: b.privacyURL,
-						ImprintURL: b.imprintURL,
+						PrivacyURL: c.privacyURL,
+						ImprintURL: c.imprintURL,
 					},
 
 					RequiresPrivacyPolicyConsent: true,
@@ -76,6 +87,8 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSi
 						Locale: locale,
 					}, http.StatusInternalServerError, errors.Join(errCouldNotRenderTemplate, err)
 				}
+
+				c.log.Debug("Refresh token cookie is missing, but can't reauthenticate with auth provider since privacy policy consent is not yet given. Redirecting to privacy policy consent page")
 
 				return true, userData{
 					Locale: locale,
@@ -99,7 +112,9 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSi
 				// with "redirect.html"
 				returnURL := r.URL.String()
 
-				http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
+				c.log.Debug("ID token cookie is missing and privacy policy consent is given since a valid refresh token exists, reauthenticating with auth provider")
+
+				http.Redirect(w, r, c.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
 				return true, userData{
 					Locale: locale,
@@ -131,12 +146,16 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSi
 				// with "redirect.html"
 				returnURL := r.URL.String()
 
-				http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
+				c.log.Debug("ID token cookie is missing and privacy policy consent is given since a refresh token exists, reauthenticating with auth provider")
+
+				http.Redirect(w, r, c.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
 				return true, userData{
 					Locale: locale,
 				}, http.StatusTemporaryRedirect, nil
 			}
+
+			c.log.Debug("Refresh token cookie and/or ID token cookie is/are missing, but logging in the user if the they are signed out is not requested, continuing without auth")
 
 			return false, userData{
 				Locale: locale,
@@ -145,13 +164,19 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSi
 		idToken = it.Value
 	}
 
-	id, err := b.verifier.Verify(r.Context(), idToken)
+	c.log.Debug("Verifying tokens")
+
+	id, err := c.verifier.Verify(r.Context(), idToken)
 	if err != nil {
-		oauth2Token, err := b.config.TokenSource(r.Context(), &oauth2.Token{
+		c.log.Debug("ID token verification failed, attempting refresh", "error", err)
+
+		oauth2Token, err := c.config.TokenSource(r.Context(), &oauth2.Token{
 			RefreshToken: refreshToken,
 		}).Token()
 		if err != nil {
-			http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
+			c.log.Debug("Token refresh failed, reauthenticating with auth provider", "error", err)
+
+			http.Redirect(w, r, c.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
 			return true, userData{
 				Locale: locale,
@@ -161,16 +186,20 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSi
 		var ok bool
 		idToken, ok = oauth2Token.Extra("id_token").(string)
 		if !ok {
-			http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
+			c.log.Debug("ID token missing from refreshed refresh token, reauthenticating with auth provider")
+
+			http.Redirect(w, r, c.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
 			return true, userData{
 				Locale: locale,
 			}, http.StatusOK, nil
 		}
 
-		id, err = b.verifier.Verify(r.Context(), idToken)
+		id, err = c.verifier.Verify(r.Context(), idToken)
 		if err != nil {
-			http.Redirect(w, r, b.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
+			c.log.Debug("Refresh token verification failed, attempting refresh", "error", err)
+
+			http.Redirect(w, r, c.config.AuthCodeURL(url.QueryEscape(returnURL)), http.StatusFound)
 
 			return true, userData{
 				Locale: locale,
@@ -178,6 +207,8 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSi
 		}
 
 		if refreshToken = oauth2Token.RefreshToken; refreshToken != "" {
+			c.log.Debug("Setting new refresh token cookie, expires in one year")
+
 			http.SetCookie(w, &http.Cookie{
 				Name:     refreshTokenKey,
 				Value:    refreshToken,
@@ -188,6 +219,8 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSi
 				Path:     "/",
 			})
 		}
+
+		c.log.Debug("Setting new ID token cookie", "expiry", oauth2Token.Expiry)
 
 		http.SetCookie(w, &http.Cookie{
 			Name:     idTokenKey,
@@ -205,18 +238,22 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSi
 		EmailVerified bool   `json:"email_verified"`
 	}
 	if err := id.Claims(&claims); err != nil {
+		c.log.Debug("Failed to parse ID token claims", "error", err)
+
 		return false, userData{
 			Locale: locale,
 		}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
 	}
 
 	if !claims.EmailVerified {
+		c.log.Debug("Email from ID token claims not verified, user is unauthorized", "email", claims.Email)
+
 		return false, userData{
 			Locale: locale,
 		}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, errEmailNotVerified)
 	}
 
-	logoutURL, err := url.Parse(b.oidcIssuer)
+	logoutURL, err := url.Parse(c.oidcIssuer)
 	if err != nil {
 		return false, userData{
 			Locale: locale,
@@ -225,10 +262,12 @@ func (b *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSi
 
 	q := logoutURL.Query()
 	q.Set("id_token_hint", idToken)
-	q.Set("post_logout_redirect_uri", b.oidcRedirectURL)
+	q.Set("post_logout_redirect_uri", c.oidcRedirectURL)
 	logoutURL.RawQuery = q.Encode()
 
 	logoutURL = logoutURL.JoinPath("oidc", "logout")
+
+	c.log.Debug("Auth successful", "email", claims.Email)
 
 	return false, userData{
 		Email:     claims.Email,
@@ -245,8 +284,10 @@ type redirectData struct {
 	RequiresPrivacyPolicyConsent bool
 }
 
-func (b *Controller) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	redirected, _, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleLogin(w http.ResponseWriter, r *http.Request) {
+	c.log.Debug("Logging in user")
+
+	redirected, _, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -260,8 +301,10 @@ func (b *Controller) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, r.Header.Get("Referer"), http.StatusFound)
 }
 
-func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
-	locale, err := b.localize(r)
+func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
+	c.log.Debug("Handling user auth")
+
+	locale, err := c.localize(r)
 	if err != nil {
 		log.Println(errCouldNotLocalize, err)
 
@@ -280,6 +323,8 @@ func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 
 	// Sign out
 	if strings.TrimSpace(authCode) == "" {
+		c.log.Debug("Signing out user", "returnURL", returnURL)
+
 		http.SetCookie(w, &http.Cookie{
 			Name:     refreshTokenKey,
 			Value:    "",
@@ -300,15 +345,15 @@ func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 			Path:     "/",
 		})
 
-		if err := b.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
+		if err := c.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
 			pageData: pageData{
 				userData: userData{
 					Locale: locale,
 				},
 
 				Page:       locale.Get("Signing you out ..."),
-				PrivacyURL: b.privacyURL,
-				ImprintURL: b.imprintURL,
+				PrivacyURL: c.privacyURL,
+				ImprintURL: c.imprintURL,
 			},
 
 			Href: returnURL,
@@ -324,7 +369,9 @@ func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Sign in
-	oauth2Token, err := b.config.Exchange(r.Context(), authCode)
+	c.log.Debug("Exchanging auth code for tokens", "returnURL", returnURL)
+
+	oauth2Token, err := c.config.Exchange(r.Context(), authCode)
 	if err != nil {
 		log.Println(errCouldNotLogin, err)
 
@@ -332,6 +379,8 @@ func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	c.log.Debug("Setting refresh token cookie, expires in one year")
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     refreshTokenKey,
@@ -352,6 +401,8 @@ func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c.log.Debug("Setting ID token cookie", "expiry", oauth2Token.Expiry)
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     idTokenKey,
 		Value:    idToken,
@@ -362,15 +413,15 @@ func (b *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 	})
 
-	if err := b.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
+	if err := c.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
 		pageData: pageData{
 			userData: userData{
 				Locale: locale,
 			},
 
 			Page:       locale.Get("Signing you in ..."),
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
+			PrivacyURL: c.privacyURL,
+			ImprintURL: c.imprintURL,
 		},
 
 		Href: returnURL,

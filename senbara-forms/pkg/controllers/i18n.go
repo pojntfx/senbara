@@ -9,7 +9,7 @@ import (
 	"golang.org/x/text/language"
 )
 
-func (b *Controller) localize(r *http.Request) (*gotext.Locale, error) {
+func (c *Controller) localize(r *http.Request) (*gotext.Locale, error) {
 	var locale *gotext.Locale
 	tags, _, err := language.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
 	if err != nil {

@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func (b *Controller) HandleCode(w http.ResponseWriter, r *http.Request, code []byte) {
+func (c *Controller) HandleCode(w http.ResponseWriter, r *http.Request, code []byte) {
 	w.Header().Set("Content-Type", "application/gzip")
 	w.Header().Set("Content-Disposition", `attachment; filename="code.tar.gz"`)
 

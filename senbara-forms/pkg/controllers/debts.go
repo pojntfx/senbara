@@ -16,8 +16,8 @@ type debtData struct {
 	Entry models.GetDebtAndContactRow
 }
 
-func (b *Controller) HandleAddDebt(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleAddDebt(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -46,7 +46,7 @@ func (b *Controller) HandleAddDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contact, err := b.persister.GetContact(r.Context(), int32(id), userData.Email)
+	contact, err := c.persister.GetContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -55,13 +55,13 @@ func (b *Controller) HandleAddDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "debts_add.html", contactData{
+	if err := c.tpl.ExecuteTemplate(w, "debts_add.html", contactData{
 		pageData: pageData{
 			userData: userData,
 
 			Page:       userData.Locale.Get("Add a debt"),
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
+			PrivacyURL: c.privacyURL,
+			ImprintURL: c.imprintURL,
 		},
 		Entry: contact,
 	}); err != nil {

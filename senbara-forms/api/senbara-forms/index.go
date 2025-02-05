@@ -85,13 +85,13 @@ func SenbaraFormsHandler(
 func Handler(w http.ResponseWriter, r *http.Request) {
 	r.URL.Path = r.URL.Query().Get("path")
 
-	if p == nil {
-		opts := &slog.HandlerOptions{}
-		if os.Getenv("VERBOSE") == "true" {
-			opts.Level = slog.LevelDebug
-		}
-		log := slog.New(slog.NewJSONHandler(os.Stderr, opts))
+	opts := &slog.HandlerOptions{}
+	if os.Getenv("VERBOSE") == "true" {
+		opts.Level = slog.LevelDebug
+	}
+	log := slog.New(slog.NewJSONHandler(os.Stderr, opts))
 
+	if p == nil {
 		p = persisters.NewPersister(log, os.Getenv("POSTGRES_URL"))
 
 		if err := p.Init(r.Context()); err != nil {
@@ -101,6 +101,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if c == nil {
 		c = controllers.NewController(
+			log,
+
 			p,
 
 			os.Getenv("OIDC_ISSUER"),
