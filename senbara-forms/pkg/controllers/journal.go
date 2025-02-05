@@ -59,8 +59,8 @@ func (c *Controller) HandleJournal(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (b *Controller) HandleAddJournal(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleAddJournal(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -71,12 +71,12 @@ func (b *Controller) HandleAddJournal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "journal_add.html", pageData{
+	if err := c.tpl.ExecuteTemplate(w, "journal_add.html", pageData{
 		userData: userData,
 
 		Page:       userData.Locale.Get("Add a journal entry"),
-		PrivacyURL: b.privacyURL,
-		ImprintURL: b.imprintURL,
+		PrivacyURL: c.privacyURL,
+		ImprintURL: c.imprintURL,
 	}); err != nil {
 		log.Println(errCouldNotRenderTemplate, err)
 
@@ -86,8 +86,8 @@ func (b *Controller) HandleAddJournal(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (b *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -142,7 +142,7 @@ func (b *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	id, err := b.persister.CreateJournalEntry(r.Context(), title, body, int32(rating), userData.Email)
+	id, err := c.persister.CreateJournalEntry(r.Context(), title, body, int32(rating), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotInsertIntoDB, err)
 
@@ -154,8 +154,8 @@ func (b *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request)
 	http.Redirect(w, r, fmt.Sprintf("/journal/view?id=%v", id), http.StatusFound)
 }
 
-func (b *Controller) HandleDeleteJournal(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleDeleteJournal(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -192,7 +192,7 @@ func (b *Controller) HandleDeleteJournal(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if err := b.persister.DeleteJournalEntry(r.Context(), int32(id), userData.Email); err != nil {
+	if err := c.persister.DeleteJournalEntry(r.Context(), int32(id), userData.Email); err != nil {
 		log.Println(errCouldNotDeleteFromDB, err)
 
 		http.Error(w, errCouldNotDeleteFromDB.Error(), http.StatusInternalServerError)
@@ -203,8 +203,8 @@ func (b *Controller) HandleDeleteJournal(w http.ResponseWriter, r *http.Request)
 	http.Redirect(w, r, "/journal", http.StatusFound)
 }
 
-func (b *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -233,7 +233,7 @@ func (b *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	journalEntry, err := b.persister.GetJournalEntry(r.Context(), int32(id), userData.Email)
+	journalEntry, err := c.persister.GetJournalEntry(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -242,13 +242,13 @@ func (b *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "journal_edit.html", journalEntryData{
+	if err := c.tpl.ExecuteTemplate(w, "journal_edit.html", journalEntryData{
 		pageData: pageData{
 			userData: userData,
 
 			Page:       userData.Locale.Get("Edit journal entry"),
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
+			PrivacyURL: c.privacyURL,
+			ImprintURL: c.imprintURL,
 		},
 		Entry: journalEntry,
 	}); err != nil {
@@ -260,8 +260,8 @@ func (b *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (b *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -334,7 +334,7 @@ func (b *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if err := b.persister.UpdateJournalEntry(r.Context(), int32(id), title, body, int32(rating), userData.Email); err != nil {
+	if err := c.persister.UpdateJournalEntry(r.Context(), int32(id), title, body, int32(rating), userData.Email); err != nil {
 		log.Println(errCouldNotUpdateInDB, err)
 
 		http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
@@ -345,8 +345,8 @@ func (b *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 	http.Redirect(w, r, "/journal/view?id="+rid, http.StatusFound)
 }
 
-func (b *Controller) HandleViewJournal(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleViewJournal(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -375,7 +375,7 @@ func (b *Controller) HandleViewJournal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	journalEntry, err := b.persister.GetJournalEntry(r.Context(), int32(id), userData.Email)
+	journalEntry, err := c.persister.GetJournalEntry(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -384,13 +384,13 @@ func (b *Controller) HandleViewJournal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "journal_view.html", journalEntryData{
+	if err := c.tpl.ExecuteTemplate(w, "journal_view.html", journalEntryData{
 		pageData: pageData{
 			userData: userData,
 
 			Page:       journalEntry.Title,
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
+			PrivacyURL: c.privacyURL,
+			ImprintURL: c.imprintURL,
 
 			BackURL: "/journal",
 		},

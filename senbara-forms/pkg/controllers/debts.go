@@ -73,8 +73,8 @@ func (c *Controller) HandleAddDebt(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (b *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -164,7 +164,7 @@ func (b *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 
 	description := r.FormValue("description")
 
-	if _, err := b.persister.CreateDebt(
+	if _, err := c.persister.CreateDebt(
 		r.Context(),
 
 		amount,
@@ -184,8 +184,8 @@ func (b *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", contactID), http.StatusFound)
 }
 
-func (b *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -240,7 +240,7 @@ func (b *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := b.persister.SettleDebt(
+	if err := c.persister.SettleDebt(
 		r.Context(),
 
 		int32(id),
@@ -257,8 +257,8 @@ func (b *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", contactID), http.StatusFound)
 }
 
-func (b *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -366,7 +366,7 @@ func (b *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 
 	description := r.FormValue("description")
 
-	if err := b.persister.UpdateDebt(
+	if err := c.persister.UpdateDebt(
 		r.Context(),
 
 		int32(id),
@@ -387,8 +387,8 @@ func (b *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", contactID), http.StatusFound)
 }
 
-func (b *Controller) HandleEditDebt(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleEditDebt(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -417,7 +417,7 @@ func (b *Controller) HandleEditDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	debtAndContact, err := b.persister.GetDebtAndContact(r.Context(), int32(id), userData.Email)
+	debtAndContact, err := c.persister.GetDebtAndContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -426,13 +426,13 @@ func (b *Controller) HandleEditDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "debts_edit.html", debtData{
+	if err := c.tpl.ExecuteTemplate(w, "debts_edit.html", debtData{
 		pageData: pageData{
 			userData: userData,
 
 			Page:       userData.Locale.Get("Edit debt"),
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
+			PrivacyURL: c.privacyURL,
+			ImprintURL: c.imprintURL,
 		},
 		Entry: debtAndContact,
 	}); err != nil {

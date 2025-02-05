@@ -84,8 +84,8 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (b *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -116,7 +116,7 @@ func (b *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 		commit,
 		rollback,
 
-		err := b.persister.CreateUserData(r.Context(), userData.Email)
+		err := c.persister.CreateUserData(r.Context(), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotStartTransaction, err)
 
@@ -240,8 +240,8 @@ func (b *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-func (b *Controller) HandleDeleteUserData(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleDeleteUserData(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -252,7 +252,7 @@ func (b *Controller) HandleDeleteUserData(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := b.persister.DeleteUserData(r.Context(), userData.Email); err != nil {
+	if err := c.persister.DeleteUserData(r.Context(), userData.Email); err != nil {
 		log.Println(errCouldNotDeleteFromDB, err)
 
 		http.Error(w, errCouldNotDeleteFromDB.Error(), http.StatusInternalServerError)

@@ -129,6 +129,8 @@ func (c *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSi
 	} else {
 		rt, err := r.Cookie(refreshTokenKey)
 		if err != nil {
+			c.log.Debug("Refresh token cookie is missing, but logging in the user if the they are signed out is not requested, continuing without auth")
+
 			return false, userData{
 				Locale: locale,
 			}, http.StatusOK, nil
@@ -155,7 +157,7 @@ func (c *Controller) authorize(w http.ResponseWriter, r *http.Request, loginIfSi
 				}, http.StatusTemporaryRedirect, nil
 			}
 
-			c.log.Debug("Refresh token cookie and/or ID token cookie is/are missing, but logging in the user if the they are signed out is not requested, continuing without auth")
+			c.log.Debug("ID token cookie is missing, but logging in the user if the they are signed out is not requested, continuing without auth")
 
 			return false, userData{
 				Locale: locale,

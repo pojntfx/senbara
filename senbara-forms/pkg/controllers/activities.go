@@ -78,8 +78,8 @@ func (c *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (b *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -143,14 +143,14 @@ func (b *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 
 	description := r.FormValue("description")
 
-	b.log.Debug("Creating activity",
+	c.log.Debug("Creating activity",
 		"contactID", contactID,
 		"name", name,
 		"date", date,
 		"email", userData.Email,
 	)
 
-	if _, err := b.persister.CreateActivity(
+	if _, err := c.persister.CreateActivity(
 		r.Context(),
 
 		name,
@@ -170,8 +170,8 @@ func (b *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", contactID), http.StatusFound)
 }
 
-func (b *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -226,13 +226,13 @@ func (b *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	b.log.Debug("Deleting activity",
+	c.log.Debug("Deleting activity",
 		"id", id,
 		"contactID", contactID,
 		"email", userData.Email,
 	)
 
-	if err := b.persister.DeleteActivity(
+	if err := c.persister.DeleteActivity(
 		r.Context(),
 
 		int32(id),
@@ -249,8 +249,8 @@ func (b *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", contactID), http.StatusFound)
 }
 
-func (b *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -332,14 +332,14 @@ func (b *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 
 	description := r.FormValue("description")
 
-	b.log.Debug("Updating activity",
+	c.log.Debug("Updating activity",
 		"id", id,
 		"name", name,
 		"date", date,
 		"email", userData.Email,
 	)
 
-	if err := b.persister.UpdateActivity(
+	if err := c.persister.UpdateActivity(
 		r.Context(),
 
 		int32(id),
@@ -360,8 +360,8 @@ func (b *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", contactID), http.StatusFound)
 }
 
-func (b *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -390,12 +390,12 @@ func (b *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	b.log.Debug("Getting activity and contact for edit",
+	c.log.Debug("Getting activity and contact for edit",
 		"id", id,
 		"email", userData.Email,
 	)
 
-	activityAndContact, err := b.persister.GetActivityAndContact(r.Context(), int32(id), userData.Email)
+	activityAndContact, err := c.persister.GetActivityAndContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -404,13 +404,13 @@ func (b *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "activities_edit.html", activityData{
+	if err := c.tpl.ExecuteTemplate(w, "activities_edit.html", activityData{
 		pageData: pageData{
 			userData: userData,
 
 			Page:       userData.Locale.Get("Edit activity"),
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
+			PrivacyURL: c.privacyURL,
+			ImprintURL: c.imprintURL,
 		},
 		Entry: activityAndContact,
 	}); err != nil {
@@ -422,8 +422,8 @@ func (b *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (b *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -470,13 +470,13 @@ func (b *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	b.log.Debug("Getting activity and contact for view",
+	c.log.Debug("Getting activity and contact for view",
 		"id", id,
 		"contactID", contactID,
 		"email", userData.Email,
 	)
 
-	activityAndContact, err := b.persister.GetActivityAndContact(r.Context(), int32(id), userData.Email)
+	activityAndContact, err := c.persister.GetActivityAndContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -485,13 +485,13 @@ func (b *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "activities_view.html", activityData{
+	if err := c.tpl.ExecuteTemplate(w, "activities_view.html", activityData{
 		pageData: pageData{
 			userData: userData,
 
 			Page:       activityAndContact.Name,
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
+			PrivacyURL: c.privacyURL,
+			ImprintURL: c.imprintURL,
 
 			BackURL: fmt.Sprintf("/contacts/view?id=%v", contactID),
 		},

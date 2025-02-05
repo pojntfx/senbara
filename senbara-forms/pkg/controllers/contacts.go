@@ -63,8 +63,8 @@ func (c *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (b *Controller) HandleAddContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleAddContact(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -75,12 +75,12 @@ func (b *Controller) HandleAddContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "contacts_add.html", pageData{
+	if err := c.tpl.ExecuteTemplate(w, "contacts_add.html", pageData{
 		userData: userData,
 
 		Page:       userData.Locale.Get("Add a contact"),
-		PrivacyURL: b.privacyURL,
-		ImprintURL: b.imprintURL,
+		PrivacyURL: c.privacyURL,
+		ImprintURL: c.imprintURL,
 	}); err != nil {
 		log.Println(errCouldNotRenderTemplate, err)
 
@@ -90,8 +90,8 @@ func (b *Controller) HandleAddContact(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (b *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -148,7 +148,7 @@ func (b *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	id, err := b.persister.CreateContact(
+	id, err := c.persister.CreateContact(
 		r.Context(),
 		firstName,
 		lastName,
@@ -168,8 +168,8 @@ func (b *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", id), http.StatusFound)
 }
 
-func (b *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -206,7 +206,7 @@ func (b *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if err := b.persister.DeleteContact(r.Context(), int32(id), userData.Email); err != nil {
+	if err := c.persister.DeleteContact(r.Context(), int32(id), userData.Email); err != nil {
 		log.Println(errCouldNotDeleteFromDB, err)
 
 		http.Error(w, errCouldNotDeleteFromDB.Error(), http.StatusInternalServerError)
@@ -217,8 +217,8 @@ func (b *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request)
 	http.Redirect(w, r, "/contacts", http.StatusFound)
 }
 
-func (b *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -247,7 +247,7 @@ func (b *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contact, err := b.persister.GetContact(r.Context(), int32(id), userData.Email)
+	contact, err := c.persister.GetContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -256,7 +256,7 @@ func (b *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	debts, err := b.persister.GetDebts(r.Context(), int32(id), userData.Email)
+	debts, err := c.persister.GetDebts(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -265,7 +265,7 @@ func (b *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	activities, err := b.persister.GetActivities(r.Context(), int32(id), userData.Email)
+	activities, err := c.persister.GetActivities(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -274,13 +274,13 @@ func (b *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "contacts_view.html", contactData{
+	if err := c.tpl.ExecuteTemplate(w, "contacts_view.html", contactData{
 		pageData: pageData{
 			userData: userData,
 
 			Page:       contact.FirstName + " " + contact.LastName,
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
+			PrivacyURL: c.privacyURL,
+			ImprintURL: c.imprintURL,
 
 			BackURL: "/contacts",
 		},
@@ -296,8 +296,8 @@ func (b *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (b *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -392,7 +392,7 @@ func (b *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 
 	notes := r.FormValue("notes")
 
-	if err := b.persister.UpdateContact(
+	if err := c.persister.UpdateContact(
 		r.Context(),
 		int32(id),
 		firstName,
@@ -415,8 +415,8 @@ func (b *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 	http.Redirect(w, r, "/contacts/view?id="+rid, http.StatusFound)
 }
 
-func (b *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {
-	redirected, userData, status, err := b.authorize(w, r, true)
+func (c *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {
+	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
 		log.Println(err)
 
@@ -445,7 +445,7 @@ func (b *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contact, err := b.persister.GetContact(r.Context(), int32(id), userData.Email)
+	contact, err := c.persister.GetContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
 
@@ -454,13 +454,13 @@ func (b *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := b.tpl.ExecuteTemplate(w, "contacts_edit.html", contactData{
+	if err := c.tpl.ExecuteTemplate(w, "contacts_edit.html", contactData{
 		pageData: pageData{
 			userData: userData,
 
 			Page:       userData.Locale.Get("Edit contact"),
-			PrivacyURL: b.privacyURL,
-			ImprintURL: b.imprintURL,
+			PrivacyURL: c.privacyURL,
+			ImprintURL: c.imprintURL,
 		},
 		Entry: contact,
 	}); err != nil {

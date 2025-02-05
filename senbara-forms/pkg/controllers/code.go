@@ -6,6 +6,8 @@ import (
 )
 
 func (c *Controller) HandleCode(w http.ResponseWriter, r *http.Request, code []byte) {
+	c.log.Debug("Getting embedded source code")
+
 	w.Header().Set("Content-Type", "application/gzip")
 	w.Header().Set("Content-Disposition", `attachment; filename="code.tar.gz"`)
 
