@@ -370,6 +370,20 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ru, err := url.Parse(returnURL)
+	if err != nil {
+		log.Println(errCouldNotLogin, err)
+
+		http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
+
+		return
+	}
+
+	// If the return URL points to login or authorize endpoints, redirect to root instead
+	if ru.Path == "/login" || ru.Path == "/authorize" {
+		returnURL = "/"
+	}
+
 	// Sign in
 	c.log.Debug("Exchanging auth code for tokens", "returnURL", returnURL)
 
