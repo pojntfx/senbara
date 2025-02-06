@@ -380,7 +380,7 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// If the return URL points to login or authorize endpoints, redirect to root instead
-	if apiHandlerPath := r.URL.Query().Get("path"); ru.Path == "/login" || apiHandlerPath == "/login" || ru.Path == "/authorize" || apiHandlerPath == "/authorize" {
+	if apiHandlerPath := ru.Query().Get("path"); ru.Path == "/login" || apiHandlerPath == "/login" || ru.Path == "/authorize" || apiHandlerPath == "/authorize" {
 		returnURL = "/"
 	}
 
