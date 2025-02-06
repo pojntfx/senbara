@@ -36,6 +36,8 @@ func (c *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c.log.Debug("Getting contacts", "email", userData.Email)
+
 	contacts, err := c.persister.GetContacts(r.Context(), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
@@ -148,6 +150,15 @@ func (c *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	c.log.Debug("Creating contact",
+		"firstName", firstName,
+		"lastName", lastName,
+		"nickname", nickname,
+		"email", email,
+		"pronouns", pronouns,
+		"namespace", userData.Email,
+	)
+
 	id, err := c.persister.CreateContact(
 		r.Context(),
 		firstName,
@@ -206,6 +217,11 @@ func (c *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	c.log.Debug("Deleting contact",
+		"id", id,
+		"namespace", userData.Email,
+	)
+
 	if err := c.persister.DeleteContact(r.Context(), int32(id), userData.Email); err != nil {
 		log.Println(errCouldNotDeleteFromDB, err)
 
@@ -247,6 +263,11 @@ func (c *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c.log.Debug("Getting contact",
+		"id", id,
+		"namespace", userData.Email,
+	)
+
 	contact, err := c.persister.GetContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
@@ -256,6 +277,11 @@ func (c *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c.log.Debug("Getting debts for contact",
+		"id", id,
+		"namespace", userData.Email,
+	)
+
 	debts, err := c.persister.GetDebts(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
@@ -264,6 +290,11 @@ func (c *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	c.log.Debug("Getting activites for contact",
+		"id", id,
+		"namespace", userData.Email,
+	)
 
 	activities, err := c.persister.GetActivities(r.Context(), int32(id), userData.Email)
 	if err != nil {
@@ -392,6 +423,18 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 
 	notes := r.FormValue("notes")
 
+	c.log.Debug("Updating contact",
+		"firstName", firstName,
+		"lastName", lastName,
+		"nickname", nickname,
+		"email", email,
+		"pronouns", pronouns,
+		"namespace", userData.Email,
+		"birthday", birthday,
+		"address", address,
+		"notes", notes,
+	)
+
 	if err := c.persister.UpdateContact(
 		r.Context(),
 		int32(id),
@@ -444,6 +487,11 @@ func (c *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	c.log.Debug("Getting contact for editing",
+		"id", id,
+		"namespace", userData.Email,
+	)
 
 	contact, err := c.persister.GetContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
