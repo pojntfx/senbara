@@ -178,41 +178,17 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 	qtx := p.queries.WithTx(tx)
 
 	var (
-		journalEntryIDMapLock sync.Mutex
-		journalEntryIDMap     = map[int32]int32{}
+		contactIDMapLock sync.Mutex
+		contactIDMap     = map[int32]int32{}
 	)
 
 	createJournalEntry = func(journalEntry models.ExportedJournalEntry) error {
 		p.log.Debug("Creating journal entry", "title", journalEntry.Title, "date", journalEntry.Date, "rating", journalEntry.Rating)
 
-		id, err := qtx.CreateJournalEntry(ctx, models.CreateJournalEntryParams{
+		if _, err := qtx.CreateJournalEntry(ctx, models.CreateJournalEntryParams{
 			Title:  journalEntry.Title,
 			Body:   journalEntry.Body,
 			Rating: journalEntry.Rating,
-
-			Namespace: namespace,
-		})
-		if err != nil {
-			return err
-		}
-
-		journalEntryIDMapLock.Lock()
-		defer journalEntryIDMapLock.Unlock()
-
-		journalEntryIDMap[journalEntry.ID] = id
-
-		return nil
-	}
-
-	createContact = func(contact models.ExportedContact) error {
-		p.log.Debug("Creating contact", "firstName", contact.FirstName, "lastName", contact.LastName, "email", contact.Email)
-
-		if _, err := qtx.CreateContact(ctx, models.CreateContactParams{
-			FirstName: contact.FirstName,
-			LastName:  contact.LastName,
-			Nickname:  contact.Nickname,
-			Email:     contact.Email,
-			Pronouns:  contact.Pronouns,
 
 			Namespace: namespace,
 		}); err != nil {
@@ -222,17 +198,41 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 		return nil
 	}
 
+	createContact = func(contact models.ExportedContact) error {
+		p.log.Debug("Creating contact", "firstName", contact.FirstName, "lastName", contact.LastName, "email", contact.Email)
+
+		id, err := qtx.CreateContact(ctx, models.CreateContactParams{
+			FirstName: contact.FirstName,
+			LastName:  contact.LastName,
+			Nickname:  contact.Nickname,
+			Email:     contact.Email,
+			Pronouns:  contact.Pronouns,
+
+			Namespace: namespace,
+		})
+		if err != nil {
+			return err
+		}
+
+		contactIDMapLock.Lock()
+		defer contactIDMapLock.Unlock()
+
+		contactIDMap[contact.ID] = id
+
+		return nil
+	}
+
 	createDebt = func(debt models.ExportedDebt) error {
 		p.log.Debug("Creating debt", "amount", debt.Amount, "currency", debt.Currency, "contactID", debt.ContactID)
 
-		journalEntryIDMapLock.Lock()
-		defer journalEntryIDMapLock.Unlock()
+		contactIDMapLock.Lock()
+		defer contactIDMapLock.Unlock()
 
 		if !debt.ContactID.Valid {
 			return ErrContactDoesNotExist
 		}
 
-		actualContactID, ok := journalEntryIDMap[debt.ContactID.Int32]
+		actualContactID, ok := contactIDMap[debt.ContactID.Int32]
 		if !ok {
 			return ErrContactDoesNotExist
 		}
@@ -254,14 +254,14 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 	createActivity = func(activity models.ExportedActivity) error {
 		p.log.Debug("Creating activity", "name", activity.Name, "date", activity.Date, "contactID", activity.ContactID)
 
-		journalEntryIDMapLock.Lock()
-		defer journalEntryIDMapLock.Unlock()
+		contactIDMapLock.Lock()
+		defer contactIDMapLock.Unlock()
 
 		if !activity.ContactID.Valid {
 			return ErrContactDoesNotExist
 		}
 
-		actualContactID, ok := journalEntryIDMap[activity.ContactID.Int32]
+		actualContactID, ok := contactIDMap[activity.ContactID.Int32]
 		if !ok {
 			return ErrContactDoesNotExist
 		}
