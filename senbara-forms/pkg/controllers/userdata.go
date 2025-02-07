@@ -29,6 +29,8 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c.log.Debug("Exporting user data", "namespace", userData.Email)
+
 	w.Header().Set("Content-Type", "application/jsonl")
 	w.Header().Set("Content-Disposition", `attachment; filename="senbara-forms-userdata.jsonl"`)
 
@@ -40,6 +42,14 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 		userData.Email,
 
 		func(journalEntry models.ExportedJournalEntry) error {
+			c.log.Debug("Exporting journal entry",
+				"journalEntryID", journalEntry.ID,
+				"title", journalEntry.Title,
+				"date", journalEntry.Date,
+				"rating", journalEntry.Rating,
+				"namespace", userData.Email,
+			)
+
 			journalEntry.ExportedEntityIdentifier.EntityName = EntityNameExportedJournalEntry
 
 			if err := encoder.Encode(journalEntry); err != nil {
@@ -49,6 +59,14 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 			return nil
 		},
 		func(contact models.ExportedContact) error {
+			c.log.Debug("Exporting contact",
+				"contactID", contact.ID,
+				"firstName", contact.FirstName,
+				"lastName", contact.LastName,
+				"email", contact.Email,
+				"namespace", userData.Email,
+			)
+
 			contact.ExportedEntityIdentifier.EntityName = EntityNameExportedContact
 
 			if err := encoder.Encode(contact); err != nil {
@@ -58,6 +76,14 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 			return nil
 		},
 		func(debt models.ExportedDebt) error {
+			c.log.Debug("Exporting debt",
+				"debtID", debt.ID,
+				"amount", debt.Amount,
+				"currency", debt.Currency,
+				"contactID", debt.ContactID,
+				"namespace", userData.Email,
+			)
+
 			debt.ExportedEntityIdentifier.EntityName = EntityNameExportedDebt
 
 			if err := encoder.Encode(debt); err != nil {
@@ -67,6 +93,14 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 			return nil
 		},
 		func(activity models.ExportedActivity) error {
+			c.log.Debug("Exporting activity",
+				"activityID", activity.ID,
+				"name", activity.Name,
+				"date", activity.Date,
+				"contactID", activity.ContactID,
+				"namespace", userData.Email,
+			)
+
 			activity.ExportedEntityIdentifier.EntityName = EntityNameExportedActivity
 
 			if err := encoder.Encode(activity); err != nil {
@@ -95,6 +129,8 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 	} else if redirected {
 		return
 	}
+
+	c.log.Debug("Starting user data import", "namespace", userData.Email)
 
 	file, _, err := r.FormFile("userData")
 	if err != nil {
@@ -149,6 +185,11 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 			return
 		}
 
+		c.log.Debug("Importing user data entity",
+			"entityType", entityIdentifier.EntityName,
+			"namespace", userData.Email,
+		)
+
 		switch entityIdentifier.EntityName {
 		case EntityNameExportedJournalEntry:
 			var journalEntry models.ExportedJournalEntry
@@ -159,6 +200,14 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 
 				return
 			}
+
+			c.log.Debug("Importing journal entry",
+				"journalEntryID", journalEntry.ID,
+				"title", journalEntry.Title,
+				"date", journalEntry.Date,
+				"rating", journalEntry.Rating,
+				"namespace", userData.Email,
+			)
 
 			if err := createJournalEntry(journalEntry); err != nil {
 				log.Println(errCouldNotInsertIntoDB, err)
@@ -178,6 +227,14 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 				return
 			}
 
+			c.log.Debug("Importing contact",
+				"contactID", contact.ID,
+				"firstName", contact.FirstName,
+				"lastName", contact.LastName,
+				"email", contact.Email,
+				"namespace", userData.Email,
+			)
+
 			if err := createContact(contact); err != nil {
 				log.Println(errCouldNotInsertIntoDB, err)
 
@@ -195,6 +252,14 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 
 				return
 			}
+
+			c.log.Debug("Importing debt",
+				"debtID", debt.ID,
+				"amount", debt.Amount,
+				"currency", debt.Currency,
+				"contactID", debt.ContactID,
+				"namespace", userData.Email,
+			)
 
 			if err := createDebt(debt); err != nil {
 				log.Println(errCouldNotInsertIntoDB, err)
@@ -214,6 +279,14 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 				return
 			}
 
+			c.log.Debug("Importing activity",
+				"activityID", activity.ID,
+				"name", activity.Name,
+				"date", activity.Date,
+				"contactID", activity.ContactID,
+				"namespace", userData.Email,
+			)
+
 			if err := createActivity(activity); err != nil {
 				log.Println(errCouldNotInsertIntoDB, err)
 
@@ -223,11 +296,19 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 			}
 
 		default:
-			log.Println("Skipping import error:", errUnknownEntityName, err)
+			c.log.Debug("Skipping user data entity import",
+				"err", errUnknownEntityName,
+				"entityType", entityIdentifier.EntityName,
+				"namespace", userData.Email,
+			)
 
 			continue
 		}
 	}
+
+	c.log.Debug("Completing user data import",
+		"namespace", userData.Email,
+	)
 
 	if err := commit(); err != nil {
 		log.Println(errCouldNotInsertIntoDB, err)
@@ -251,6 +332,10 @@ func (c *Controller) HandleDeleteUserData(w http.ResponseWriter, r *http.Request
 	} else if redirected {
 		return
 	}
+
+	c.log.Debug("Deleting all user data",
+		"namespace", userData.Email,
+	)
 
 	if err := c.persister.DeleteUserData(r.Context(), userData.Email); err != nil {
 		log.Println(errCouldNotDeleteFromDB, err)

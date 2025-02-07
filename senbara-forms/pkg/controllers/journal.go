@@ -32,6 +32,10 @@ func (c *Controller) HandleJournal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c.log.Debug("Getting journal entries",
+		"namespace", userData.Email,
+	)
+
 	journalEntries, err := c.persister.GetJournalEntries(r.Context(), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
@@ -142,6 +146,12 @@ func (c *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	c.log.Debug("Creating journal entry",
+		"title", title,
+		"rating", rating,
+		"namespace", userData.Email,
+	)
+
 	id, err := c.persister.CreateJournalEntry(r.Context(), title, body, int32(rating), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotInsertIntoDB, err)
@@ -192,6 +202,11 @@ func (c *Controller) HandleDeleteJournal(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	c.log.Debug("Deleting journal entry",
+		"id", id,
+		"namespace", userData.Email,
+	)
+
 	if err := c.persister.DeleteJournalEntry(r.Context(), int32(id), userData.Email); err != nil {
 		log.Println(errCouldNotDeleteFromDB, err)
 
@@ -232,6 +247,11 @@ func (c *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	c.log.Debug("Getting journal entry for editing",
+		"id", id,
+		"namespace", userData.Email,
+	)
 
 	journalEntry, err := c.persister.GetJournalEntry(r.Context(), int32(id), userData.Email)
 	if err != nil {
@@ -334,6 +354,13 @@ func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	c.log.Debug("Updating journal entry",
+		"id", id,
+		"title", title,
+		"rating", rating,
+		"namespace", userData.Email,
+	)
+
 	if err := c.persister.UpdateJournalEntry(r.Context(), int32(id), title, body, int32(rating), userData.Email); err != nil {
 		log.Println(errCouldNotUpdateInDB, err)
 
@@ -374,6 +401,11 @@ func (c *Controller) HandleViewJournal(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	c.log.Debug("Getting journal entry",
+		"id", id,
+		"namespace", userData.Email,
+	)
 
 	journalEntry, err := c.persister.GetJournalEntry(r.Context(), int32(id), userData.Email)
 	if err != nil {

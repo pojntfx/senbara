@@ -46,6 +46,11 @@ func (c *Controller) HandleAddDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c.log.Debug("Getting contact for debt addition",
+		"id", id,
+		"namespace", userData.Email,
+	)
+
 	contact, err := c.persister.GetContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
 		log.Println(errCouldNotFetchFromDB, err)
@@ -164,6 +169,14 @@ func (c *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 
 	description := r.FormValue("description")
 
+	c.log.Debug("Creating debt",
+		"contactID", contactID,
+		"amount", amount,
+		"currency", currency,
+		"description", description,
+		"namespace", userData.Email,
+	)
+
 	if _, err := c.persister.CreateDebt(
 		r.Context(),
 
@@ -239,6 +252,12 @@ func (c *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	c.log.Debug("Settling debt",
+		"id", id,
+		"contactID", contactID,
+		"namespace", userData.Email,
+	)
 
 	if err := c.persister.SettleDebt(
 		r.Context(),
@@ -366,6 +385,15 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 
 	description := r.FormValue("description")
 
+	c.log.Debug("Updating debt",
+		"id", id,
+		"contactID", contactID,
+		"amount", amount,
+		"currency", currency,
+		"description", description,
+		"namespace", userData.Email,
+	)
+
 	if err := c.persister.UpdateDebt(
 		r.Context(),
 
@@ -416,6 +444,11 @@ func (c *Controller) HandleEditDebt(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	c.log.Debug("Getting debt and contact for editing",
+		"id", id,
+		"namespace", userData.Email,
+	)
 
 	debtAndContact, err := c.persister.GetDebtAndContact(r.Context(), int32(id), userData.Email)
 	if err != nil {

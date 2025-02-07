@@ -13,6 +13,8 @@ type indexData struct {
 }
 
 func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
+	c.log.Debug("Getting index")
+
 	if r.Method == http.MethodGet && r.URL.Path == "/" {
 		_, userData, status, err := c.authorize(w, r, false)
 		if err != nil {
@@ -25,6 +27,8 @@ func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 
 		var contactsCount, journalEntriesCount int64
 		if strings.TrimSpace(userData.Email) != "" {
+			c.log.Debug("Counting contacts for index summary", "namespace", userData.Email)
+
 			contactsCount, err = c.persister.CountContacts(r.Context(), userData.Email)
 			if err != nil {
 				log.Println(errCouldNotFetchFromDB, err)
@@ -33,6 +37,8 @@ func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 
 				return
 			}
+
+			c.log.Debug("Counting journal entries for index summary", "namespace", userData.Email)
 
 			journalEntriesCount, err = c.persister.CountJournalEntries(r.Context(), userData.Email)
 			if err != nil {
@@ -64,6 +70,8 @@ func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	c.log.Debug("Getting page not found template")
 
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
