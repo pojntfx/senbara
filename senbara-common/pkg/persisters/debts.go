@@ -16,7 +16,7 @@ func (p *Persister) CreateDebt(
 	contactID int32,
 	namespace string,
 ) (int32, error) {
-	p.log.Debug("Creating debt", "amount", amount, "currency", currency, "contactID", contactID, "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Creating debt", "amount", amount, "currency", currency, "contactID", contactID)
 
 	return p.queries.CreateDebt(ctx, models.CreateDebtParams{
 		ID:          contactID,
@@ -33,7 +33,7 @@ func (p *Persister) GetDebts(
 	contactID int32,
 	namespace string,
 ) ([]models.GetDebtsRow, error) {
-	p.log.Debug("Getting debts", "contactID", contactID, "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Getting debts", "contactID", contactID)
 
 	return p.queries.GetDebts(ctx, models.GetDebtsParams{
 		ID:        contactID,
@@ -48,11 +48,10 @@ func (p *Persister) SettleDebt(
 
 	namespace string,
 ) error {
-	p.log.Debug("Settling debt", "id", id, "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Settling debt", "id", id)
 
 	return p.queries.SettleDebt(ctx, models.SettleDebtParams{
-		ID: id,
-
+		ID:        id,
 		Namespace: namespace,
 	})
 }
@@ -64,11 +63,10 @@ func (p *Persister) GetDebtAndContact(
 
 	namespace string,
 ) (models.GetDebtAndContactRow, error) {
-	p.log.Debug("Getting debt and contact", "id", id, "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Getting debt and contact", "id", id)
 
 	return p.queries.GetDebtAndContact(ctx, models.GetDebtAndContactParams{
-		ID: id,
-
+		ID:        id,
 		Namespace: namespace,
 	})
 }
@@ -84,13 +82,11 @@ func (p *Persister) UpdateDebt(
 	currency,
 	description string,
 ) error {
-	p.log.Debug("Updating debt", "id", id, "amount", amount, "currency", currency, "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Updating debt", "id", id, "amount", amount, "currency", currency)
 
 	return p.queries.UpdateDebt(ctx, models.UpdateDebtParams{
-		ID: id,
-
-		Namespace: namespace,
-
+		ID:          id,
+		Namespace:   namespace,
 		Amount:      amount,
 		Currency:    currency,
 		Description: description,

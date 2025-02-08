@@ -17,7 +17,7 @@ func (p *Persister) CreateActivity(
 	contactID int32,
 	namespace string,
 ) (int32, error) {
-	p.log.Debug("Creating activity", "name", name, "date", date, "contactID", contactID, "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Creating activity", "name", name, "date", date, "contactID", contactID)
 
 	return p.queries.CreateActivity(ctx, models.CreateActivityParams{
 		ID:          contactID,
@@ -34,7 +34,7 @@ func (p *Persister) GetActivities(
 	contactID int32,
 	namespace string,
 ) ([]models.GetActivitiesRow, error) {
-	p.log.Debug("Getting activities", "contactID", contactID, "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Getting activities", "contactID", contactID)
 
 	return p.queries.GetActivities(ctx, models.GetActivitiesParams{
 		ID:        contactID,
@@ -49,11 +49,10 @@ func (p *Persister) DeleteActivity(
 
 	namespace string,
 ) error {
-	p.log.Debug("Deleting activity", "id", id, "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Deleting activity", "id", id)
 
 	return p.queries.DeleteActivity(ctx, models.DeleteActivityParams{
-		ID: id,
-
+		ID:        id,
 		Namespace: namespace,
 	})
 }
@@ -65,11 +64,10 @@ func (p *Persister) GetActivityAndContact(
 
 	namespace string,
 ) (models.GetActivityAndContactRow, error) {
-	p.log.Debug("Getting activity and contact", "id", id, "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Getting activity and contact", "id", id)
 
 	return p.queries.GetActivityAndContact(ctx, models.GetActivityAndContactParams{
-		ID: id,
-
+		ID:        id,
 		Namespace: namespace,
 	})
 }
@@ -85,13 +83,11 @@ func (p *Persister) UpdateActivity(
 	date time.Time,
 	description string,
 ) error {
-	p.log.Debug("Updating activity", "id", id, "name", name, "date", date, "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Updating activity", "id", id, "name", name, "date", date)
 
 	return p.queries.UpdateActivity(ctx, models.UpdateActivityParams{
-		ID: id,
-
-		Namespace: namespace,
-
+		ID:          id,
+		Namespace:   namespace,
 		Name:        name,
 		Date:        date,
 		Description: description,

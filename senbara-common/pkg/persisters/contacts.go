@@ -9,7 +9,7 @@ import (
 )
 
 func (p *Persister) GetContacts(ctx context.Context, namespace string) ([]models.Contact, error) {
-	p.log.Debug("Getting contacts", "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Getting contacts")
 
 	return p.queries.GetContacts(ctx, namespace)
 }
@@ -23,7 +23,7 @@ func (p *Persister) CreateContact(
 	pronouns string,
 	namespace string,
 ) (int32, error) {
-	p.log.Debug("Creating contact", "firstName", firstName, "lastName", lastName, "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Creating contact", "firstName", firstName, "lastName", lastName)
 
 	return p.queries.CreateContact(ctx, models.CreateContactParams{
 		FirstName: firstName,
@@ -36,7 +36,7 @@ func (p *Persister) CreateContact(
 }
 
 func (p *Persister) GetContact(ctx context.Context, id int32, namespace string) (models.Contact, error) {
-	p.log.Debug("Getting contact", "id", id, "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Getting contact", "id", id)
 
 	return p.queries.GetContact(ctx, models.GetContactParams{
 		ID:        id,
@@ -45,7 +45,7 @@ func (p *Persister) GetContact(ctx context.Context, id int32, namespace string) 
 }
 
 func (p *Persister) DeleteContact(ctx context.Context, id int32, namespace string) error {
-	p.log.Debug("Deleting contact", "id", id, "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Deleting contact", "id", id)
 
 	tx, err := p.db.Begin()
 	if err != nil {
@@ -85,7 +85,7 @@ func (p *Persister) UpdateContact(
 	address,
 	notes string,
 ) error {
-	p.log.Debug("Updating contact", "id", id, "firstName", firstName, "lastName", lastName, "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Updating contact", "id", id, "firstName", firstName, "lastName", lastName)
 
 	var birthdayDate sql.NullTime
 	if birthday != nil {
@@ -110,7 +110,7 @@ func (p *Persister) UpdateContact(
 }
 
 func (p *Persister) CountContacts(ctx context.Context, namespace string) (int64, error) {
-	p.log.Debug("Counting contacts", "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Counting contacts")
 
 	return p.queries.CountContacts(ctx, namespace)
 }

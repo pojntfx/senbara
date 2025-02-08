@@ -23,7 +23,7 @@ func (p *Persister) GetUserData(
 	onDebt func(debt models.ExportedDebt) error,
 	onActivity func(activity models.ExportedActivity) error,
 ) error {
-	p.log.Debug("Getting user data", "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Getting user data")
 
 	tx, err := p.db.Begin()
 	if err != nil {
@@ -39,7 +39,7 @@ func (p *Persister) GetUserData(
 	}
 
 	for _, journalEntry := range journalEntries {
-		p.log.Debug("Fetched journal entry", "journalEntryID", journalEntry.ID, "title", journalEntry.Title, "date", journalEntry.Date, "rating", journalEntry.Rating)
+		p.log.With("namespace", namespace).Debug("Fetched journal entry", "journalEntryID", journalEntry.ID, "title", journalEntry.Title, "date", journalEntry.Date, "rating", journalEntry.Rating)
 
 		if err := onJournalEntry(models.ExportedJournalEntry{
 			ID:        journalEntry.ID,
@@ -59,7 +59,7 @@ func (p *Persister) GetUserData(
 	}
 
 	for _, contact := range contacts {
-		p.log.Debug("Fetched contact", "contactID", contact.ID, "firstName", contact.FirstName, "lastName", contact.LastName, "email", contact.Email)
+		p.log.With("namespace", namespace).Debug("Fetched contact", "contactID", contact.ID, "firstName", contact.FirstName, "lastName", contact.LastName, "email", contact.Email)
 
 		if err := onContact(models.ExportedContact{
 			ID:        contact.ID,
@@ -83,7 +83,7 @@ func (p *Persister) GetUserData(
 	}
 
 	for _, debt := range debts {
-		p.log.Debug("Fetched debt", "debtID", debt.ID, "amount", debt.Amount, "currency", debt.Currency, "contactID", debt.ContactID)
+		p.log.With("namespace", namespace).Debug("Fetched debt", "debtID", debt.ID, "amount", debt.Amount, "currency", debt.Currency, "contactID", debt.ContactID)
 
 		if err := onDebt(models.ExportedDebt{
 			ID:          debt.ID,
@@ -102,7 +102,7 @@ func (p *Persister) GetUserData(
 	}
 
 	for _, activity := range activities {
-		p.log.Debug("Fetched activity", "activityID", activity.ID, "name", activity.Name, "date", activity.Date, "contactID", activity.ContactID)
+		p.log.With("namespace", namespace).Debug("Fetched activity", "activityID", activity.ID, "name", activity.Name, "date", activity.Date, "contactID", activity.ContactID)
 
 		if err := onActivity(models.ExportedActivity{
 			ID:          activity.ID,
@@ -119,7 +119,7 @@ func (p *Persister) GetUserData(
 }
 
 func (p *Persister) DeleteUserData(ctx context.Context, namespace string) error {
-	p.log.Debug("Deleting user data", "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Deleting user data")
 
 	tx, err := p.db.Begin()
 	if err != nil {
@@ -159,7 +159,7 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 
 	err error,
 ) {
-	p.log.Debug("Creating user data", "namespace", namespace)
+	p.log.With("namespace", namespace).Debug("Creating user data")
 
 	createJournalEntry = func(journalEntry models.ExportedJournalEntry) error { return nil }
 	createContact = func(contact models.ExportedContact) error { return nil }
@@ -183,13 +183,12 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 	)
 
 	createJournalEntry = func(journalEntry models.ExportedJournalEntry) error {
-		p.log.Debug("Creating journal entry", "title", journalEntry.Title, "date", journalEntry.Date, "rating", journalEntry.Rating)
+		p.log.With("namespace", namespace).Debug("Creating journal entry", "title", journalEntry.Title, "date", journalEntry.Date, "rating", journalEntry.Rating)
 
 		if _, err := qtx.CreateJournalEntry(ctx, models.CreateJournalEntryParams{
-			Title:  journalEntry.Title,
-			Body:   journalEntry.Body,
-			Rating: journalEntry.Rating,
-
+			Title:     journalEntry.Title,
+			Body:      journalEntry.Body,
+			Rating:    journalEntry.Rating,
 			Namespace: namespace,
 		}); err != nil {
 			return err
@@ -199,7 +198,7 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 	}
 
 	createContact = func(contact models.ExportedContact) error {
-		p.log.Debug("Creating contact", "firstName", contact.FirstName, "lastName", contact.LastName, "email", contact.Email)
+		p.log.With("namespace", namespace).Debug("Creating contact", "firstName", contact.FirstName, "lastName", contact.LastName, "email", contact.Email)
 
 		id, err := qtx.CreateContact(ctx, models.CreateContactParams{
 			FirstName: contact.FirstName,
@@ -207,7 +206,6 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 			Nickname:  contact.Nickname,
 			Email:     contact.Email,
 			Pronouns:  contact.Pronouns,
-
 			Namespace: namespace,
 		})
 		if err != nil {
@@ -223,7 +221,7 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 	}
 
 	createDebt = func(debt models.ExportedDebt) error {
-		p.log.Debug("Creating debt", "amount", debt.Amount, "currency", debt.Currency, "contactID", debt.ContactID)
+		p.log.With("namespace", namespace).Debug("Creating debt", "amount", debt.Amount, "currency", debt.Currency, "contactID", debt.ContactID)
 
 		contactIDMapLock.Lock()
 		defer contactIDMapLock.Unlock()
@@ -242,8 +240,7 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 			Amount:      debt.Amount,
 			Currency:    debt.Currency,
 			Description: debt.Description,
-
-			Namespace: namespace,
+			Namespace:   namespace,
 		}); err != nil {
 			return err
 		}
@@ -252,7 +249,7 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 	}
 
 	createActivity = func(activity models.ExportedActivity) error {
-		p.log.Debug("Creating activity", "name", activity.Name, "date", activity.Date, "contactID", activity.ContactID)
+		p.log.With("namespace", namespace).Debug("Creating activity", "name", activity.Name, "date", activity.Date, "contactID", activity.ContactID)
 
 		contactIDMapLock.Lock()
 		defer contactIDMapLock.Unlock()
@@ -271,8 +268,7 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 			Name:        activity.Name,
 			Date:        activity.Date,
 			Description: activity.Description,
-
-			Namespace: namespace,
+			Namespace:   namespace,
 		}); err != nil {
 			return err
 		}
