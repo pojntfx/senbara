@@ -1,8 +1,8 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -19,7 +19,7 @@ type activityData struct {
 func (c *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for add activity page", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -28,9 +28,13 @@ func (c *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling add activity page")
+
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare add activity page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
@@ -39,21 +43,18 @@ func (c *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare add activity page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Getting contact for activity addition",
-		"id", id,
-		"email", userData.Email,
-	)
+	log.Debug("Getting contact to add activity to on add activity page from DB", "id", id)
 
 	contact, err := c.persister.GetContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+		log.Warn("Could not get contact to add activity to from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -70,7 +71,7 @@ func (c *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
 		},
 		Entry: contact,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Warn("Could not render template for adding an activity", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 
@@ -81,7 +82,7 @@ func (c *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for create activity", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -90,8 +91,12 @@ func (c *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling create activity")
+
 	if err := r.ParseForm(); err != nil {
-		log.Println(errCouldNotParseForm, err)
+		log.Warn("Could not create activity", "err", errors.Join(errCouldNotParseForm, err))
 
 		http.Error(w, errCouldNotParseForm.Error(), http.StatusInternalServerError)
 
@@ -100,7 +105,7 @@ func (c *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 
 	rcontactID := r.FormValue("contact_id")
 	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create activity", "err", errors.Join(errInvalidForm, err))
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -109,7 +114,7 @@ func (c *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 
 	contactID, err := strconv.Atoi(rcontactID)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create activity", "err", errors.Join(errInvalidForm, err))
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -118,14 +123,16 @@ func (c *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 
 	name := r.FormValue("name")
 	if strings.TrimSpace(name) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create activity", "err", errInvalidForm)
+
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
+
 		return
 	}
 
 	rdate := r.FormValue("date")
 	if strings.TrimSpace(rdate) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create activity", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -134,7 +141,7 @@ func (c *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 
 	date, err := time.Parse("2006-01-02", rdate)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create activity", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -143,11 +150,10 @@ func (c *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 
 	description := r.FormValue("description")
 
-	c.log.Debug("Creating activity",
+	log.Debug("Creating activity in DB",
 		"contactID", contactID,
 		"name", name,
 		"date", date,
-		"email", userData.Email,
 	)
 
 	if _, err := c.persister.CreateActivity(
@@ -160,7 +166,7 @@ func (c *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 		int32(contactID),
 		userData.Email,
 	); err != nil {
-		log.Println(errCouldNotInsertIntoDB, err)
+		log.Warn("Could not create activity in DB", "err", errors.Join(errCouldNotInsertIntoDB, err))
 
 		http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
 
@@ -173,7 +179,7 @@ func (c *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 func (c *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for delete activity", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -182,8 +188,12 @@ func (c *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling delete activity")
+
 	if err := r.ParseForm(); err != nil {
-		log.Println(errCouldNotParseForm, err)
+		log.Warn("Could not delete activity", "err", errors.Join(errCouldNotParseForm, err))
 
 		http.Error(w, errCouldNotParseForm.Error(), http.StatusInternalServerError)
 
@@ -192,7 +202,7 @@ func (c *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not delete activity", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -201,7 +211,7 @@ func (c *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not delete activity", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -210,7 +220,7 @@ func (c *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 
 	rcontactID := r.FormValue("contact_id")
 	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not delete activity", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -219,17 +229,16 @@ func (c *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 
 	contactID, err := strconv.Atoi(rcontactID)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not delete activity", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Deleting activity",
+	log.Debug("Deleting activity",
 		"id", id,
 		"contactID", contactID,
-		"email", userData.Email,
 	)
 
 	if err := c.persister.DeleteActivity(
@@ -239,7 +248,7 @@ func (c *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 
 		userData.Email,
 	); err != nil {
-		log.Println(errCouldNotUpdateInDB, err)
+		log.Warn("Could not delete activity in DB", "err", errors.Join(errCouldNotUpdateInDB, err))
 
 		http.Error(w, errCouldNotUpdateInDB.Error(), http.StatusInternalServerError)
 
@@ -252,7 +261,7 @@ func (c *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 func (c *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for update activity", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -261,8 +270,12 @@ func (c *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling update activity")
+
 	if err := r.ParseForm(); err != nil {
-		log.Println(errCouldNotParseForm, err)
+		log.Warn("Could not update activity", "err", errors.Join(errCouldNotParseForm, err))
 
 		http.Error(w, errCouldNotParseForm.Error(), http.StatusInternalServerError)
 
@@ -271,7 +284,7 @@ func (c *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update activity", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -280,7 +293,7 @@ func (c *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update activity", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -289,7 +302,7 @@ func (c *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 
 	rcontactID := r.FormValue("contact_id")
 	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update activity", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -298,7 +311,7 @@ func (c *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 
 	contactID, err := strconv.Atoi(rcontactID)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update activity", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -307,14 +320,16 @@ func (c *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 
 	name := r.FormValue("name")
 	if strings.TrimSpace(name) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update activity", "err", errInvalidForm)
+
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
+
 		return
 	}
 
 	rdate := r.FormValue("date")
 	if strings.TrimSpace(rdate) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update activity", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -323,7 +338,7 @@ func (c *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 
 	date, err := time.Parse("2006-01-02", rdate)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update activity", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -332,11 +347,10 @@ func (c *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 
 	description := r.FormValue("description")
 
-	c.log.Debug("Updating activity",
+	log.Debug("Updating activity",
 		"id", id,
 		"name", name,
 		"date", date,
-		"email", userData.Email,
 	)
 
 	if err := c.persister.UpdateActivity(
@@ -350,7 +364,7 @@ func (c *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 		date,
 		description,
 	); err != nil {
-		log.Println(errCouldNotUpdateInDB, err)
+		log.Warn("Could not update activity in DB", "err", errors.Join(errCouldNotUpdateInDB, err))
 
 		http.Error(w, errCouldNotUpdateInDB.Error(), http.StatusInternalServerError)
 
@@ -363,7 +377,7 @@ func (c *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 func (c *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for edit activity page", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -372,9 +386,13 @@ func (c *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling edit activity page")
+
 	rid := r.URL.Query().Get("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare edit activity page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
@@ -383,21 +401,20 @@ func (c *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) 
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare edit activity page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Getting activity and contact for edit",
+	log.Debug("Getting activity and contact for edit",
 		"id", id,
-		"email", userData.Email,
 	)
 
 	activityAndContact, err := c.persister.GetActivityAndContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+		log.Warn("Could not get activity and contact for edit", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -414,7 +431,7 @@ func (c *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) 
 		},
 		Entry: activityAndContact,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Warn("Could not render template for editing an activity", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 
@@ -425,7 +442,7 @@ func (c *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) 
 func (c *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for view activity page", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -434,9 +451,13 @@ func (c *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling view activity page")
+
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare view activity page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
@@ -445,7 +466,7 @@ func (c *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare view activity page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
@@ -454,7 +475,7 @@ func (c *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 
 	rcontactID := r.URL.Query().Get("contact_id")
 	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare view activity page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
@@ -463,22 +484,21 @@ func (c *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 
 	contactID, err := strconv.Atoi(rcontactID)
 	if err != nil {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare view activity page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Getting activity and contact for view",
+	log.Debug("Getting activity and contact for view",
 		"id", id,
 		"contactID", contactID,
-		"email", userData.Email,
 	)
 
 	activityAndContact, err := c.persister.GetActivityAndContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+		log.Warn("Could not get activity and contact for view", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -497,7 +517,7 @@ func (c *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 		},
 		Entry: activityAndContact,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Warn("Could not render template for viewing an activity", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 
