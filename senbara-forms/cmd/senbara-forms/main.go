@@ -106,14 +106,14 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				return errMissingImprintURL
 			}
 
-			p := persisters.NewPersister(log, viper.GetString(pgaddrKey))
+			p := persisters.NewPersister(slog.New(log.Handler().WithGroup("persister")), viper.GetString(pgaddrKey))
 
 			if err := p.Init(ctx); err != nil {
 				return err
 			}
 
 			c := controllers.NewController(
-				log,
+				slog.New(log.Handler().WithGroup("controller")),
 
 				p,
 

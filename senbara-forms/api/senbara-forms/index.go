@@ -92,7 +92,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	log := slog.New(slog.NewJSONHandler(os.Stderr, opts))
 
 	if p == nil {
-		p = persisters.NewPersister(log, os.Getenv("POSTGRES_URL"))
+		p = persisters.NewPersister(slog.New(log.Handler().WithGroup("persister")), os.Getenv("POSTGRES_URL"))
 
 		if err := p.Init(r.Context()); err != nil {
 			panic(err)
@@ -101,7 +101,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if c == nil {
 		c = controllers.NewController(
-			log,
+			slog.New(log.Handler().WithGroup("controller")),
 
 			p,
 
