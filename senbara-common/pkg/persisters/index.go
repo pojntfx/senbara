@@ -39,10 +39,7 @@ func (p *Persister) Init(ctx context.Context) error {
 		return err
 	}
 
-	if !p.log.Enabled(ctx, slog.LevelDebug) {
-		goose.SetLogger(goose.NopLogger())
-	}
-
+	goose.SetLogger(slog.NewLogLogger(p.log.Handler(), slog.LevelDebug))
 	goose.SetBaseFS(migrations.FS)
 
 	if err := goose.SetDialect("postgres"); err != nil {
