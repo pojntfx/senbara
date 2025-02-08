@@ -1,8 +1,8 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -19,7 +19,7 @@ type debtData struct {
 func (c *Controller) HandleAddDebt(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for add debt page", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -28,9 +28,13 @@ func (c *Controller) HandleAddDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling add debt page")
+
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare add debt page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
@@ -39,21 +43,18 @@ func (c *Controller) HandleAddDebt(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare add debt page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Getting contact for debt addition",
-		"id", id,
-		"namespace", userData.Email,
-	)
+	log.Debug("Getting contact for debt addition from DB", "id", id)
 
 	contact, err := c.persister.GetContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+		log.Warn("Could not get contact from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -70,7 +71,7 @@ func (c *Controller) HandleAddDebt(w http.ResponseWriter, r *http.Request) {
 		},
 		Entry: contact,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Warn("Could not render template for adding a debt", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 
@@ -81,7 +82,7 @@ func (c *Controller) HandleAddDebt(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for create debt", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -90,8 +91,12 @@ func (c *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling create debt")
+
 	if err := r.ParseForm(); err != nil {
-		log.Println(errCouldNotParseForm, err)
+		log.Warn("Could not create debt", "err", errors.Join(errCouldNotParseForm, err))
 
 		http.Error(w, errCouldNotParseForm.Error(), http.StatusInternalServerError)
 
@@ -100,7 +105,7 @@ func (c *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 
 	ryouOwe := r.FormValue("you_owe")
 	if strings.TrimSpace(ryouOwe) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -109,7 +114,7 @@ func (c *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 
 	youOwe, err := strconv.Atoi(ryouOwe)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -118,7 +123,7 @@ func (c *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 
 	rcontactID := r.FormValue("contact_id")
 	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -127,7 +132,7 @@ func (c *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 
 	contactID, err := strconv.Atoi(rcontactID)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -136,7 +141,7 @@ func (c *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 
 	ramount := r.FormValue("amount")
 	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -145,7 +150,7 @@ func (c *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 
 	amount, err := strconv.ParseFloat(ramount, 64)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -160,7 +165,7 @@ func (c *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 
 	currency := r.FormValue("currency")
 	if strings.TrimSpace(currency) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -169,12 +174,11 @@ func (c *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 
 	description := r.FormValue("description")
 
-	c.log.Debug("Creating debt",
+	log.Debug("Creating debt in DB",
 		"contactID", contactID,
 		"amount", amount,
 		"currency", currency,
 		"description", description,
-		"namespace", userData.Email,
 	)
 
 	if _, err := c.persister.CreateDebt(
@@ -187,7 +191,7 @@ func (c *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 		int32(contactID),
 		userData.Email,
 	); err != nil {
-		log.Println(errCouldNotInsertIntoDB, err)
+		log.Warn("Could not create debt in DB", "err", errors.Join(errCouldNotInsertIntoDB, err))
 
 		http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
 
@@ -200,7 +204,7 @@ func (c *Controller) HandleCreateDebt(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for settle debt", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -209,8 +213,12 @@ func (c *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling settle debt")
+
 	if err := r.ParseForm(); err != nil {
-		log.Println(errCouldNotParseForm, err)
+		log.Warn("Could not settle debt", "err", errors.Join(errCouldNotParseForm, err))
 
 		http.Error(w, errCouldNotParseForm.Error(), http.StatusInternalServerError)
 
@@ -219,7 +227,7 @@ func (c *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not settle debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -228,7 +236,7 @@ func (c *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not settle debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -237,7 +245,7 @@ func (c *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 
 	rcontactID := r.FormValue("contact_id")
 	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not settle debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -246,17 +254,16 @@ func (c *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 
 	contactID, err := strconv.Atoi(rcontactID)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not settle debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Settling debt",
+	log.Debug("Settling debt in DB",
 		"id", id,
 		"contactID", contactID,
-		"namespace", userData.Email,
 	)
 
 	if err := c.persister.SettleDebt(
@@ -266,7 +273,7 @@ func (c *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 
 		userData.Email,
 	); err != nil {
-		log.Println(errCouldNotUpdateInDB, err)
+		log.Warn("Could not settle debt in DB", "err", errors.Join(errCouldNotUpdateInDB, err))
 
 		http.Error(w, errCouldNotUpdateInDB.Error(), http.StatusInternalServerError)
 
@@ -279,7 +286,7 @@ func (c *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for update debt", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -288,8 +295,12 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling update debt")
+
 	if err := r.ParseForm(); err != nil {
-		log.Println(errCouldNotParseForm, err)
+		log.Warn("Could not update debt", "err", errors.Join(errCouldNotParseForm, err))
 
 		http.Error(w, errCouldNotParseForm.Error(), http.StatusInternalServerError)
 
@@ -298,7 +309,7 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -307,7 +318,7 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -316,7 +327,7 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 
 	rcontactID := r.FormValue("contact_id")
 	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -325,7 +336,7 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 
 	contactID, err := strconv.Atoi(rcontactID)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -334,7 +345,7 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 
 	ryouOwe := r.FormValue("you_owe")
 	if strings.TrimSpace(ryouOwe) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -343,7 +354,7 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 
 	youOwe, err := strconv.Atoi(ryouOwe)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -352,7 +363,7 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 
 	ramount := r.FormValue("amount")
 	if strings.TrimSpace(rcontactID) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -361,7 +372,7 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 
 	amount, err := strconv.ParseFloat(ramount, 64)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -376,7 +387,7 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 
 	currency := r.FormValue("currency")
 	if strings.TrimSpace(currency) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update debt", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -385,13 +396,12 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 
 	description := r.FormValue("description")
 
-	c.log.Debug("Updating debt",
+	log.Debug("Updating debt in DB",
 		"id", id,
 		"contactID", contactID,
 		"amount", amount,
 		"currency", currency,
 		"description", description,
-		"namespace", userData.Email,
 	)
 
 	if err := c.persister.UpdateDebt(
@@ -405,7 +415,7 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 		currency,
 		description,
 	); err != nil {
-		log.Println(errCouldNotUpdateInDB, err)
+		log.Warn("Could not update debt in DB", "err", errors.Join(errCouldNotUpdateInDB, err))
 
 		http.Error(w, errCouldNotUpdateInDB.Error(), http.StatusInternalServerError)
 
@@ -418,7 +428,7 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) HandleEditDebt(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for edit debt page", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -427,9 +437,13 @@ func (c *Controller) HandleEditDebt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling edit debt page")
+
 	rid := r.URL.Query().Get("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare edit debt page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
@@ -438,21 +452,18 @@ func (c *Controller) HandleEditDebt(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare edit debt page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Getting debt and contact for editing",
-		"id", id,
-		"namespace", userData.Email,
-	)
+	log.Debug("Getting debt and contact for editing from DB", "id", id)
 
 	debtAndContact, err := c.persister.GetDebtAndContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+		log.Warn("Could not get debt and contact from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -469,7 +480,7 @@ func (c *Controller) HandleEditDebt(w http.ResponseWriter, r *http.Request) {
 		},
 		Entry: debtAndContact,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Warn("Could not render template for editing a debt", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 

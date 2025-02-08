@@ -1,8 +1,8 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -23,7 +23,7 @@ type journalEntryData struct {
 func (c *Controller) HandleJournal(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for journal page", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -32,13 +32,13 @@ func (c *Controller) HandleJournal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.log.Debug("Getting journal entries",
-		"namespace", userData.Email,
-	)
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling journal page")
 
 	journalEntries, err := c.persister.GetJournalEntries(r.Context(), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+		log.Warn("Could not get journal entries from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -55,7 +55,7 @@ func (c *Controller) HandleJournal(w http.ResponseWriter, r *http.Request) {
 		},
 		Entries: journalEntries,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Warn("Could not render template for journal page", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 
@@ -66,7 +66,7 @@ func (c *Controller) HandleJournal(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) HandleAddJournal(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for add journal page", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -75,6 +75,10 @@ func (c *Controller) HandleAddJournal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling add journal page")
+
 	if err := c.tpl.ExecuteTemplate(w, "journal_add.html", pageData{
 		userData: userData,
 
@@ -82,7 +86,7 @@ func (c *Controller) HandleAddJournal(w http.ResponseWriter, r *http.Request) {
 		PrivacyURL: c.privacyURL,
 		ImprintURL: c.imprintURL,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Warn("Could not render template for adding journal entry", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 
@@ -93,7 +97,7 @@ func (c *Controller) HandleAddJournal(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for create journal", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -102,8 +106,12 @@ func (c *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling create journal")
+
 	if err := r.ParseForm(); err != nil {
-		log.Println(errCouldNotParseForm, err)
+		log.Warn("Could not create journal entry", "err", errors.Join(errCouldNotParseForm, err))
 
 		http.Error(w, errCouldNotParseForm.Error(), http.StatusInternalServerError)
 
@@ -112,7 +120,7 @@ func (c *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request)
 
 	title := r.FormValue("title")
 	if strings.TrimSpace(title) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create journal entry", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -121,7 +129,7 @@ func (c *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request)
 
 	body := r.FormValue("body")
 	if strings.TrimSpace(body) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create journal entry", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -130,7 +138,7 @@ func (c *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request)
 
 	rrating := r.FormValue("rating")
 	if strings.TrimSpace(rrating) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create journal entry", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -139,22 +147,21 @@ func (c *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request)
 
 	rating, err := strconv.Atoi(rrating)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create journal entry", "err", errors.Join(errInvalidForm, err))
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Creating journal entry",
+	log.Debug("Creating journal entry in DB",
 		"title", title,
 		"rating", rating,
-		"namespace", userData.Email,
 	)
 
 	id, err := c.persister.CreateJournalEntry(r.Context(), title, body, int32(rating), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotInsertIntoDB, err)
+		log.Warn("Could not create journal entry in DB", "err", errors.Join(errCouldNotInsertIntoDB, err))
 
 		http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
 
@@ -167,7 +174,7 @@ func (c *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request)
 func (c *Controller) HandleDeleteJournal(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for delete journal", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -176,8 +183,12 @@ func (c *Controller) HandleDeleteJournal(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling delete journal")
+
 	if err := r.ParseForm(); err != nil {
-		log.Println(errCouldNotParseForm, err)
+		log.Warn("Could not delete journal entry", "err", errors.Join(errCouldNotParseForm, err))
 
 		http.Error(w, errCouldNotParseForm.Error(), http.StatusInternalServerError)
 
@@ -186,7 +197,7 @@ func (c *Controller) HandleDeleteJournal(w http.ResponseWriter, r *http.Request)
 
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not delete journal entry", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -195,20 +206,19 @@ func (c *Controller) HandleDeleteJournal(w http.ResponseWriter, r *http.Request)
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not delete journal entry", "err", errors.Join(errInvalidForm, err))
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Deleting journal entry",
+	log.Debug("Deleting journal entry from DB",
 		"id", id,
-		"namespace", userData.Email,
 	)
 
 	if err := c.persister.DeleteJournalEntry(r.Context(), int32(id), userData.Email); err != nil {
-		log.Println(errCouldNotDeleteFromDB, err)
+		log.Warn("Could not delete journal entry from DB", "err", errors.Join(errCouldNotDeleteFromDB, err))
 
 		http.Error(w, errCouldNotDeleteFromDB.Error(), http.StatusInternalServerError)
 
@@ -221,7 +231,7 @@ func (c *Controller) HandleDeleteJournal(w http.ResponseWriter, r *http.Request)
 func (c *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for edit journal page", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -230,9 +240,13 @@ func (c *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling edit journal page")
+
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare edit journal page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
@@ -241,21 +255,20 @@ func (c *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare edit journal page", "err", errors.Join(errInvalidQueryParam, err))
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Getting journal entry for editing",
+	log.Debug("Getting journal entry for edit",
 		"id", id,
-		"namespace", userData.Email,
 	)
 
 	journalEntry, err := c.persister.GetJournalEntry(r.Context(), int32(id), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+		log.Warn("Could not get journal entry for edit from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -272,7 +285,7 @@ func (c *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
 		},
 		Entry: journalEntry,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Warn("Could not render template for editing journal entry", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 
@@ -283,7 +296,7 @@ func (c *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for update journal", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -292,8 +305,12 @@ func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling update journal")
+
 	if err := r.ParseForm(); err != nil {
-		log.Println(errCouldNotParseForm, err)
+		log.Warn("Could not update journal entry", "err", errors.Join(errCouldNotParseForm, err))
 
 		http.Error(w, errCouldNotParseForm.Error(), http.StatusInternalServerError)
 
@@ -302,7 +319,7 @@ func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update journal entry", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -311,7 +328,7 @@ func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update journal entry", "err", errors.Join(errInvalidForm, err))
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -320,7 +337,7 @@ func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 
 	title := r.FormValue("title")
 	if strings.TrimSpace(title) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update journal entry", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -329,7 +346,7 @@ func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 
 	body := r.FormValue("body")
 	if strings.TrimSpace(body) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update journal entry", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -338,7 +355,7 @@ func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 
 	rrating := r.FormValue("rating")
 	if strings.TrimSpace(rrating) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update journal entry", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -347,24 +364,23 @@ func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 
 	rating, err := strconv.Atoi(rrating)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update journal entry", "err", errors.Join(errInvalidForm, err))
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Updating journal entry",
+	log.Debug("Updating journal entry in DB",
 		"id", id,
 		"title", title,
 		"rating", rating,
-		"namespace", userData.Email,
 	)
 
 	if err := c.persister.UpdateJournalEntry(r.Context(), int32(id), title, body, int32(rating), userData.Email); err != nil {
-		log.Println(errCouldNotUpdateInDB, err)
+		log.Warn("Could not update journal entry in DB", "err", errors.Join(errCouldNotUpdateInDB, err))
 
-		http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
+		http.Error(w, errCouldNotUpdateInDB.Error(), http.StatusInternalServerError)
 
 		return
 	}
@@ -375,7 +391,7 @@ func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 func (c *Controller) HandleViewJournal(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for view journal page", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -384,9 +400,13 @@ func (c *Controller) HandleViewJournal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling view journal page")
+
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare view journal page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
@@ -395,21 +415,20 @@ func (c *Controller) HandleViewJournal(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare view journal page", "err", errors.Join(errInvalidQueryParam, err))
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Getting journal entry",
+	log.Debug("Getting journal entry for view",
 		"id", id,
-		"namespace", userData.Email,
 	)
 
 	journalEntry, err := c.persister.GetJournalEntry(r.Context(), int32(id), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+		log.Warn("Could not get journal entry for view from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -428,7 +447,7 @@ func (c *Controller) HandleViewJournal(w http.ResponseWriter, r *http.Request) {
 		},
 		Entry: journalEntry,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Warn("Could not render template for view journal page", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 

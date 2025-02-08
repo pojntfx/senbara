@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/pojntfx/senbara/senbara-common/pkg/models"
@@ -20,7 +19,7 @@ const (
 func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for user data export", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -29,7 +28,9 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.log.Debug("Exporting user data", "namespace", userData.Email)
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling user data export")
 
 	w.Header().Set("Content-Type", "application/jsonl")
 	w.Header().Set("Content-Disposition", `attachment; filename="senbara-forms-userdata.jsonl"`)
@@ -42,12 +43,11 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 		userData.Email,
 
 		func(journalEntry models.ExportedJournalEntry) error {
-			c.log.Debug("Exporting journal entry",
+			log.Debug("Exporting journal entry",
 				"journalEntryID", journalEntry.ID,
 				"title", journalEntry.Title,
 				"date", journalEntry.Date,
 				"rating", journalEntry.Rating,
-				"namespace", userData.Email,
 			)
 
 			journalEntry.ExportedEntityIdentifier.EntityName = EntityNameExportedJournalEntry
@@ -59,12 +59,11 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 			return nil
 		},
 		func(contact models.ExportedContact) error {
-			c.log.Debug("Exporting contact",
+			log.Debug("Exporting contact",
 				"contactID", contact.ID,
 				"firstName", contact.FirstName,
 				"lastName", contact.LastName,
 				"email", contact.Email,
-				"namespace", userData.Email,
 			)
 
 			contact.ExportedEntityIdentifier.EntityName = EntityNameExportedContact
@@ -76,12 +75,11 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 			return nil
 		},
 		func(debt models.ExportedDebt) error {
-			c.log.Debug("Exporting debt",
+			log.Debug("Exporting debt",
 				"debtID", debt.ID,
 				"amount", debt.Amount,
 				"currency", debt.Currency,
 				"contactID", debt.ContactID,
-				"namespace", userData.Email,
 			)
 
 			debt.ExportedEntityIdentifier.EntityName = EntityNameExportedDebt
@@ -93,12 +91,11 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 			return nil
 		},
 		func(activity models.ExportedActivity) error {
-			c.log.Debug("Exporting activity",
+			log.Debug("Exporting activity",
 				"activityID", activity.ID,
 				"name", activity.Name,
 				"date", activity.Date,
 				"contactID", activity.ContactID,
-				"namespace", userData.Email,
 			)
 
 			activity.ExportedEntityIdentifier.EntityName = EntityNameExportedActivity
@@ -110,7 +107,7 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 			return nil
 		},
 	); err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+		log.Warn("Could not export user data from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -121,7 +118,7 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for user data import", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -130,11 +127,13 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	c.log.Debug("Starting user data import", "namespace", userData.Email)
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling user data import")
 
 	file, _, err := r.FormFile("userData")
 	if err != nil {
-		log.Println(errCouldNotReadRequest, err)
+		log.Warn("Could not read user data file from request", "err", errors.Join(errCouldNotReadRequest, err))
 
 		http.Error(w, errCouldNotReadRequest.Error(), http.StatusInternalServerError)
 
@@ -154,7 +153,7 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 
 		err := c.persister.CreateUserData(r.Context(), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotStartTransaction, err)
+		log.Warn("Could not start transaction for user data import", "err", errors.Join(errCouldNotStartTransaction, err))
 
 		http.Error(w, errCouldNotStartTransaction.Error(), http.StatusInternalServerError)
 
@@ -169,7 +168,7 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 				break
 			}
 
-			log.Println(errCouldNotReadRequest, err)
+			log.Warn("Could not decode user data", "err", errors.Join(errCouldNotReadRequest, err))
 
 			http.Error(w, errCouldNotReadRequest.Error(), http.StatusInternalServerError)
 
@@ -178,39 +177,35 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 
 		var entityIdentifier models.ExportedEntityIdentifier
 		if err := json.Unmarshal(b, &entityIdentifier); err != nil {
-			log.Println(errCouldNotReadRequest, err)
+			log.Warn("Could not unmarshal entity identifier", "err", errors.Join(errCouldNotReadRequest, err))
 
 			http.Error(w, errCouldNotReadRequest.Error(), http.StatusInternalServerError)
 
 			return
 		}
 
-		c.log.Debug("Importing user data entity",
-			"entityType", entityIdentifier.EntityName,
-			"namespace", userData.Email,
-		)
+		log.Debug("Processing user data entity for user data import", "entityType", entityIdentifier.EntityName)
 
 		switch entityIdentifier.EntityName {
 		case EntityNameExportedJournalEntry:
 			var journalEntry models.ExportedJournalEntry
 			if err := json.Unmarshal(b, &journalEntry); err != nil {
-				log.Println(errCouldNotReadRequest, err)
+				log.Warn("Could not unmarshal journal entry", "err", errors.Join(errCouldNotReadRequest, err))
 
 				http.Error(w, errCouldNotReadRequest.Error(), http.StatusInternalServerError)
 
 				return
 			}
 
-			c.log.Debug("Importing journal entry",
+			log.Debug("Importing journal entry",
 				"journalEntryID", journalEntry.ID,
 				"title", journalEntry.Title,
 				"date", journalEntry.Date,
 				"rating", journalEntry.Rating,
-				"namespace", userData.Email,
 			)
 
 			if err := createJournalEntry(journalEntry); err != nil {
-				log.Println(errCouldNotInsertIntoDB, err)
+				log.Warn("Could not create journal entry in DB", "err", errors.Join(errCouldNotInsertIntoDB, err))
 
 				http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
 
@@ -220,23 +215,22 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 		case EntityNameExportedContact:
 			var contact models.ExportedContact
 			if err := json.Unmarshal(b, &contact); err != nil {
-				log.Println(errCouldNotReadRequest, err)
+				log.Warn("Could not unmarshal contact", "err", errors.Join(errCouldNotReadRequest, err))
 
 				http.Error(w, errCouldNotReadRequest.Error(), http.StatusInternalServerError)
 
 				return
 			}
 
-			c.log.Debug("Importing contact",
+			log.Debug("Importing contact",
 				"contactID", contact.ID,
 				"firstName", contact.FirstName,
 				"lastName", contact.LastName,
 				"email", contact.Email,
-				"namespace", userData.Email,
 			)
 
 			if err := createContact(contact); err != nil {
-				log.Println(errCouldNotInsertIntoDB, err)
+				log.Warn("Could not create contact in DB", "err", errors.Join(errCouldNotInsertIntoDB, err))
 
 				http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
 
@@ -246,23 +240,22 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 		case EntityNameExportedDebt:
 			var debt models.ExportedDebt
 			if err := json.Unmarshal(b, &debt); err != nil {
-				log.Println(errCouldNotReadRequest, err)
+				log.Warn("Could not unmarshal debt", "err", errors.Join(errCouldNotReadRequest, err))
 
 				http.Error(w, errCouldNotReadRequest.Error(), http.StatusInternalServerError)
 
 				return
 			}
 
-			c.log.Debug("Importing debt",
+			log.Debug("Importing debt",
 				"debtID", debt.ID,
 				"amount", debt.Amount,
 				"currency", debt.Currency,
 				"contactID", debt.ContactID,
-				"namespace", userData.Email,
 			)
 
 			if err := createDebt(debt); err != nil {
-				log.Println(errCouldNotInsertIntoDB, err)
+				log.Warn("Could not create debt in DB", "err", errors.Join(errCouldNotInsertIntoDB, err))
 
 				http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
 
@@ -272,23 +265,22 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 		case EntityNameExportedActivity:
 			var activity models.ExportedActivity
 			if err := json.Unmarshal(b, &activity); err != nil {
-				log.Println(errCouldNotReadRequest, err)
+				log.Warn("Could not unmarshal activity", "err", errors.Join(errCouldNotReadRequest, err))
 
 				http.Error(w, errCouldNotReadRequest.Error(), http.StatusInternalServerError)
 
 				return
 			}
 
-			c.log.Debug("Importing activity",
+			log.Debug("Importing activity",
 				"activityID", activity.ID,
 				"name", activity.Name,
 				"date", activity.Date,
 				"contactID", activity.ContactID,
-				"namespace", userData.Email,
 			)
 
 			if err := createActivity(activity); err != nil {
-				log.Println(errCouldNotInsertIntoDB, err)
+				log.Warn("Could not create activity in DB", "err", errors.Join(errCouldNotInsertIntoDB, err))
 
 				http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
 
@@ -296,22 +288,19 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 			}
 
 		default:
-			c.log.Debug("Skipping user data entity import",
+			log.Debug("Skipping import of user data entity with unknown entity type",
 				"err", errUnknownEntityName,
 				"entityType", entityIdentifier.EntityName,
-				"namespace", userData.Email,
 			)
 
 			continue
 		}
 	}
 
-	c.log.Debug("Completing user data import",
-		"namespace", userData.Email,
-	)
+	log.Debug("Completing user data import")
 
 	if err := commit(); err != nil {
-		log.Println(errCouldNotInsertIntoDB, err)
+		log.Warn("Could not commit user data import transaction", "err", errors.Join(errCouldNotInsertIntoDB, err))
 
 		http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
 
@@ -324,7 +313,7 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 func (c *Controller) HandleDeleteUserData(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for user data deletion", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -333,12 +322,12 @@ func (c *Controller) HandleDeleteUserData(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	c.log.Debug("Deleting all user data",
-		"namespace", userData.Email,
-	)
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling user data deletion")
 
 	if err := c.persister.DeleteUserData(r.Context(), userData.Email); err != nil {
-		log.Println(errCouldNotDeleteFromDB, err)
+		log.Warn("Could not delete user data from DB", "err", errors.Join(errCouldNotDeleteFromDB, err))
 
 		http.Error(w, errCouldNotDeleteFromDB.Error(), http.StatusInternalServerError)
 

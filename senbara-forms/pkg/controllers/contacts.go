@@ -1,8 +1,8 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"net/mail"
 	"strconv"
@@ -27,7 +27,7 @@ type contactData struct {
 func (c *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for contacts page", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -36,11 +36,13 @@ func (c *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.log.Debug("Getting contacts", "email", userData.Email)
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Getting contacts")
 
 	contacts, err := c.persister.GetContacts(r.Context(), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+		log.Warn("Could not get contacts from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -57,7 +59,7 @@ func (c *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
 		},
 		Entries: contacts,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Warn("Could not render contacts template", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 
@@ -68,7 +70,7 @@ func (c *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) HandleAddContact(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for add contact page", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -77,6 +79,10 @@ func (c *Controller) HandleAddContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling add contact page")
+
 	if err := c.tpl.ExecuteTemplate(w, "contacts_add.html", pageData{
 		userData: userData,
 
@@ -84,7 +90,7 @@ func (c *Controller) HandleAddContact(w http.ResponseWriter, r *http.Request) {
 		PrivacyURL: c.privacyURL,
 		ImprintURL: c.imprintURL,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Warn("Could not render template for adding a contact", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 
@@ -95,7 +101,7 @@ func (c *Controller) HandleAddContact(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for create contact", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -104,8 +110,12 @@ func (c *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling create contact")
+
 	if err := r.ParseForm(); err != nil {
-		log.Println(errCouldNotParseForm, err)
+		log.Warn("Could not create contact", "err", errors.Join(errCouldNotParseForm, err))
 
 		http.Error(w, errCouldNotParseForm.Error(), http.StatusInternalServerError)
 
@@ -114,7 +124,7 @@ func (c *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 
 	firstName := r.FormValue("first_name")
 	if strings.TrimSpace(firstName) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create contact", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -123,7 +133,7 @@ func (c *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 
 	lastName := r.FormValue("last_name")
 	if strings.TrimSpace(lastName) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create contact", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -132,7 +142,7 @@ func (c *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 
 	email := r.FormValue("email")
 	if _, err := mail.ParseAddress(email); err != nil {
-		log.Println(err)
+		log.Warn("Could not create contact", "err", errors.Join(errInvalidForm, err))
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -143,20 +153,19 @@ func (c *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 
 	pronouns := r.FormValue("pronouns")
 	if strings.TrimSpace(pronouns) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not create contact", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Creating contact",
+	log.Debug("Creating contact in DB",
 		"firstName", firstName,
 		"lastName", lastName,
 		"nickname", nickname,
 		"email", email,
 		"pronouns", pronouns,
-		"namespace", userData.Email,
 	)
 
 	id, err := c.persister.CreateContact(
@@ -169,7 +178,7 @@ func (c *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 		userData.Email,
 	)
 	if err != nil {
-		log.Println(errCouldNotInsertIntoDB, err)
+		log.Warn("Could not create contact in DB", "err", errors.Join(errCouldNotInsertIntoDB, err))
 
 		http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
 
@@ -182,7 +191,7 @@ func (c *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 func (c *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for delete contact", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -191,8 +200,12 @@ func (c *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling delete contact")
+
 	if err := r.ParseForm(); err != nil {
-		log.Println(errCouldNotParseForm, err)
+		log.Warn("Could not delete contact", "err", errors.Join(errCouldNotParseForm, err))
 
 		http.Error(w, errCouldNotParseForm.Error(), http.StatusInternalServerError)
 
@@ -201,7 +214,7 @@ func (c *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request)
 
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not delete contact", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -210,20 +223,17 @@ func (c *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request)
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not delete contact", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Deleting contact",
-		"id", id,
-		"namespace", userData.Email,
-	)
+	log.Debug("Deleting contact from DB", "id", id)
 
 	if err := c.persister.DeleteContact(r.Context(), int32(id), userData.Email); err != nil {
-		log.Println(errCouldNotDeleteFromDB, err)
+		log.Warn("Could not delete contact from DB", "err", errors.Join(errCouldNotDeleteFromDB, err))
 
 		http.Error(w, errCouldNotDeleteFromDB.Error(), http.StatusInternalServerError)
 
@@ -236,7 +246,7 @@ func (c *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request)
 func (c *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for view contact page", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -245,9 +255,13 @@ func (c *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling view contact page")
+
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare view contact page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
@@ -256,49 +270,40 @@ func (c *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare view contact page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Getting contact",
-		"id", id,
-		"namespace", userData.Email,
-	)
+	log.Debug("Getting contact from DB", "id", id)
 
 	contact, err := c.persister.GetContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+		log.Warn("Could not get contact from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
 		return
 	}
 
-	c.log.Debug("Getting debts for contact",
-		"id", id,
-		"namespace", userData.Email,
-	)
+	log.Debug("Getting debts for contact from DB", "id", id)
 
 	debts, err := c.persister.GetDebts(r.Context(), int32(id), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+		log.Warn("Could not get debts from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
 		return
 	}
 
-	c.log.Debug("Getting activites for contact",
-		"id", id,
-		"namespace", userData.Email,
-	)
+	log.Debug("Getting activities for contact from DB", "id", id)
 
 	activities, err := c.persister.GetActivities(r.Context(), int32(id), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+		log.Warn("Could not get activities from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -319,7 +324,7 @@ func (c *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		Debts:      debts,
 		Activities: activities,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Warn("Could not render template for viewing a contact", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 
@@ -330,7 +335,7 @@ func (c *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for update contact", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -339,8 +344,12 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling update contact")
+
 	if err := r.ParseForm(); err != nil {
-		log.Println(errCouldNotParseForm, err)
+		log.Warn("Could not update contact", "err", errors.Join(errCouldNotParseForm, err))
 
 		http.Error(w, errCouldNotParseForm.Error(), http.StatusInternalServerError)
 
@@ -349,7 +358,7 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update contact", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -358,7 +367,7 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update contact", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -367,7 +376,7 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 
 	firstName := r.FormValue("first_name")
 	if strings.TrimSpace(firstName) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update contact", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -376,7 +385,7 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 
 	lastName := r.FormValue("last_name")
 	if strings.TrimSpace(lastName) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update contact", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -385,7 +394,7 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 
 	email := r.FormValue("email")
 	if _, err := mail.ParseAddress(email); err != nil {
-		log.Println(err)
+		log.Warn("Could not update contact", "err", errors.Join(errInvalidForm, err))
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -396,7 +405,7 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 
 	pronouns := r.FormValue("pronouns")
 	if strings.TrimSpace(pronouns) == "" {
-		log.Println(errInvalidForm)
+		log.Warn("Could not update contact", "err", errInvalidForm)
 
 		http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -409,7 +418,7 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 	if strings.TrimSpace(rbirthday) != "" {
 		b, err := time.Parse("2006-01-02", rbirthday)
 		if err != nil {
-			log.Println(errInvalidForm)
+			log.Warn("Could not update contact", "err", errInvalidForm)
 
 			http.Error(w, errInvalidForm.Error(), http.StatusUnprocessableEntity)
 
@@ -423,13 +432,13 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 
 	notes := r.FormValue("notes")
 
-	c.log.Debug("Updating contact",
+	log.Debug("Updating contact in DB",
+		"id", id,
 		"firstName", firstName,
 		"lastName", lastName,
 		"nickname", nickname,
 		"email", email,
 		"pronouns", pronouns,
-		"namespace", userData.Email,
 		"birthday", birthday,
 		"address", address,
 		"notes", notes,
@@ -448,7 +457,7 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 		address,
 		notes,
 	); err != nil {
-		log.Println(errCouldNotUpdateInDB, err)
+		log.Warn("Could not update contact in DB", "err", errors.Join(errCouldNotUpdateInDB, err))
 
 		http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
 
@@ -461,7 +470,7 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 func (c *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for edit contact page", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -470,9 +479,13 @@ func (c *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log := c.log.With("namespace", userData.Email)
+
+	log.Debug("Handling edit contact page")
+
 	rid := r.FormValue("id")
 	if strings.TrimSpace(rid) == "" {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare edit contact page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
@@ -481,21 +494,18 @@ func (c *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(rid)
 	if err != nil {
-		log.Println(errInvalidQueryParam)
+		log.Warn("Could not prepare edit contact page", "err", errInvalidQueryParam)
 
 		http.Error(w, errInvalidQueryParam.Error(), http.StatusUnprocessableEntity)
 
 		return
 	}
 
-	c.log.Debug("Getting contact for editing",
-		"id", id,
-		"namespace", userData.Email,
-	)
+	log.Debug("Getting contact for editing from DB", "id", id)
 
 	contact, err := c.persister.GetContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
-		log.Println(errCouldNotFetchFromDB, err)
+		log.Warn("Could not get contact from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -512,7 +522,7 @@ func (c *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {
 		},
 		Entry: contact,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Warn("Could not render template for editing a contact", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 

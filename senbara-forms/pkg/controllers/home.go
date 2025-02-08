@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"log"
+	"errors"
 	"net/http"
 	"strings"
 )
@@ -13,12 +13,12 @@ type indexData struct {
 }
 
 func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
-	c.log.Debug("Getting index")
+	c.log.Debug("Handling index")
 
 	if r.Method == http.MethodGet && r.URL.Path == "/" {
 		_, userData, status, err := c.authorize(w, r, false)
 		if err != nil {
-			log.Println(err)
+			c.log.Warn("Could not authorize user for index page", "err", err)
 
 			http.Error(w, err.Error(), status)
 
@@ -27,22 +27,25 @@ func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 
 		var contactsCount, journalEntriesCount int64
 		if strings.TrimSpace(userData.Email) != "" {
-			c.log.Debug("Counting contacts for index summary", "namespace", userData.Email)
+			log := c.log.With("namespace", userData.Email)
 
+			log.Debug("Counting contacts for index summary")
+
+			var err error
 			contactsCount, err = c.persister.CountContacts(r.Context(), userData.Email)
 			if err != nil {
-				log.Println(errCouldNotFetchFromDB, err)
+				log.Warn("Could not count contacts for index summary", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 				http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
 				return
 			}
 
-			c.log.Debug("Counting journal entries for index summary", "namespace", userData.Email)
+			log.Debug("Counting journal entries for index summary")
 
 			journalEntriesCount, err = c.persister.CountJournalEntries(r.Context(), userData.Email)
 			if err != nil {
-				log.Println(errCouldNotFetchFromDB, err)
+				log.Warn("Could not count journal entries for index summary", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 				http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -61,7 +64,7 @@ func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 			ContactsCount:       contactsCount,
 			JournalEntriesCount: journalEntriesCount,
 		}); err != nil {
-			log.Println(errCouldNotRenderTemplate, err)
+			c.log.Warn("Could not render index template", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 			http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 
@@ -71,11 +74,11 @@ func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.log.Debug("Getting page not found template")
+	c.log.Debug("Handling page not found")
 
 	redirected, userData, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		c.log.Warn("Could not authorize user for page not found page", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -83,6 +86,8 @@ func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 	} else if redirected {
 		return
 	}
+
+	log := c.log.With("namespace", userData.Email)
 
 	w.WriteHeader(http.StatusNotFound)
 
@@ -92,9 +97,8 @@ func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 		Page:       userData.Locale.Get("Page not found"),
 		PrivacyURL: c.privacyURL,
 		ImprintURL: c.imprintURL,
-	},
-	); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+	}); err != nil {
+		log.Warn("Could not render page not found template", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -287,11 +286,15 @@ type redirectData struct {
 }
 
 func (c *Controller) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	c.log.Debug("Logging in user")
+	returnURL := r.Header.Get("Referer")
+
+	log := c.log.With("returnURL", returnURL)
+
+	log.Debug("Logging in user")
 
 	redirected, _, status, err := c.authorize(w, r, true)
 	if err != nil {
-		log.Println(err)
+		log.Warn("Could not authorize user for login", "err", err)
 
 		http.Error(w, err.Error(), status)
 
@@ -300,15 +303,20 @@ func (c *Controller) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, r.Header.Get("Referer"), http.StatusFound)
+	http.Redirect(w, r, returnURL, http.StatusFound)
 }
 
 func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
+	log := c.log.With(
+		"authCode", r.URL.Query().Get("code") != "",
+		"state", r.URL.Query().Get("state"),
+	)
+
 	c.log.Debug("Handling user auth")
 
 	locale, err := c.localize(r)
 	if err != nil {
-		log.Println(errCouldNotLocalize, err)
+		log.Warn("Could not localize auth page", "err", errors.Join(errCouldNotLocalize, err))
 
 		http.Error(w, errCouldNotLocalize.Error(), http.StatusInternalServerError)
 
@@ -323,9 +331,11 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 		returnURL = "/"
 	}
 
+	log = log.With("returnURL", returnURL)
+
 	// Sign out
 	if strings.TrimSpace(authCode) == "" {
-		c.log.Debug("Signing out user", "returnURL", returnURL)
+		log.Debug("Signing out user")
 
 		http.SetCookie(w, &http.Cookie{
 			Name:     refreshTokenKey,
@@ -360,7 +370,7 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 
 			Href: returnURL,
 		}); err != nil {
-			log.Println(errCouldNotRenderTemplate, err)
+			log.Warn("Could not render sign out template", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 			http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 
@@ -372,7 +382,7 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 
 	ru, err := url.Parse(returnURL)
 	if err != nil {
-		log.Println(errCouldNotLogin, err)
+		log.Warn("Could not parse return URL", "err", errors.Join(errCouldNotLogin, err))
 
 		http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
 
@@ -385,18 +395,18 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Sign in
-	c.log.Debug("Exchanging auth code for tokens", "returnURL", returnURL)
+	log.Debug("Exchanging auth code for tokens")
 
 	oauth2Token, err := c.config.Exchange(r.Context(), authCode)
 	if err != nil {
-		log.Println(errCouldNotLogin, err)
+		log.Warn("Could not exchange auth code", "err", errors.Join(errCouldNotLogin, err))
 
 		http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
 
 		return
 	}
 
-	c.log.Debug("Setting refresh token cookie, expires in one year")
+	log.Debug("Setting refresh token cookie, expires in one year")
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     refreshTokenKey,
@@ -410,14 +420,14 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 
 	idToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
-		log.Println(errCouldNotLogin, err)
+		log.Warn("Could not extract ID token", "err", errors.Join(errCouldNotLogin, err))
 
 		http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
 
 		return
 	}
 
-	c.log.Debug("Setting ID token cookie", "expiry", oauth2Token.Expiry)
+	log.Debug("Setting ID token cookie", "expiry", oauth2Token.Expiry)
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     idTokenKey,
@@ -442,7 +452,7 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 
 		Href: returnURL,
 	}); err != nil {
-		log.Println(errCouldNotRenderTemplate, err)
+		log.Warn("Could not render sign in template", "err", errors.Join(errCouldNotRenderTemplate, err))
 
 		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
 
