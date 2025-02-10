@@ -20,4 +20,4 @@ To translate Senbara, you can use [Weblate](https://hosted.weblate.org/engage/se
 
 Senbara (c) 2025 Felicitas Pojtinger and contributors
 
-SPDX-License-Identifier: Apache-2.0
+SPDX-License-Identifier: AGPL-3.0
