@@ -100,7 +100,5 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	http.Handle("/api/senbara-rest", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		SenbaraRESTHandler(w, r, c, s)
-	}))
+	SenbaraRESTHandler(w, r, c, s)
 }
