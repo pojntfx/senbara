@@ -1,8 +1,8 @@
 {
-  "routes": [
+  "redirects": [
     {
-      "src": "/api/senbara(.*)",
-      "dest": "/api/senbara-rest"
+      "source": "/((?!api/senbara-forms).*)",
+      "destination": "/api/senbara-forms?path=/$1"
     }
   ]
 }

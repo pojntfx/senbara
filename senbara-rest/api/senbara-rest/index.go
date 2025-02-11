@@ -57,6 +57,8 @@ func SenbaraRESTHandler(
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
+	r.URL.Path = r.URL.Query().Get("path")
+
 	opts := &slog.HandlerOptions{}
 	if os.Getenv("VERBOSE") == "true" {
 		opts.Level = slog.LevelDebug
