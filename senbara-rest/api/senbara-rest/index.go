@@ -100,7 +100,5 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	http.StripPrefix("/api/senbara-rest", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		SenbaraRESTHandler(w, r, c, s)
-	})).ServeHTTP(w, r)
+	SenbaraRESTHandler(w, r, c, s)
 }
