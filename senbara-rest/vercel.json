@@ -1,5 +1,5 @@
 {
-  "redirects": [
+  "rewrites": [
     {
       "source": "/((?!api/senbara-rest).*)",
       "destination": "/api/senbara-rest?path=/$1"
