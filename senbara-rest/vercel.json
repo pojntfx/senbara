@@ -1,10 +1,8 @@
 {
   "routes": [
     {
-      "src": "/api/senbara-rest(/?|/.*)",
-      "dest": "/api/senbara-rest$1",
-      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-      "continue": true
+      "src": "/api/senbara(.*)",
+      "dest": "/api/senbara-rest/index.go"
     }
   ]
 }
