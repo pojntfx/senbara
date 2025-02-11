@@ -1,58 +1,39 @@
 package controllers
 
 import (
-	"encoding/json"
-	"log"
-	"net/http"
+	"context"
+	"errors"
+
+	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 )
 
-type indexData struct {
-	ContactsCount       int64
-	JournalEntriesCount int64
-}
+func (c *Controller) GetIndex(ctx context.Context, request api.GetIndexRequestObject) (api.GetIndexResponseObject, error) {
+	namespace := ctx.Value(ContextKeyNamespace).(string)
 
-func (b *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet && r.URL.Path == "/" {
-		email, err := b.authorize(r)
-		if err != nil {
-			log.Println(err)
+	log := c.log.With("namespace", namespace)
 
-			http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
+	log.Debug("Handling index")
 
-			return
-		}
+	log.Debug("Counting contacts for index summary")
 
-		contactsCount, err := b.persister.CountContacts(r.Context(), email)
-		if err != nil {
-			log.Println(errCouldNotFetchFromDB, err)
+	contactsCount, err := c.persister.CountContacts(ctx, namespace)
+	if err != nil {
+		log.Warn("Could not count contacts for index summary", "err", errors.Join(errCouldNotFetchFromDB, err))
 
-			http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
-
-			return
-		}
-
-		journalEntriesCount, err := b.persister.CountJournalEntries(r.Context(), email)
-		if err != nil {
-			log.Println(errCouldNotFetchFromDB, err)
-
-			http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
-
-			return
-		}
-
-		if err := json.NewEncoder(w).Encode(indexData{
-			ContactsCount:       contactsCount,
-			JournalEntriesCount: journalEntriesCount,
-		}); err != nil {
-			log.Println(errCouldNotWriteResponse, err)
-
-			http.Error(w, errCouldNotWriteResponse.Error(), http.StatusInternalServerError)
-
-			return
-		}
-
-		return
+		return api.GetIndex500TextResponse(errCouldNotFetchFromDB.Error()), nil
 	}
 
-	http.NotFound(w, r)
+	log.Debug("Counting journal entries for index summary")
+
+	journalEntriesCount, err := c.persister.CountJournalEntries(ctx, namespace)
+	if err != nil {
+		log.Warn("Could not count journal entries for index summary", "err", errors.Join(errCouldNotFetchFromDB, err))
+
+		return api.GetIndex500TextResponse(errCouldNotFetchFromDB.Error()), nil
+	}
+
+	return api.GetIndex200JSONResponse(api.IndexData{
+		ContactsCount:       &contactsCount,
+		JournalEntriesCount: &journalEntriesCount,
+	}), nil
 }

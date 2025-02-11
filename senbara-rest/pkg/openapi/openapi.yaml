@@ -1,0 +1,71 @@
+openapi: 3.1.1
+info:
+  title: Senbara REST API v1
+  summary: Personal ERP REST API using the Go stdlib, OIDC and PostgreSQL
+  description: |-
+    REST API for a simple personal ERP web application built with the Go standard library, OpenID Connect authentication and PostgreSQL data storage. Designed as a reference for modern REST API development with Go.
+
+    Imprint: https://felicitas.pojtinger.com/imprint
+  termsOfService: https://felicitas.pojtinger.com/privacy/dynamic
+  contact:
+    name: Felicitas Pojtinger
+    url: https://matrix.to/#/@pojntfx:matrix.org
+    email: felicitas@pojtinger.com
+  license:
+    name: AGPL-3.0
+    url: https://github.com/pojntfx/senbara/blob/main/LICENSE
+  version: 0.1.0
+externalDocs:
+  description: More information about the Senbara REST API v1
+  url: https://github.com/pojntfx/senbara
+tags:
+  - name: index
+    description: General operations
+paths:
+  /:
+    get:
+      tags:
+        - index
+      summary: Get index information
+      description: Gets counts of contacts and journal entries for the authenticated user.
+      operationId: getIndex
+      security:
+        - oidc: []
+      responses:
+        "200":
+          description: Index information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IndexData"
+        "403":
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    IndexData:
+      type: object
+      description: Index information including contact and journal entry counts
+      properties:
+        contactsCount:
+          type: integer
+          format: int64
+          description: The number of contacts for the authenticated user
+        journalEntriesCount:
+          type: integer
+          format: int64
+          description: The number of journal entries for the authenticated user
+  securitySchemes:
+    oidc:
+      type: openIdConnect
+      openIdConnectUrl: /.well-known/openid-configuration
+      description: OIDC configuration

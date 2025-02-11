@@ -1,4 +1,4 @@
-package senbaraForms
+package senbaraRest
 
 //go:generate tar czf code.tar.gz --exclude .git -C ../../.. .
 
@@ -10,7 +10,11 @@ import (
 
 	_ "github.com/lib/pq"
 
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/getkin/kin-openapi/openapi3filter"
+	middleware "github.com/oapi-codegen/nethttp-middleware"
 	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
+	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/controllers"
 )
 
@@ -20,45 +24,34 @@ var code []byte
 var (
 	p *persisters.Persister
 	c *controllers.Controller
+	s *openapi3.T
 )
 
 func SenbaraRESTHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 	c *controllers.Controller,
+	s *openapi3.T,
 ) {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /journal", c.HandleJournal)
-	mux.HandleFunc("GET /journal/{id}", c.HandleViewJournal)
-	mux.HandleFunc("POST /journal", c.HandleCreateJournal)
-	mux.HandleFunc("DELETE /journal/{id}", c.HandleDeleteJournal)
-	mux.HandleFunc("PUT /journal/{id}", c.HandleUpdateJournal)
-
-	mux.HandleFunc("GET /contacts", c.HandleContacts)
-	mux.HandleFunc("GET /contacts/{id}", c.HandleViewContact)
-	mux.HandleFunc("POST /contacts", c.HandleCreateContact)
-	mux.HandleFunc("DELETE /contacts/{id}", c.HandleDeleteContact)
-	mux.HandleFunc("PUT /contacts/{id}", c.HandleUpdateContact)
-
-	mux.HandleFunc("POST /debts", c.HandleCreateDebt)
-	mux.HandleFunc("DELETE /debts/{id}", c.HandleSettleDebt)
-	mux.HandleFunc("PUT /debts/{id}", c.HandleUpdateDebt)
-
-	mux.HandleFunc("GET /activities/{id}", c.HandleViewActivity)
-	mux.HandleFunc("POST /activities", c.HandleCreateActivity)
-	mux.HandleFunc("DELETE /activities/{id}", c.HandleDeleteActivity)
-	mux.HandleFunc("PUT /activities/{id}", c.HandleUpdateActivity)
-
-	mux.HandleFunc("GET /userdata", c.HandleUserData)
-	mux.HandleFunc("POST /userdata", c.HandleCreateUserData)
-	mux.HandleFunc("DELETE /userdata", c.HandleDeleteUserData)
-
-	mux.HandleFunc("GET /code/", func(w http.ResponseWriter, r *http.Request) {
-		c.HandleCode(w, r, code)
-	})
-
-	mux.HandleFunc("/", c.HandleIndex)
+	mux.Handle(
+		"/",
+		middleware.OapiRequestValidatorWithOptions(
+			s,
+			&middleware.Options{
+				Options: openapi3filter.Options{
+					AuthenticationFunc: openapi3filter.NoopAuthenticationFunc,
+				},
+			},
+		)(
+			c.Authorize(
+				api.Handler(
+					api.NewStrictHandler(c, []api.StrictMiddlewareFunc{}),
+				),
+			),
+		),
+	)
 
 	mux.ServeHTTP(w, r)
 }
@@ -66,14 +59,14 @@ func SenbaraRESTHandler(
 func Handler(w http.ResponseWriter, r *http.Request) {
 	r.URL.Path = r.URL.Query().Get("path")
 
-	if p == nil {
-		opts := &slog.HandlerOptions{}
-		if os.Getenv("VERBOSE") == "true" {
-			opts.Level = slog.LevelDebug
-		}
-		log := slog.New(slog.NewJSONHandler(os.Stderr, opts))
+	opts := &slog.HandlerOptions{}
+	if os.Getenv("VERBOSE") == "true" {
+		opts.Level = slog.LevelDebug
+	}
+	log := slog.New(slog.NewJSONHandler(os.Stderr, opts))
 
-		p = persisters.NewPersister(log, os.Getenv("POSTGRES_URL"))
+	if p == nil {
+		p = persisters.NewPersister(slog.New(log.Handler().WithGroup("persister")), os.Getenv("POSTGRES_URL"))
 
 		if err := p.Init(r.Context()); err != nil {
 			panic(err)
@@ -82,11 +75,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if c == nil {
 		c = controllers.NewController(
+			slog.New(log.Handler().WithGroup("controller")),
+
 			p,
 
 			os.Getenv("OIDC_ISSUER"),
 			os.Getenv("OIDC_CLIENT_ID"),
 			os.Getenv("OIDC_REDIRECT_URL"),
+
+			os.Getenv("PRIVACY_URL"),
+			os.Getenv("IMPRINT_URL"),
 		)
 
 		if err := c.Init(r.Context()); err != nil {
@@ -94,5 +92,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	SenbaraRESTHandler(w, r, c)
+	if s == nil {
+		var err error
+		s, err = api.GetSwagger()
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	http.Handle("/api/senbara-rest", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		SenbaraRESTHandler(w, r, c, s)
+	}))
 }

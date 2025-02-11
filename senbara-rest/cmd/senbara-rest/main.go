@@ -12,7 +12,8 @@ import (
 
 	"github.com/adrg/xdg"
 	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
-	senbaraREST "github.com/pojntfx/senbara/senbara-rest/api/senbara-rest"
+	senbaraRest "github.com/pojntfx/senbara/senbara-rest/api/senbara-rest"
+	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/controllers"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -22,6 +23,8 @@ var (
 	errMissingOIDCIssuer      = errors.New("missing OIDC issuer")
 	errMissingOIDCClientID    = errors.New("missing OIDC client ID")
 	errMissingOIDCRedirectURL = errors.New("missing OIDC redirect URL")
+	errMissingPrivacyURL      = errors.New("missing privacy policy URL")
+	errMissingImprintURL      = errors.New("missing imprint URL")
 )
 
 const (
@@ -32,6 +35,8 @@ const (
 	oidcIssuerKey      = "oidc-issuer"
 	oidcClientIDKey    = "oidc-client-id"
 	oidcRedirectURLKey = "oidc-redirect-url"
+	privacyURLKey      = "privacy-url"
+	imprintURLKey      = "imprint-url"
 )
 
 func main() {
@@ -94,28 +99,46 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				return errMissingOIDCRedirectURL
 			}
 
-			p := persisters.NewPersister(log, viper.GetString(pgaddrKey))
+			if !viper.IsSet(privacyURLKey) {
+				return errMissingPrivacyURL
+			}
+
+			if !viper.IsSet(imprintURLKey) {
+				return errMissingImprintURL
+			}
+
+			p := persisters.NewPersister(slog.New(log.Handler().WithGroup("persister")), viper.GetString(pgaddrKey))
 
 			if err := p.Init(ctx); err != nil {
 				return err
 			}
 
 			c := controllers.NewController(
+				slog.New(log.Handler().WithGroup("controller")),
+
 				p,
 
 				viper.GetString(oidcIssuerKey),
 				viper.GetString(oidcClientIDKey),
 				viper.GetString(oidcRedirectURLKey),
+
+				viper.GetString(privacyURLKey),
+				viper.GetString(imprintURLKey),
 			)
 
 			if err := c.Init(ctx); err != nil {
 				return err
 			}
 
+			s, err := api.GetSwagger()
+			if err != nil {
+				return err
+			}
+
 			log.Info("Listening", "laddr", viper.GetString(laddrKey))
 
 			panic(http.ListenAndServe(viper.GetString(laddrKey), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				senbaraREST.SenbaraRESTHandler(w, r, c)
+				senbaraRest.SenbaraRESTHandler(w, r, c, s)
 			})))
 		},
 	}
@@ -123,10 +146,12 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 	cmd.PersistentFlags().BoolP(verboseKey, "v", false, "Whether to enable verbose logging")
 	cmd.PersistentFlags().StringP(configKey, "c", "", "Config file to use (by default "+cmd.Use+".yaml in the XDG config directory is read if it exists)")
 	cmd.PersistentFlags().StringP(laddrKey, "l", ":1337", "Listen address (port can also be set with `PORT` env variable)")
-	cmd.PersistentFlags().StringP(pgaddrKey, "p", "postgresql://postgres@localhost:5432/senbara_rest?sslmode=disable", "Database address")
+	cmd.PersistentFlags().StringP(pgaddrKey, "p", "postgresql://postgres@localhost:5432/senbara?sslmode=disable", "Database address")
 	cmd.PersistentFlags().String(oidcIssuerKey, "", "OIDC Issuer (i.e. https://pojntfx.eu.auth0.com/)")
 	cmd.PersistentFlags().String(oidcClientIDKey, "", "OIDC Client ID (i.e. myoidcclientid))")
 	cmd.PersistentFlags().String(oidcRedirectURLKey, "http://localhost:1337/authorize", "OIDC redirect URL")
+	cmd.PersistentFlags().String(privacyURLKey, "", "Privacy policy URL")
+	cmd.PersistentFlags().String(imprintURLKey, "", "Imprint URL")
 
 	if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
 		panic(err)
