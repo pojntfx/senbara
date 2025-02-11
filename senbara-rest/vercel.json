@@ -2,7 +2,7 @@
   "routes": [
     {
       "src": "/api/senbara(.*)",
-      "dest": "/api/senbara-rest/index.go"
+      "dest": "/api/senbara-rest"
     }
   ]
 }
