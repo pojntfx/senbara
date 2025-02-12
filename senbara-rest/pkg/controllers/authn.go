@@ -5,6 +5,9 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+
+	"github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
+	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 )
 
 type contextKey int
@@ -13,54 +16,67 @@ const (
 	ContextKeyNamespace contextKey = iota
 )
 
-func (c *Controller) Authorize(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if security := c.spec.Paths.Find(r.URL.Path).GetOperation(r.Method).Security; security == nil || len(*security) <= 0 {
-			c.log.Debug("Auth skipped since path doesn't require auth", "path", r.URL.Path)
+func (c *Controller) Authenticate(r *http.Request) (string, error) {
+	idToken := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 
-			next.ServeHTTP(w, r)
+	c.log.Debug("Starting authentication",
+		"method", r.Method,
+		"path", r.URL.Path,
+	)
 
-			return
+	id, err := c.verifier.Verify(r.Context(), idToken)
+	if err != nil {
+		c.log.Debug("ID token verification failed", "error", errors.Join(errCouldNotLogin, err))
+
+		return "", errCouldNotLogin
+	}
+
+	var claims struct {
+		Email         string `json:"email"`
+		EmailVerified bool   `json:"email_verified"`
+	}
+	if err := id.Claims(&claims); err != nil {
+		c.log.Debug("Failed to parse ID token claims", "error", errors.Join(errCouldNotLogin, err))
+
+		return "", errCouldNotLogin
+	}
+
+	if !claims.EmailVerified {
+		c.log.Debug("Email from ID token claims not verified, user is unauthenticated", "email", claims.Email)
+
+		return "", errCouldNotLogin
+	}
+
+	c.log.Debug("Authentication successful", "email", claims.Email)
+
+	return claims.Email, nil
+}
+
+func (c *Controller) Authorize(f nethttp.StrictHTTPHandlerFunc, operationID string) nethttp.StrictHTTPHandlerFunc {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (response interface{}, err error) {
+		if _, ok := r.Context().Value(api.OidcScopes).([]string); ok {
+			c.log.Debug("Starting authorization",
+				"method", r.Method,
+				"path", r.URL.Path,
+			)
+
+			namespace, err := c.Authenticate(r)
+			if err != nil {
+				c.log.Debug("Could not re-authenticate to extract namespace", "error", errors.Join(errCouldNotLogin, err))
+
+				return struct{}{}, errCouldNotLogin
+			}
+
+			ctx = context.WithValue(r.Context(), ContextKeyNamespace, namespace)
+
+			c.log.Debug("Authorization successful", "email", namespace)
+		} else {
+			c.log.Debug("Authorization skipped since route doesn't require it",
+				"method", r.Method,
+				"path", r.URL.Path,
+			)
 		}
 
-		idToken := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
-
-		c.log.Debug("Starting auth",
-			"method", r.Method,
-			"path", r.URL.Path,
-		)
-
-		id, err := c.verifier.Verify(r.Context(), idToken)
-		if err != nil {
-			c.log.Debug("ID token verification failed", "error", errors.Join(errCouldNotLogin, err))
-
-			http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
-
-			return
-		}
-
-		var claims struct {
-			Email         string `json:"email"`
-			EmailVerified bool   `json:"email_verified"`
-		}
-		if err := id.Claims(&claims); err != nil {
-			c.log.Debug("Failed to parse ID token claims", "error", errors.Join(errCouldNotLogin, err))
-
-			http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
-
-			return
-		}
-
-		if !claims.EmailVerified {
-			c.log.Debug("Email from ID token claims not verified, user is unauthorized", "email", claims.Email)
-
-			http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
-
-			return
-		}
-
-		c.log.Debug("Auth successful", "email", claims.Email)
-
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ContextKeyNamespace, claims.Email)))
-	})
+		return f(ctx, w, r, request)
+	}
 }

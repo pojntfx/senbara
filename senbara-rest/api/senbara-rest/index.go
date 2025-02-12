@@ -3,6 +3,7 @@ package senbaraRest
 //go:generate tar czf code.tar.gz --exclude .git -C ../../.. .
 
 import (
+	"context"
 	_ "embed"
 	"log/slog"
 	"net/http"
@@ -41,14 +42,18 @@ func SenbaraRESTHandler(
 			s,
 			&middleware.Options{
 				Options: openapi3filter.Options{
-					AuthenticationFunc: openapi3filter.NoopAuthenticationFunc,
+					AuthenticationFunc: func(ctx context.Context, ai *openapi3filter.AuthenticationInput) error {
+						_, err := c.Authenticate(r)
+
+						return err
+					},
 				},
 			},
 		)(
-			c.Authorize(
-				api.Handler(
-					api.NewStrictHandler(c, []api.StrictMiddlewareFunc{}),
-				),
+			api.Handler(
+				api.NewStrictHandler(c, []api.StrictMiddlewareFunc{
+					c.Authorize,
+				}),
 			),
 		),
 	)
