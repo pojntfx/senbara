@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"slices"
 	"strings"
 )
 
@@ -13,8 +14,16 @@ const (
 	ContextKeyNamespace contextKey = iota
 )
 
-func (c *Controller) Authorize(next http.Handler) http.Handler {
+func (c *Controller) Authorize(next http.Handler, pathsThatDontRequireAuth []string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if slices.Contains(pathsThatDontRequireAuth, r.URL.Path) {
+			c.log.Debug("Auth skipped since path doesn't require auth", "path", r.URL.Path, "pathsThatDontRequireAuth", pathsThatDontRequireAuth)
+
+			next.ServeHTTP(w, r)
+
+			return
+		}
+
 		idToken := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 
 		c.log.Debug("Starting auth",

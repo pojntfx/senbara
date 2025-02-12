@@ -19,15 +19,35 @@ externalDocs:
   description: More information about the Senbara REST API v1
   url: https://github.com/pojntfx/senbara
 tags:
+  - name: meta
+    description: Meta operations
   - name: index
     description: General operations
 paths:
+  /openapi.yaml:
+    get:
+      tags:
+        - meta
+      summary: Get the OpenAPI spec
+      operationId: getOpenAPISpec
+      responses:
+        "200":
+          description: OpenAPI spec retrieved successfully
+          content:
+            application/yaml:
+              schema:
+                type: object
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
   /:
     get:
       tags:
         - index
-      summary: Get index information
-      description: Gets counts of contacts and journal entries for the authenticated user.
+      summary: Gets counts of contacts and journal entries for the authenticated user
       operationId: getIndex
       security:
         - oidc: []

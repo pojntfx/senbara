@@ -18,6 +18,8 @@ import (
 	"path"
 	"strings"
 
+	"gopkg.in/yaml.v2"
+
 	"github.com/getkin/kin-openapi/openapi3"
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 )
@@ -110,10 +112,25 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 type ClientInterface interface {
 	// GetIndex request
 	GetIndex(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetOpenAPISpec request
+	GetOpenAPISpec(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) GetIndex(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetIndexRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetOpenAPISpec(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetOpenAPISpecRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -134,6 +151,33 @@ func NewGetIndexRequest(server string) (*http.Request, error) {
 	}
 
 	operationPath := fmt.Sprintf("/")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetOpenAPISpecRequest generates requests for GetOpenAPISpec
+func NewGetOpenAPISpecRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/openapi.yaml")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -196,6 +240,9 @@ func WithBaseURL(baseURL string) ClientOption {
 type ClientWithResponsesInterface interface {
 	// GetIndexWithResponse request
 	GetIndexWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetIndexResponse, error)
+
+	// GetOpenAPISpecWithResponse request
+	GetOpenAPISpecWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetOpenAPISpecResponse, error)
 }
 
 type GetIndexResponse struct {
@@ -220,6 +267,28 @@ func (r GetIndexResponse) StatusCode() int {
 	return 0
 }
 
+type GetOpenAPISpecResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	YAML200      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r GetOpenAPISpecResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetOpenAPISpecResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // GetIndexWithResponse request returning *GetIndexResponse
 func (c *ClientWithResponses) GetIndexWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetIndexResponse, error) {
 	rsp, err := c.GetIndex(ctx, reqEditors...)
@@ -227,6 +296,15 @@ func (c *ClientWithResponses) GetIndexWithResponse(ctx context.Context, reqEdito
 		return nil, err
 	}
 	return ParseGetIndexResponse(rsp)
+}
+
+// GetOpenAPISpecWithResponse request returning *GetOpenAPISpecResponse
+func (c *ClientWithResponses) GetOpenAPISpecWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetOpenAPISpecResponse, error) {
+	rsp, err := c.GetOpenAPISpec(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetOpenAPISpecResponse(rsp)
 }
 
 // ParseGetIndexResponse parses an HTTP response from a GetIndexWithResponse call
@@ -255,11 +333,40 @@ func ParseGetIndexResponse(rsp *http.Response) (*GetIndexResponse, error) {
 	return response, nil
 }
 
+// ParseGetOpenAPISpecResponse parses an HTTP response from a GetOpenAPISpecWithResponse call
+func ParseGetOpenAPISpecResponse(rsp *http.Response) (*GetOpenAPISpecResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetOpenAPISpecResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "yaml") && rsp.StatusCode == 200:
+		var dest map[string]interface{}
+		if err := yaml.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.YAML200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Get index information
+	// Gets counts of contacts and journal entries for the authenticated user
 	// (GET /)
 	GetIndex(w http.ResponseWriter, r *http.Request)
+	// Get the OpenAPI spec
+	// (GET /openapi.yaml)
+	GetOpenAPISpec(w http.ResponseWriter, r *http.Request)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -282,6 +389,20 @@ func (siw *ServerInterfaceWrapper) GetIndex(w http.ResponseWriter, r *http.Reque
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetIndex(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetOpenAPISpec operation middleware
+func (siw *ServerInterfaceWrapper) GetOpenAPISpec(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetOpenAPISpec(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -412,6 +533,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	}
 
 	m.HandleFunc("GET "+options.BaseURL+"/", wrapper.GetIndex)
+	m.HandleFunc("GET "+options.BaseURL+"/openapi.yaml", wrapper.GetOpenAPISpec)
 
 	return m
 }
@@ -452,11 +574,50 @@ func (response GetIndex500TextResponse) VisitGetIndexResponse(w http.ResponseWri
 	return err
 }
 
+type GetOpenAPISpecRequestObject struct {
+}
+
+type GetOpenAPISpecResponseObject interface {
+	VisitGetOpenAPISpecResponse(w http.ResponseWriter) error
+}
+
+type GetOpenAPISpec200ApplicationyamlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response GetOpenAPISpec200ApplicationyamlResponse) VisitGetOpenAPISpecResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/yaml")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type GetOpenAPISpec500TextResponse string
+
+func (response GetOpenAPISpec500TextResponse) VisitGetOpenAPISpecResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
-	// Get index information
+	// Gets counts of contacts and journal entries for the authenticated user
 	// (GET /)
 	GetIndex(ctx context.Context, request GetIndexRequestObject) (GetIndexResponseObject, error)
+	// Get the OpenAPI spec
+	// (GET /openapi.yaml)
+	GetOpenAPISpec(ctx context.Context, request GetOpenAPISpecRequestObject) (GetOpenAPISpecResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -512,24 +673,49 @@ func (sh *strictHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetOpenAPISpec operation middleware
+func (sh *strictHandler) GetOpenAPISpec(w http.ResponseWriter, r *http.Request) {
+	var request GetOpenAPISpecRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetOpenAPISpec(ctx, request.(GetOpenAPISpecRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetOpenAPISpec")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetOpenAPISpecResponseObject); ok {
+		if err := validResponse.VisitGetOpenAPISpecResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/6RVT2/juA/9KoTmd3Tt9NfZPfg0RdspAnS32cnsqdODLNGOujYlUHTaYJDvvpDtpEnT",
-	"/X8JHP0hHx+fHr8r47vgCUmiKr+raFbY6eFzThZfrrXo9MdiNOyCOE+qHLfAUe2502kNHJm2t44aMJ5E",
-	"GwFNFp58z6RbQBLegPF9ypKpwD4gi8Mhz3QhXqXt01xfVwjUdxUy+HoXPULtGWSFoHtZIYkzWtBCH5FV",
-	"pkZcqlSO5MePKlOyCTj+xQZZbTM1QbshYYd/L/dhNQ7/K4TtfslXT2hkWIloenayWaY2jPR4Z80psvv5",
-	"9VUio3ZNz0MLVKZ8QJrbK0+ERn7lVpWqyJ+xbc9+I/9MRdp39uzttR2Mw9tqm+Dgi2Aq+dqbeIrhJ894",
-	"JAJd+V4GSpZIlWYNX26WX+FyMYf1ucpUP0BaiYRYFkXjZNVXufFdEfwTSf1SxPFa6k+Ke6CO9ImddilA",
-	"ja0zTnT8FPyTOGqQUxSVKdJdquTz7gAsdgdOsnda2L3k4osPxacpfzktem4ShONq96WktmuIrgstQkCO",
-	"Poni5ssCnrECHUKblJD4qHrXCjw7WQ2k3HqIoslqttC6ijVvMrhPrF/DRPuhlgZGycLCR2kYl7/cgdWi",
-	"IYpn3WAO1xhdQ2hBR9DAWCMjGRwAdt4i0yv/FtfY+tAhTYBuff6NvtG8C+xIStjxsic3PyK3cONBlanW",
-	"GaSIqSMT35e3i7uzi3z2D1pcVK2vik47Ku7mVzc/L28S47HvOs0bVarFIa/7KvqYHGbPpW1dlcHwFI6J",
-	"SqJG7uJ9vUReO4MHmP6owMBurc2msBvSnTMphJM23XxfzGvkOCpjlp/nswQ/vSAdnCrVRX6ep0NBy2p4",
-	"OUX6afAdj7lFiZM1HhncW//8c8fJx+c/vum5HeMONq0yxRiDpzj6yf9ns927wtHzDiRbPMUEajcH0tf/",
-	"GGtVqg/F66AopilRvI6IwS7+akgwpjLWaCH2xmCMdd+2m8Tcx9nFG1CCL1KEVrs3cCazisKOmvfSfvZc",
-	"OWuRUtwfTor913Ev05Ab7RCQ2TN4Y3pmtEfOrcqHnWc/PG4fDzV9iwLuLSlJZ7qJqnxQw556HHJPa6di",
-	"IWTdwr7V8dX1xuvbx+3vAQAA//92JAYB1AcAAA==",
+	"H4sIAAAAAAAC/7xVT2/jthP9KgT3d1Qk55dtDzptkGQNA2njrrenbA4UOZKZUiQxHDkxFv7uxUiyI8fp",
+	"brcFejFk/pl58+bxzVepQxuDB09Jll9l0mtoVf+58AaerxUp/mMgabSRbPCyHLaE9XXAVvGasF67zljf",
+	"CB08KU1CeSMeQ4deOQGecCt06DhLJiOGCEgW+jzjhXTF26e5Pq9B+K6tAEWo99GTqAMKWoNQHa3Bk9WK",
+	"wIguAcpMDrhkKa2nn9/LTNI2wvAXGkC5y+QI7cYTWvh7uafVWPi3EHaHpVA9gqZ+JYHu0NJ2xW0Y6AnW",
+	"6FNkd4vrKyajtk2HfQtkJkMEvzBXwXvQ9Ds6WcoifwLnzv7w4ckXvG/N2etrexjT23LHcOCZgEu+Djqd",
+	"YvglIByJQFWho56SFfhKoRKfblafxeVyITbnMpNdD2lNFFNZFI2ldVflOrRFDI+e6uciDde4Pxx3og7+",
+	"hFZZDlCDs9qSSh9ieCTrG0COIjPpVcuVfNwfEMv9gZPsrSK0zzmF4l3xYcxfjosBG4ZwXO2hFG67Esm2",
+	"0YGIgCmwKG4+LcUTVELF6FgJzEfVWUfiydK6J2UeRCLljUIjnK1Q4TYTd8z6tRhpn2qpZ9QbsQyJGoTV",
+	"b7fCKFIiUUDVQC6uIdnGgxEqCSUQakDwGnqAbTCA/oV/AxtwIbbgR0DzkH/xX/yijWg9lWLPy4Hc/Ijc",
+	"wg4HZSad1eATcEdGvi/ny9uzi3z2Ay0uKheqolXWF7eLq5tfVzfMeOraVuFWlnI55fVQRZfYYQ5cGmer",
+	"TPRP4ZgoFjVgm+7qFeDGaphg+qsCI9qN0tvCbL1qreYQlhzffFvMG8A0KGOWn+czhs8vSEUrS3mRn+d8",
+	"KCpa9y+n4J8Geh2z+fXtXRhZyjlQb6cykwgpBp+Gd///2Wyvfxi8aSKt4jFx6r1f89f/EGpZynfFi6EX",
+	"o5sXL1beP+vvmTkCG9wGjEid1pBS3Tm35Qrfzy5egSJ4piI6ZV/BGU0lEVrfvJX2Y8DKGgOe4/50Uuw/",
+	"jnvJw2iwLQGIAUXQukMEc+Swsrzfe+v9w+5hqr05UBqH1dHIeT3RvjsDSDVJlvfS9v194PTFqJF8q1r3",
+	"LU2wL1wuF6sI+seUsQ98QtlhzJxQNuYSKYL+RvP/wyZNe9HzO4U4YbYFUkzs7rB0MqSAlDiwm16GRH91",
+	"l70+PwcPqNybV4Y+7h52fwYAAP//nVErDjYJAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -49,6 +49,7 @@ func SenbaraRESTHandler(
 				api.Handler(
 					api.NewStrictHandler(c, []api.StrictMiddlewareFunc{}),
 				),
+				[]string{"/openapi.yaml"},
 			),
 		),
 	)

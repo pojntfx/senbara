@@ -13,6 +13,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	golang.org/x/oauth2 v0.25.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
