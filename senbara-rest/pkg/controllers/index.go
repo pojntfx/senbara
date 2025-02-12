@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
 	"golang.org/x/oauth2"
 )
@@ -21,6 +22,7 @@ var (
 type Controller struct {
 	log       *slog.Logger
 	persister *persisters.Persister
+	spec      *openapi3.T
 
 	oidcIssuer      string
 	oidcClientID    string
@@ -38,6 +40,8 @@ func NewController(
 
 	persister *persisters.Persister,
 
+	spec *openapi3.T,
+
 	oidcIssuer,
 	oidcClientID,
 	oidcRedirectURL,
@@ -49,6 +53,8 @@ func NewController(
 		log: log,
 
 		persister: persister,
+
+		spec: spec,
 
 		oidcIssuer:      oidcIssuer,
 		oidcClientID:    oidcClientID,

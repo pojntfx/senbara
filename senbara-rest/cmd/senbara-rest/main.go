@@ -113,10 +113,17 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				return err
 			}
 
+			s, err := api.GetSwagger()
+			if err != nil {
+				return err
+			}
+
 			c := controllers.NewController(
 				slog.New(log.Handler().WithGroup("controller")),
 
 				p,
+
+				s,
 
 				viper.GetString(oidcIssuerKey),
 				viper.GetString(oidcClientIDKey),
@@ -127,11 +134,6 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 			)
 
 			if err := c.Init(ctx); err != nil {
-				return err
-			}
-
-			s, err := api.GetSwagger()
-			if err != nil {
 				return err
 			}
 

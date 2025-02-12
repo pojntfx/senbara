@@ -49,7 +49,6 @@ func SenbaraRESTHandler(
 				api.Handler(
 					api.NewStrictHandler(c, []api.StrictMiddlewareFunc{}),
 				),
-				[]string{"/openapi.yaml"},
 			),
 		),
 	)
@@ -74,11 +73,21 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if s == nil {
+		var err error
+		s, err = api.GetSwagger()
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	if c == nil {
 		c = controllers.NewController(
 			slog.New(log.Handler().WithGroup("controller")),
 
 			p,
+
+			s,
 
 			os.Getenv("OIDC_ISSUER"),
 			os.Getenv("OIDC_CLIENT_ID"),
@@ -89,14 +98,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		)
 
 		if err := c.Init(r.Context()); err != nil {
-			panic(err)
-		}
-	}
-
-	if s == nil {
-		var err error
-		s, err = api.GetSwagger()
-		if err != nil {
 			panic(err)
 		}
 	}

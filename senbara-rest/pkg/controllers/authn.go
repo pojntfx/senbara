@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"slices"
 	"strings"
 )
 
@@ -14,10 +13,10 @@ const (
 	ContextKeyNamespace contextKey = iota
 )
 
-func (c *Controller) Authorize(next http.Handler, pathsThatDontRequireAuth []string) http.Handler {
+func (c *Controller) Authorize(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if slices.Contains(pathsThatDontRequireAuth, r.URL.Path) {
-			c.log.Debug("Auth skipped since path doesn't require auth", "path", r.URL.Path, "pathsThatDontRequireAuth", pathsThatDontRequireAuth)
+		if security := c.spec.Paths.Find(r.URL.Path).GetOperation(r.Method).Security; security == nil || len(*security) <= 0 {
+			c.log.Debug("Auth skipped since path doesn't require auth", "path", r.URL.Path)
 
 			next.ServeHTTP(w, r)
 
