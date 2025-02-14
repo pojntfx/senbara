@@ -35,6 +35,7 @@ const (
 	oidcIssuerKey      = "oidc-issuer"
 	oidcClientIDKey    = "oidc-client-id"
 	oidcRedirectURLKey = "oidc-redirect-url"
+	corsOriginsKey     = "cors-origins"
 	privacyURLKey      = "privacy-url"
 	imprintURLKey      = "imprint-url"
 )
@@ -140,7 +141,16 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 			log.Info("Listening", "laddr", viper.GetString(laddrKey))
 
 			panic(http.ListenAndServe(viper.GetString(laddrKey), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				senbaraRest.SenbaraRESTHandler(w, r, c, s)
+				senbaraRest.SenbaraRESTHandler(
+					w,
+					r,
+
+					r.Context(),
+					slog.New(log.Handler().WithGroup("handler")),
+					viper.GetStringSlice(corsOriginsKey),
+					c,
+					s,
+				)
 			})))
 		},
 	}
@@ -152,6 +162,7 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 	cmd.PersistentFlags().String(oidcIssuerKey, "", "OIDC Issuer (i.e. https://pojntfx.eu.auth0.com/)")
 	cmd.PersistentFlags().String(oidcClientIDKey, "", "OIDC Client ID (i.e. myoidcclientid))")
 	cmd.PersistentFlags().String(oidcRedirectURLKey, "http://localhost:1337/authorize", "OIDC redirect URL")
+	cmd.PersistentFlags().StringArray(corsOriginsKey, []string{}, "CORS origins to allow")
 	cmd.PersistentFlags().String(privacyURLKey, "", "Privacy policy URL")
 	cmd.PersistentFlags().String(imprintURLKey, "", "Imprint URL")
 

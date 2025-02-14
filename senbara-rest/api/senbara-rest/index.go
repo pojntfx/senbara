@@ -8,8 +8,10 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
@@ -31,6 +33,10 @@ var (
 func SenbaraRESTHandler(
 	w http.ResponseWriter,
 	r *http.Request,
+
+	ctx context.Context,
+	log *slog.Logger,
+	o []string,
 	c *controllers.Controller,
 	s *openapi3.T,
 ) {
@@ -58,7 +64,19 @@ func SenbaraRESTHandler(
 		),
 	)
 
-	mux.ServeHTTP(w, r)
+	if len(o) <= 0 {
+		mux.ServeHTTP(w, r)
+	} else {
+		cors.New(cors.Options{
+			AllowedOrigins:   o,
+			AllowCredentials: true,
+			AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut},
+			AllowedHeaders:   []string{"authorization"},
+			Debug:            log.Enabled(ctx, slog.LevelDebug),
+			Logger:           slog.NewLogLogger(log.Handler(), slog.LevelDebug),
+		}).Handler(mux).ServeHTTP(w, r)
+	}
+
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -107,5 +125,19 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	SenbaraRESTHandler(w, r, c, s)
+	o := []string{}
+	if v := os.Getenv("CORS_ORIGINS"); v != "" {
+		o = strings.Split(v, ",")
+	}
+
+	SenbaraRESTHandler(
+		w,
+		r,
+
+		r.Context(),
+		slog.New(log.Handler().WithGroup("handler")),
+		o,
+		c,
+		s,
+	)
 }

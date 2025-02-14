@@ -10,6 +10,7 @@ require (
 	github.com/oapi-codegen/nethttp-middleware v1.0.2
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/pojntfx/senbara/senbara-common v0.0.0-20250210073228-96d2107435c1
+	github.com/rs/cors v1.11.1
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	golang.org/x/oauth2 v0.25.0
