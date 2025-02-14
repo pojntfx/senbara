@@ -39,3 +39,25 @@ func (c *Controller) GetJournalEntries(ctx context.Context, request api.GetJourn
 
 	return api.GetJournalEntries200JSONResponse(journalEntries), nil
 }
+
+func (c *Controller) CreateJournalEntry(ctx context.Context, request api.CreateJournalEntryRequestObject) (api.CreateJournalEntryResponseObject, error) {
+	namespace := ctx.Value(ContextKeyNamespace).(string)
+
+	log := c.log.With("namespace", namespace)
+
+	log.Debug("Handling create journal")
+
+	log.Debug("Creating journal entry in DB",
+		"title", request.Body.Title,
+		"rating", request.Body.Rating,
+	)
+
+	id, err := c.persister.CreateJournalEntry(ctx, request.Body.Title, request.Body.Body, request.Body.Rating, namespace)
+	if err != nil {
+		log.Warn("Could not create journal entry in DB", "err", errors.Join(errCouldNotInsertIntoDB, err))
+
+		return api.CreateJournalEntry500TextResponse(errCouldNotInsertIntoDB.Error()), nil
+	}
+
+	return api.CreateJournalEntry200JSONResponse(id), nil
+}

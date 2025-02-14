@@ -110,42 +110,46 @@ paths:
             text/plain:
               schema:
                 type: string
-#     post:
-#       tags:
-#         - journal
-#       summary: Create a new journal entry
-#       operationId: createJournalEntry
-#       security:
-#         - oidc: []
-#       requestBody:
-#         required: true
-#         content:
-#           application/x-www-form-urlencoded:
-#             schema:
-#               type: object
-#               properties:
-#                 title:
-#                   type: string
-#                 body:
-#                   type: string
-#                 rating:
-#                   type: integer
-#                   format: int32
-#               required:
-#                 - title
-#                 - body
-#                 - rating
-#       responses:
-#         "200":
-#           description: Journal entry created successfully
-#           content:
-#             application/json:
-#               schema:
-#                 $ref: "#/components/schemas/JournalEntry"
-#         "422":
-#           description: Validation error
-#         "500":
-#           description: An internal error occurred
+    post:
+      tags:
+        - journal
+      summary: Create a new journal entry
+      operationId: createJournalEntry
+      security:
+        - oidc: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+                rating:
+                  type: integer
+                  format: int32
+              required:
+                - title
+                - body
+                - rating
+      responses:
+        "200":
+          description: Journal entry created successfully
+          content:
+            application/json:
+              schema:
+                type: integer
+        "422":
+          description: Validation error
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
 
 #   /journal/{id}:
 #     get:

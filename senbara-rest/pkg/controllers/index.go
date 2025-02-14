@@ -17,6 +17,7 @@ var (
 	errEmailNotVerified       = errors.New("email not verified")
 	errCouldNotGetOpenAPISpec = errors.New("could not get OpenAPI spec")
 	errCouldNotEncodeResponse = errors.New("could not encode response")
+	errCouldNotInsertIntoDB   = errors.New("could not insert into DB")
 )
 
 type Controller struct {

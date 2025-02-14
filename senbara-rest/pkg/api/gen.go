@@ -22,6 +22,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oapi-codegen/runtime"
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 )
 
@@ -44,6 +45,16 @@ type JournalEntry struct {
 	Rating    *int32     `json:"rating,omitempty"`
 	Title     *string    `json:"title,omitempty"`
 }
+
+// CreateJournalEntryFormdataBody defines parameters for CreateJournalEntry.
+type CreateJournalEntryFormdataBody struct {
+	Body   string `form:"body" json:"body"`
+	Rating int32  `form:"rating" json:"rating"`
+	Title  string `form:"title" json:"title"`
+}
+
+// CreateJournalEntryFormdataRequestBody defines body for CreateJournalEntry for application/x-www-form-urlencoded ContentType.
+type CreateJournalEntryFormdataRequestBody CreateJournalEntryFormdataBody
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -124,6 +135,11 @@ type ClientInterface interface {
 	// GetJournalEntries request
 	GetJournalEntries(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// CreateJournalEntryWithBody request with any body
+	CreateJournalEntryWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateJournalEntryWithFormdataBody(ctx context.Context, body CreateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetOpenAPISpec request
 	GetOpenAPISpec(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
@@ -142,6 +158,30 @@ func (c *Client) GetIndex(ctx context.Context, reqEditors ...RequestEditorFn) (*
 
 func (c *Client) GetJournalEntries(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetJournalEntriesRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateJournalEntryWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateJournalEntryRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateJournalEntryWithFormdataBody(ctx context.Context, body CreateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateJournalEntryRequestWithFormdataBody(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -214,6 +254,46 @@ func NewGetJournalEntriesRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewCreateJournalEntryRequestWithFormdataBody calls the generic CreateJournalEntry builder with application/x-www-form-urlencoded body
+func NewCreateJournalEntryRequestWithFormdataBody(server string, body CreateJournalEntryFormdataRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	bodyStr, err := runtime.MarshalForm(body, nil)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = strings.NewReader(bodyStr.Encode())
+	return NewCreateJournalEntryRequestWithBody(server, "application/x-www-form-urlencoded", bodyReader)
+}
+
+// NewCreateJournalEntryRequestWithBody generates requests for CreateJournalEntry with any type of body
+func NewCreateJournalEntryRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/journal")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -294,6 +374,11 @@ type ClientWithResponsesInterface interface {
 	// GetJournalEntriesWithResponse request
 	GetJournalEntriesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetJournalEntriesResponse, error)
 
+	// CreateJournalEntryWithBodyWithResponse request with any body
+	CreateJournalEntryWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateJournalEntryResponse, error)
+
+	CreateJournalEntryWithFormdataBodyWithResponse(ctx context.Context, body CreateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateJournalEntryResponse, error)
+
 	// GetOpenAPISpecWithResponse request
 	GetOpenAPISpecWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetOpenAPISpecResponse, error)
 }
@@ -342,6 +427,28 @@ func (r GetJournalEntriesResponse) StatusCode() int {
 	return 0
 }
 
+type CreateJournalEntryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *int
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateJournalEntryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateJournalEntryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetOpenAPISpecResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -380,6 +487,23 @@ func (c *ClientWithResponses) GetJournalEntriesWithResponse(ctx context.Context,
 		return nil, err
 	}
 	return ParseGetJournalEntriesResponse(rsp)
+}
+
+// CreateJournalEntryWithBodyWithResponse request with arbitrary body returning *CreateJournalEntryResponse
+func (c *ClientWithResponses) CreateJournalEntryWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateJournalEntryResponse, error) {
+	rsp, err := c.CreateJournalEntryWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateJournalEntryResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateJournalEntryWithFormdataBodyWithResponse(ctx context.Context, body CreateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateJournalEntryResponse, error) {
+	rsp, err := c.CreateJournalEntryWithFormdataBody(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateJournalEntryResponse(rsp)
 }
 
 // GetOpenAPISpecWithResponse request returning *GetOpenAPISpecResponse
@@ -443,6 +567,32 @@ func ParseGetJournalEntriesResponse(rsp *http.Response) (*GetJournalEntriesRespo
 	return response, nil
 }
 
+// ParseCreateJournalEntryResponse parses an HTTP response from a CreateJournalEntryWithResponse call
+func ParseCreateJournalEntryResponse(rsp *http.Response) (*CreateJournalEntryResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateJournalEntryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest int
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetOpenAPISpecResponse parses an HTTP response from a GetOpenAPISpecWithResponse call
 func ParseGetOpenAPISpecResponse(rsp *http.Response) (*GetOpenAPISpecResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -477,6 +627,9 @@ type ServerInterface interface {
 	// List all journal entries
 	// (GET /journal)
 	GetJournalEntries(w http.ResponseWriter, r *http.Request)
+	// Create a new journal entry
+	// (POST /journal)
+	CreateJournalEntry(w http.ResponseWriter, r *http.Request)
 	// Get the OpenAPI spec
 	// (GET /openapi.yaml)
 	GetOpenAPISpec(w http.ResponseWriter, r *http.Request)
@@ -522,6 +675,26 @@ func (siw *ServerInterfaceWrapper) GetJournalEntries(w http.ResponseWriter, r *h
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetJournalEntries(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateJournalEntry operation middleware
+func (siw *ServerInterfaceWrapper) CreateJournalEntry(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateJournalEntry(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -667,6 +840,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 
 	m.HandleFunc("GET "+options.BaseURL+"/", wrapper.GetIndex)
 	m.HandleFunc("GET "+options.BaseURL+"/journal", wrapper.GetJournalEntries)
+	m.HandleFunc("POST "+options.BaseURL+"/journal", wrapper.CreateJournalEntry)
 	m.HandleFunc("GET "+options.BaseURL+"/openapi.yaml", wrapper.GetOpenAPISpec)
 
 	return m
@@ -734,6 +908,41 @@ func (response GetJournalEntries500TextResponse) VisitGetJournalEntriesResponse(
 	return err
 }
 
+type CreateJournalEntryRequestObject struct {
+	Body *CreateJournalEntryFormdataRequestBody
+}
+
+type CreateJournalEntryResponseObject interface {
+	VisitCreateJournalEntryResponse(w http.ResponseWriter) error
+}
+
+type CreateJournalEntry200JSONResponse int
+
+func (response CreateJournalEntry200JSONResponse) VisitCreateJournalEntryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateJournalEntry422Response struct {
+}
+
+func (response CreateJournalEntry422Response) VisitCreateJournalEntryResponse(w http.ResponseWriter) error {
+	w.WriteHeader(422)
+	return nil
+}
+
+type CreateJournalEntry500TextResponse string
+
+func (response CreateJournalEntry500TextResponse) VisitCreateJournalEntryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
 type GetOpenAPISpecRequestObject struct {
 }
 
@@ -778,6 +987,9 @@ type StrictServerInterface interface {
 	// List all journal entries
 	// (GET /journal)
 	GetJournalEntries(ctx context.Context, request GetJournalEntriesRequestObject) (GetJournalEntriesResponseObject, error)
+	// Create a new journal entry
+	// (POST /journal)
+	CreateJournalEntry(ctx context.Context, request CreateJournalEntryRequestObject) (CreateJournalEntryResponseObject, error)
 	// Get the OpenAPI spec
 	// (GET /openapi.yaml)
 	GetOpenAPISpec(ctx context.Context, request GetOpenAPISpecRequestObject) (GetOpenAPISpecResponseObject, error)
@@ -860,6 +1072,41 @@ func (sh *strictHandler) GetJournalEntries(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// CreateJournalEntry operation middleware
+func (sh *strictHandler) CreateJournalEntry(w http.ResponseWriter, r *http.Request) {
+	var request CreateJournalEntryRequestObject
+
+	if err := r.ParseForm(); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
+		return
+	}
+	var body CreateJournalEntryFormdataRequestBody
+	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateJournalEntry(ctx, request.(CreateJournalEntryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateJournalEntry")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateJournalEntryResponseObject); ok {
+		if err := validResponse.VisitCreateJournalEntryResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // GetOpenAPISpec operation middleware
 func (sh *strictHandler) GetOpenAPISpec(w http.ResponseWriter, r *http.Request) {
 	var request GetOpenAPISpecRequestObject
@@ -887,25 +1134,27 @@ func (sh *strictHandler) GetOpenAPISpec(w http.ResponseWriter, r *http.Request) 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
