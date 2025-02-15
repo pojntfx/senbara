@@ -185,32 +185,40 @@ paths:
             text/plain:
               schema:
                 type: string
-#     delete:
-#       tags:
-#         - journal
-#       summary: Delete a journal entry
-#       operationId: deleteJournalEntry
-#       security:
-#         - oidc: []
-#       parameters:
-#         - name: id
-#           in: path
-#           required: true
-#           schema:
-#             type: integer
-#             format: int64
-#       responses:
-#         "200":
-#           description: Journal entry deleted successfully
-#           content:
-#             application/json:
-#               schema:
-#                 type: integer
-#                 format: int64
-#         "404":
-#           description: Entry not found
-#         "500":
-#           description: An internal error occurred
+    delete:
+      tags:
+        - journal
+      summary: Delete a journal entry
+      operationId: deleteJournalEntry
+      security:
+        - oidc: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Journal entry deleted successfully
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+        "404":
+          description: Entry not found
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
 #     put:
 #       tags:
 #         - journal

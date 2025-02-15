@@ -69,7 +69,10 @@ func (c *Controller) GetJournalEntry(ctx context.Context, request api.GetJournal
 
 	log.Debug("Handling view journal")
 
-	log.Debug("Getting journal entry from DB", "id", request.Id)
+	log.Debug("Getting journal entry from DB",
+		"id",
+		request.Id,
+	)
 
 	journalEntry, err := c.persister.GetJournalEntry(ctx, int32(request.Id), namespace)
 	if err != nil {
@@ -88,4 +91,24 @@ func (c *Controller) GetJournalEntry(ctx context.Context, request api.GetJournal
 		Rating:    &journalEntry.Rating,
 		Title:     &journalEntry.Title,
 	}), nil
+}
+
+func (c *Controller) DeleteJournalEntry(ctx context.Context, request api.DeleteJournalEntryRequestObject) (api.DeleteJournalEntryResponseObject, error) {
+	namespace := ctx.Value(ContextKeyNamespace).(string)
+
+	log := c.log.With("namespace", namespace)
+
+	log.Debug("Handling delete journal")
+
+	log.Debug("Deleting journal entry from DB",
+		"id", request.Id,
+	)
+
+	if err := c.persister.DeleteJournalEntry(ctx, int32(request.Id), namespace); err != nil {
+		log.Warn("Could not create journal entry in DB", "err", errors.Join(errCouldNotInsertIntoDB, err))
+
+		return api.DeleteJournalEntry500TextResponse(errCouldNotInsertIntoDB.Error()), nil
+	}
+
+	return api.DeleteJournalEntry200JSONResponse(request.Id), nil
 }

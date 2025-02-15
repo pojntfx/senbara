@@ -140,6 +140,9 @@ type ClientInterface interface {
 
 	CreateJournalEntryWithFormdataBody(ctx context.Context, body CreateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DeleteJournalEntry request
+	DeleteJournalEntry(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetJournalEntry request
 	GetJournalEntry(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -185,6 +188,18 @@ func (c *Client) CreateJournalEntryWithBody(ctx context.Context, contentType str
 
 func (c *Client) CreateJournalEntryWithFormdataBody(ctx context.Context, body CreateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateJournalEntryRequestWithFormdataBody(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteJournalEntry(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteJournalEntryRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -313,6 +328,40 @@ func NewCreateJournalEntryRequestWithBody(server string, contentType string, bod
 	return req, nil
 }
 
+// NewDeleteJournalEntryRequest generates requests for DeleteJournalEntry
+func NewDeleteJournalEntryRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/journal/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetJournalEntryRequest generates requests for GetJournalEntry
 func NewGetJournalEntryRequest(server string, id int64) (*http.Request, error) {
 	var err error
@@ -428,6 +477,9 @@ type ClientWithResponsesInterface interface {
 
 	CreateJournalEntryWithFormdataBodyWithResponse(ctx context.Context, body CreateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateJournalEntryResponse, error)
 
+	// DeleteJournalEntryWithResponse request
+	DeleteJournalEntryWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteJournalEntryResponse, error)
+
 	// GetJournalEntryWithResponse request
 	GetJournalEntryWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetJournalEntryResponse, error)
 
@@ -495,6 +547,28 @@ func (r CreateJournalEntryResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r CreateJournalEntryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteJournalEntryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *int64
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteJournalEntryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteJournalEntryResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -578,6 +652,15 @@ func (c *ClientWithResponses) CreateJournalEntryWithFormdataBodyWithResponse(ctx
 		return nil, err
 	}
 	return ParseCreateJournalEntryResponse(rsp)
+}
+
+// DeleteJournalEntryWithResponse request returning *DeleteJournalEntryResponse
+func (c *ClientWithResponses) DeleteJournalEntryWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteJournalEntryResponse, error) {
+	rsp, err := c.DeleteJournalEntry(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteJournalEntryResponse(rsp)
 }
 
 // GetJournalEntryWithResponse request returning *GetJournalEntryResponse
@@ -676,6 +759,32 @@ func ParseCreateJournalEntryResponse(rsp *http.Response) (*CreateJournalEntryRes
 	return response, nil
 }
 
+// ParseDeleteJournalEntryResponse parses an HTTP response from a DeleteJournalEntryWithResponse call
+func ParseDeleteJournalEntryResponse(rsp *http.Response) (*DeleteJournalEntryResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteJournalEntryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest int64
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetJournalEntryResponse parses an HTTP response from a GetJournalEntryWithResponse call
 func ParseGetJournalEntryResponse(rsp *http.Response) (*GetJournalEntryResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -739,6 +848,9 @@ type ServerInterface interface {
 	// Create a new journal entry
 	// (POST /journal)
 	CreateJournalEntry(w http.ResponseWriter, r *http.Request)
+	// Delete a journal entry
+	// (DELETE /journal/{id})
+	DeleteJournalEntry(w http.ResponseWriter, r *http.Request, id int64)
 	// Get a specific journal entry
 	// (GET /journal/{id})
 	GetJournalEntry(w http.ResponseWriter, r *http.Request, id int64)
@@ -798,6 +910,34 @@ func (siw *ServerInterfaceWrapper) CreateJournalEntry(w http.ResponseWriter, r *
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CreateJournalEntry(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteJournalEntry operation middleware
+func (siw *ServerInterfaceWrapper) DeleteJournalEntry(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteJournalEntry(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -967,6 +1107,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("GET "+options.BaseURL+"/", wrapper.GetIndex)
 	m.HandleFunc("GET "+options.BaseURL+"/journal", wrapper.GetJournalEntries)
 	m.HandleFunc("POST "+options.BaseURL+"/journal", wrapper.CreateJournalEntry)
+	m.HandleFunc("DELETE "+options.BaseURL+"/journal/{id}", wrapper.DeleteJournalEntry)
 	m.HandleFunc("GET "+options.BaseURL+"/journal/{id}", wrapper.GetJournalEntry)
 	m.HandleFunc("GET "+options.BaseURL+"/openapi.yaml", wrapper.GetOpenAPISpec)
 
@@ -1070,6 +1211,43 @@ func (response CreateJournalEntry500TextResponse) VisitCreateJournalEntryRespons
 	return err
 }
 
+type DeleteJournalEntryRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type DeleteJournalEntryResponseObject interface {
+	VisitDeleteJournalEntryResponse(w http.ResponseWriter) error
+}
+
+type DeleteJournalEntry200JSONResponse int64
+
+func (response DeleteJournalEntry200JSONResponse) VisitDeleteJournalEntryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteJournalEntry404TextResponse string
+
+func (response DeleteJournalEntry404TextResponse) VisitDeleteJournalEntryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(404)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type DeleteJournalEntry500TextResponse string
+
+func (response DeleteJournalEntry500TextResponse) VisitDeleteJournalEntryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
 type GetJournalEntryRequestObject struct {
 	Id int64 `json:"id"`
 }
@@ -1154,6 +1332,9 @@ type StrictServerInterface interface {
 	// Create a new journal entry
 	// (POST /journal)
 	CreateJournalEntry(ctx context.Context, request CreateJournalEntryRequestObject) (CreateJournalEntryResponseObject, error)
+	// Delete a journal entry
+	// (DELETE /journal/{id})
+	DeleteJournalEntry(ctx context.Context, request DeleteJournalEntryRequestObject) (DeleteJournalEntryResponseObject, error)
 	// Get a specific journal entry
 	// (GET /journal/{id})
 	GetJournalEntry(ctx context.Context, request GetJournalEntryRequestObject) (GetJournalEntryResponseObject, error)
@@ -1274,6 +1455,32 @@ func (sh *strictHandler) CreateJournalEntry(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+// DeleteJournalEntry operation middleware
+func (sh *strictHandler) DeleteJournalEntry(w http.ResponseWriter, r *http.Request, id int64) {
+	var request DeleteJournalEntryRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteJournalEntry(ctx, request.(DeleteJournalEntryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteJournalEntry")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteJournalEntryResponseObject); ok {
+		if err := validResponse.VisitDeleteJournalEntryResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // GetJournalEntry operation middleware
 func (sh *strictHandler) GetJournalEntry(w http.ResponseWriter, r *http.Request, id int64) {
 	var request GetJournalEntryRequestObject
@@ -1327,29 +1534,29 @@ func (sh *strictHandler) GetOpenAPISpec(w http.ResponseWriter, r *http.Request) 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/8xX23LbNhN+FQzyX0qkT3/a4VVc2/Eo4zZq1PTG0cUSWElwSAABljpMRu/eAUgdKDG2",
-	"06QzvpEoEHv69tuDvnJhSms0avI8+8q9mGEJ8XGgJS6vgSD8sM5YdKQwvhJGEwjyV6bSFA4mxpVAPONK",
-	"0+sL3uO0slj/xCk6vu7xB1M5DcWNJqfwOyTX2yOTP6CgoOvdTtfq2LvcyHjaiHlySk+DmATCls1w0CdV",
-	"4s7u7raSz4xMQ4negsBOow4oPB2oOj/rVEWKii41xyCse9yjqJyi1SjkrA7dKCnit0U9kFdGaxT00RU8",
-	"4zMi67M0lTjvXxh7IUryr3/VXwTqPKl8AhXNThJhyjRZYFH0P2uz0GlQpGRfGD1R0yrEYvTO85YZvg5O",
-	"4ZIw5ObaiOiRRC+cslEu478bh0zpGgllNIPcVMRohmyEOgcH7MPN6C92ORyw+Snv8arl+1TRrMqjk9Y8",
-	"aJosU1+LxYTpidljZ3jEElRQMMFCCUXg31jzEPKBLmjhdfJ4xt9uLrDh5sKR9RLIqWVCJn2VvmnsZ82h",
-	"cTXDWtFuQ5kYx4B5VdoCmUXnjYaC3XwYsgXmDKwtlKjxyCtVEFsomkVQbg3zBFqCk6xQuQO36rH3AfVr",
-	"1sDOQuJQ00YDaMmGxtPU4ejPOyaBgHkyDqaYsGv0aqpRMvAMmMMJOtQCo4Olkej0Dn+JcyyMLVE3Dt2a",
-	"5JP+pAeldUpTxja4bMFNWuCmqr7Ie7xQArWPxG7wvrwd3vXPk5PvSHGaFyZPS1A6vRtc3fwxugmI+6os",
-	"IXQBPtzHdRtF5ZWe7rCUhcp77P3g+uoAqEBqdKV/Pxmhm6tQzPypAK1TcxCrVK40lErwbf3ybjLP0fma",
-	"GSfJaXIS3A8VBFbxjJ8np0m4ZIFmsXLS8DFFauq5rr2B5Bm/RYrNmfe4Q2+N9nX1n52cbPiPdXfdo1b6",
-	"4IPpTYsPT/9zOOEZf5XuZkDaDIB01/1jWbeJHV+26thhaOtzlMxXQqD3k6ooViHCi5PzA6cIl5TaAtSB",
-	"O4c978jsW+NyJSXqoPf/R8H+a72XmoUeHNoWQ+eMY0aIyjmUrT7Ls/tNh70fr8f73LtF8kyEmeaZmbDN",
-	"fIwcawYfw3ryxVoLfNyrW5Ss8rHjEEw9z+65ivkdB/Npo+AxOrxrDdcf5YUiLP1TBGnN4N18Audg1QXy",
-	"uwMYvs2YF5XZO+WJQVEcpnEvV5v8jNc9bo3vyNCVQyBsIRZS9KVCT78128o3srPsLxaLfii0fuUK1MJI",
-	"lG0Unrn9/KxFJPitAoLZfXOtVxvdmhgfbystOXIVrn+Qo0dr4qOEWzERU9DRns7OjteUv6FQsm5skTUv",
-	"jpU1oRgwjYsWM1edvNzrIulXJdfPbCWrOI4clEjofHQnxBpH1G51UpIfJre3h8bTC/74Pxxj7S71FEke",
-	"m2IXPyv70RemDbGJqbR8ibMsLKsWhZoo8Ux2NXtMsoLy0UEVdtfL4WBkUXzflNooPoJiv8W0oWhsxVBe",
-	"xrhpYRx2gH0X97AtkSAAGxPm5pviaxu7MwKK1pZe322t1FmaFuHezHjKTs/Pf+Eh2Y2do39nSMC2KfO7",
-	"Eo/+rHuH929Ro4OiU6ReYI5lDteAEjRMMbi/k91Q61j6ql6sOqU2S1eH2DXmxMiB+BwSt5WQmHdevxSk",
-	"5opWnWagfhmm7bHkR4+u/sulSmscpbgMXzvpsOZJ6ERzZConkIUBz6RZ6MKA3I9OIl+P1/8EAAD//2Yp",
-	"pQaxEQAA",
+	"H4sIAAAAAAAC/+RXS3PbNhD+KxikR4mUH007PMW1HI0ybqNGTS+ODktgJcEhAQZY6jEZ/fcOQOpBibGd",
+	"Ogd3erEpEvv69tsHvnJh8sJo1OR48pU7McccwuNQS1z1gcD/KKwp0JLC8EkYTSDIXZtSk38xNTYH4glX",
+	"ml5f8g6ndYHVT5yh5ZsOvzel1ZDdaLIKv0Nys3tl0nsU5HW92+tan3qXGhne1mKOrNIzLyaBsGHTv+iS",
+	"ynFvd39aySdGpiFHV4DAVqMWyD8dqbo4b1VFirI2NacgbDrcoSitovXY56wK3Sgpwv8C9VBeG61R0Eeb",
+	"8YTPiQqXxLHERffSFJciJ/f6V/1FoE6j0kVQ0rwXCZPH0RKzrPtZm6WOvSIlu8LoqZqVPhaj9543zPCN",
+	"dwpXhD43fSOCRxKdsKoIcgn/3VhkSldIKKMZpKYkRnNkY9QpWGAfbsZ/savRkC3OeIeXDd9niuZlGpws",
+	"zL2m6Sp2lVhImJ6aA3b6R8xBeQVTzJRQBO5NYe59PtB6LbxKHk/42+0BNtoeOLGeA1m1isjEr+I3tf2k",
+	"fmlsxbBGtLtQpsYyYE7lRYasQOuMhozdfBixJaYMiiJTosIjLVVGbKloHkAZGOYItAQrWaZSC3bdYe89",
+	"6n1Ww8584lDTVgNoyUbG0czi+M9bJoGAOTIWZhixPjo10ygZOAbM4hQtaoHBwdxItHqPv8QFZqbIUdcO",
+	"DUz0SX/Sw7ywSlPCtrjswI0a4MaqOsg7PFMCtQvErvG+GoxuuxdR7ztSHKeZSeMclI5vh9c3f4xvPOKu",
+	"zHPwXYCPDnHdRVE6pWd7LGWm0g57P+xfHwHlSY02d++nY7QL5YuZPxZgYdUCxDqWaw25EnxXv7ydzAu0",
+	"rmJGLzqLet59X0FQKJ7wi+gs8ocKoHmonNj/mSHV9VzV3lDyhA+QQnPmHW7RFUa7qvrPe70t/7HqrgfU",
+	"iu+dN71t8f7pJ4tTnvBX8X4GxPUAiPfdP5R1k9jhY6OOLfq2vkDJXCkEOjcts2ztI7zsXRw5RbiiuMhA",
+	"Hblz3PNOzL41NlVSovZ6fz4J9l/rvdLM92DfthhaaywzQpTWomz0WZ7cbTvs3WQzOeTeAMkx4WeaY2bK",
+	"tvMxcKwefAyryRdqzfPxoG5RstKFjkMwczy54yrkd+LNx7WCh+jwrjFcn8sLRZi7xwjSmMH7+QTWwroN",
+	"5HdHMHybMS8qs7fKEYMsO07jQa62+ZlsOrwwriVD1xaBsIGYT9GXEh39Vm8r38jOqrtcLru+0LqlzVAL",
+	"I1E2UXji9vOjFhHvt/IIJnf1sU5ldGdicrqtNOTIlrh5JkdP1sQHCbdmIqSgpT2dn5+uKX9DpmTV2AJr",
+	"XhwrK0IxYBqXDWauW3l50EXir0puqogzrNbhJlf74f0RVwuwkCOhdcEpH3EYVPsFSkl+nOLOASaPr/mT",
+	"ZxLicQuPMKQCpG2AXf6oxAc4mTbEpqbU8sXRqso9gydQqvOUWfQfoc7Tx9xjHHpoDfrfsGiA5G87BQo1",
+	"VeKJ7alehKM15A9uOv7yczUajgsU37fmbBWfQHE4o5pQ1LZCKC9jX2lg7JfIQxcPsM2RwAMbEmYX2+Jr",
+	"Grs1ArLGNa8627iTJXGc+XNz4yg5u7j4hftk13ZOrvdIwHYpc/sSD/5sOsfnB6jRQtYqUm3ApzLHe2QO",
+	"Gmbo3d/Lbql1Kn1dbeatUtutvUWsjykxsiA++8TtJCSmrcevBKmFonWrGag++nXtVPKjQ1vd2VVeGEsx",
+	"rvy/vbS/J0hoRXNsSiuQ+Q2RSbPUmQF5GJ1Evpls/gkAAP//WqBt9vITAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
