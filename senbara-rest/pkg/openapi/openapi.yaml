@@ -151,32 +151,40 @@ paths:
               schema:
                 type: string
 
-#   /journal/{id}:
-#     get:
-#       tags:
-#         - journal
-#       summary: Get a specific journal entry
-#       operationId: getJournalEntry
-#       security:
-#         - oidc: []
-#       parameters:
-#         - name: id
-#           in: path
-#           required: true
-#           schema:
-#             type: integer
-#             format: int64
-#       responses:
-#         "200":
-#           description: Journal entry retrieved successfully
-#           content:
-#             application/json:
-#               schema:
-#                 $ref: "#/components/schemas/JournalEntry"
-#         "404":
-#           description: Entry not found
-#         "500":
-#           description: An internal error occurred
+  /journal/{id}:
+    get:
+      tags:
+        - journal
+      summary: Get a specific journal entry
+      operationId: getJournalEntry
+      security:
+        - oidc: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Journal entry retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JournalEntry"
+        "404":
+          description: Entry not found
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
 #     delete:
 #       tags:
 #         - journal
