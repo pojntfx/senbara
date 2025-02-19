@@ -115,6 +115,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			os.Getenv("OIDC_ISSUER"),
 			os.Getenv("OIDC_CLIENT_ID"),
 			os.Getenv("OIDC_REDIRECT_URL"),
+			os.Getenv("OIDC_DISCOVERY_URL"),
 
 			os.Getenv("PRIVACY_URL"),
 			os.Getenv("IMPRINT_URL"),

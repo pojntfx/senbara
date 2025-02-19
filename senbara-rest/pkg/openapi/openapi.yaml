@@ -911,4 +911,4 @@ components:
   securitySchemes:
     oidc:
       type: openIdConnect
-      openIdConnectUrl: https://dev-4op4cmts68nqcenb.us.auth0.com/.well-known/openid-configuration
+      openIdConnectUrl: https://dev-4op4cmts68nqcenb.us.auth0.com/.well-known/openid-configuration # Filled out at runtime

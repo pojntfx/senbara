@@ -25,9 +25,10 @@ type Controller struct {
 	persister *persisters.Persister
 	spec      *openapi3.T
 
-	oidcIssuer      string
-	oidcClientID    string
-	oidcRedirectURL string
+	oidcIssuer       string
+	oidcClientID     string
+	oidcRedirectURL  string
+	oidcDiscoveryURL string
 
 	privacyURL string
 	imprintURL string
@@ -46,6 +47,7 @@ func NewController(
 	oidcIssuer,
 	oidcClientID,
 	oidcRedirectURL,
+	oidcDiscoveryURL,
 
 	privacyURL,
 	imprintURL string,
@@ -57,9 +59,10 @@ func NewController(
 
 		spec: spec,
 
-		oidcIssuer:      oidcIssuer,
-		oidcClientID:    oidcClientID,
-		oidcRedirectURL: oidcRedirectURL,
+		oidcIssuer:       oidcIssuer,
+		oidcClientID:     oidcClientID,
+		oidcRedirectURL:  oidcRedirectURL,
+		oidcDiscoveryURL: oidcDiscoveryURL,
 
 		privacyURL: privacyURL,
 		imprintURL: imprintURL,
