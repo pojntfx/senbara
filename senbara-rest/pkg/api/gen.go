@@ -53,8 +53,18 @@ type CreateJournalEntryFormdataBody struct {
 	Title  string `form:"title" json:"title"`
 }
 
+// UpdateJournalEntryFormdataBody defines parameters for UpdateJournalEntry.
+type UpdateJournalEntryFormdataBody struct {
+	Body   string `form:"body" json:"body"`
+	Rating int32  `form:"rating" json:"rating"`
+	Title  string `form:"title" json:"title"`
+}
+
 // CreateJournalEntryFormdataRequestBody defines body for CreateJournalEntry for application/x-www-form-urlencoded ContentType.
 type CreateJournalEntryFormdataRequestBody CreateJournalEntryFormdataBody
+
+// UpdateJournalEntryFormdataRequestBody defines body for UpdateJournalEntry for application/x-www-form-urlencoded ContentType.
+type UpdateJournalEntryFormdataRequestBody UpdateJournalEntryFormdataBody
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -146,6 +156,11 @@ type ClientInterface interface {
 	// GetJournalEntry request
 	GetJournalEntry(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// UpdateJournalEntryWithBody request with any body
+	UpdateJournalEntryWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateJournalEntryWithFormdataBody(ctx context.Context, id int64, body UpdateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetOpenAPISpec request
 	GetOpenAPISpec(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
@@ -212,6 +227,30 @@ func (c *Client) DeleteJournalEntry(ctx context.Context, id int64, reqEditors ..
 
 func (c *Client) GetJournalEntry(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetJournalEntryRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateJournalEntryWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateJournalEntryRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateJournalEntryWithFormdataBody(ctx context.Context, id int64, body UpdateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateJournalEntryRequestWithFormdataBody(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -396,6 +435,53 @@ func NewGetJournalEntryRequest(server string, id int64) (*http.Request, error) {
 	return req, nil
 }
 
+// NewUpdateJournalEntryRequestWithFormdataBody calls the generic UpdateJournalEntry builder with application/x-www-form-urlencoded body
+func NewUpdateJournalEntryRequestWithFormdataBody(server string, id int64, body UpdateJournalEntryFormdataRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	bodyStr, err := runtime.MarshalForm(body, nil)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = strings.NewReader(bodyStr.Encode())
+	return NewUpdateJournalEntryRequestWithBody(server, id, "application/x-www-form-urlencoded", bodyReader)
+}
+
+// NewUpdateJournalEntryRequestWithBody generates requests for UpdateJournalEntry with any type of body
+func NewUpdateJournalEntryRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/journal/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewGetOpenAPISpecRequest generates requests for GetOpenAPISpec
 func NewGetOpenAPISpecRequest(server string) (*http.Request, error) {
 	var err error
@@ -482,6 +568,11 @@ type ClientWithResponsesInterface interface {
 
 	// GetJournalEntryWithResponse request
 	GetJournalEntryWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetJournalEntryResponse, error)
+
+	// UpdateJournalEntryWithBodyWithResponse request with any body
+	UpdateJournalEntryWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateJournalEntryResponse, error)
+
+	UpdateJournalEntryWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateJournalEntryResponse, error)
 
 	// GetOpenAPISpecWithResponse request
 	GetOpenAPISpecWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetOpenAPISpecResponse, error)
@@ -597,6 +688,28 @@ func (r GetJournalEntryResponse) StatusCode() int {
 	return 0
 }
 
+type UpdateJournalEntryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *JournalEntry
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateJournalEntryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateJournalEntryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetOpenAPISpecResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -670,6 +783,23 @@ func (c *ClientWithResponses) GetJournalEntryWithResponse(ctx context.Context, i
 		return nil, err
 	}
 	return ParseGetJournalEntryResponse(rsp)
+}
+
+// UpdateJournalEntryWithBodyWithResponse request with arbitrary body returning *UpdateJournalEntryResponse
+func (c *ClientWithResponses) UpdateJournalEntryWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateJournalEntryResponse, error) {
+	rsp, err := c.UpdateJournalEntryWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateJournalEntryResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateJournalEntryWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateJournalEntryResponse, error) {
+	rsp, err := c.UpdateJournalEntryWithFormdataBody(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateJournalEntryResponse(rsp)
 }
 
 // GetOpenAPISpecWithResponse request returning *GetOpenAPISpecResponse
@@ -811,6 +941,32 @@ func ParseGetJournalEntryResponse(rsp *http.Response) (*GetJournalEntryResponse,
 	return response, nil
 }
 
+// ParseUpdateJournalEntryResponse parses an HTTP response from a UpdateJournalEntryWithResponse call
+func ParseUpdateJournalEntryResponse(rsp *http.Response) (*UpdateJournalEntryResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateJournalEntryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest JournalEntry
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetOpenAPISpecResponse parses an HTTP response from a GetOpenAPISpecWithResponse call
 func ParseGetOpenAPISpecResponse(rsp *http.Response) (*GetOpenAPISpecResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -854,6 +1010,9 @@ type ServerInterface interface {
 	// Get a specific journal entry
 	// (GET /journal/{id})
 	GetJournalEntry(w http.ResponseWriter, r *http.Request, id int64)
+	// Update a journal entry
+	// (PUT /journal/{id})
+	UpdateJournalEntry(w http.ResponseWriter, r *http.Request, id int64)
 	// Get the OpenAPI spec
 	// (GET /openapi.yaml)
 	GetOpenAPISpec(w http.ResponseWriter, r *http.Request)
@@ -966,6 +1125,34 @@ func (siw *ServerInterfaceWrapper) GetJournalEntry(w http.ResponseWriter, r *htt
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetJournalEntry(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// UpdateJournalEntry operation middleware
+func (siw *ServerInterfaceWrapper) UpdateJournalEntry(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateJournalEntry(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -1109,6 +1296,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("POST "+options.BaseURL+"/journal", wrapper.CreateJournalEntry)
 	m.HandleFunc("DELETE "+options.BaseURL+"/journal/{id}", wrapper.DeleteJournalEntry)
 	m.HandleFunc("GET "+options.BaseURL+"/journal/{id}", wrapper.GetJournalEntry)
+	m.HandleFunc("PUT "+options.BaseURL+"/journal/{id}", wrapper.UpdateJournalEntry)
 	m.HandleFunc("GET "+options.BaseURL+"/openapi.yaml", wrapper.GetOpenAPISpec)
 
 	return m
@@ -1285,6 +1473,54 @@ func (response GetJournalEntry500TextResponse) VisitGetJournalEntryResponse(w ht
 	return err
 }
 
+type UpdateJournalEntryRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *UpdateJournalEntryFormdataRequestBody
+}
+
+type UpdateJournalEntryResponseObject interface {
+	VisitUpdateJournalEntryResponse(w http.ResponseWriter) error
+}
+
+type UpdateJournalEntry200JSONResponse JournalEntry
+
+func (response UpdateJournalEntry200JSONResponse) VisitUpdateJournalEntryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateJournalEntry404TextResponse string
+
+func (response UpdateJournalEntry404TextResponse) VisitUpdateJournalEntryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(404)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type UpdateJournalEntry422TextResponse string
+
+func (response UpdateJournalEntry422TextResponse) VisitUpdateJournalEntryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(422)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type UpdateJournalEntry500TextResponse string
+
+func (response UpdateJournalEntry500TextResponse) VisitUpdateJournalEntryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
 type GetOpenAPISpecRequestObject struct {
 }
 
@@ -1338,6 +1574,9 @@ type StrictServerInterface interface {
 	// Get a specific journal entry
 	// (GET /journal/{id})
 	GetJournalEntry(ctx context.Context, request GetJournalEntryRequestObject) (GetJournalEntryResponseObject, error)
+	// Update a journal entry
+	// (PUT /journal/{id})
+	UpdateJournalEntry(ctx context.Context, request UpdateJournalEntryRequestObject) (UpdateJournalEntryResponseObject, error)
 	// Get the OpenAPI spec
 	// (GET /openapi.yaml)
 	GetOpenAPISpec(ctx context.Context, request GetOpenAPISpecRequestObject) (GetOpenAPISpecResponseObject, error)
@@ -1507,6 +1746,43 @@ func (sh *strictHandler) GetJournalEntry(w http.ResponseWriter, r *http.Request,
 	}
 }
 
+// UpdateJournalEntry operation middleware
+func (sh *strictHandler) UpdateJournalEntry(w http.ResponseWriter, r *http.Request, id int64) {
+	var request UpdateJournalEntryRequestObject
+
+	request.Id = id
+
+	if err := r.ParseForm(); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
+		return
+	}
+	var body UpdateJournalEntryFormdataRequestBody
+	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateJournalEntry(ctx, request.(UpdateJournalEntryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateJournalEntry")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateJournalEntryResponseObject); ok {
+		if err := validResponse.VisitUpdateJournalEntryResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // GetOpenAPISpec operation middleware
 func (sh *strictHandler) GetOpenAPISpec(w http.ResponseWriter, r *http.Request) {
 	var request GetOpenAPISpecRequestObject
@@ -1534,29 +1810,30 @@ func (sh *strictHandler) GetOpenAPISpec(w http.ResponseWriter, r *http.Request) 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

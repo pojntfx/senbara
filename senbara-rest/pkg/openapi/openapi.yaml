@@ -219,51 +219,63 @@ paths:
             text/plain:
               schema:
                 type: string
-#     put:
-#       tags:
-#         - journal
-#       summary: Update a journal entry
-#       operationId: updateJournalEntry
-#       security:
-#         - oidc: []
-#       parameters:
-#         - name: id
-#           in: path
-#           required: true
-#           schema:
-#             type: integer
-#             format: int64
-#       requestBody:
-#         required: true
-#         content:
-#           application/x-www-form-urlencoded:
-#             schema:
-#               type: object
-#               properties:
-#                 title:
-#                   type: string
-#                 body:
-#                   type: string
-#                 rating:
-#                   type: integer
-#                   format: int32
-#               required:
-#                 - title
-#                 - body
-#                 - rating
-#       responses:
-#         "200":
-#           description: Journal entry updated successfully
-#           content:
-#             application/json:
-#               schema:
-#                 $ref: "#/components/schemas/JournalEntry"
-#         "404":
-#           description: Entry not found
-#         "422":
-#           description: Validation error
-#         "500":
-#           description: An internal error occurred
+    put:
+      tags:
+        - journal
+      summary: Update a journal entry
+      operationId: updateJournalEntry
+      security:
+        - oidc: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+                rating:
+                  type: integer
+                  format: int32
+              required:
+                - title
+                - body
+                - rating
+      responses:
+        "200":
+          description: Journal entry updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JournalEntry"
+        "404":
+          description: Entry not found
+          content:
+            text/plain:
+              schema:
+                type: string
+        "422":
+          description: Validation error
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
 
 #   /contacts:
 #     get:

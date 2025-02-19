@@ -112,3 +112,31 @@ func (c *Controller) DeleteJournalEntry(ctx context.Context, request api.DeleteJ
 
 	return api.DeleteJournalEntry200JSONResponse(request.Id), nil
 }
+
+func (c *Controller) UpdateJournalEntry(ctx context.Context, request api.UpdateJournalEntryRequestObject) (api.UpdateJournalEntryResponseObject, error) {
+	namespace := ctx.Value(ContextKeyNamespace).(string)
+
+	log := c.log.With("namespace", namespace)
+
+	log.Debug("Handling update journal")
+
+	log.Debug("Updating journal entry in DB",
+		"id", request.Id,
+		"title", request.Body.Title,
+		"rating", request.Body.Rating,
+	)
+
+	if err := c.persister.UpdateJournalEntry(ctx, int32(request.Id), request.Body.Title, request.Body.Body, request.Body.Rating, namespace); err != nil {
+		log.Warn("Could not create journal entry in DB", "err", errors.Join(errCouldNotInsertIntoDB, err))
+
+		return api.UpdateJournalEntry404TextResponse(errCouldNotInsertIntoDB.Error()), nil
+	}
+
+	return api.UpdateJournalEntry200JSONResponse((api.JournalEntry{
+		Body:      &request.Body.Body,
+		Id:        &request.Id,
+		Namespace: &namespace,
+		Rating:    &request.Body.Rating,
+		Title:     &request.Body.Title,
+	})), nil
+}
