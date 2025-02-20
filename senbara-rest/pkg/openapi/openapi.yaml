@@ -277,66 +277,78 @@ paths:
               schema:
                 type: string
 
-#   /contacts:
-#     get:
-#       tags:
-#         - contacts
-#       summary: List all contacts
-#       operationId: getContacts
-#       security:
-#         - oidc: []
-#       responses:
-#         "200":
-#           description: Contacts retrieved successfully
-#           content:
-#             application/json:
-#               schema:
-#                 type: array
-#                 items:
-#                   $ref: "#/components/schemas/Contact"
-#         "500":
-#           description: An internal error occurred
-#     post:
-#       tags:
-#         - contacts
-#       summary: Create a new contact
-#       operationId: createContact
-#       security:
-#         - oidc: []
-#       requestBody:
-#         required: true
-#         content:
-#           application/x-www-form-urlencoded:
-#             schema:
-#               type: object
-#               properties:
-#                 first_name:
-#                   type: string
-#                 last_name:
-#                   type: string
-#                 email:
-#                   type: string
-#                   format: email
-#                 pronouns:
-#                   type: string
-#                 nickname:
-#                   type: string
-#               required:
-#                 - first_name
-#                 - last_name
-#                 - email
-#                 - pronouns
-#       responses:
-#         "200":
-#           description: Contact created successfully
-#           content:
-#             application/json:
-#               schema:
-#                 $ref: "#/components/schemas/Contact"
-#         "422":
-#           description: Validation error
-#         "500":
-#           description: An internal error occurred
+  /contacts:
+    get:
+      tags:
+        - contacts
+      summary: List all contacts
+      operationId: getContacts
+      security:
+        - oidc: []
+      responses:
+        "200":
+          description: Contacts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contact"
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
+    # post:
+    #   tags:
+    #     - contacts
+    #   summary: Create a new contact
+    #   operationId: createContact
+    #   security:
+    #     - oidc: []
+    #   requestBody:
+    #     required: true
+    #     content:
+    #       application/x-www-form-urlencoded:
+    #         schema:
+    #           type: object
+    #           properties:
+    #             first_name:
+    #               type: string
+    #             last_name:
+    #               type: string
+    #             email:
+    #               type: string
+    #               format: email
+    #             pronouns:
+    #               type: string
+    #             nickname:
+    #               type: string
+    #           required:
+    #             - first_name
+    #             - last_name
+    #             - email
+    #             - pronouns
+    #   responses:
+    #     "200":
+    #       description: Contact created successfully
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: "#/components/schemas/Contact"
+    #     "422":
+    #       description: Validation error
+    #       content:
+    #         text/plain:
+    #           schema:
+    #             type: string
+    #     "500":
+    #       description: An internal error occurred
+    #       content:
+    #         text/plain:
+    #           schema:
+    #             type: string
 
 #   /contacts/{id}:
 #     get:
@@ -819,31 +831,31 @@ components:
         namespace:
           type: string
 
-    # Contact:
-    #   type: object
-    #   properties:
-    #     id:
-    #       type: integer
-    #       format: int64
-    #     first_name:
-    #       type: string
-    #     last_name:
-    #       type: string
-    #     nickname:
-    #       type: string
-    #     email:
-    #       type: string
-    #       format: email
-    #     pronouns:
-    #       type: string
-    #     birthday:
-    #       type: string
-    #       format: date
-    #       nullable: true
-    #     address:
-    #       type: string
-    #     notes:
-    #       type: string
+    Contact:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        first_name:
+          type: string
+        last_name:
+          type: string
+        nickname:
+          type: string
+        email:
+          type: string
+          format: email
+        pronouns:
+          type: string
+        birthday:
+          type: string
+          format: date
+          nullable: true
+        address:
+          type: string
+        notes:
+          type: string
 
     # ContactData:
     #   type: object

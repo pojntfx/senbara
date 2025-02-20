@@ -38,7 +38,7 @@ func (c *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
 
 	log := c.log.With("namespace", userData.Email)
 
-	log.Debug("Getting contacts")
+	log.Debug("Handling contacts page")
 
 	contacts, err := c.persister.GetContacts(r.Context(), userData.Email)
 	if err != nil {

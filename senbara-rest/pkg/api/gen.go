@@ -24,11 +24,25 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oapi-codegen/runtime"
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 const (
 	OidcScopes = "oidc.Scopes"
 )
+
+// Contact defines model for Contact.
+type Contact struct {
+	Address   *string              `json:"address,omitempty"`
+	Birthday  *openapi_types.Date  `json:"birthday"`
+	Email     *openapi_types.Email `json:"email,omitempty"`
+	FirstName *string              `json:"first_name,omitempty"`
+	Id        *int64               `json:"id,omitempty"`
+	LastName  *string              `json:"last_name,omitempty"`
+	Nickname  *string              `json:"nickname,omitempty"`
+	Notes     *string              `json:"notes,omitempty"`
+	Pronouns  *string              `json:"pronouns,omitempty"`
+}
 
 // IndexData defines model for IndexData.
 type IndexData struct {
@@ -142,6 +156,9 @@ type ClientInterface interface {
 	// GetIndex request
 	GetIndex(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetContacts request
+	GetContacts(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetJournalEntries request
 	GetJournalEntries(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -167,6 +184,18 @@ type ClientInterface interface {
 
 func (c *Client) GetIndex(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetIndexRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetContacts(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetContactsRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -283,6 +312,33 @@ func NewGetIndexRequest(server string) (*http.Request, error) {
 	}
 
 	operationPath := fmt.Sprintf("/")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetContactsRequest generates requests for GetContacts
+func NewGetContactsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/contacts")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -555,6 +611,9 @@ type ClientWithResponsesInterface interface {
 	// GetIndexWithResponse request
 	GetIndexWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetIndexResponse, error)
 
+	// GetContactsWithResponse request
+	GetContactsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetContactsResponse, error)
+
 	// GetJournalEntriesWithResponse request
 	GetJournalEntriesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetJournalEntriesResponse, error)
 
@@ -594,6 +653,28 @@ func (r GetIndexResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetIndexResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetContactsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]Contact
+}
+
+// Status returns HTTPResponse.Status
+func (r GetContactsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetContactsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -741,6 +822,15 @@ func (c *ClientWithResponses) GetIndexWithResponse(ctx context.Context, reqEdito
 	return ParseGetIndexResponse(rsp)
 }
 
+// GetContactsWithResponse request returning *GetContactsResponse
+func (c *ClientWithResponses) GetContactsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetContactsResponse, error) {
+	rsp, err := c.GetContacts(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetContactsResponse(rsp)
+}
+
 // GetJournalEntriesWithResponse request returning *GetJournalEntriesResponse
 func (c *ClientWithResponses) GetJournalEntriesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetJournalEntriesResponse, error) {
 	rsp, err := c.GetJournalEntries(ctx, reqEditors...)
@@ -827,6 +917,32 @@ func ParseGetIndexResponse(rsp *http.Response) (*GetIndexResponse, error) {
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest IndexData
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetContactsResponse parses an HTTP response from a GetContactsWithResponse call
+func ParseGetContactsResponse(rsp *http.Response) (*GetContactsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetContactsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []Contact
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -998,6 +1114,9 @@ type ServerInterface interface {
 	// Gets counts of contacts and journal entries for the authenticated user
 	// (GET /)
 	GetIndex(w http.ResponseWriter, r *http.Request)
+	// List all contacts
+	// (GET /contacts)
+	GetContacts(w http.ResponseWriter, r *http.Request)
 	// List all journal entries
 	// (GET /journal)
 	GetJournalEntries(w http.ResponseWriter, r *http.Request)
@@ -1035,6 +1154,23 @@ func (siw *ServerInterfaceWrapper) GetIndex(w http.ResponseWriter, r *http.Reque
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetIndex(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetContacts operation middleware
+func (siw *ServerInterfaceWrapper) GetContacts(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetContacts(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -1292,6 +1428,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	}
 
 	m.HandleFunc("GET "+options.BaseURL+"/", wrapper.GetIndex)
+	m.HandleFunc("GET "+options.BaseURL+"/contacts", wrapper.GetContacts)
 	m.HandleFunc("GET "+options.BaseURL+"/journal", wrapper.GetJournalEntries)
 	m.HandleFunc("POST "+options.BaseURL+"/journal", wrapper.CreateJournalEntry)
 	m.HandleFunc("DELETE "+options.BaseURL+"/journal/{id}", wrapper.DeleteJournalEntry)
@@ -1331,6 +1468,32 @@ func (response GetIndex403TextResponse) VisitGetIndexResponse(w http.ResponseWri
 type GetIndex500TextResponse string
 
 func (response GetIndex500TextResponse) VisitGetIndexResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type GetContactsRequestObject struct {
+}
+
+type GetContactsResponseObject interface {
+	VisitGetContactsResponse(w http.ResponseWriter) error
+}
+
+type GetContacts200JSONResponse []Contact
+
+func (response GetContacts200JSONResponse) VisitGetContactsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetContacts500TextResponse string
+
+func (response GetContacts500TextResponse) VisitGetContactsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(500)
 
@@ -1562,6 +1725,9 @@ type StrictServerInterface interface {
 	// Gets counts of contacts and journal entries for the authenticated user
 	// (GET /)
 	GetIndex(ctx context.Context, request GetIndexRequestObject) (GetIndexResponseObject, error)
+	// List all contacts
+	// (GET /contacts)
+	GetContacts(ctx context.Context, request GetContactsRequestObject) (GetContactsResponseObject, error)
 	// List all journal entries
 	// (GET /journal)
 	GetJournalEntries(ctx context.Context, request GetJournalEntriesRequestObject) (GetJournalEntriesResponseObject, error)
@@ -1628,6 +1794,30 @@ func (sh *strictHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetIndexResponseObject); ok {
 		if err := validResponse.VisitGetIndexResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetContacts operation middleware
+func (sh *strictHandler) GetContacts(w http.ResponseWriter, r *http.Request) {
+	var request GetContactsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetContacts(ctx, request.(GetContactsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetContacts")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetContactsResponseObject); ok {
+		if err := validResponse.VisitGetContactsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -1810,30 +2000,32 @@ func (sh *strictHandler) GetOpenAPISpec(w http.ResponseWriter, r *http.Request) 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"AAD//1nZFFaZGgAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
