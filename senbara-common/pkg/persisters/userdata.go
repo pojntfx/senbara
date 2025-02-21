@@ -119,7 +119,9 @@ func (p *Persister) GetUserData(
 }
 
 func (p *Persister) DeleteUserData(ctx context.Context, namespace string) error {
-	p.log.With("namespace", namespace).Debug("Deleting user data")
+	log := p.log.With("namespace", namespace)
+
+	log.Debug("Deleting user data")
 
 	tx, err := p.db.Begin()
 	if err != nil {
@@ -129,21 +131,33 @@ func (p *Persister) DeleteUserData(ctx context.Context, namespace string) error 
 
 	qtx := p.queries.WithTx(tx)
 
-	if err := qtx.DeleteActivitiesForNamespace(ctx, namespace); err != nil {
+	activityIDs, err := qtx.DeleteActivitiesForNamespace(ctx, namespace)
+	if err != nil {
 		return err
 	}
 
-	if err := qtx.DeleteDebtsForNamespace(ctx, namespace); err != nil {
+	log.With("len", len(activityIDs)).Debug("Deleted activities")
+
+	debtIDs, err := qtx.DeleteDebtsForNamespace(ctx, namespace)
+	if err != nil {
 		return err
 	}
 
-	if err := qtx.DeleteContactsForNamespace(ctx, namespace); err != nil {
+	log.With("len", len(debtIDs)).Debug("Deleted debts")
+
+	contactIDs, err := qtx.DeleteContactsForNamespace(ctx, namespace)
+	if err != nil {
 		return err
 	}
 
-	if err := qtx.DeleteJournalEntriesForNamespace(ctx, namespace); err != nil {
+	log.With("len", len(contactIDs)).Debug("Deleted debts")
+
+	journalEntryIDs, err := qtx.DeleteJournalEntriesForNamespace(ctx, namespace)
+	if err != nil {
 		return err
 	}
+
+	log.With("len", len(journalEntryIDs)).Debug("Deleted debts")
 
 	return tx.Commit()
 }
@@ -200,7 +214,7 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 	createContact = func(contact models.ExportedContact) error {
 		p.log.With("namespace", namespace).Debug("Creating contact", "firstName", contact.FirstName, "lastName", contact.LastName, "email", contact.Email)
 
-		id, err := qtx.CreateContact(ctx, models.CreateContactParams{
+		c, err := qtx.CreateContact(ctx, models.CreateContactParams{
 			FirstName: contact.FirstName,
 			LastName:  contact.LastName,
 			Nickname:  contact.Nickname,
@@ -215,7 +229,7 @@ func (p *Persister) CreateUserData(ctx context.Context, namespace string) (
 		contactIDMapLock.Lock()
 		defer contactIDMapLock.Unlock()
 
-		contactIDMap[contact.ID] = id
+		contactIDMap[contact.ID] = c.ID
 
 		return nil
 	}

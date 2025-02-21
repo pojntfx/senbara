@@ -11,6 +11,8 @@ type (
 )
 
 type (
+	CreateDebtRow        = tables.CreateDebtRow
+	UpdateDebtRow        = tables.UpdateDebtRow
 	GetDebtsRow          = tables.GetDebtsRow
 	GetDebtAndContactRow = tables.GetDebtAndContactRow
 )

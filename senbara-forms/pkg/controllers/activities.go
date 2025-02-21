@@ -241,7 +241,7 @@ func (c *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 		"contactID", contactID,
 	)
 
-	if err := c.persister.DeleteActivity(
+	if _, err := c.persister.DeleteActivity(
 		r.Context(),
 
 		int32(id),
@@ -353,7 +353,7 @@ func (c *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 		"date", date,
 	)
 
-	if err := c.persister.UpdateActivity(
+	if _, err := c.persister.UpdateActivity(
 		r.Context(),
 
 		int32(id),

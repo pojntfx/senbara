@@ -13,17 +13,18 @@ insert into contacts (
         namespace
     )
 values ($1, $2, $3, $4, $5, $6)
-returning id;
--- name: DeleteContact :exec
+returning *;
+-- name: DeleteContact :one
 delete from contacts
 where id = $1
-    and namespace = $2;
+    and namespace = $2
+returning id;
 -- name: GetContact :one
 select *
 from contacts
 where id = $1
     and namespace = $2;
--- name: UpdateContact :exec
+-- name: UpdateContact :one
 update contacts
 set first_name = $3,
     last_name = $4,
@@ -34,10 +35,12 @@ set first_name = $3,
     address = $9,
     notes = $10
 where id = $1
-    and namespace = $2;
--- name: DeleteContactsForNamespace :exec
+    and namespace = $2
+returning *;
+-- name: DeleteContactsForNamespace :many
 delete from contacts
-where namespace = $1;
+where namespace = $1
+returning id;
 -- name: GetContactsExportForNamespace :many
 select 'contacts' as table_name,
     *

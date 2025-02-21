@@ -33,7 +33,7 @@ insert into contacts (
         namespace
     )
 values ($1, $2, $3, $4, $5, $6)
-returning id
+returning id, first_name, last_name, nickname, email, pronouns, namespace, birthday, address, notes
 `
 
 type CreateContactParams struct {
@@ -45,7 +45,7 @@ type CreateContactParams struct {
 	Namespace string
 }
 
-func (q *Queries) CreateContact(ctx context.Context, arg CreateContactParams) (int32, error) {
+func (q *Queries) CreateContact(ctx context.Context, arg CreateContactParams) (Contact, error) {
 	row := q.db.QueryRowContext(ctx, createContact,
 		arg.FirstName,
 		arg.LastName,
@@ -54,15 +54,27 @@ func (q *Queries) CreateContact(ctx context.Context, arg CreateContactParams) (i
 		arg.Pronouns,
 		arg.Namespace,
 	)
-	var id int32
-	err := row.Scan(&id)
-	return id, err
+	var i Contact
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Nickname,
+		&i.Email,
+		&i.Pronouns,
+		&i.Namespace,
+		&i.Birthday,
+		&i.Address,
+		&i.Notes,
+	)
+	return i, err
 }
 
-const deleteContact = `-- name: DeleteContact :exec
+const deleteContact = `-- name: DeleteContact :one
 delete from contacts
 where id = $1
     and namespace = $2
+returning id
 `
 
 type DeleteContactParams struct {
@@ -70,19 +82,40 @@ type DeleteContactParams struct {
 	Namespace string
 }
 
-func (q *Queries) DeleteContact(ctx context.Context, arg DeleteContactParams) error {
-	_, err := q.db.ExecContext(ctx, deleteContact, arg.ID, arg.Namespace)
-	return err
+func (q *Queries) DeleteContact(ctx context.Context, arg DeleteContactParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, deleteContact, arg.ID, arg.Namespace)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
 }
 
-const deleteContactsForNamespace = `-- name: DeleteContactsForNamespace :exec
+const deleteContactsForNamespace = `-- name: DeleteContactsForNamespace :many
 delete from contacts
 where namespace = $1
+returning id
 `
 
-func (q *Queries) DeleteContactsForNamespace(ctx context.Context, namespace string) error {
-	_, err := q.db.ExecContext(ctx, deleteContactsForNamespace, namespace)
-	return err
+func (q *Queries) DeleteContactsForNamespace(ctx context.Context, namespace string) ([]int32, error) {
+	rows, err := q.db.QueryContext(ctx, deleteContactsForNamespace, namespace)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int32
+	for rows.Next() {
+		var id int32
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getContact = `-- name: GetContact :one
@@ -213,7 +246,7 @@ func (q *Queries) GetContactsExportForNamespace(ctx context.Context, namespace s
 	return items, nil
 }
 
-const updateContact = `-- name: UpdateContact :exec
+const updateContact = `-- name: UpdateContact :one
 update contacts
 set first_name = $3,
     last_name = $4,
@@ -225,6 +258,7 @@ set first_name = $3,
     notes = $10
 where id = $1
     and namespace = $2
+returning id, first_name, last_name, nickname, email, pronouns, namespace, birthday, address, notes
 `
 
 type UpdateContactParams struct {
@@ -240,8 +274,8 @@ type UpdateContactParams struct {
 	Notes     string
 }
 
-func (q *Queries) UpdateContact(ctx context.Context, arg UpdateContactParams) error {
-	_, err := q.db.ExecContext(ctx, updateContact,
+func (q *Queries) UpdateContact(ctx context.Context, arg UpdateContactParams) (Contact, error) {
+	row := q.db.QueryRowContext(ctx, updateContact,
 		arg.ID,
 		arg.Namespace,
 		arg.FirstName,
@@ -253,5 +287,18 @@ func (q *Queries) UpdateContact(ctx context.Context, arg UpdateContactParams) er
 		arg.Address,
 		arg.Notes,
 	)
-	return err
+	var i Contact
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Nickname,
+		&i.Email,
+		&i.Pronouns,
+		&i.Namespace,
+		&i.Birthday,
+		&i.Address,
+		&i.Notes,
+	)
+	return i, err
 }

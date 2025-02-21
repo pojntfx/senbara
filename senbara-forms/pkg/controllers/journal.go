@@ -217,7 +217,7 @@ func (c *Controller) HandleDeleteJournal(w http.ResponseWriter, r *http.Request)
 		"id", id,
 	)
 
-	if err := c.persister.DeleteJournalEntry(r.Context(), int32(id), userData.Email); err != nil {
+	if _, err := c.persister.DeleteJournalEntry(r.Context(), int32(id), userData.Email); err != nil {
 		log.Warn("Could not delete journal entry from DB", "err", errors.Join(errCouldNotDeleteFromDB, err))
 
 		http.Error(w, errCouldNotDeleteFromDB.Error(), http.StatusInternalServerError)
@@ -377,7 +377,8 @@ func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 		"rating", rating,
 	)
 
-	if err := c.persister.UpdateJournalEntry(r.Context(), int32(id), title, body, int32(rating), userData.Email); err != nil {
+	journal, err := c.persister.UpdateJournalEntry(r.Context(), int32(id), title, body, int32(rating), userData.Email)
+	if err != nil {
 		log.Warn("Could not update journal entry in DB", "err", errors.Join(errCouldNotUpdateInDB, err))
 
 		http.Error(w, errCouldNotUpdateInDB.Error(), http.StatusInternalServerError)
@@ -385,7 +386,7 @@ func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	http.Redirect(w, r, "/journal/view?id="+rid, http.StatusFound)
+	http.Redirect(w, r, "/journal/view?id="+string(journal.ID), http.StatusFound)
 }
 
 func (c *Controller) HandleViewJournal(w http.ResponseWriter, r *http.Request) {

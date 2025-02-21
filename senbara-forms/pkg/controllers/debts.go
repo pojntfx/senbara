@@ -266,7 +266,7 @@ func (c *Controller) HandleSettleDebt(w http.ResponseWriter, r *http.Request) {
 		"contactID", contactID,
 	)
 
-	if err := c.persister.SettleDebt(
+	if _, err := c.persister.SettleDebt(
 		r.Context(),
 
 		int32(id),
@@ -404,7 +404,7 @@ func (c *Controller) HandleUpdateDebt(w http.ResponseWriter, r *http.Request) {
 		"description", description,
 	)
 
-	if err := c.persister.UpdateDebt(
+	if _, err := c.persister.UpdateDebt(
 		r.Context(),
 
 		int32(id),

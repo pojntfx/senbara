@@ -12,7 +12,7 @@ func (p *Persister) GetJournalEntries(ctx context.Context, namespace string) ([]
 	return p.queries.GetJournalEntries(ctx, namespace)
 }
 
-func (p *Persister) CreateJournalEntry(ctx context.Context, title, body string, rating int32, namespace string) (int32, error) {
+func (p *Persister) CreateJournalEntry(ctx context.Context, title, body string, rating int32, namespace string) (models.JournalEntry, error) {
 	p.log.With("namespace", namespace).Debug("Creating journal entry", "title", title, "rating", rating)
 
 	return p.queries.CreateJournalEntry(ctx, models.CreateJournalEntryParams{
@@ -23,7 +23,7 @@ func (p *Persister) CreateJournalEntry(ctx context.Context, title, body string, 
 	})
 }
 
-func (p *Persister) DeleteJournalEntry(ctx context.Context, id int32, namespace string) error {
+func (p *Persister) DeleteJournalEntry(ctx context.Context, id int32, namespace string) (int32, error) {
 	p.log.With("namespace", namespace).Debug("Deleting journal entry", "id", id)
 
 	return p.queries.DeleteJournalEntry(ctx, models.DeleteJournalEntryParams{
@@ -41,7 +41,7 @@ func (p *Persister) GetJournalEntry(ctx context.Context, id int32, namespace str
 	})
 }
 
-func (p *Persister) UpdateJournalEntry(ctx context.Context, id int32, title, body string, rating int32, namespace string) error {
+func (p *Persister) UpdateJournalEntry(ctx context.Context, id int32, title, body string, rating int32, namespace string) (models.JournalEntry, error) {
 	p.log.With("namespace", namespace).Debug("Updating journal entry", "id", id, "title", title, "rating", rating)
 
 	return p.queries.UpdateJournalEntry(ctx, models.UpdateJournalEntryParams{

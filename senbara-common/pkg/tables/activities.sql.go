@@ -29,9 +29,15 @@ insertion as (
             select 1
             from contact
         )
-    returning activities.id
+    returning activities.id,
+        activities.name,
+        activities.date,
+        activities.description
 )
-select id
+select id,
+    name,
+    date,
+    description
 from insertion
 `
 
@@ -43,7 +49,14 @@ type CreateActivityParams struct {
 	Description string
 }
 
-func (q *Queries) CreateActivity(ctx context.Context, arg CreateActivityParams) (int32, error) {
+type CreateActivityRow struct {
+	ID          int32
+	Name        string
+	Date        time.Time
+	Description string
+}
+
+func (q *Queries) CreateActivity(ctx context.Context, arg CreateActivityParams) (CreateActivityRow, error) {
 	row := q.db.QueryRowContext(ctx, createActivity,
 		arg.ID,
 		arg.Namespace,
@@ -51,9 +64,14 @@ func (q *Queries) CreateActivity(ctx context.Context, arg CreateActivityParams) 
 		arg.Date,
 		arg.Description,
 	)
-	var id int32
-	err := row.Scan(&id)
-	return id, err
+	var i CreateActivityRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Date,
+		&i.Description,
+	)
+	return i, err
 }
 
 const deleteActivitesForContact = `-- name: DeleteActivitesForContact :exec
@@ -73,22 +91,42 @@ func (q *Queries) DeleteActivitesForContact(ctx context.Context, arg DeleteActiv
 	return err
 }
 
-const deleteActivitiesForNamespace = `-- name: DeleteActivitiesForNamespace :exec
+const deleteActivitiesForNamespace = `-- name: DeleteActivitiesForNamespace :many
 delete from activities using contacts
 where activities.contact_id = contacts.id
     and contacts.namespace = $1
+returning activities.id
 `
 
-func (q *Queries) DeleteActivitiesForNamespace(ctx context.Context, namespace string) error {
-	_, err := q.db.ExecContext(ctx, deleteActivitiesForNamespace, namespace)
-	return err
+func (q *Queries) DeleteActivitiesForNamespace(ctx context.Context, namespace string) ([]int32, error) {
+	rows, err := q.db.QueryContext(ctx, deleteActivitiesForNamespace, namespace)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int32
+	for rows.Next() {
+		var id int32
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
-const deleteActivity = `-- name: DeleteActivity :exec
+const deleteActivity = `-- name: DeleteActivity :one
 delete from activities using contacts
 where activities.id = $1
     and activities.contact_id = contacts.id
     and contacts.namespace = $2
+returning activities.id
 `
 
 type DeleteActivityParams struct {
@@ -96,9 +134,11 @@ type DeleteActivityParams struct {
 	Namespace string
 }
 
-func (q *Queries) DeleteActivity(ctx context.Context, arg DeleteActivityParams) error {
-	_, err := q.db.ExecContext(ctx, deleteActivity, arg.ID, arg.Namespace)
-	return err
+func (q *Queries) DeleteActivity(ctx context.Context, arg DeleteActivityParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, deleteActivity, arg.ID, arg.Namespace)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
 }
 
 const getActivities = `-- name: GetActivities :many
@@ -247,7 +287,7 @@ func (q *Queries) GetActivityAndContact(ctx context.Context, arg GetActivityAndC
 	return i, err
 }
 
-const updateActivity = `-- name: UpdateActivity :exec
+const updateActivity = `-- name: UpdateActivity :one
 update activities
 set name = $3,
     date = $4,
@@ -256,6 +296,10 @@ from contacts
 where activities.id = $1
     and contacts.namespace = $2
     and activities.contact_id = contacts.id
+returning activities.id,
+    activities.name,
+    activities.date,
+    activities.description
 `
 
 type UpdateActivityParams struct {
@@ -266,13 +310,27 @@ type UpdateActivityParams struct {
 	Description string
 }
 
-func (q *Queries) UpdateActivity(ctx context.Context, arg UpdateActivityParams) error {
-	_, err := q.db.ExecContext(ctx, updateActivity,
+type UpdateActivityRow struct {
+	ID          int32
+	Name        string
+	Date        time.Time
+	Description string
+}
+
+func (q *Queries) UpdateActivity(ctx context.Context, arg UpdateActivityParams) (UpdateActivityRow, error) {
+	row := q.db.QueryRowContext(ctx, updateActivity,
 		arg.ID,
 		arg.Namespace,
 		arg.Name,
 		arg.Date,
 		arg.Description,
 	)
-	return err
+	var i UpdateActivityRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Date,
+		&i.Description,
+	)
+	return i, err
 }

@@ -232,7 +232,7 @@ func (c *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request)
 
 	log.Debug("Deleting contact from DB", "id", id)
 
-	if err := c.persister.DeleteContact(r.Context(), int32(id), userData.Email); err != nil {
+	if _, err := c.persister.DeleteContact(r.Context(), int32(id), userData.Email); err != nil {
 		log.Warn("Could not delete contact from DB", "err", errors.Join(errCouldNotDeleteFromDB, err))
 
 		http.Error(w, errCouldNotDeleteFromDB.Error(), http.StatusInternalServerError)
@@ -444,7 +444,7 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 		"notes", notes,
 	)
 
-	if err := c.persister.UpdateContact(
+	contact, err := c.persister.UpdateContact(
 		r.Context(),
 		int32(id),
 		firstName,
@@ -456,7 +456,8 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 		birthday,
 		address,
 		notes,
-	); err != nil {
+	)
+	if err != nil {
 		log.Warn("Could not update contact in DB", "err", errors.Join(errCouldNotUpdateInDB, err))
 
 		http.Error(w, errCouldNotInsertIntoDB.Error(), http.StatusInternalServerError)
@@ -464,7 +465,7 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	http.Redirect(w, r, "/contacts/view?id="+rid, http.StatusFound)
+	http.Redirect(w, r, "/contacts/view?id="+string(contact.ID), http.StatusFound)
 }
 
 func (c *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {

@@ -16,7 +16,7 @@ func (p *Persister) CreateActivity(
 
 	contactID int32,
 	namespace string,
-) (int32, error) {
+) (models.CreateActivityRow, error) {
 	p.log.With("namespace", namespace).Debug("Creating activity", "name", name, "date", date, "contactID", contactID)
 
 	return p.queries.CreateActivity(ctx, models.CreateActivityParams{
@@ -48,7 +48,7 @@ func (p *Persister) DeleteActivity(
 	id int32,
 
 	namespace string,
-) error {
+) (int32, error) {
 	p.log.With("namespace", namespace).Debug("Deleting activity", "id", id)
 
 	return p.queries.DeleteActivity(ctx, models.DeleteActivityParams{
@@ -82,7 +82,7 @@ func (p *Persister) UpdateActivity(
 	name string,
 	date time.Time,
 	description string,
-) error {
+) (models.UpdateActivityRow, error) {
 	p.log.With("namespace", namespace).Debug("Updating activity", "id", id, "name", name, "date", date)
 
 	return p.queries.UpdateActivity(ctx, models.UpdateActivityParams{

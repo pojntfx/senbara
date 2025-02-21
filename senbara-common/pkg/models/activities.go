@@ -11,6 +11,8 @@ type (
 )
 
 type (
+	CreateActivityRow        = tables.CreateActivityRow
+	UpdateActivityRow        = tables.UpdateActivityRow
 	GetActivitiesRow         = tables.GetActivitiesRow
 	GetActivityAndContactRow = tables.GetActivityAndContactRow
 )

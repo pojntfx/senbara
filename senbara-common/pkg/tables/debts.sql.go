@@ -28,9 +28,15 @@ insertion as (
             select 1
             from contact
         )
-    returning debts.id
+    returning debts.id,
+        debts.amount,
+        debts.currency,
+        debts.description
 )
-select id
+select id,
+    amount,
+    currency,
+    description
 from insertion
 `
 
@@ -42,7 +48,14 @@ type CreateDebtParams struct {
 	Description string
 }
 
-func (q *Queries) CreateDebt(ctx context.Context, arg CreateDebtParams) (int32, error) {
+type CreateDebtRow struct {
+	ID          int32
+	Amount      float64
+	Currency    string
+	Description string
+}
+
+func (q *Queries) CreateDebt(ctx context.Context, arg CreateDebtParams) (CreateDebtRow, error) {
 	row := q.db.QueryRowContext(ctx, createDebt,
 		arg.ID,
 		arg.Namespace,
@@ -50,9 +63,14 @@ func (q *Queries) CreateDebt(ctx context.Context, arg CreateDebtParams) (int32, 
 		arg.Currency,
 		arg.Description,
 	)
-	var id int32
-	err := row.Scan(&id)
-	return id, err
+	var i CreateDebtRow
+	err := row.Scan(
+		&i.ID,
+		&i.Amount,
+		&i.Currency,
+		&i.Description,
+	)
+	return i, err
 }
 
 const deleteDebtsForContact = `-- name: DeleteDebtsForContact :exec
@@ -72,15 +90,34 @@ func (q *Queries) DeleteDebtsForContact(ctx context.Context, arg DeleteDebtsForC
 	return err
 }
 
-const deleteDebtsForNamespace = `-- name: DeleteDebtsForNamespace :exec
+const deleteDebtsForNamespace = `-- name: DeleteDebtsForNamespace :many
 delete from debts using contacts
 where debts.contact_id = contacts.id
     and contacts.namespace = $1
+returning debts.id
 `
 
-func (q *Queries) DeleteDebtsForNamespace(ctx context.Context, namespace string) error {
-	_, err := q.db.ExecContext(ctx, deleteDebtsForNamespace, namespace)
-	return err
+func (q *Queries) DeleteDebtsForNamespace(ctx context.Context, namespace string) ([]int32, error) {
+	rows, err := q.db.QueryContext(ctx, deleteDebtsForNamespace, namespace)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int32
+	for rows.Next() {
+		var id int32
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getDebtAndContact = `-- name: GetDebtAndContact :one
@@ -229,11 +266,12 @@ func (q *Queries) GetDebtsExportForNamespace(ctx context.Context, namespace stri
 	return items, nil
 }
 
-const settleDebt = `-- name: SettleDebt :exec
+const settleDebt = `-- name: SettleDebt :one
 delete from debts using contacts
 where debts.id = $1
     and debts.contact_id = contacts.id
     and contacts.namespace = $2
+returning debts.id
 `
 
 type SettleDebtParams struct {
@@ -241,12 +279,14 @@ type SettleDebtParams struct {
 	Namespace string
 }
 
-func (q *Queries) SettleDebt(ctx context.Context, arg SettleDebtParams) error {
-	_, err := q.db.ExecContext(ctx, settleDebt, arg.ID, arg.Namespace)
-	return err
+func (q *Queries) SettleDebt(ctx context.Context, arg SettleDebtParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, settleDebt, arg.ID, arg.Namespace)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
 }
 
-const updateDebt = `-- name: UpdateDebt :exec
+const updateDebt = `-- name: UpdateDebt :one
 update debts
 set amount = $3,
     currency = $4,
@@ -255,6 +295,10 @@ from contacts
 where debts.id = $1
     and contacts.namespace = $2
     and debts.contact_id = contacts.id
+returning debts.id,
+    debts.amount,
+    debts.currency,
+    debts.description
 `
 
 type UpdateDebtParams struct {
@@ -265,13 +309,27 @@ type UpdateDebtParams struct {
 	Description string
 }
 
-func (q *Queries) UpdateDebt(ctx context.Context, arg UpdateDebtParams) error {
-	_, err := q.db.ExecContext(ctx, updateDebt,
+type UpdateDebtRow struct {
+	ID          int32
+	Amount      float64
+	Currency    string
+	Description string
+}
+
+func (q *Queries) UpdateDebt(ctx context.Context, arg UpdateDebtParams) (UpdateDebtRow, error) {
+	row := q.db.QueryRowContext(ctx, updateDebt,
 		arg.ID,
 		arg.Namespace,
 		arg.Amount,
 		arg.Currency,
 		arg.Description,
 	)
-	return err
+	var i UpdateDebtRow
+	err := row.Scan(
+		&i.ID,
+		&i.Amount,
+		&i.Currency,
+		&i.Description,
+	)
+	return i, err
 }

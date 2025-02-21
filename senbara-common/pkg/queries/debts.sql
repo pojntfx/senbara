@@ -16,9 +16,15 @@ insertion as (
             select 1
             from contact
         )
-    returning debts.id
+    returning debts.id,
+        debts.amount,
+        debts.currency,
+        debts.description
 )
-select id
+select id,
+    amount,
+    currency,
+    description
 from insertion;
 -- name: GetDebts :many
 select debts.id,
@@ -29,11 +35,12 @@ from contacts
     right join debts on debts.contact_id = contacts.id
 where contacts.id = $1
     and contacts.namespace = $2;
--- name: SettleDebt :exec
+-- name: SettleDebt :one
 delete from debts using contacts
 where debts.id = $1
     and debts.contact_id = contacts.id
-    and contacts.namespace = $2;
+    and contacts.namespace = $2
+returning debts.id;
 -- name: DeleteDebtsForContact :exec
 delete from debts using contacts
 where debts.contact_id = contacts.id
@@ -51,7 +58,7 @@ from contacts
     inner join debts on debts.contact_id = contacts.id
 where debts.id = $1
     and contacts.namespace = $2;
--- name: UpdateDebt :exec
+-- name: UpdateDebt :one
 update debts
 set amount = $3,
     currency = $4,
@@ -59,7 +66,11 @@ set amount = $3,
 from contacts
 where debts.id = $1
     and contacts.namespace = $2
-    and debts.contact_id = contacts.id;
+    and debts.contact_id = contacts.id
+returning debts.id,
+    debts.amount,
+    debts.currency,
+    debts.description;
 -- name: GetDebtsExportForNamespace :many
 select 'debts' as table_name,
     debts.id,
@@ -70,7 +81,8 @@ select 'debts' as table_name,
 from contacts
     right join debts on debts.contact_id = contacts.id
 where contacts.namespace = $1;
--- name: DeleteDebtsForNamespace :exec
+-- name: DeleteDebtsForNamespace :many
 delete from debts using contacts
 where debts.contact_id = contacts.id
-    and contacts.namespace = $1;
+    and contacts.namespace = $1
+returning debts.id;

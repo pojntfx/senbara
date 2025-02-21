@@ -22,7 +22,7 @@ func (p *Persister) CreateContact(
 	email string,
 	pronouns string,
 	namespace string,
-) (int32, error) {
+) (models.Contact, error) {
 	p.log.With("namespace", namespace).Debug("Creating contact", "firstName", firstName, "lastName", lastName)
 
 	return p.queries.CreateContact(ctx, models.CreateContactParams{
@@ -44,12 +44,12 @@ func (p *Persister) GetContact(ctx context.Context, id int32, namespace string) 
 	})
 }
 
-func (p *Persister) DeleteContact(ctx context.Context, id int32, namespace string) error {
+func (p *Persister) DeleteContact(ctx context.Context, id int32, namespace string) (int32, error) {
 	p.log.With("namespace", namespace).Debug("Deleting contact", "id", id)
 
 	tx, err := p.db.Begin()
 	if err != nil {
-		return err
+		return -1, err
 	}
 	defer tx.Rollback()
 
@@ -59,17 +59,22 @@ func (p *Persister) DeleteContact(ctx context.Context, id int32, namespace strin
 		ID:        id,
 		Namespace: namespace,
 	}); err != nil {
-		return err
+		return -1, err
 	}
 
-	if err := qtx.DeleteContact(ctx, models.DeleteContactParams{
+	deletedContactID, err := qtx.DeleteContact(ctx, models.DeleteContactParams{
 		ID:        id,
 		Namespace: namespace,
-	}); err != nil {
-		return err
+	})
+	if err != nil {
+		return -1, err
 	}
 
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return -1, err
+	}
+
+	return deletedContactID, nil
 }
 
 func (p *Persister) UpdateContact(
@@ -84,7 +89,7 @@ func (p *Persister) UpdateContact(
 	birthday *time.Time,
 	address,
 	notes string,
-) error {
+) (models.Contact, error) {
 	p.log.With("namespace", namespace).Debug("Updating contact", "id", id, "firstName", firstName, "lastName", lastName)
 
 	var birthdayDate sql.NullTime
