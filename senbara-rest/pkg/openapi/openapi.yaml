@@ -84,6 +84,94 @@ paths:
             text/plain:
               schema:
                 type: string
+
+  /userdata:
+    get:
+      tags:
+        - userdata
+      summary: Export all user data
+      operationId: exportUserData
+      security:
+        - oidc: []
+      responses:
+        "200":
+          description: User data exported successfully
+          content:
+            application/jsonl:
+              schema:
+                type: string
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              example: 'attachment; filename="senbara-forms-userdata.jsonl"'
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
+    post:
+      tags:
+        - userdata
+      summary: Import user data
+      operationId: importUserData
+      security:
+        - oidc: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                userData:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: User data imported successfully
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
+    delete:
+      tags:
+        - userdata
+      summary: Delete all user data
+      operationId: deleteUserData
+      security:
+        - oidc: []
+      responses:
+        "200":
+          description: User data deleted successfully
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
+
   /:
     get:
       tags:
@@ -100,7 +188,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/IndexData"
         "403":
-          description: Forbidden
+          description: Unauthorized
           content:
             text/plain:
               schema:
@@ -129,6 +217,12 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/JournalEntry"
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
         "500":
           description: An internal error occurred
           content:
@@ -166,9 +260,13 @@ paths:
           content:
             application/json:
               schema:
-                type: integer
-        "422":
-          description: Validation error
+                $ref: "#/components/schemas/JournalEntry"
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
         "500":
           description: An internal error occurred
           content:
@@ -198,8 +296,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/JournalEntry"
-        "404":
-          description: Entry not found
+        "403":
+          description: Unauthorized
           content:
             text/plain:
               schema:
@@ -232,8 +330,8 @@ paths:
               schema:
                 type: integer
                 format: int64
-        "404":
-          description: Entry not found
+        "403":
+          description: Unauthorized
           content:
             text/plain:
               schema:
@@ -283,14 +381,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/JournalEntry"
-        "404":
-          description: Entry not found
-          content:
-            text/plain:
-              schema:
-                type: string
-        "422":
-          description: Validation error
+        "403":
+          description: Unauthorized
           content:
             text/plain:
               schema:
@@ -319,511 +411,510 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Contact"
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
         "500":
           description: An internal error occurred
           content:
             text/plain:
               schema:
                 type: string
-    # post:
-    #   tags:
-    #     - contacts
-    #   summary: Create a new contact
-    #   operationId: createContact
-    #   security:
-    #     - oidc: []
-    #   requestBody:
-    #     required: true
-    #     content:
-    #       application/x-www-form-urlencoded:
-    #         schema:
-    #           type: object
-    #           properties:
-    #             first_name:
-    #               type: string
-    #             last_name:
-    #               type: string
-    #             email:
-    #               type: string
-    #               format: email
-    #             pronouns:
-    #               type: string
-    #             nickname:
-    #               type: string
-    #           required:
-    #             - first_name
-    #             - last_name
-    #             - email
-    #             - pronouns
-    #   responses:
-    #     "200":
-    #       description: Contact created successfully
-    #       content:
-    #         application/json:
-    #           schema:
-    #             $ref: "#/components/schemas/Contact"
-    #     "422":
-    #       description: Validation error
-    #       content:
-    #         text/plain:
-    #           schema:
-    #             type: string
-    #     "500":
-    #       description: An internal error occurred
-    #       content:
-    #         text/plain:
-    #           schema:
-    #             type: string
+    post:
+      tags:
+        - contacts
+      summary: Create a new contact
+      operationId: createContact
+      security:
+        - oidc: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                pronouns:
+                  type: string
+                nickname:
+                  type: string
+              required:
+                - first_name
+                - last_name
+                - email
+                - pronouns
+      responses:
+        "200":
+          description: Contact created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
 
-#   /contacts/{id}:
-#     get:
-#       tags:
-#         - contacts
-#       summary: Get contact details including debts and activities
-#       operationId: getContactDetails
-#       security:
-#         - oidc: []
-#       parameters:
-#         - name: id
-#           in: path
-#           required: true
-#           schema:
-#             type: integer
-#             format: int64
-#       responses:
-#         "200":
-#           description: Contact details retrieved successfully
-#           content:
-#             application/json:
-#               schema:
-#                 $ref: "#/components/schemas/ContactData"
-#         "404":
-#           description: Contact not found
-#         "500":
-#           description: An internal error occurred
-#     delete:
-#       tags:
-#         - contacts
-#       summary: Delete a contact
-#       operationId: deleteContact
-#       security:
-#         - oidc: []
-#       parameters:
-#         - name: id
-#           in: path
-#           required: true
-#           schema:
-#             type: integer
-#             format: int64
-#       responses:
-#         "200":
-#           description: Contact deleted successfully
-#           content:
-#             application/json:
-#               schema:
-#                 type: integer
-#                 format: int64
-#         "404":
-#           description: Contact not found
-#         "500":
-#           description: An internal error occurred
-#     put:
-#       tags:
-#         - contacts
-#       summary: Update a contact
-#       operationId: updateContact
-#       security:
-#         - oidc: []
-#       parameters:
-#         - name: id
-#           in: path
-#           required: true
-#           schema:
-#             type: integer
-#             format: int64
-#       requestBody:
-#         required: true
-#         content:
-#           application/x-www-form-urlencoded:
-#             schema:
-#               type: object
-#               properties:
-#                 first_name:
-#                   type: string
-#                 last_name:
-#                   type: string
-#                 email:
-#                   type: string
-#                   format: email
-#                 pronouns:
-#                   type: string
-#                 nickname:
-#                   type: string
-#                 birthday:
-#                   type: string
-#                   format: date
-#                 address:
-#                   type: string
-#                 notes:
-#                   type: string
-#               required:
-#                 - first_name
-#                 - last_name
-#                 - email
-#                 - pronouns
-#       responses:
-#         "200":
-#           description: Contact updated successfully
-#           content:
-#             application/json:
-#               schema:
-#                 $ref: "#/components/schemas/Contact"
-#         "404":
-#           description: Contact not found
-#         "422":
-#           description: Validation error
-#         "500":
-#           description: An internal error occurred
+  /contacts/{id}:
+    get:
+      tags:
+        - contacts
+      summary: Get contact including debts and activities
+      operationId: getContact
+      security:
+        - oidc: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Contact retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactData"
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
+    delete:
+      tags:
+        - contacts
+      summary: Delete a contact
+      operationId: deleteContact
+      security:
+        - oidc: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Contact deleted successfully
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
+    put:
+      tags:
+        - contacts
+      summary: Update a contact
+      operationId: updateContact
+      security:
+        - oidc: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                pronouns:
+                  type: string
+                nickname:
+                  type: string
+                birthday:
+                  type: string
+                  format: date
+                address:
+                  type: string
+                notes:
+                  type: string
+              required:
+                - first_name
+                - last_name
+                - email
+                - pronouns
+      responses:
+        "200":
+          description: Contact updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
 
-#   /debts:
-#     post:
-#       tags:
-#         - debts
-#       summary: Create a new debt record
-#       operationId: createDebt
-#       security:
-#         - oidc: []
-#       requestBody:
-#         required: true
-#         content:
-#           application/x-www-form-urlencoded:
-#             schema:
-#               type: object
-#               properties:
-#                 contact_id:
-#                   type: integer
-#                   format: int64
-#                 you_owe:
-#                   type: integer
-#                   enum: [0, 1]
-#                 amount:
-#                   type: number
-#                   format: float
-#                 currency:
-#                   type: string
-#                 description:
-#                   type: string
-#               required:
-#                 - contact_id
-#                 - you_owe
-#                 - amount
-#                 - currency
-#       responses:
-#         "200":
-#           description: Debt created successfully
-#           content:
-#             application/json:
-#               schema:
-#                 $ref: "#/components/schemas/Debt"
-#         "422":
-#           description: Validation error
-#         "500":
-#           description: An internal error occurred
+  /debts:
+    post:
+      tags:
+        - debts
+      summary: Create a new debt
+      operationId: createDebt
+      security:
+        - oidc: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                contact_id:
+                  type: integer
+                  format: int64
+                you_owe:
+                  type: integer
+                  enum: [0, 1]
+                amount:
+                  type: number
+                  format: float
+                currency:
+                  type: string
+                description:
+                  type: string
+              required:
+                - contact_id
+                - you_owe
+                - amount
+                - currency
+      responses:
+        "200":
+          description: Debt created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Debt"
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
 
-#   /debts/{id}:
-#     delete:
-#       tags:
-#         - debts
-#       summary: Settle a debt
-#       operationId: settleDebt
-#       security:
-#         - oidc: []
-#       parameters:
-#         - name: id
-#           in: path
-#           required: true
-#           schema:
-#             type: integer
-#             format: int64
-#       responses:
-#         "200":
-#           description: Debt settled successfully
-#           content:
-#             application/json:
-#               schema:
-#                 type: integer
-#                 format: int64
-#         "404":
-#           description: Debt not found
-#         "500":
-#           description: An internal error occurred
-#     put:
-#       tags:
-#         - debts
-#       summary: Update a debt record
-#       operationId: updateDebt
-#       security:
-#         - oidc: []
-#       parameters:
-#         - name: id
-#           in: path
-#           required: true
-#           schema:
-#             type: integer
-#             format: int64
-#       requestBody:
-#         required: true
-#         content:
-#           application/x-www-form-urlencoded:
-#             schema:
-#               type: object
-#               properties:
-#                 you_owe:
-#                   type: integer
-#                   enum: [0, 1]
-#                 amount:
-#                   type: number
-#                   format: float
-#                 currency:
-#                   type: string
-#                 description:
-#                   type: string
-#               required:
-#                 - you_owe
-#                 - amount
-#                 - currency
-#       responses:
-#         "200":
-#           description: Debt updated successfully
-#           content:
-#             application/json:
-#               schema:
-#                 $ref: "#/components/schemas/Debt"
-#         "404":
-#           description: Debt not found
-#         "422":
-#           description: Validation error
-#         "500":
-#           description: An internal error occurred
+  /debts/{id}:
+    delete:
+      tags:
+        - debts
+      summary: Settle a debt
+      operationId: settleDebt
+      security:
+        - oidc: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Debt settled successfully
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
+    put:
+      tags:
+        - debts
+      summary: Update a debt
+      operationId: updateDebt
+      security:
+        - oidc: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                you_owe:
+                  type: integer
+                  enum: [0, 1]
+                amount:
+                  type: number
+                  format: float
+                currency:
+                  type: string
+                description:
+                  type: string
+              required:
+                - you_owe
+                - amount
+                - currency
+      responses:
+        "200":
+          description: Debt updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Debt"
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
 
-#   /activities:
-#     post:
-#       tags:
-#         - activities
-#       summary: Create a new activity
-#       operationId: createActivity
-#       security:
-#         - oidc: []
-#       requestBody:
-#         required: true
-#         content:
-#           application/x-www-form-urlencoded:
-#             schema:
-#               type: object
-#               properties:
-#                 contact_id:
-#                   type: integer
-#                   format: int64
-#                 name:
-#                   type: string
-#                 date:
-#                   type: string
-#                   format: date
-#                 description:
-#                   type: string
-#               required:
-#                 - contact_id
-#                 - name
-#                 - date
-#       responses:
-#         "200":
-#           description: Activity created successfully
-#           content:
-#             application/json:
-#               schema:
-#                 $ref: "#/components/schemas/Activity"
-#         "422":
-#           description: Validation error
-#         "500":
-#           description: An internal error occurred
+  /activities:
+    post:
+      tags:
+        - activities
+      summary: Create a new activity
+      operationId: createActivity
+      security:
+        - oidc: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                contact_id:
+                  type: integer
+                  format: int64
+                name:
+                  type: string
+                date:
+                  type: string
+                  format: date
+                description:
+                  type: string
+              required:
+                - contact_id
+                - name
+                - date
+      responses:
+        "200":
+          description: Activity created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Activity"
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
 
-#   /activities/{id}:
-#     get:
-#       tags:
-#         - activities
-#       summary: Get activity details
-#       operationId: getActivityDetails
-#       security:
-#         - oidc: []
-#       parameters:
-#         - name: id
-#           in: path
-#           required: true
-#           schema:
-#             type: integer
-#             format: int64
-#       responses:
-#         "200":
-#           description: Activity details retrieved successfully
-#           content:
-#             application/json:
-#               schema:
-#                 $ref: "#/components/schemas/ActivityWithContact"
-#         "404":
-#           description: Activity not found
-#         "500":
-#           description: An internal error occurred
-#     delete:
-#       tags:
-#         - activities
-#       summary: Delete an activity
-#       operationId: deleteActivity
-#       security:
-#         - oidc: []
-#       parameters:
-#         - name: id
-#           in: path
-#           required: true
-#           schema:
-#             type: integer
-#             format: int64
-#       responses:
-#         "200":
-#           description: Activity deleted successfully
-#           content:
-#             application/json:
-#               schema:
-#                 type: integer
-#                 format: int64
-#         "404":
-#           description: Activity not found
-#         "500":
-#           description: An internal error occurred
-#     put:
-#       tags:
-#         - activities
-#       summary: Update an activity
-#       operationId: updateActivity
-#       security:
-#         - oidc: []
-#       parameters:
-#         - name: id
-#           in: path
-#           required: true
-#           schema:
-#             type: integer
-#             format: int64
-#       requestBody:
-#         required: true
-#         content:
-#           application/x-www-form-urlencoded:
-#             schema:
-#               type: object
-#               properties:
-#                 name:
-#                   type: string
-#                 date:
-#                   type: string
-#                   format: date
-#                 description:
-#                   type: string
-#               required:
-#                 - name
-#                 - date
-#       responses:
-#         "200":
-#           description: Activity updated successfully
-#           content:
-#             application/json:
-#               schema:
-#                 $ref: "#/components/schemas/Activity"
-#         "404":
-#           description: Activity not found
-#         "422":
-#           description: Validation error
-#         "500":
-#           description: An internal error occurred
-
-#   /userdata:
-#     get:
-#       tags:
-#         - userdata
-#       summary: Export all user data
-#       operationId: exportUserData
-#       security:
-#         - oidc: []
-#       responses:
-#         "200":
-#           description: User data exported successfully
-#           content:
-#             application/jsonl:
-#               schema:
-#                 type: string
-#           headers:
-#             Content-Disposition:
-#               schema:
-#                 type: string
-#               example: 'attachment; filename="senbara-forms-userdata.jsonl"'
-#         "500":
-#           description: An internal error occurred
-#     post:
-#       tags:
-#         - userdata
-#       summary: Import user data
-#       operationId: importUserData
-#       security:
-#         - oidc: []
-#       requestBody:
-#         required: true
-#         content:
-#           multipart/form-data:
-#             schema:
-#               type: object
-#               properties:
-#                 userData:
-#                   type: string
-#                   format: binary
-#       responses:
-#         "200":
-#           description: User data imported successfully
-#         "400":
-#           description: Invalid input data
-#         "500":
-#           description: An internal error occurred
-#     delete:
-#       tags:
-#         - userdata
-#       summary: Delete all user data
-#       operationId: deleteUserData
-#       security:
-#         - oidc: []
-#       responses:
-#         "200":
-#           description: User data deleted successfully
-#         "500":
-#           description: An internal error occurred
-
-#   /code/:
-#     get:
-#       tags:
-#         - code
-#       summary: Download application source code
-#       operationId: getSourceCode
-#       responses:
-#         "200":
-#           description: Source code retrieved successfully
-#           content:
-#             application/gzip:
-#               schema:
-#                 type: string
-#                 format: binary
-#           headers:
-#             Content-Disposition:
-#               schema:
-#                 type: string
-#               example: 'attachment; filename="code.tar.gz"'
-#         "500":
-#           description: An internal error occurred
+  /activities/{id}:
+    get:
+      tags:
+        - activities
+      summary: Get activity
+      operationId: getActivity
+      security:
+        - oidc: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Activity retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivityWithContact"
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
+    delete:
+      tags:
+        - activities
+      summary: Delete an activity
+      operationId: deleteActivity
+      security:
+        - oidc: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Activity deleted successfully
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
+    put:
+      tags:
+        - activities
+      summary: Update an activity
+      operationId: updateActivity
+      security:
+        - oidc: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                date:
+                  type: string
+                  format: date
+                description:
+                  type: string
+              required:
+                - name
+                - date
+      responses:
+        "200":
+          description: Activity updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Activity"
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
 
 components:
   schemas:
@@ -882,70 +973,70 @@ components:
         notes:
           type: string
 
-    # ContactData:
-    #   type: object
-    #   properties:
-    #     entry:
-    #       $ref: "#/components/schemas/Contact"
-    #     debts:
-    #       type: array
-    #       items:
-    #         $ref: "#/components/schemas/Debt"
-    #     activities:
-    #       type: array
-    #       items:
-    #         $ref: "#/components/schemas/Activity"
+    ContactData:
+      type: object
+      properties:
+        entry:
+          $ref: "#/components/schemas/Contact"
+        debts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Debt"
+        activities:
+          type: array
+          items:
+            $ref: "#/components/schemas/Activity"
 
-    # Debt:
-    #   type: object
-    #   properties:
-    #     id:
-    #       type: integer
-    #       format: int64
-    #     amount:
-    #       type: number
-    #       format: float
-    #     currency:
-    #       type: string
-    #     description:
-    #       type: string
+    Debt:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        amount:
+          type: number
+          format: float
+        currency:
+          type: string
+        description:
+          type: string
 
-    # Activity:
-    #   type: object
-    #   properties:
-    #     id:
-    #       type: integer
-    #       format: int64
-    #     name:
-    #       type: string
-    #     date:
-    #       type: string
-    #       format: date
-    #     description:
-    #       type: string
+    Activity:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        date:
+          type: string
+          format: date
+        description:
+          type: string
 
-    # ActivityWithContact:
-    #   type: object
-    #   properties:
-    #     activity_id:
-    #       type: integer
-    #       format: int64
-    #     name:
-    #       type: string
-    #     date:
-    #       type: string
-    #       format: date
-    #     description:
-    #       type: string
-    #     contact_id:
-    #       type: integer
-    #       format: int64
-    #     first_name:
-    #       type: string
-    #     last_name:
-    #       type: string
+    ActivityWithContact:
+      type: object
+      properties:
+        activity_id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+        contact_id:
+          type: integer
+          format: int64
+        first_name:
+          type: string
+        last_name:
+          type: string
 
   securitySchemes:
     oidc:
       type: openIdConnect
-      openIdConnectUrl: https://dev-4op4cmts68nqcenb.us.auth0.com/.well-known/openid-configuration # Filled out at runtime
+      openIdConnectUrl: /.well-known/openid-configuration # Filled out at runtime

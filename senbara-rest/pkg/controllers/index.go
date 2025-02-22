@@ -14,10 +14,8 @@ import (
 var (
 	errCouldNotFetchFromDB    = errors.New("could not fetch from DB")
 	errCouldNotLogin          = errors.New("could not login")
-	errEmailNotVerified       = errors.New("email not verified")
-	errCouldNotGetOpenAPISpec = errors.New("could not get OpenAPI spec")
 	errCouldNotEncodeResponse = errors.New("could not encode response")
-	errCouldNotInsertIntoDB   = errors.New("could not insert into DB")
+	errCouldNotWriteResponse  = errors.New("could not write response")
 )
 
 type Controller struct {

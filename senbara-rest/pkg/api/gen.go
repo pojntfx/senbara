@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"path"
@@ -31,6 +32,37 @@ const (
 	OidcScopes = "oidc.Scopes"
 )
 
+// Defines values for CreateDebtFormdataBodyYouOwe.
+const (
+	CreateDebtFormdataBodyYouOweN0 CreateDebtFormdataBodyYouOwe = 0
+	CreateDebtFormdataBodyYouOweN1 CreateDebtFormdataBodyYouOwe = 1
+)
+
+// Defines values for UpdateDebtFormdataBodyYouOwe.
+const (
+	UpdateDebtFormdataBodyYouOweN0 UpdateDebtFormdataBodyYouOwe = 0
+	UpdateDebtFormdataBodyYouOweN1 UpdateDebtFormdataBodyYouOwe = 1
+)
+
+// Activity defines model for Activity.
+type Activity struct {
+	Date        *openapi_types.Date `json:"date,omitempty"`
+	Description *string             `json:"description,omitempty"`
+	Id          *int64              `json:"id,omitempty"`
+	Name        *string             `json:"name,omitempty"`
+}
+
+// ActivityWithContact defines model for ActivityWithContact.
+type ActivityWithContact struct {
+	ActivityId  *int64              `json:"activity_id,omitempty"`
+	ContactId   *int64              `json:"contact_id,omitempty"`
+	Date        *openapi_types.Date `json:"date,omitempty"`
+	Description *string             `json:"description,omitempty"`
+	FirstName   *string             `json:"first_name,omitempty"`
+	LastName    *string             `json:"last_name,omitempty"`
+	Name        *string             `json:"name,omitempty"`
+}
+
 // Contact defines model for Contact.
 type Contact struct {
 	Address   *string              `json:"address,omitempty"`
@@ -42,6 +74,21 @@ type Contact struct {
 	Nickname  *string              `json:"nickname,omitempty"`
 	Notes     *string              `json:"notes,omitempty"`
 	Pronouns  *string              `json:"pronouns,omitempty"`
+}
+
+// ContactData defines model for ContactData.
+type ContactData struct {
+	Activities *[]Activity `json:"activities,omitempty"`
+	Debts      *[]Debt     `json:"debts,omitempty"`
+	Entry      *Contact    `json:"entry,omitempty"`
+}
+
+// Debt defines model for Debt.
+type Debt struct {
+	Amount      *float32 `json:"amount,omitempty"`
+	Currency    *string  `json:"currency,omitempty"`
+	Description *string  `json:"description,omitempty"`
+	Id          *int64   `json:"id,omitempty"`
 }
 
 // IndexData defines model for IndexData.
@@ -60,6 +107,65 @@ type JournalEntry struct {
 	Title     *string    `json:"title,omitempty"`
 }
 
+// CreateActivityFormdataBody defines parameters for CreateActivity.
+type CreateActivityFormdataBody struct {
+	ContactId   int64              `form:"contact_id" json:"contact_id"`
+	Date        openapi_types.Date `form:"date" json:"date"`
+	Description *string            `form:"description,omitempty" json:"description,omitempty"`
+	Name        string             `form:"name" json:"name"`
+}
+
+// UpdateActivityFormdataBody defines parameters for UpdateActivity.
+type UpdateActivityFormdataBody struct {
+	Date        openapi_types.Date `form:"date" json:"date"`
+	Description *string            `form:"description,omitempty" json:"description,omitempty"`
+	Name        string             `form:"name" json:"name"`
+}
+
+// CreateContactFormdataBody defines parameters for CreateContact.
+type CreateContactFormdataBody struct {
+	Email     openapi_types.Email `form:"email" json:"email"`
+	FirstName string              `form:"first_name" json:"first_name"`
+	LastName  string              `form:"last_name" json:"last_name"`
+	Nickname  *string             `form:"nickname,omitempty" json:"nickname,omitempty"`
+	Pronouns  string              `form:"pronouns" json:"pronouns"`
+}
+
+// UpdateContactFormdataBody defines parameters for UpdateContact.
+type UpdateContactFormdataBody struct {
+	Address   *string             `form:"address,omitempty" json:"address,omitempty"`
+	Birthday  *openapi_types.Date `form:"birthday,omitempty" json:"birthday,omitempty"`
+	Email     openapi_types.Email `form:"email" json:"email"`
+	FirstName string              `form:"first_name" json:"first_name"`
+	LastName  string              `form:"last_name" json:"last_name"`
+	Nickname  *string             `form:"nickname,omitempty" json:"nickname,omitempty"`
+	Notes     *string             `form:"notes,omitempty" json:"notes,omitempty"`
+	Pronouns  string              `form:"pronouns" json:"pronouns"`
+}
+
+// CreateDebtFormdataBody defines parameters for CreateDebt.
+type CreateDebtFormdataBody struct {
+	Amount      float32                      `form:"amount" json:"amount"`
+	ContactId   int64                        `form:"contact_id" json:"contact_id"`
+	Currency    string                       `form:"currency" json:"currency"`
+	Description *string                      `form:"description,omitempty" json:"description,omitempty"`
+	YouOwe      CreateDebtFormdataBodyYouOwe `form:"you_owe" json:"you_owe"`
+}
+
+// CreateDebtFormdataBodyYouOwe defines parameters for CreateDebt.
+type CreateDebtFormdataBodyYouOwe int
+
+// UpdateDebtFormdataBody defines parameters for UpdateDebt.
+type UpdateDebtFormdataBody struct {
+	Amount      float32                      `form:"amount" json:"amount"`
+	Currency    string                       `form:"currency" json:"currency"`
+	Description *string                      `form:"description,omitempty" json:"description,omitempty"`
+	YouOwe      UpdateDebtFormdataBodyYouOwe `form:"you_owe" json:"you_owe"`
+}
+
+// UpdateDebtFormdataBodyYouOwe defines parameters for UpdateDebt.
+type UpdateDebtFormdataBodyYouOwe int
+
 // CreateJournalEntryFormdataBody defines parameters for CreateJournalEntry.
 type CreateJournalEntryFormdataBody struct {
 	Body   string `form:"body" json:"body"`
@@ -74,11 +180,37 @@ type UpdateJournalEntryFormdataBody struct {
 	Title  string `form:"title" json:"title"`
 }
 
+// ImportUserDataMultipartBody defines parameters for ImportUserData.
+type ImportUserDataMultipartBody struct {
+	UserData *openapi_types.File `json:"userData,omitempty"`
+}
+
+// CreateActivityFormdataRequestBody defines body for CreateActivity for application/x-www-form-urlencoded ContentType.
+type CreateActivityFormdataRequestBody CreateActivityFormdataBody
+
+// UpdateActivityFormdataRequestBody defines body for UpdateActivity for application/x-www-form-urlencoded ContentType.
+type UpdateActivityFormdataRequestBody UpdateActivityFormdataBody
+
+// CreateContactFormdataRequestBody defines body for CreateContact for application/x-www-form-urlencoded ContentType.
+type CreateContactFormdataRequestBody CreateContactFormdataBody
+
+// UpdateContactFormdataRequestBody defines body for UpdateContact for application/x-www-form-urlencoded ContentType.
+type UpdateContactFormdataRequestBody UpdateContactFormdataBody
+
+// CreateDebtFormdataRequestBody defines body for CreateDebt for application/x-www-form-urlencoded ContentType.
+type CreateDebtFormdataRequestBody CreateDebtFormdataBody
+
+// UpdateDebtFormdataRequestBody defines body for UpdateDebt for application/x-www-form-urlencoded ContentType.
+type UpdateDebtFormdataRequestBody UpdateDebtFormdataBody
+
 // CreateJournalEntryFormdataRequestBody defines body for CreateJournalEntry for application/x-www-form-urlencoded ContentType.
 type CreateJournalEntryFormdataRequestBody CreateJournalEntryFormdataBody
 
 // UpdateJournalEntryFormdataRequestBody defines body for UpdateJournalEntry for application/x-www-form-urlencoded ContentType.
 type UpdateJournalEntryFormdataRequestBody UpdateJournalEntryFormdataBody
+
+// ImportUserDataMultipartRequestBody defines body for ImportUserData for multipart/form-data ContentType.
+type ImportUserDataMultipartRequestBody ImportUserDataMultipartBody
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -156,8 +288,56 @@ type ClientInterface interface {
 	// GetIndex request
 	GetIndex(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// CreateActivityWithBody request with any body
+	CreateActivityWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateActivityWithFormdataBody(ctx context.Context, body CreateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteActivity request
+	DeleteActivity(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetActivity request
+	GetActivity(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateActivityWithBody request with any body
+	UpdateActivityWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateActivityWithFormdataBody(ctx context.Context, id int64, body UpdateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetSourceCode request
+	GetSourceCode(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetContacts request
 	GetContacts(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateContactWithBody request with any body
+	CreateContactWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateContactWithFormdataBody(ctx context.Context, body CreateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteContact request
+	DeleteContact(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetContact request
+	GetContact(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateContactWithBody request with any body
+	UpdateContactWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateContactWithFormdataBody(ctx context.Context, id int64, body UpdateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateDebtWithBody request with any body
+	CreateDebtWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateDebtWithFormdataBody(ctx context.Context, body CreateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// SettleDebt request
+	SettleDebt(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateDebtWithBody request with any body
+	UpdateDebtWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateDebtWithFormdataBody(ctx context.Context, id int64, body UpdateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetJournalEntries request
 	GetJournalEntries(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -180,6 +360,15 @@ type ClientInterface interface {
 
 	// GetOpenAPISpec request
 	GetOpenAPISpec(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteUserData request
+	DeleteUserData(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExportUserData request
+	ExportUserData(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ImportUserDataWithBody request with any body
+	ImportUserDataWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) GetIndex(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -194,8 +383,224 @@ func (c *Client) GetIndex(ctx context.Context, reqEditors ...RequestEditorFn) (*
 	return c.Client.Do(req)
 }
 
+func (c *Client) CreateActivityWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateActivityRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateActivityWithFormdataBody(ctx context.Context, body CreateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateActivityRequestWithFormdataBody(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteActivity(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteActivityRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetActivity(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetActivityRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateActivityWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateActivityRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateActivityWithFormdataBody(ctx context.Context, id int64, body UpdateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateActivityRequestWithFormdataBody(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetSourceCode(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetSourceCodeRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetContacts(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetContactsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateContactWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateContactRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateContactWithFormdataBody(ctx context.Context, body CreateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateContactRequestWithFormdataBody(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteContact(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteContactRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetContact(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetContactRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateContactWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateContactRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateContactWithFormdataBody(ctx context.Context, id int64, body UpdateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateContactRequestWithFormdataBody(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateDebtWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateDebtRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateDebtWithFormdataBody(ctx context.Context, body CreateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateDebtRequestWithFormdataBody(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SettleDebt(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSettleDebtRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateDebtWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateDebtRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateDebtWithFormdataBody(ctx context.Context, id int64, body UpdateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateDebtRequestWithFormdataBody(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -302,6 +707,42 @@ func (c *Client) GetOpenAPISpec(ctx context.Context, reqEditors ...RequestEditor
 	return c.Client.Do(req)
 }
 
+func (c *Client) DeleteUserData(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteUserDataRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExportUserData(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExportUserDataRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ImportUserDataWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewImportUserDataRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 // NewGetIndexRequest generates requests for GetIndex
 func NewGetIndexRequest(server string) (*http.Request, error) {
 	var err error
@@ -312,6 +753,188 @@ func NewGetIndexRequest(server string) (*http.Request, error) {
 	}
 
 	operationPath := fmt.Sprintf("/")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCreateActivityRequestWithFormdataBody calls the generic CreateActivity builder with application/x-www-form-urlencoded body
+func NewCreateActivityRequestWithFormdataBody(server string, body CreateActivityFormdataRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	bodyStr, err := runtime.MarshalForm(body, nil)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = strings.NewReader(bodyStr.Encode())
+	return NewCreateActivityRequestWithBody(server, "application/x-www-form-urlencoded", bodyReader)
+}
+
+// NewCreateActivityRequestWithBody generates requests for CreateActivity with any type of body
+func NewCreateActivityRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/activities")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteActivityRequest generates requests for DeleteActivity
+func NewDeleteActivityRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/activities/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetActivityRequest generates requests for GetActivity
+func NewGetActivityRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/activities/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateActivityRequestWithFormdataBody calls the generic UpdateActivity builder with application/x-www-form-urlencoded body
+func NewUpdateActivityRequestWithFormdataBody(server string, id int64, body UpdateActivityFormdataRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	bodyStr, err := runtime.MarshalForm(body, nil)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = strings.NewReader(bodyStr.Encode())
+	return NewUpdateActivityRequestWithBody(server, id, "application/x-www-form-urlencoded", bodyReader)
+}
+
+// NewUpdateActivityRequestWithBody generates requests for UpdateActivity with any type of body
+func NewUpdateActivityRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/activities/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetSourceCodeRequest generates requests for GetSourceCode
+func NewGetSourceCodeRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/code/")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -352,6 +975,282 @@ func NewGetContactsRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewCreateContactRequestWithFormdataBody calls the generic CreateContact builder with application/x-www-form-urlencoded body
+func NewCreateContactRequestWithFormdataBody(server string, body CreateContactFormdataRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	bodyStr, err := runtime.MarshalForm(body, nil)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = strings.NewReader(bodyStr.Encode())
+	return NewCreateContactRequestWithBody(server, "application/x-www-form-urlencoded", bodyReader)
+}
+
+// NewCreateContactRequestWithBody generates requests for CreateContact with any type of body
+func NewCreateContactRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/contacts")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteContactRequest generates requests for DeleteContact
+func NewDeleteContactRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/contacts/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetContactRequest generates requests for GetContact
+func NewGetContactRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/contacts/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateContactRequestWithFormdataBody calls the generic UpdateContact builder with application/x-www-form-urlencoded body
+func NewUpdateContactRequestWithFormdataBody(server string, id int64, body UpdateContactFormdataRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	bodyStr, err := runtime.MarshalForm(body, nil)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = strings.NewReader(bodyStr.Encode())
+	return NewUpdateContactRequestWithBody(server, id, "application/x-www-form-urlencoded", bodyReader)
+}
+
+// NewUpdateContactRequestWithBody generates requests for UpdateContact with any type of body
+func NewUpdateContactRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/contacts/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCreateDebtRequestWithFormdataBody calls the generic CreateDebt builder with application/x-www-form-urlencoded body
+func NewCreateDebtRequestWithFormdataBody(server string, body CreateDebtFormdataRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	bodyStr, err := runtime.MarshalForm(body, nil)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = strings.NewReader(bodyStr.Encode())
+	return NewCreateDebtRequestWithBody(server, "application/x-www-form-urlencoded", bodyReader)
+}
+
+// NewCreateDebtRequestWithBody generates requests for CreateDebt with any type of body
+func NewCreateDebtRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/debts")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewSettleDebtRequest generates requests for SettleDebt
+func NewSettleDebtRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/debts/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateDebtRequestWithFormdataBody calls the generic UpdateDebt builder with application/x-www-form-urlencoded body
+func NewUpdateDebtRequestWithFormdataBody(server string, id int64, body UpdateDebtFormdataRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	bodyStr, err := runtime.MarshalForm(body, nil)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = strings.NewReader(bodyStr.Encode())
+	return NewUpdateDebtRequestWithBody(server, id, "application/x-www-form-urlencoded", bodyReader)
+}
+
+// NewUpdateDebtRequestWithBody generates requests for UpdateDebt with any type of body
+func NewUpdateDebtRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/debts/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -565,6 +1464,89 @@ func NewGetOpenAPISpecRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
+// NewDeleteUserDataRequest generates requests for DeleteUserData
+func NewDeleteUserDataRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/userdata")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewExportUserDataRequest generates requests for ExportUserData
+func NewExportUserDataRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/userdata")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewImportUserDataRequestWithBody generates requests for ImportUserData with any type of body
+func NewImportUserDataRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/userdata")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
@@ -611,8 +1593,56 @@ type ClientWithResponsesInterface interface {
 	// GetIndexWithResponse request
 	GetIndexWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetIndexResponse, error)
 
+	// CreateActivityWithBodyWithResponse request with any body
+	CreateActivityWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateActivityResponse, error)
+
+	CreateActivityWithFormdataBodyWithResponse(ctx context.Context, body CreateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateActivityResponse, error)
+
+	// DeleteActivityWithResponse request
+	DeleteActivityWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteActivityResponse, error)
+
+	// GetActivityWithResponse request
+	GetActivityWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetActivityResponse, error)
+
+	// UpdateActivityWithBodyWithResponse request with any body
+	UpdateActivityWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateActivityResponse, error)
+
+	UpdateActivityWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateActivityResponse, error)
+
+	// GetSourceCodeWithResponse request
+	GetSourceCodeWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSourceCodeResponse, error)
+
 	// GetContactsWithResponse request
 	GetContactsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetContactsResponse, error)
+
+	// CreateContactWithBodyWithResponse request with any body
+	CreateContactWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateContactResponse, error)
+
+	CreateContactWithFormdataBodyWithResponse(ctx context.Context, body CreateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateContactResponse, error)
+
+	// DeleteContactWithResponse request
+	DeleteContactWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteContactResponse, error)
+
+	// GetContactWithResponse request
+	GetContactWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetContactResponse, error)
+
+	// UpdateContactWithBodyWithResponse request with any body
+	UpdateContactWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateContactResponse, error)
+
+	UpdateContactWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateContactResponse, error)
+
+	// CreateDebtWithBodyWithResponse request with any body
+	CreateDebtWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateDebtResponse, error)
+
+	CreateDebtWithFormdataBodyWithResponse(ctx context.Context, body CreateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateDebtResponse, error)
+
+	// SettleDebtWithResponse request
+	SettleDebtWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*SettleDebtResponse, error)
+
+	// UpdateDebtWithBodyWithResponse request with any body
+	UpdateDebtWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateDebtResponse, error)
+
+	UpdateDebtWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateDebtResponse, error)
 
 	// GetJournalEntriesWithResponse request
 	GetJournalEntriesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetJournalEntriesResponse, error)
@@ -635,6 +1665,15 @@ type ClientWithResponsesInterface interface {
 
 	// GetOpenAPISpecWithResponse request
 	GetOpenAPISpecWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetOpenAPISpecResponse, error)
+
+	// DeleteUserDataWithResponse request
+	DeleteUserDataWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*DeleteUserDataResponse, error)
+
+	// ExportUserDataWithResponse request
+	ExportUserDataWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ExportUserDataResponse, error)
+
+	// ImportUserDataWithBodyWithResponse request with any body
+	ImportUserDataWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ImportUserDataResponse, error)
 }
 
 type GetIndexResponse struct {
@@ -659,6 +1698,115 @@ func (r GetIndexResponse) StatusCode() int {
 	return 0
 }
 
+type CreateActivityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Activity
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateActivityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateActivityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteActivityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *int64
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteActivityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteActivityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetActivityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ActivityWithContact
+}
+
+// Status returns HTTPResponse.Status
+func (r GetActivityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetActivityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UpdateActivityResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Activity
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateActivityResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateActivityResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetSourceCodeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r GetSourceCodeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetSourceCodeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetContactsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -675,6 +1823,160 @@ func (r GetContactsResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetContactsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateContactResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Contact
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateContactResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateContactResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteContactResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *int64
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteContactResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteContactResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetContactResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ContactData
+}
+
+// Status returns HTTPResponse.Status
+func (r GetContactResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetContactResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UpdateContactResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Contact
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateContactResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateContactResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateDebtResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Debt
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateDebtResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateDebtResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type SettleDebtResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *int64
+}
+
+// Status returns HTTPResponse.Status
+func (r SettleDebtResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SettleDebtResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UpdateDebtResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Debt
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateDebtResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateDebtResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -706,7 +2008,7 @@ func (r GetJournalEntriesResponse) StatusCode() int {
 type CreateJournalEntryResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *int
+	JSON200      *JournalEntry
 }
 
 // Status returns HTTPResponse.Status
@@ -813,6 +2115,69 @@ func (r GetOpenAPISpecResponse) StatusCode() int {
 	return 0
 }
 
+type DeleteUserDataResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteUserDataResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteUserDataResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ExportUserDataResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r ExportUserDataResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExportUserDataResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ImportUserDataResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r ImportUserDataResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ImportUserDataResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // GetIndexWithResponse request returning *GetIndexResponse
 func (c *ClientWithResponses) GetIndexWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetIndexResponse, error) {
 	rsp, err := c.GetIndex(ctx, reqEditors...)
@@ -822,6 +2187,67 @@ func (c *ClientWithResponses) GetIndexWithResponse(ctx context.Context, reqEdito
 	return ParseGetIndexResponse(rsp)
 }
 
+// CreateActivityWithBodyWithResponse request with arbitrary body returning *CreateActivityResponse
+func (c *ClientWithResponses) CreateActivityWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateActivityResponse, error) {
+	rsp, err := c.CreateActivityWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateActivityResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateActivityWithFormdataBodyWithResponse(ctx context.Context, body CreateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateActivityResponse, error) {
+	rsp, err := c.CreateActivityWithFormdataBody(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateActivityResponse(rsp)
+}
+
+// DeleteActivityWithResponse request returning *DeleteActivityResponse
+func (c *ClientWithResponses) DeleteActivityWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteActivityResponse, error) {
+	rsp, err := c.DeleteActivity(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteActivityResponse(rsp)
+}
+
+// GetActivityWithResponse request returning *GetActivityResponse
+func (c *ClientWithResponses) GetActivityWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetActivityResponse, error) {
+	rsp, err := c.GetActivity(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetActivityResponse(rsp)
+}
+
+// UpdateActivityWithBodyWithResponse request with arbitrary body returning *UpdateActivityResponse
+func (c *ClientWithResponses) UpdateActivityWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateActivityResponse, error) {
+	rsp, err := c.UpdateActivityWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateActivityResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateActivityWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateActivityResponse, error) {
+	rsp, err := c.UpdateActivityWithFormdataBody(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateActivityResponse(rsp)
+}
+
+// GetSourceCodeWithResponse request returning *GetSourceCodeResponse
+func (c *ClientWithResponses) GetSourceCodeWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSourceCodeResponse, error) {
+	rsp, err := c.GetSourceCode(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetSourceCodeResponse(rsp)
+}
+
 // GetContactsWithResponse request returning *GetContactsResponse
 func (c *ClientWithResponses) GetContactsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetContactsResponse, error) {
 	rsp, err := c.GetContacts(ctx, reqEditors...)
@@ -829,6 +2255,101 @@ func (c *ClientWithResponses) GetContactsWithResponse(ctx context.Context, reqEd
 		return nil, err
 	}
 	return ParseGetContactsResponse(rsp)
+}
+
+// CreateContactWithBodyWithResponse request with arbitrary body returning *CreateContactResponse
+func (c *ClientWithResponses) CreateContactWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateContactResponse, error) {
+	rsp, err := c.CreateContactWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateContactResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateContactWithFormdataBodyWithResponse(ctx context.Context, body CreateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateContactResponse, error) {
+	rsp, err := c.CreateContactWithFormdataBody(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateContactResponse(rsp)
+}
+
+// DeleteContactWithResponse request returning *DeleteContactResponse
+func (c *ClientWithResponses) DeleteContactWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteContactResponse, error) {
+	rsp, err := c.DeleteContact(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteContactResponse(rsp)
+}
+
+// GetContactWithResponse request returning *GetContactResponse
+func (c *ClientWithResponses) GetContactWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetContactResponse, error) {
+	rsp, err := c.GetContact(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetContactResponse(rsp)
+}
+
+// UpdateContactWithBodyWithResponse request with arbitrary body returning *UpdateContactResponse
+func (c *ClientWithResponses) UpdateContactWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateContactResponse, error) {
+	rsp, err := c.UpdateContactWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateContactResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateContactWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateContactResponse, error) {
+	rsp, err := c.UpdateContactWithFormdataBody(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateContactResponse(rsp)
+}
+
+// CreateDebtWithBodyWithResponse request with arbitrary body returning *CreateDebtResponse
+func (c *ClientWithResponses) CreateDebtWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateDebtResponse, error) {
+	rsp, err := c.CreateDebtWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateDebtResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateDebtWithFormdataBodyWithResponse(ctx context.Context, body CreateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateDebtResponse, error) {
+	rsp, err := c.CreateDebtWithFormdataBody(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateDebtResponse(rsp)
+}
+
+// SettleDebtWithResponse request returning *SettleDebtResponse
+func (c *ClientWithResponses) SettleDebtWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*SettleDebtResponse, error) {
+	rsp, err := c.SettleDebt(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSettleDebtResponse(rsp)
+}
+
+// UpdateDebtWithBodyWithResponse request with arbitrary body returning *UpdateDebtResponse
+func (c *ClientWithResponses) UpdateDebtWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateDebtResponse, error) {
+	rsp, err := c.UpdateDebtWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateDebtResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateDebtWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateDebtResponse, error) {
+	rsp, err := c.UpdateDebtWithFormdataBody(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateDebtResponse(rsp)
 }
 
 // GetJournalEntriesWithResponse request returning *GetJournalEntriesResponse
@@ -901,6 +2422,33 @@ func (c *ClientWithResponses) GetOpenAPISpecWithResponse(ctx context.Context, re
 	return ParseGetOpenAPISpecResponse(rsp)
 }
 
+// DeleteUserDataWithResponse request returning *DeleteUserDataResponse
+func (c *ClientWithResponses) DeleteUserDataWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*DeleteUserDataResponse, error) {
+	rsp, err := c.DeleteUserData(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteUserDataResponse(rsp)
+}
+
+// ExportUserDataWithResponse request returning *ExportUserDataResponse
+func (c *ClientWithResponses) ExportUserDataWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ExportUserDataResponse, error) {
+	rsp, err := c.ExportUserData(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExportUserDataResponse(rsp)
+}
+
+// ImportUserDataWithBodyWithResponse request with arbitrary body returning *ImportUserDataResponse
+func (c *ClientWithResponses) ImportUserDataWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ImportUserDataResponse, error) {
+	rsp, err := c.ImportUserDataWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseImportUserDataResponse(rsp)
+}
+
 // ParseGetIndexResponse parses an HTTP response from a GetIndexWithResponse call
 func ParseGetIndexResponse(rsp *http.Response) (*GetIndexResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -927,6 +2475,126 @@ func ParseGetIndexResponse(rsp *http.Response) (*GetIndexResponse, error) {
 	return response, nil
 }
 
+// ParseCreateActivityResponse parses an HTTP response from a CreateActivityWithResponse call
+func ParseCreateActivityResponse(rsp *http.Response) (*CreateActivityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateActivityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Activity
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteActivityResponse parses an HTTP response from a DeleteActivityWithResponse call
+func ParseDeleteActivityResponse(rsp *http.Response) (*DeleteActivityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteActivityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest int64
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetActivityResponse parses an HTTP response from a GetActivityWithResponse call
+func ParseGetActivityResponse(rsp *http.Response) (*GetActivityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetActivityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ActivityWithContact
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateActivityResponse parses an HTTP response from a UpdateActivityWithResponse call
+func ParseUpdateActivityResponse(rsp *http.Response) (*UpdateActivityResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateActivityResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Activity
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetSourceCodeResponse parses an HTTP response from a GetSourceCodeWithResponse call
+func ParseGetSourceCodeResponse(rsp *http.Response) (*GetSourceCodeResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetSourceCodeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
 // ParseGetContactsResponse parses an HTTP response from a GetContactsWithResponse call
 func ParseGetContactsResponse(rsp *http.Response) (*GetContactsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -943,6 +2611,188 @@ func ParseGetContactsResponse(rsp *http.Response) (*GetContactsResponse, error) 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest []Contact
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateContactResponse parses an HTTP response from a CreateContactWithResponse call
+func ParseCreateContactResponse(rsp *http.Response) (*CreateContactResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateContactResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Contact
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteContactResponse parses an HTTP response from a DeleteContactWithResponse call
+func ParseDeleteContactResponse(rsp *http.Response) (*DeleteContactResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteContactResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest int64
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetContactResponse parses an HTTP response from a GetContactWithResponse call
+func ParseGetContactResponse(rsp *http.Response) (*GetContactResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetContactResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ContactData
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateContactResponse parses an HTTP response from a UpdateContactWithResponse call
+func ParseUpdateContactResponse(rsp *http.Response) (*UpdateContactResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateContactResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Contact
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateDebtResponse parses an HTTP response from a CreateDebtWithResponse call
+func ParseCreateDebtResponse(rsp *http.Response) (*CreateDebtResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateDebtResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Debt
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseSettleDebtResponse parses an HTTP response from a SettleDebtWithResponse call
+func ParseSettleDebtResponse(rsp *http.Response) (*SettleDebtResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SettleDebtResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest int64
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateDebtResponse parses an HTTP response from a UpdateDebtWithResponse call
+func ParseUpdateDebtResponse(rsp *http.Response) (*UpdateDebtResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateDebtResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Debt
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -994,7 +2844,7 @@ func ParseCreateJournalEntryResponse(rsp *http.Response) (*CreateJournalEntryRes
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest int
+		var dest JournalEntry
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1109,14 +2959,98 @@ func ParseGetOpenAPISpecResponse(rsp *http.Response) (*GetOpenAPISpecResponse, e
 	return response, nil
 }
 
+// ParseDeleteUserDataResponse parses an HTTP response from a DeleteUserDataWithResponse call
+func ParseDeleteUserDataResponse(rsp *http.Response) (*DeleteUserDataResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteUserDataResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseExportUserDataResponse parses an HTTP response from a ExportUserDataWithResponse call
+func ParseExportUserDataResponse(rsp *http.Response) (*ExportUserDataResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExportUserDataResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseImportUserDataResponse parses an HTTP response from a ImportUserDataWithResponse call
+func ParseImportUserDataResponse(rsp *http.Response) (*ImportUserDataResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ImportUserDataResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Gets counts of contacts and journal entries for the authenticated user
 	// (GET /)
 	GetIndex(w http.ResponseWriter, r *http.Request)
+	// Create a new activity
+	// (POST /activities)
+	CreateActivity(w http.ResponseWriter, r *http.Request)
+	// Delete an activity
+	// (DELETE /activities/{id})
+	DeleteActivity(w http.ResponseWriter, r *http.Request, id int64)
+	// Get activity
+	// (GET /activities/{id})
+	GetActivity(w http.ResponseWriter, r *http.Request, id int64)
+	// Update an activity
+	// (PUT /activities/{id})
+	UpdateActivity(w http.ResponseWriter, r *http.Request, id int64)
+	// Download application source code
+	// (GET /code/)
+	GetSourceCode(w http.ResponseWriter, r *http.Request)
 	// List all contacts
 	// (GET /contacts)
 	GetContacts(w http.ResponseWriter, r *http.Request)
+	// Create a new contact
+	// (POST /contacts)
+	CreateContact(w http.ResponseWriter, r *http.Request)
+	// Delete a contact
+	// (DELETE /contacts/{id})
+	DeleteContact(w http.ResponseWriter, r *http.Request, id int64)
+	// Get contact including debts and activities
+	// (GET /contacts/{id})
+	GetContact(w http.ResponseWriter, r *http.Request, id int64)
+	// Update a contact
+	// (PUT /contacts/{id})
+	UpdateContact(w http.ResponseWriter, r *http.Request, id int64)
+	// Create a new debt
+	// (POST /debts)
+	CreateDebt(w http.ResponseWriter, r *http.Request)
+	// Settle a debt
+	// (DELETE /debts/{id})
+	SettleDebt(w http.ResponseWriter, r *http.Request, id int64)
+	// Update a debt
+	// (PUT /debts/{id})
+	UpdateDebt(w http.ResponseWriter, r *http.Request, id int64)
 	// List all journal entries
 	// (GET /journal)
 	GetJournalEntries(w http.ResponseWriter, r *http.Request)
@@ -1135,6 +3069,15 @@ type ServerInterface interface {
 	// Get the OpenAPI spec
 	// (GET /openapi.yaml)
 	GetOpenAPISpec(w http.ResponseWriter, r *http.Request)
+	// Delete all user data
+	// (DELETE /userdata)
+	DeleteUserData(w http.ResponseWriter, r *http.Request)
+	// Export all user data
+	// (GET /userdata)
+	ExportUserData(w http.ResponseWriter, r *http.Request)
+	// Import user data
+	// (POST /userdata)
+	ImportUserData(w http.ResponseWriter, r *http.Request)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -1163,6 +3106,122 @@ func (siw *ServerInterfaceWrapper) GetIndex(w http.ResponseWriter, r *http.Reque
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
+// CreateActivity operation middleware
+func (siw *ServerInterfaceWrapper) CreateActivity(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateActivity(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteActivity operation middleware
+func (siw *ServerInterfaceWrapper) DeleteActivity(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteActivity(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetActivity operation middleware
+func (siw *ServerInterfaceWrapper) GetActivity(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetActivity(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// UpdateActivity operation middleware
+func (siw *ServerInterfaceWrapper) UpdateActivity(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateActivity(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetSourceCode operation middleware
+func (siw *ServerInterfaceWrapper) GetSourceCode(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetSourceCode(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
 // GetContacts operation middleware
 func (siw *ServerInterfaceWrapper) GetContacts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -1171,6 +3230,180 @@ func (siw *ServerInterfaceWrapper) GetContacts(w http.ResponseWriter, r *http.Re
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetContacts(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// CreateContact operation middleware
+func (siw *ServerInterfaceWrapper) CreateContact(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateContact(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteContact operation middleware
+func (siw *ServerInterfaceWrapper) DeleteContact(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteContact(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetContact operation middleware
+func (siw *ServerInterfaceWrapper) GetContact(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetContact(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// UpdateContact operation middleware
+func (siw *ServerInterfaceWrapper) UpdateContact(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateContact(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// CreateDebt operation middleware
+func (siw *ServerInterfaceWrapper) CreateDebt(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateDebt(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// SettleDebt operation middleware
+func (siw *ServerInterfaceWrapper) SettleDebt(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SettleDebt(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// UpdateDebt operation middleware
+func (siw *ServerInterfaceWrapper) UpdateDebt(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateDebt(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -1313,6 +3546,57 @@ func (siw *ServerInterfaceWrapper) GetOpenAPISpec(w http.ResponseWriter, r *http
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
+// DeleteUserData operation middleware
+func (siw *ServerInterfaceWrapper) DeleteUserData(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteUserData(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// ExportUserData operation middleware
+func (siw *ServerInterfaceWrapper) ExportUserData(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ExportUserData(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// ImportUserData operation middleware
+func (siw *ServerInterfaceWrapper) ImportUserData(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ImportUserData(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -1428,13 +3712,28 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	}
 
 	m.HandleFunc("GET "+options.BaseURL+"/", wrapper.GetIndex)
+	m.HandleFunc("POST "+options.BaseURL+"/activities", wrapper.CreateActivity)
+	m.HandleFunc("DELETE "+options.BaseURL+"/activities/{id}", wrapper.DeleteActivity)
+	m.HandleFunc("GET "+options.BaseURL+"/activities/{id}", wrapper.GetActivity)
+	m.HandleFunc("PUT "+options.BaseURL+"/activities/{id}", wrapper.UpdateActivity)
+	m.HandleFunc("GET "+options.BaseURL+"/code/", wrapper.GetSourceCode)
 	m.HandleFunc("GET "+options.BaseURL+"/contacts", wrapper.GetContacts)
+	m.HandleFunc("POST "+options.BaseURL+"/contacts", wrapper.CreateContact)
+	m.HandleFunc("DELETE "+options.BaseURL+"/contacts/{id}", wrapper.DeleteContact)
+	m.HandleFunc("GET "+options.BaseURL+"/contacts/{id}", wrapper.GetContact)
+	m.HandleFunc("PUT "+options.BaseURL+"/contacts/{id}", wrapper.UpdateContact)
+	m.HandleFunc("POST "+options.BaseURL+"/debts", wrapper.CreateDebt)
+	m.HandleFunc("DELETE "+options.BaseURL+"/debts/{id}", wrapper.SettleDebt)
+	m.HandleFunc("PUT "+options.BaseURL+"/debts/{id}", wrapper.UpdateDebt)
 	m.HandleFunc("GET "+options.BaseURL+"/journal", wrapper.GetJournalEntries)
 	m.HandleFunc("POST "+options.BaseURL+"/journal", wrapper.CreateJournalEntry)
 	m.HandleFunc("DELETE "+options.BaseURL+"/journal/{id}", wrapper.DeleteJournalEntry)
 	m.HandleFunc("GET "+options.BaseURL+"/journal/{id}", wrapper.GetJournalEntry)
 	m.HandleFunc("PUT "+options.BaseURL+"/journal/{id}", wrapper.UpdateJournalEntry)
 	m.HandleFunc("GET "+options.BaseURL+"/openapi.yaml", wrapper.GetOpenAPISpec)
+	m.HandleFunc("DELETE "+options.BaseURL+"/userdata", wrapper.DeleteUserData)
+	m.HandleFunc("GET "+options.BaseURL+"/userdata", wrapper.ExportUserData)
+	m.HandleFunc("POST "+options.BaseURL+"/userdata", wrapper.ImportUserData)
 
 	return m
 }
@@ -1475,6 +3774,197 @@ func (response GetIndex500TextResponse) VisitGetIndexResponse(w http.ResponseWri
 	return err
 }
 
+type CreateActivityRequestObject struct {
+	Body *CreateActivityFormdataRequestBody
+}
+
+type CreateActivityResponseObject interface {
+	VisitCreateActivityResponse(w http.ResponseWriter) error
+}
+
+type CreateActivity200JSONResponse Activity
+
+func (response CreateActivity200JSONResponse) VisitCreateActivityResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateActivity403TextResponse string
+
+func (response CreateActivity403TextResponse) VisitCreateActivityResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type CreateActivity500TextResponse string
+
+func (response CreateActivity500TextResponse) VisitCreateActivityResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type DeleteActivityRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type DeleteActivityResponseObject interface {
+	VisitDeleteActivityResponse(w http.ResponseWriter) error
+}
+
+type DeleteActivity200JSONResponse int64
+
+func (response DeleteActivity200JSONResponse) VisitDeleteActivityResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteActivity403TextResponse string
+
+func (response DeleteActivity403TextResponse) VisitDeleteActivityResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type DeleteActivity500TextResponse string
+
+func (response DeleteActivity500TextResponse) VisitDeleteActivityResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type GetActivityRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type GetActivityResponseObject interface {
+	VisitGetActivityResponse(w http.ResponseWriter) error
+}
+
+type GetActivity200JSONResponse ActivityWithContact
+
+func (response GetActivity200JSONResponse) VisitGetActivityResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetActivity403TextResponse string
+
+func (response GetActivity403TextResponse) VisitGetActivityResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type GetActivity500TextResponse string
+
+func (response GetActivity500TextResponse) VisitGetActivityResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type UpdateActivityRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *UpdateActivityFormdataRequestBody
+}
+
+type UpdateActivityResponseObject interface {
+	VisitUpdateActivityResponse(w http.ResponseWriter) error
+}
+
+type UpdateActivity200JSONResponse Activity
+
+func (response UpdateActivity200JSONResponse) VisitUpdateActivityResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateActivity403TextResponse string
+
+func (response UpdateActivity403TextResponse) VisitUpdateActivityResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type UpdateActivity500TextResponse string
+
+func (response UpdateActivity500TextResponse) VisitUpdateActivityResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type GetSourceCodeRequestObject struct {
+}
+
+type GetSourceCodeResponseObject interface {
+	VisitGetSourceCodeResponse(w http.ResponseWriter) error
+}
+
+type GetSourceCode200ResponseHeaders struct {
+	ContentDisposition string
+}
+
+type GetSourceCode200ApplicationgzipResponse struct {
+	Body          io.Reader
+	Headers       GetSourceCode200ResponseHeaders
+	ContentLength int64
+}
+
+func (response GetSourceCode200ApplicationgzipResponse) VisitGetSourceCodeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/gzip")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.Header().Set("Content-Disposition", fmt.Sprint(response.Headers.ContentDisposition))
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type GetSourceCode500TextResponse string
+
+func (response GetSourceCode500TextResponse) VisitGetSourceCodeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
 type GetContactsRequestObject struct {
 }
 
@@ -1491,9 +3981,280 @@ func (response GetContacts200JSONResponse) VisitGetContactsResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetContacts403TextResponse string
+
+func (response GetContacts403TextResponse) VisitGetContactsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
 type GetContacts500TextResponse string
 
 func (response GetContacts500TextResponse) VisitGetContactsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type CreateContactRequestObject struct {
+	Body *CreateContactFormdataRequestBody
+}
+
+type CreateContactResponseObject interface {
+	VisitCreateContactResponse(w http.ResponseWriter) error
+}
+
+type CreateContact200JSONResponse Contact
+
+func (response CreateContact200JSONResponse) VisitCreateContactResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateContact403TextResponse string
+
+func (response CreateContact403TextResponse) VisitCreateContactResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type CreateContact500TextResponse string
+
+func (response CreateContact500TextResponse) VisitCreateContactResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type DeleteContactRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type DeleteContactResponseObject interface {
+	VisitDeleteContactResponse(w http.ResponseWriter) error
+}
+
+type DeleteContact200JSONResponse int64
+
+func (response DeleteContact200JSONResponse) VisitDeleteContactResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteContact403TextResponse string
+
+func (response DeleteContact403TextResponse) VisitDeleteContactResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type DeleteContact500TextResponse string
+
+func (response DeleteContact500TextResponse) VisitDeleteContactResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type GetContactRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type GetContactResponseObject interface {
+	VisitGetContactResponse(w http.ResponseWriter) error
+}
+
+type GetContact200JSONResponse ContactData
+
+func (response GetContact200JSONResponse) VisitGetContactResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetContact403TextResponse string
+
+func (response GetContact403TextResponse) VisitGetContactResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type GetContact500TextResponse string
+
+func (response GetContact500TextResponse) VisitGetContactResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type UpdateContactRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *UpdateContactFormdataRequestBody
+}
+
+type UpdateContactResponseObject interface {
+	VisitUpdateContactResponse(w http.ResponseWriter) error
+}
+
+type UpdateContact200JSONResponse Contact
+
+func (response UpdateContact200JSONResponse) VisitUpdateContactResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateContact403TextResponse string
+
+func (response UpdateContact403TextResponse) VisitUpdateContactResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type UpdateContact500TextResponse string
+
+func (response UpdateContact500TextResponse) VisitUpdateContactResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type CreateDebtRequestObject struct {
+	Body *CreateDebtFormdataRequestBody
+}
+
+type CreateDebtResponseObject interface {
+	VisitCreateDebtResponse(w http.ResponseWriter) error
+}
+
+type CreateDebt200JSONResponse Debt
+
+func (response CreateDebt200JSONResponse) VisitCreateDebtResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateDebt403TextResponse string
+
+func (response CreateDebt403TextResponse) VisitCreateDebtResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type CreateDebt500TextResponse string
+
+func (response CreateDebt500TextResponse) VisitCreateDebtResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type SettleDebtRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type SettleDebtResponseObject interface {
+	VisitSettleDebtResponse(w http.ResponseWriter) error
+}
+
+type SettleDebt200JSONResponse int64
+
+func (response SettleDebt200JSONResponse) VisitSettleDebtResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type SettleDebt403TextResponse string
+
+func (response SettleDebt403TextResponse) VisitSettleDebtResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type SettleDebt500TextResponse string
+
+func (response SettleDebt500TextResponse) VisitSettleDebtResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type UpdateDebtRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *UpdateDebtFormdataRequestBody
+}
+
+type UpdateDebtResponseObject interface {
+	VisitUpdateDebtResponse(w http.ResponseWriter) error
+}
+
+type UpdateDebt200JSONResponse Debt
+
+func (response UpdateDebt200JSONResponse) VisitUpdateDebtResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateDebt403TextResponse string
+
+func (response UpdateDebt403TextResponse) VisitUpdateDebtResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type UpdateDebt500TextResponse string
+
+func (response UpdateDebt500TextResponse) VisitUpdateDebtResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(500)
 
@@ -1517,6 +4278,16 @@ func (response GetJournalEntries200JSONResponse) VisitGetJournalEntriesResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetJournalEntries403TextResponse string
+
+func (response GetJournalEntries403TextResponse) VisitGetJournalEntriesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
 type GetJournalEntries500TextResponse string
 
 func (response GetJournalEntries500TextResponse) VisitGetJournalEntriesResponse(w http.ResponseWriter) error {
@@ -1535,7 +4306,7 @@ type CreateJournalEntryResponseObject interface {
 	VisitCreateJournalEntryResponse(w http.ResponseWriter) error
 }
 
-type CreateJournalEntry200JSONResponse int
+type CreateJournalEntry200JSONResponse JournalEntry
 
 func (response CreateJournalEntry200JSONResponse) VisitCreateJournalEntryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -1544,12 +4315,14 @@ func (response CreateJournalEntry200JSONResponse) VisitCreateJournalEntryRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type CreateJournalEntry422Response struct {
-}
+type CreateJournalEntry403TextResponse string
 
-func (response CreateJournalEntry422Response) VisitCreateJournalEntryResponse(w http.ResponseWriter) error {
-	w.WriteHeader(422)
-	return nil
+func (response CreateJournalEntry403TextResponse) VisitCreateJournalEntryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
 }
 
 type CreateJournalEntry500TextResponse string
@@ -1579,11 +4352,11 @@ func (response DeleteJournalEntry200JSONResponse) VisitDeleteJournalEntryRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteJournalEntry404TextResponse string
+type DeleteJournalEntry403TextResponse string
 
-func (response DeleteJournalEntry404TextResponse) VisitDeleteJournalEntryResponse(w http.ResponseWriter) error {
+func (response DeleteJournalEntry403TextResponse) VisitDeleteJournalEntryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(404)
+	w.WriteHeader(403)
 
 	_, err := w.Write([]byte(response))
 	return err
@@ -1616,11 +4389,11 @@ func (response GetJournalEntry200JSONResponse) VisitGetJournalEntryResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetJournalEntry404TextResponse string
+type GetJournalEntry403TextResponse string
 
-func (response GetJournalEntry404TextResponse) VisitGetJournalEntryResponse(w http.ResponseWriter) error {
+func (response GetJournalEntry403TextResponse) VisitGetJournalEntryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(404)
+	w.WriteHeader(403)
 
 	_, err := w.Write([]byte(response))
 	return err
@@ -1654,21 +4427,11 @@ func (response UpdateJournalEntry200JSONResponse) VisitUpdateJournalEntryRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateJournalEntry404TextResponse string
+type UpdateJournalEntry403TextResponse string
 
-func (response UpdateJournalEntry404TextResponse) VisitUpdateJournalEntryResponse(w http.ResponseWriter) error {
+func (response UpdateJournalEntry403TextResponse) VisitUpdateJournalEntryResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(404)
-
-	_, err := w.Write([]byte(response))
-	return err
-}
-
-type UpdateJournalEntry422TextResponse string
-
-func (response UpdateJournalEntry422TextResponse) VisitUpdateJournalEntryResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(422)
+	w.WriteHeader(403)
 
 	_, err := w.Write([]byte(response))
 	return err
@@ -1720,14 +4483,173 @@ func (response GetOpenAPISpec500TextResponse) VisitGetOpenAPISpecResponse(w http
 	return err
 }
 
+type DeleteUserDataRequestObject struct {
+}
+
+type DeleteUserDataResponseObject interface {
+	VisitDeleteUserDataResponse(w http.ResponseWriter) error
+}
+
+type DeleteUserData200Response struct {
+}
+
+func (response DeleteUserData200Response) VisitDeleteUserDataResponse(w http.ResponseWriter) error {
+	w.WriteHeader(200)
+	return nil
+}
+
+type DeleteUserData403TextResponse string
+
+func (response DeleteUserData403TextResponse) VisitDeleteUserDataResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type DeleteUserData500TextResponse string
+
+func (response DeleteUserData500TextResponse) VisitDeleteUserDataResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type ExportUserDataRequestObject struct {
+}
+
+type ExportUserDataResponseObject interface {
+	VisitExportUserDataResponse(w http.ResponseWriter) error
+}
+
+type ExportUserData200ResponseHeaders struct {
+	ContentDisposition string
+}
+
+type ExportUserData200ApplicationjsonlResponse struct {
+	Body          io.Reader
+	Headers       ExportUserData200ResponseHeaders
+	ContentLength int64
+}
+
+func (response ExportUserData200ApplicationjsonlResponse) VisitExportUserDataResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/jsonl")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.Header().Set("Content-Disposition", fmt.Sprint(response.Headers.ContentDisposition))
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type ExportUserData403TextResponse string
+
+func (response ExportUserData403TextResponse) VisitExportUserDataResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type ExportUserData500TextResponse string
+
+func (response ExportUserData500TextResponse) VisitExportUserDataResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type ImportUserDataRequestObject struct {
+	Body *multipart.Reader
+}
+
+type ImportUserDataResponseObject interface {
+	VisitImportUserDataResponse(w http.ResponseWriter) error
+}
+
+type ImportUserData200Response struct {
+}
+
+func (response ImportUserData200Response) VisitImportUserDataResponse(w http.ResponseWriter) error {
+	w.WriteHeader(200)
+	return nil
+}
+
+type ImportUserData403TextResponse string
+
+func (response ImportUserData403TextResponse) VisitImportUserDataResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type ImportUserData500TextResponse string
+
+func (response ImportUserData500TextResponse) VisitImportUserDataResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Gets counts of contacts and journal entries for the authenticated user
 	// (GET /)
 	GetIndex(ctx context.Context, request GetIndexRequestObject) (GetIndexResponseObject, error)
+	// Create a new activity
+	// (POST /activities)
+	CreateActivity(ctx context.Context, request CreateActivityRequestObject) (CreateActivityResponseObject, error)
+	// Delete an activity
+	// (DELETE /activities/{id})
+	DeleteActivity(ctx context.Context, request DeleteActivityRequestObject) (DeleteActivityResponseObject, error)
+	// Get activity
+	// (GET /activities/{id})
+	GetActivity(ctx context.Context, request GetActivityRequestObject) (GetActivityResponseObject, error)
+	// Update an activity
+	// (PUT /activities/{id})
+	UpdateActivity(ctx context.Context, request UpdateActivityRequestObject) (UpdateActivityResponseObject, error)
+	// Download application source code
+	// (GET /code/)
+	GetSourceCode(ctx context.Context, request GetSourceCodeRequestObject) (GetSourceCodeResponseObject, error)
 	// List all contacts
 	// (GET /contacts)
 	GetContacts(ctx context.Context, request GetContactsRequestObject) (GetContactsResponseObject, error)
+	// Create a new contact
+	// (POST /contacts)
+	CreateContact(ctx context.Context, request CreateContactRequestObject) (CreateContactResponseObject, error)
+	// Delete a contact
+	// (DELETE /contacts/{id})
+	DeleteContact(ctx context.Context, request DeleteContactRequestObject) (DeleteContactResponseObject, error)
+	// Get contact including debts and activities
+	// (GET /contacts/{id})
+	GetContact(ctx context.Context, request GetContactRequestObject) (GetContactResponseObject, error)
+	// Update a contact
+	// (PUT /contacts/{id})
+	UpdateContact(ctx context.Context, request UpdateContactRequestObject) (UpdateContactResponseObject, error)
+	// Create a new debt
+	// (POST /debts)
+	CreateDebt(ctx context.Context, request CreateDebtRequestObject) (CreateDebtResponseObject, error)
+	// Settle a debt
+	// (DELETE /debts/{id})
+	SettleDebt(ctx context.Context, request SettleDebtRequestObject) (SettleDebtResponseObject, error)
+	// Update a debt
+	// (PUT /debts/{id})
+	UpdateDebt(ctx context.Context, request UpdateDebtRequestObject) (UpdateDebtResponseObject, error)
 	// List all journal entries
 	// (GET /journal)
 	GetJournalEntries(ctx context.Context, request GetJournalEntriesRequestObject) (GetJournalEntriesResponseObject, error)
@@ -1746,6 +4668,15 @@ type StrictServerInterface interface {
 	// Get the OpenAPI spec
 	// (GET /openapi.yaml)
 	GetOpenAPISpec(ctx context.Context, request GetOpenAPISpecRequestObject) (GetOpenAPISpecResponseObject, error)
+	// Delete all user data
+	// (DELETE /userdata)
+	DeleteUserData(ctx context.Context, request DeleteUserDataRequestObject) (DeleteUserDataResponseObject, error)
+	// Export all user data
+	// (GET /userdata)
+	ExportUserData(ctx context.Context, request ExportUserDataRequestObject) (ExportUserDataResponseObject, error)
+	// Import user data
+	// (POST /userdata)
+	ImportUserData(ctx context.Context, request ImportUserDataRequestObject) (ImportUserDataResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -1801,6 +4732,154 @@ func (sh *strictHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// CreateActivity operation middleware
+func (sh *strictHandler) CreateActivity(w http.ResponseWriter, r *http.Request) {
+	var request CreateActivityRequestObject
+
+	if err := r.ParseForm(); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
+		return
+	}
+	var body CreateActivityFormdataRequestBody
+	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateActivity(ctx, request.(CreateActivityRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateActivity")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateActivityResponseObject); ok {
+		if err := validResponse.VisitCreateActivityResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteActivity operation middleware
+func (sh *strictHandler) DeleteActivity(w http.ResponseWriter, r *http.Request, id int64) {
+	var request DeleteActivityRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteActivity(ctx, request.(DeleteActivityRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteActivity")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteActivityResponseObject); ok {
+		if err := validResponse.VisitDeleteActivityResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetActivity operation middleware
+func (sh *strictHandler) GetActivity(w http.ResponseWriter, r *http.Request, id int64) {
+	var request GetActivityRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetActivity(ctx, request.(GetActivityRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetActivity")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetActivityResponseObject); ok {
+		if err := validResponse.VisitGetActivityResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateActivity operation middleware
+func (sh *strictHandler) UpdateActivity(w http.ResponseWriter, r *http.Request, id int64) {
+	var request UpdateActivityRequestObject
+
+	request.Id = id
+
+	if err := r.ParseForm(); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
+		return
+	}
+	var body UpdateActivityFormdataRequestBody
+	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateActivity(ctx, request.(UpdateActivityRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateActivity")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateActivityResponseObject); ok {
+		if err := validResponse.VisitUpdateActivityResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetSourceCode operation middleware
+func (sh *strictHandler) GetSourceCode(w http.ResponseWriter, r *http.Request) {
+	var request GetSourceCodeRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetSourceCode(ctx, request.(GetSourceCodeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetSourceCode")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetSourceCodeResponseObject); ok {
+		if err := validResponse.VisitGetSourceCodeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // GetContacts operation middleware
 func (sh *strictHandler) GetContacts(w http.ResponseWriter, r *http.Request) {
 	var request GetContactsRequestObject
@@ -1818,6 +4897,228 @@ func (sh *strictHandler) GetContacts(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetContactsResponseObject); ok {
 		if err := validResponse.VisitGetContactsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateContact operation middleware
+func (sh *strictHandler) CreateContact(w http.ResponseWriter, r *http.Request) {
+	var request CreateContactRequestObject
+
+	if err := r.ParseForm(); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
+		return
+	}
+	var body CreateContactFormdataRequestBody
+	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateContact(ctx, request.(CreateContactRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateContact")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateContactResponseObject); ok {
+		if err := validResponse.VisitCreateContactResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteContact operation middleware
+func (sh *strictHandler) DeleteContact(w http.ResponseWriter, r *http.Request, id int64) {
+	var request DeleteContactRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteContact(ctx, request.(DeleteContactRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteContact")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteContactResponseObject); ok {
+		if err := validResponse.VisitDeleteContactResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetContact operation middleware
+func (sh *strictHandler) GetContact(w http.ResponseWriter, r *http.Request, id int64) {
+	var request GetContactRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetContact(ctx, request.(GetContactRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetContact")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetContactResponseObject); ok {
+		if err := validResponse.VisitGetContactResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateContact operation middleware
+func (sh *strictHandler) UpdateContact(w http.ResponseWriter, r *http.Request, id int64) {
+	var request UpdateContactRequestObject
+
+	request.Id = id
+
+	if err := r.ParseForm(); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
+		return
+	}
+	var body UpdateContactFormdataRequestBody
+	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateContact(ctx, request.(UpdateContactRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateContact")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateContactResponseObject); ok {
+		if err := validResponse.VisitUpdateContactResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateDebt operation middleware
+func (sh *strictHandler) CreateDebt(w http.ResponseWriter, r *http.Request) {
+	var request CreateDebtRequestObject
+
+	if err := r.ParseForm(); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
+		return
+	}
+	var body CreateDebtFormdataRequestBody
+	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateDebt(ctx, request.(CreateDebtRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateDebt")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateDebtResponseObject); ok {
+		if err := validResponse.VisitCreateDebtResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SettleDebt operation middleware
+func (sh *strictHandler) SettleDebt(w http.ResponseWriter, r *http.Request, id int64) {
+	var request SettleDebtRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SettleDebt(ctx, request.(SettleDebtRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SettleDebt")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SettleDebtResponseObject); ok {
+		if err := validResponse.VisitSettleDebtResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateDebt operation middleware
+func (sh *strictHandler) UpdateDebt(w http.ResponseWriter, r *http.Request, id int64) {
+	var request UpdateDebtRequestObject
+
+	request.Id = id
+
+	if err := r.ParseForm(); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
+		return
+	}
+	var body UpdateDebtFormdataRequestBody
+	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateDebt(ctx, request.(UpdateDebtRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateDebt")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateDebtResponseObject); ok {
+		if err := validResponse.VisitUpdateDebtResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -1997,35 +5298,125 @@ func (sh *strictHandler) GetOpenAPISpec(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
+// DeleteUserData operation middleware
+func (sh *strictHandler) DeleteUserData(w http.ResponseWriter, r *http.Request) {
+	var request DeleteUserDataRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteUserData(ctx, request.(DeleteUserDataRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteUserData")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteUserDataResponseObject); ok {
+		if err := validResponse.VisitDeleteUserDataResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ExportUserData operation middleware
+func (sh *strictHandler) ExportUserData(w http.ResponseWriter, r *http.Request) {
+	var request ExportUserDataRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ExportUserData(ctx, request.(ExportUserDataRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ExportUserData")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ExportUserDataResponseObject); ok {
+		if err := validResponse.VisitExportUserDataResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ImportUserData operation middleware
+func (sh *strictHandler) ImportUserData(w http.ResponseWriter, r *http.Request) {
+	var request ImportUserDataRequestObject
+
+	if reader, err := r.MultipartReader(); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode multipart body: %w", err))
+		return
+	} else {
+		request.Body = reader
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ImportUserData(ctx, request.(ImportUserDataRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ImportUserData")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ImportUserDataResponseObject); ok {
+		if err := validResponse.VisitImportUserDataResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"AAD//1nZFFaZGgAA",
+	"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",
+	"3V0MdHm//F8AAAD//xl8pa6kRQAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
