@@ -1,13 +1,13 @@
 module github.com/pojntfx/senbara/senbara-forms
 
-go 1.23.5
+go 1.24.0
 
 require (
 	github.com/adrg/xdg v0.5.3
 	github.com/coreos/go-oidc/v3 v3.12.0
 	github.com/leonelquinteros/gotext v1.7.1
 	github.com/lib/pq v1.10.9
-	github.com/pojntfx/senbara/senbara-common v0.0.0-20250221014500-8a6f413a606b
+	github.com/pojntfx/senbara/senbara-common v0.0.0-20250222072619-7f790546e54b
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.19.0
 	github.com/yuin/goldmark v1.7.8
@@ -42,4 +42,5 @@ require (
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	modernc.org/sqlite v1.34.5 // indirect
 )

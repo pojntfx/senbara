@@ -168,7 +168,7 @@ func (c *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 		"pronouns", pronouns,
 	)
 
-	id, err := c.persister.CreateContact(
+	createdContact, err := c.persister.CreateContact(
 		r.Context(),
 		firstName,
 		lastName,
@@ -185,7 +185,7 @@ func (c *Controller) HandleCreateContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", id), http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", createdContact.ID), http.StatusFound)
 }
 
 func (c *Controller) HandleDeleteContact(w http.ResponseWriter, r *http.Request) {
@@ -444,7 +444,7 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 		"notes", notes,
 	)
 
-	contact, err := c.persister.UpdateContact(
+	updatedContact, err := c.persister.UpdateContact(
 		r.Context(),
 		int32(id),
 		firstName,
@@ -465,7 +465,7 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	http.Redirect(w, r, "/contacts/view?id="+string(contact.ID), http.StatusFound)
+	http.Redirect(w, r, "/contacts/view?id="+string(updatedContact.ID), http.StatusFound)
 }
 
 func (c *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {

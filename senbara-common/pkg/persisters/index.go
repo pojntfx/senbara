@@ -1,6 +1,6 @@
 package persisters
 
-//go:generate sqlc -f ../../sqlc.yaml generate
+//go:generate go tool github.com/sqlc-dev/sqlc/cmd/sqlc -f ../../sqlc.yaml generate
 
 import (
 	"context"

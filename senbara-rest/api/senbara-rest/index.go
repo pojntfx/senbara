@@ -1,6 +1,6 @@
 package senbaraRest
 
-//go:generate tar czf code.tar.gz --exclude .git -C ../../.. .
+//go:generate tar czf code.tar.gz --exclude .git --exclude */api/*/code.tar.gz -C ../../.. .
 
 import (
 	"context"

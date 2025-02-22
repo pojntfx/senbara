@@ -159,7 +159,7 @@ func (c *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request)
 		"rating", rating,
 	)
 
-	id, err := c.persister.CreateJournalEntry(r.Context(), title, body, int32(rating), userData.Email)
+	createdJournalEntry, err := c.persister.CreateJournalEntry(r.Context(), title, body, int32(rating), userData.Email)
 	if err != nil {
 		log.Warn("Could not create journal entry in DB", "err", errors.Join(errCouldNotInsertIntoDB, err))
 
@@ -168,7 +168,7 @@ func (c *Controller) HandleCreateJournal(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/journal/view?id=%v", id), http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("/journal/view?id=%v", createdJournalEntry.ID), http.StatusFound)
 }
 
 func (c *Controller) HandleDeleteJournal(w http.ResponseWriter, r *http.Request) {
@@ -377,7 +377,7 @@ func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 		"rating", rating,
 	)
 
-	journal, err := c.persister.UpdateJournalEntry(r.Context(), int32(id), title, body, int32(rating), userData.Email)
+	updatedJournalEntry, err := c.persister.UpdateJournalEntry(r.Context(), int32(id), title, body, int32(rating), userData.Email)
 	if err != nil {
 		log.Warn("Could not update journal entry in DB", "err", errors.Join(errCouldNotUpdateInDB, err))
 
@@ -386,7 +386,7 @@ func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	http.Redirect(w, r, "/journal/view?id="+string(journal.ID), http.StatusFound)
+	http.Redirect(w, r, "/journal/view?id="+string(updatedJournalEntry.ID), http.StatusFound)
 }
 
 func (c *Controller) HandleViewJournal(w http.ResponseWriter, r *http.Request) {
