@@ -16,7 +16,7 @@ import (
 )
 
 //go:embed code.tar.gz
-var code []byte
+var Code []byte
 
 var (
 	p *persisters.Persister
@@ -73,9 +73,7 @@ func SenbaraFormsHandler(
 	mux.HandleFunc("GET /login", c.HandleLogin)
 	mux.HandleFunc("GET /authorize", c.HandleAuthorize)
 
-	mux.HandleFunc("GET /code/", func(w http.ResponseWriter, r *http.Request) {
-		c.HandleCode(w, r, code)
-	})
+	mux.HandleFunc("GET /code/", c.HandleCode)
 
 	mux.HandleFunc("/", c.HandleIndex)
 
@@ -111,6 +109,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 			os.Getenv("PRIVACY_URL"),
 			os.Getenv("IMPRINT_URL"),
+
+			Code,
 		)
 
 		if err := c.Init(r.Context()); err != nil {

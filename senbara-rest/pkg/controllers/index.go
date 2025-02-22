@@ -33,6 +33,8 @@ type Controller struct {
 	privacyURL string
 	imprintURL string
 
+	code []byte
+
 	config   *oauth2.Config
 	verifier *oidc.IDTokenVerifier
 }
@@ -51,6 +53,8 @@ func NewController(
 
 	privacyURL,
 	imprintURL string,
+
+	code []byte,
 ) *Controller {
 	return &Controller{
 		log: log,
@@ -66,6 +70,8 @@ func NewController(
 
 		privacyURL: privacyURL,
 		imprintURL: imprintURL,
+
+		code: code,
 	}
 }
 

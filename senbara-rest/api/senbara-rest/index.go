@@ -22,7 +22,7 @@ import (
 )
 
 //go:embed code.tar.gz
-var code []byte
+var Code []byte
 
 var (
 	p *persisters.Persister
@@ -47,6 +47,7 @@ func SenbaraRESTHandler(
 		middleware.OapiRequestValidatorWithOptions(
 			s,
 			&middleware.Options{
+				SilenceServersWarning: true,
 				Options: openapi3filter.Options{
 					AuthenticationFunc: func(ctx context.Context, ai *openapi3filter.AuthenticationInput) error {
 						_, err := c.Authenticate(r)
@@ -119,6 +120,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 			os.Getenv("PRIVACY_URL"),
 			os.Getenv("IMPRINT_URL"),
+
+			Code,
 		)
 
 		if err := c.Init(r.Context()); err != nil {

@@ -59,6 +59,31 @@ paths:
               schema:
                 type: string
 
+  /code/:
+    get:
+      tags:
+        - code
+      summary: Download application source code
+      operationId: getSourceCode
+      responses:
+        "200":
+          description: Source code retrieved successfully
+          content:
+            application/gzip:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              example: 'attachment; filename="code.tar.gz"'
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
   /:
     get:
       tags:

@@ -123,6 +123,8 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 
 				viper.GetString(privacyURLKey),
 				viper.GetString(imprintURLKey),
+
+				senbaraForms.Code,
 			)
 
 			if err := c.Init(ctx); err != nil {
