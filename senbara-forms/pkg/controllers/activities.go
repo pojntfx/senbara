@@ -54,7 +54,7 @@ func (c *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
 
 	contact, err := c.persister.GetContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
-		log.Warn("Could not get contact to add activity to from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
+		log.Warn("Could not get contact to add activity from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -154,6 +154,7 @@ func (c *Controller) HandleCreateActivity(w http.ResponseWriter, r *http.Request
 		"contactID", contactID,
 		"name", name,
 		"date", date,
+		"description", description,
 	)
 
 	if _, err := c.persister.CreateActivity(
@@ -248,9 +249,9 @@ func (c *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 
 		userData.Email,
 	); err != nil {
-		log.Warn("Could not delete activity in DB", "err", errors.Join(errCouldNotUpdateInDB, err))
+		log.Warn("Could not delete activity in DB", "err", errors.Join(errCouldNotDeleteFromDB, err))
 
-		http.Error(w, errCouldNotUpdateInDB.Error(), http.StatusInternalServerError)
+		http.Error(w, errCouldNotDeleteFromDB.Error(), http.StatusInternalServerError)
 
 		return
 	}
@@ -414,7 +415,7 @@ func (c *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) 
 
 	activityAndContact, err := c.persister.GetActivityAndContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
-		log.Warn("Could not get activity and contact for edit", "err", errors.Join(errCouldNotFetchFromDB, err))
+		log.Warn("Could not get activity and contact from DB for edit", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -498,7 +499,7 @@ func (c *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 
 	activityAndContact, err := c.persister.GetActivityAndContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
-		log.Warn("Could not get activity and contact for view", "err", errors.Join(errCouldNotFetchFromDB, err))
+		log.Warn("Could not get activity and contact from DB for view", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 

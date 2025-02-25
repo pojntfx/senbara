@@ -16,6 +16,9 @@ var (
 	errCouldNotLogin          = errors.New("could not login")
 	errCouldNotEncodeResponse = errors.New("could not encode response")
 	errCouldNotWriteResponse  = errors.New("could not write response")
+	errCouldNotInsertIntoDB   = errors.New("could not insert into DB")
+	errCouldNotDeleteFromDB   = errors.New("could not delete from DB")
+	errCouldNotUpdateInDB     = errors.New("could not update in DB")
 )
 
 type Controller struct {
