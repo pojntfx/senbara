@@ -32,16 +32,16 @@ const (
 	OidcScopes = "oidc.Scopes"
 )
 
-// Defines values for CreateDebtFormdataBodyYouOwe.
+// Defines values for CreateDebtJSONBodyYouOwe.
 const (
-	CreateDebtFormdataBodyYouOweN0 CreateDebtFormdataBodyYouOwe = 0
-	CreateDebtFormdataBodyYouOweN1 CreateDebtFormdataBodyYouOwe = 1
+	CreateDebtJSONBodyYouOweN0 CreateDebtJSONBodyYouOwe = 0
+	CreateDebtJSONBodyYouOweN1 CreateDebtJSONBodyYouOwe = 1
 )
 
-// Defines values for UpdateDebtFormdataBodyYouOwe.
+// Defines values for UpdateDebtJSONBodyYouOwe.
 const (
-	UpdateDebtFormdataBodyYouOweN0 UpdateDebtFormdataBodyYouOwe = 0
-	UpdateDebtFormdataBodyYouOweN1 UpdateDebtFormdataBodyYouOwe = 1
+	UpdateDebtJSONBodyYouOweN0 UpdateDebtJSONBodyYouOwe = 0
+	UpdateDebtJSONBodyYouOweN1 UpdateDebtJSONBodyYouOwe = 1
 )
 
 // Activity defines model for Activity.
@@ -107,77 +107,77 @@ type JournalEntry struct {
 	Title     *string    `json:"title,omitempty"`
 }
 
-// CreateActivityFormdataBody defines parameters for CreateActivity.
-type CreateActivityFormdataBody struct {
-	ContactId   int64              `form:"contact_id" json:"contact_id"`
-	Date        openapi_types.Date `form:"date" json:"date"`
-	Description *string            `form:"description,omitempty" json:"description,omitempty"`
-	Name        string             `form:"name" json:"name"`
+// CreateActivityJSONBody defines parameters for CreateActivity.
+type CreateActivityJSONBody struct {
+	ContactId   int64              `json:"contact_id"`
+	Date        openapi_types.Date `json:"date"`
+	Description *string            `json:"description,omitempty"`
+	Name        string             `json:"name"`
 }
 
-// UpdateActivityFormdataBody defines parameters for UpdateActivity.
-type UpdateActivityFormdataBody struct {
-	Date        openapi_types.Date `form:"date" json:"date"`
-	Description *string            `form:"description,omitempty" json:"description,omitempty"`
-	Name        string             `form:"name" json:"name"`
+// UpdateActivityJSONBody defines parameters for UpdateActivity.
+type UpdateActivityJSONBody struct {
+	Date        openapi_types.Date `json:"date"`
+	Description *string            `json:"description,omitempty"`
+	Name        string             `json:"name"`
 }
 
-// CreateContactFormdataBody defines parameters for CreateContact.
-type CreateContactFormdataBody struct {
-	Email     openapi_types.Email `form:"email" json:"email"`
-	FirstName string              `form:"first_name" json:"first_name"`
-	LastName  string              `form:"last_name" json:"last_name"`
-	Nickname  *string             `form:"nickname,omitempty" json:"nickname,omitempty"`
-	Pronouns  string              `form:"pronouns" json:"pronouns"`
+// CreateContactJSONBody defines parameters for CreateContact.
+type CreateContactJSONBody struct {
+	Email     openapi_types.Email `json:"email"`
+	FirstName string              `json:"first_name"`
+	LastName  string              `json:"last_name"`
+	Nickname  *string             `json:"nickname,omitempty"`
+	Pronouns  string              `json:"pronouns"`
 }
 
-// UpdateContactFormdataBody defines parameters for UpdateContact.
-type UpdateContactFormdataBody struct {
-	Address   *string             `form:"address,omitempty" json:"address,omitempty"`
-	Birthday  *openapi_types.Date `form:"birthday,omitempty" json:"birthday,omitempty"`
-	Email     openapi_types.Email `form:"email" json:"email"`
-	FirstName string              `form:"first_name" json:"first_name"`
-	LastName  string              `form:"last_name" json:"last_name"`
-	Nickname  *string             `form:"nickname,omitempty" json:"nickname,omitempty"`
-	Notes     *string             `form:"notes,omitempty" json:"notes,omitempty"`
-	Pronouns  string              `form:"pronouns" json:"pronouns"`
+// UpdateContactJSONBody defines parameters for UpdateContact.
+type UpdateContactJSONBody struct {
+	Address   *string             `json:"address,omitempty"`
+	Birthday  *openapi_types.Date `json:"birthday,omitempty"`
+	Email     openapi_types.Email `json:"email"`
+	FirstName string              `json:"first_name"`
+	LastName  string              `json:"last_name"`
+	Nickname  *string             `json:"nickname,omitempty"`
+	Notes     *string             `json:"notes,omitempty"`
+	Pronouns  string              `json:"pronouns"`
 }
 
-// CreateDebtFormdataBody defines parameters for CreateDebt.
-type CreateDebtFormdataBody struct {
-	Amount      float32                      `form:"amount" json:"amount"`
-	ContactId   int64                        `form:"contact_id" json:"contact_id"`
-	Currency    string                       `form:"currency" json:"currency"`
-	Description *string                      `form:"description,omitempty" json:"description,omitempty"`
-	YouOwe      CreateDebtFormdataBodyYouOwe `form:"you_owe" json:"you_owe"`
+// CreateDebtJSONBody defines parameters for CreateDebt.
+type CreateDebtJSONBody struct {
+	Amount      float32                  `json:"amount"`
+	ContactId   int64                    `json:"contact_id"`
+	Currency    string                   `json:"currency"`
+	Description *string                  `json:"description,omitempty"`
+	YouOwe      CreateDebtJSONBodyYouOwe `json:"you_owe"`
 }
 
-// CreateDebtFormdataBodyYouOwe defines parameters for CreateDebt.
-type CreateDebtFormdataBodyYouOwe int
+// CreateDebtJSONBodyYouOwe defines parameters for CreateDebt.
+type CreateDebtJSONBodyYouOwe int
 
-// UpdateDebtFormdataBody defines parameters for UpdateDebt.
-type UpdateDebtFormdataBody struct {
-	Amount      float32                      `form:"amount" json:"amount"`
-	Currency    string                       `form:"currency" json:"currency"`
-	Description *string                      `form:"description,omitempty" json:"description,omitempty"`
-	YouOwe      UpdateDebtFormdataBodyYouOwe `form:"you_owe" json:"you_owe"`
+// UpdateDebtJSONBody defines parameters for UpdateDebt.
+type UpdateDebtJSONBody struct {
+	Amount      float32                  `json:"amount"`
+	Currency    string                   `json:"currency"`
+	Description *string                  `json:"description,omitempty"`
+	YouOwe      UpdateDebtJSONBodyYouOwe `json:"you_owe"`
 }
 
-// UpdateDebtFormdataBodyYouOwe defines parameters for UpdateDebt.
-type UpdateDebtFormdataBodyYouOwe int
+// UpdateDebtJSONBodyYouOwe defines parameters for UpdateDebt.
+type UpdateDebtJSONBodyYouOwe int
 
-// CreateJournalEntryFormdataBody defines parameters for CreateJournalEntry.
-type CreateJournalEntryFormdataBody struct {
-	Body   string `form:"body" json:"body"`
-	Rating int32  `form:"rating" json:"rating"`
-	Title  string `form:"title" json:"title"`
+// CreateJournalEntryJSONBody defines parameters for CreateJournalEntry.
+type CreateJournalEntryJSONBody struct {
+	Body   string `json:"body"`
+	Rating int32  `json:"rating"`
+	Title  string `json:"title"`
 }
 
-// UpdateJournalEntryFormdataBody defines parameters for UpdateJournalEntry.
-type UpdateJournalEntryFormdataBody struct {
-	Body   string `form:"body" json:"body"`
-	Rating int32  `form:"rating" json:"rating"`
-	Title  string `form:"title" json:"title"`
+// UpdateJournalEntryJSONBody defines parameters for UpdateJournalEntry.
+type UpdateJournalEntryJSONBody struct {
+	Body   string `json:"body"`
+	Rating int32  `json:"rating"`
+	Title  string `json:"title"`
 }
 
 // ImportUserDataMultipartBody defines parameters for ImportUserData.
@@ -185,29 +185,29 @@ type ImportUserDataMultipartBody struct {
 	UserData *openapi_types.File `json:"userData,omitempty"`
 }
 
-// CreateActivityFormdataRequestBody defines body for CreateActivity for application/x-www-form-urlencoded ContentType.
-type CreateActivityFormdataRequestBody CreateActivityFormdataBody
+// CreateActivityJSONRequestBody defines body for CreateActivity for application/json ContentType.
+type CreateActivityJSONRequestBody CreateActivityJSONBody
 
-// UpdateActivityFormdataRequestBody defines body for UpdateActivity for application/x-www-form-urlencoded ContentType.
-type UpdateActivityFormdataRequestBody UpdateActivityFormdataBody
+// UpdateActivityJSONRequestBody defines body for UpdateActivity for application/json ContentType.
+type UpdateActivityJSONRequestBody UpdateActivityJSONBody
 
-// CreateContactFormdataRequestBody defines body for CreateContact for application/x-www-form-urlencoded ContentType.
-type CreateContactFormdataRequestBody CreateContactFormdataBody
+// CreateContactJSONRequestBody defines body for CreateContact for application/json ContentType.
+type CreateContactJSONRequestBody CreateContactJSONBody
 
-// UpdateContactFormdataRequestBody defines body for UpdateContact for application/x-www-form-urlencoded ContentType.
-type UpdateContactFormdataRequestBody UpdateContactFormdataBody
+// UpdateContactJSONRequestBody defines body for UpdateContact for application/json ContentType.
+type UpdateContactJSONRequestBody UpdateContactJSONBody
 
-// CreateDebtFormdataRequestBody defines body for CreateDebt for application/x-www-form-urlencoded ContentType.
-type CreateDebtFormdataRequestBody CreateDebtFormdataBody
+// CreateDebtJSONRequestBody defines body for CreateDebt for application/json ContentType.
+type CreateDebtJSONRequestBody CreateDebtJSONBody
 
-// UpdateDebtFormdataRequestBody defines body for UpdateDebt for application/x-www-form-urlencoded ContentType.
-type UpdateDebtFormdataRequestBody UpdateDebtFormdataBody
+// UpdateDebtJSONRequestBody defines body for UpdateDebt for application/json ContentType.
+type UpdateDebtJSONRequestBody UpdateDebtJSONBody
 
-// CreateJournalEntryFormdataRequestBody defines body for CreateJournalEntry for application/x-www-form-urlencoded ContentType.
-type CreateJournalEntryFormdataRequestBody CreateJournalEntryFormdataBody
+// CreateJournalEntryJSONRequestBody defines body for CreateJournalEntry for application/json ContentType.
+type CreateJournalEntryJSONRequestBody CreateJournalEntryJSONBody
 
-// UpdateJournalEntryFormdataRequestBody defines body for UpdateJournalEntry for application/x-www-form-urlencoded ContentType.
-type UpdateJournalEntryFormdataRequestBody UpdateJournalEntryFormdataBody
+// UpdateJournalEntryJSONRequestBody defines body for UpdateJournalEntry for application/json ContentType.
+type UpdateJournalEntryJSONRequestBody UpdateJournalEntryJSONBody
 
 // ImportUserDataMultipartRequestBody defines body for ImportUserData for multipart/form-data ContentType.
 type ImportUserDataMultipartRequestBody ImportUserDataMultipartBody
@@ -291,7 +291,7 @@ type ClientInterface interface {
 	// CreateActivityWithBody request with any body
 	CreateActivityWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	CreateActivityWithFormdataBody(ctx context.Context, body CreateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	CreateActivity(ctx context.Context, body CreateActivityJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DeleteActivity request
 	DeleteActivity(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -302,7 +302,7 @@ type ClientInterface interface {
 	// UpdateActivityWithBody request with any body
 	UpdateActivityWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	UpdateActivityWithFormdataBody(ctx context.Context, id int64, body UpdateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UpdateActivity(ctx context.Context, id int64, body UpdateActivityJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetSourceCode request
 	GetSourceCode(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -313,7 +313,7 @@ type ClientInterface interface {
 	// CreateContactWithBody request with any body
 	CreateContactWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	CreateContactWithFormdataBody(ctx context.Context, body CreateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	CreateContact(ctx context.Context, body CreateContactJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DeleteContact request
 	DeleteContact(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -324,12 +324,12 @@ type ClientInterface interface {
 	// UpdateContactWithBody request with any body
 	UpdateContactWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	UpdateContactWithFormdataBody(ctx context.Context, id int64, body UpdateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UpdateContact(ctx context.Context, id int64, body UpdateContactJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CreateDebtWithBody request with any body
 	CreateDebtWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	CreateDebtWithFormdataBody(ctx context.Context, body CreateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	CreateDebt(ctx context.Context, body CreateDebtJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// SettleDebt request
 	SettleDebt(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -337,7 +337,7 @@ type ClientInterface interface {
 	// UpdateDebtWithBody request with any body
 	UpdateDebtWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	UpdateDebtWithFormdataBody(ctx context.Context, id int64, body UpdateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UpdateDebt(ctx context.Context, id int64, body UpdateDebtJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetJournalEntries request
 	GetJournalEntries(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -345,7 +345,7 @@ type ClientInterface interface {
 	// CreateJournalEntryWithBody request with any body
 	CreateJournalEntryWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	CreateJournalEntryWithFormdataBody(ctx context.Context, body CreateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	CreateJournalEntry(ctx context.Context, body CreateJournalEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DeleteJournalEntry request
 	DeleteJournalEntry(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -356,7 +356,7 @@ type ClientInterface interface {
 	// UpdateJournalEntryWithBody request with any body
 	UpdateJournalEntryWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	UpdateJournalEntryWithFormdataBody(ctx context.Context, id int64, body UpdateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UpdateJournalEntry(ctx context.Context, id int64, body UpdateJournalEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetOpenAPISpec request
 	GetOpenAPISpec(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -395,8 +395,8 @@ func (c *Client) CreateActivityWithBody(ctx context.Context, contentType string,
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateActivityWithFormdataBody(ctx context.Context, body CreateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateActivityRequestWithFormdataBody(c.Server, body)
+func (c *Client) CreateActivity(ctx context.Context, body CreateActivityJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateActivityRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -443,8 +443,8 @@ func (c *Client) UpdateActivityWithBody(ctx context.Context, id int64, contentTy
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateActivityWithFormdataBody(ctx context.Context, id int64, body UpdateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateActivityRequestWithFormdataBody(c.Server, id, body)
+func (c *Client) UpdateActivity(ctx context.Context, id int64, body UpdateActivityJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateActivityRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -491,8 +491,8 @@ func (c *Client) CreateContactWithBody(ctx context.Context, contentType string, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateContactWithFormdataBody(ctx context.Context, body CreateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateContactRequestWithFormdataBody(c.Server, body)
+func (c *Client) CreateContact(ctx context.Context, body CreateContactJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateContactRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -539,8 +539,8 @@ func (c *Client) UpdateContactWithBody(ctx context.Context, id int64, contentTyp
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateContactWithFormdataBody(ctx context.Context, id int64, body UpdateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateContactRequestWithFormdataBody(c.Server, id, body)
+func (c *Client) UpdateContact(ctx context.Context, id int64, body UpdateContactJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateContactRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -563,8 +563,8 @@ func (c *Client) CreateDebtWithBody(ctx context.Context, contentType string, bod
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateDebtWithFormdataBody(ctx context.Context, body CreateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateDebtRequestWithFormdataBody(c.Server, body)
+func (c *Client) CreateDebt(ctx context.Context, body CreateDebtJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateDebtRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -599,8 +599,8 @@ func (c *Client) UpdateDebtWithBody(ctx context.Context, id int64, contentType s
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateDebtWithFormdataBody(ctx context.Context, id int64, body UpdateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateDebtRequestWithFormdataBody(c.Server, id, body)
+func (c *Client) UpdateDebt(ctx context.Context, id int64, body UpdateDebtJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateDebtRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -635,8 +635,8 @@ func (c *Client) CreateJournalEntryWithBody(ctx context.Context, contentType str
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateJournalEntryWithFormdataBody(ctx context.Context, body CreateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateJournalEntryRequestWithFormdataBody(c.Server, body)
+func (c *Client) CreateJournalEntry(ctx context.Context, body CreateJournalEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateJournalEntryRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -683,8 +683,8 @@ func (c *Client) UpdateJournalEntryWithBody(ctx context.Context, id int64, conte
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateJournalEntryWithFormdataBody(ctx context.Context, id int64, body UpdateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateJournalEntryRequestWithFormdataBody(c.Server, id, body)
+func (c *Client) UpdateJournalEntry(ctx context.Context, id int64, body UpdateJournalEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateJournalEntryRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -770,15 +770,15 @@ func NewGetIndexRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewCreateActivityRequestWithFormdataBody calls the generic CreateActivity builder with application/x-www-form-urlencoded body
-func NewCreateActivityRequestWithFormdataBody(server string, body CreateActivityFormdataRequestBody) (*http.Request, error) {
+// NewCreateActivityRequest calls the generic CreateActivity builder with application/json body
+func NewCreateActivityRequest(server string, body CreateActivityJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
-	bodyStr, err := runtime.MarshalForm(body, nil)
+	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
-	bodyReader = strings.NewReader(bodyStr.Encode())
-	return NewCreateActivityRequestWithBody(server, "application/x-www-form-urlencoded", bodyReader)
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateActivityRequestWithBody(server, "application/json", bodyReader)
 }
 
 // NewCreateActivityRequestWithBody generates requests for CreateActivity with any type of body
@@ -878,15 +878,15 @@ func NewGetActivityRequest(server string, id int64) (*http.Request, error) {
 	return req, nil
 }
 
-// NewUpdateActivityRequestWithFormdataBody calls the generic UpdateActivity builder with application/x-www-form-urlencoded body
-func NewUpdateActivityRequestWithFormdataBody(server string, id int64, body UpdateActivityFormdataRequestBody) (*http.Request, error) {
+// NewUpdateActivityRequest calls the generic UpdateActivity builder with application/json body
+func NewUpdateActivityRequest(server string, id int64, body UpdateActivityJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
-	bodyStr, err := runtime.MarshalForm(body, nil)
+	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
-	bodyReader = strings.NewReader(bodyStr.Encode())
-	return NewUpdateActivityRequestWithBody(server, id, "application/x-www-form-urlencoded", bodyReader)
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateActivityRequestWithBody(server, id, "application/json", bodyReader)
 }
 
 // NewUpdateActivityRequestWithBody generates requests for UpdateActivity with any type of body
@@ -979,15 +979,15 @@ func NewGetContactsRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewCreateContactRequestWithFormdataBody calls the generic CreateContact builder with application/x-www-form-urlencoded body
-func NewCreateContactRequestWithFormdataBody(server string, body CreateContactFormdataRequestBody) (*http.Request, error) {
+// NewCreateContactRequest calls the generic CreateContact builder with application/json body
+func NewCreateContactRequest(server string, body CreateContactJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
-	bodyStr, err := runtime.MarshalForm(body, nil)
+	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
-	bodyReader = strings.NewReader(bodyStr.Encode())
-	return NewCreateContactRequestWithBody(server, "application/x-www-form-urlencoded", bodyReader)
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateContactRequestWithBody(server, "application/json", bodyReader)
 }
 
 // NewCreateContactRequestWithBody generates requests for CreateContact with any type of body
@@ -1087,15 +1087,15 @@ func NewGetContactRequest(server string, id int64) (*http.Request, error) {
 	return req, nil
 }
 
-// NewUpdateContactRequestWithFormdataBody calls the generic UpdateContact builder with application/x-www-form-urlencoded body
-func NewUpdateContactRequestWithFormdataBody(server string, id int64, body UpdateContactFormdataRequestBody) (*http.Request, error) {
+// NewUpdateContactRequest calls the generic UpdateContact builder with application/json body
+func NewUpdateContactRequest(server string, id int64, body UpdateContactJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
-	bodyStr, err := runtime.MarshalForm(body, nil)
+	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
-	bodyReader = strings.NewReader(bodyStr.Encode())
-	return NewUpdateContactRequestWithBody(server, id, "application/x-www-form-urlencoded", bodyReader)
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateContactRequestWithBody(server, id, "application/json", bodyReader)
 }
 
 // NewUpdateContactRequestWithBody generates requests for UpdateContact with any type of body
@@ -1134,15 +1134,15 @@ func NewUpdateContactRequestWithBody(server string, id int64, contentType string
 	return req, nil
 }
 
-// NewCreateDebtRequestWithFormdataBody calls the generic CreateDebt builder with application/x-www-form-urlencoded body
-func NewCreateDebtRequestWithFormdataBody(server string, body CreateDebtFormdataRequestBody) (*http.Request, error) {
+// NewCreateDebtRequest calls the generic CreateDebt builder with application/json body
+func NewCreateDebtRequest(server string, body CreateDebtJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
-	bodyStr, err := runtime.MarshalForm(body, nil)
+	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
-	bodyReader = strings.NewReader(bodyStr.Encode())
-	return NewCreateDebtRequestWithBody(server, "application/x-www-form-urlencoded", bodyReader)
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateDebtRequestWithBody(server, "application/json", bodyReader)
 }
 
 // NewCreateDebtRequestWithBody generates requests for CreateDebt with any type of body
@@ -1208,15 +1208,15 @@ func NewSettleDebtRequest(server string, id int64) (*http.Request, error) {
 	return req, nil
 }
 
-// NewUpdateDebtRequestWithFormdataBody calls the generic UpdateDebt builder with application/x-www-form-urlencoded body
-func NewUpdateDebtRequestWithFormdataBody(server string, id int64, body UpdateDebtFormdataRequestBody) (*http.Request, error) {
+// NewUpdateDebtRequest calls the generic UpdateDebt builder with application/json body
+func NewUpdateDebtRequest(server string, id int64, body UpdateDebtJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
-	bodyStr, err := runtime.MarshalForm(body, nil)
+	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
-	bodyReader = strings.NewReader(bodyStr.Encode())
-	return NewUpdateDebtRequestWithBody(server, id, "application/x-www-form-urlencoded", bodyReader)
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateDebtRequestWithBody(server, id, "application/json", bodyReader)
 }
 
 // NewUpdateDebtRequestWithBody generates requests for UpdateDebt with any type of body
@@ -1282,15 +1282,15 @@ func NewGetJournalEntriesRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewCreateJournalEntryRequestWithFormdataBody calls the generic CreateJournalEntry builder with application/x-www-form-urlencoded body
-func NewCreateJournalEntryRequestWithFormdataBody(server string, body CreateJournalEntryFormdataRequestBody) (*http.Request, error) {
+// NewCreateJournalEntryRequest calls the generic CreateJournalEntry builder with application/json body
+func NewCreateJournalEntryRequest(server string, body CreateJournalEntryJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
-	bodyStr, err := runtime.MarshalForm(body, nil)
+	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
-	bodyReader = strings.NewReader(bodyStr.Encode())
-	return NewCreateJournalEntryRequestWithBody(server, "application/x-www-form-urlencoded", bodyReader)
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateJournalEntryRequestWithBody(server, "application/json", bodyReader)
 }
 
 // NewCreateJournalEntryRequestWithBody generates requests for CreateJournalEntry with any type of body
@@ -1390,15 +1390,15 @@ func NewGetJournalEntryRequest(server string, id int64) (*http.Request, error) {
 	return req, nil
 }
 
-// NewUpdateJournalEntryRequestWithFormdataBody calls the generic UpdateJournalEntry builder with application/x-www-form-urlencoded body
-func NewUpdateJournalEntryRequestWithFormdataBody(server string, id int64, body UpdateJournalEntryFormdataRequestBody) (*http.Request, error) {
+// NewUpdateJournalEntryRequest calls the generic UpdateJournalEntry builder with application/json body
+func NewUpdateJournalEntryRequest(server string, id int64, body UpdateJournalEntryJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
-	bodyStr, err := runtime.MarshalForm(body, nil)
+	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
-	bodyReader = strings.NewReader(bodyStr.Encode())
-	return NewUpdateJournalEntryRequestWithBody(server, id, "application/x-www-form-urlencoded", bodyReader)
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateJournalEntryRequestWithBody(server, id, "application/json", bodyReader)
 }
 
 // NewUpdateJournalEntryRequestWithBody generates requests for UpdateJournalEntry with any type of body
@@ -1596,7 +1596,7 @@ type ClientWithResponsesInterface interface {
 	// CreateActivityWithBodyWithResponse request with any body
 	CreateActivityWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateActivityResponse, error)
 
-	CreateActivityWithFormdataBodyWithResponse(ctx context.Context, body CreateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateActivityResponse, error)
+	CreateActivityWithResponse(ctx context.Context, body CreateActivityJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateActivityResponse, error)
 
 	// DeleteActivityWithResponse request
 	DeleteActivityWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteActivityResponse, error)
@@ -1607,7 +1607,7 @@ type ClientWithResponsesInterface interface {
 	// UpdateActivityWithBodyWithResponse request with any body
 	UpdateActivityWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateActivityResponse, error)
 
-	UpdateActivityWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateActivityResponse, error)
+	UpdateActivityWithResponse(ctx context.Context, id int64, body UpdateActivityJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateActivityResponse, error)
 
 	// GetSourceCodeWithResponse request
 	GetSourceCodeWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSourceCodeResponse, error)
@@ -1618,7 +1618,7 @@ type ClientWithResponsesInterface interface {
 	// CreateContactWithBodyWithResponse request with any body
 	CreateContactWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateContactResponse, error)
 
-	CreateContactWithFormdataBodyWithResponse(ctx context.Context, body CreateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateContactResponse, error)
+	CreateContactWithResponse(ctx context.Context, body CreateContactJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateContactResponse, error)
 
 	// DeleteContactWithResponse request
 	DeleteContactWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteContactResponse, error)
@@ -1629,12 +1629,12 @@ type ClientWithResponsesInterface interface {
 	// UpdateContactWithBodyWithResponse request with any body
 	UpdateContactWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateContactResponse, error)
 
-	UpdateContactWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateContactResponse, error)
+	UpdateContactWithResponse(ctx context.Context, id int64, body UpdateContactJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateContactResponse, error)
 
 	// CreateDebtWithBodyWithResponse request with any body
 	CreateDebtWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateDebtResponse, error)
 
-	CreateDebtWithFormdataBodyWithResponse(ctx context.Context, body CreateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateDebtResponse, error)
+	CreateDebtWithResponse(ctx context.Context, body CreateDebtJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateDebtResponse, error)
 
 	// SettleDebtWithResponse request
 	SettleDebtWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*SettleDebtResponse, error)
@@ -1642,7 +1642,7 @@ type ClientWithResponsesInterface interface {
 	// UpdateDebtWithBodyWithResponse request with any body
 	UpdateDebtWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateDebtResponse, error)
 
-	UpdateDebtWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateDebtResponse, error)
+	UpdateDebtWithResponse(ctx context.Context, id int64, body UpdateDebtJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateDebtResponse, error)
 
 	// GetJournalEntriesWithResponse request
 	GetJournalEntriesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetJournalEntriesResponse, error)
@@ -1650,7 +1650,7 @@ type ClientWithResponsesInterface interface {
 	// CreateJournalEntryWithBodyWithResponse request with any body
 	CreateJournalEntryWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateJournalEntryResponse, error)
 
-	CreateJournalEntryWithFormdataBodyWithResponse(ctx context.Context, body CreateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateJournalEntryResponse, error)
+	CreateJournalEntryWithResponse(ctx context.Context, body CreateJournalEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateJournalEntryResponse, error)
 
 	// DeleteJournalEntryWithResponse request
 	DeleteJournalEntryWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteJournalEntryResponse, error)
@@ -1661,7 +1661,7 @@ type ClientWithResponsesInterface interface {
 	// UpdateJournalEntryWithBodyWithResponse request with any body
 	UpdateJournalEntryWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateJournalEntryResponse, error)
 
-	UpdateJournalEntryWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateJournalEntryResponse, error)
+	UpdateJournalEntryWithResponse(ctx context.Context, id int64, body UpdateJournalEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateJournalEntryResponse, error)
 
 	// GetOpenAPISpecWithResponse request
 	GetOpenAPISpecWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetOpenAPISpecResponse, error)
@@ -2196,8 +2196,8 @@ func (c *ClientWithResponses) CreateActivityWithBodyWithResponse(ctx context.Con
 	return ParseCreateActivityResponse(rsp)
 }
 
-func (c *ClientWithResponses) CreateActivityWithFormdataBodyWithResponse(ctx context.Context, body CreateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateActivityResponse, error) {
-	rsp, err := c.CreateActivityWithFormdataBody(ctx, body, reqEditors...)
+func (c *ClientWithResponses) CreateActivityWithResponse(ctx context.Context, body CreateActivityJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateActivityResponse, error) {
+	rsp, err := c.CreateActivity(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -2231,8 +2231,8 @@ func (c *ClientWithResponses) UpdateActivityWithBodyWithResponse(ctx context.Con
 	return ParseUpdateActivityResponse(rsp)
 }
 
-func (c *ClientWithResponses) UpdateActivityWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateActivityFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateActivityResponse, error) {
-	rsp, err := c.UpdateActivityWithFormdataBody(ctx, id, body, reqEditors...)
+func (c *ClientWithResponses) UpdateActivityWithResponse(ctx context.Context, id int64, body UpdateActivityJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateActivityResponse, error) {
+	rsp, err := c.UpdateActivity(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -2266,8 +2266,8 @@ func (c *ClientWithResponses) CreateContactWithBodyWithResponse(ctx context.Cont
 	return ParseCreateContactResponse(rsp)
 }
 
-func (c *ClientWithResponses) CreateContactWithFormdataBodyWithResponse(ctx context.Context, body CreateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateContactResponse, error) {
-	rsp, err := c.CreateContactWithFormdataBody(ctx, body, reqEditors...)
+func (c *ClientWithResponses) CreateContactWithResponse(ctx context.Context, body CreateContactJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateContactResponse, error) {
+	rsp, err := c.CreateContact(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -2301,8 +2301,8 @@ func (c *ClientWithResponses) UpdateContactWithBodyWithResponse(ctx context.Cont
 	return ParseUpdateContactResponse(rsp)
 }
 
-func (c *ClientWithResponses) UpdateContactWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateContactFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateContactResponse, error) {
-	rsp, err := c.UpdateContactWithFormdataBody(ctx, id, body, reqEditors...)
+func (c *ClientWithResponses) UpdateContactWithResponse(ctx context.Context, id int64, body UpdateContactJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateContactResponse, error) {
+	rsp, err := c.UpdateContact(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -2318,8 +2318,8 @@ func (c *ClientWithResponses) CreateDebtWithBodyWithResponse(ctx context.Context
 	return ParseCreateDebtResponse(rsp)
 }
 
-func (c *ClientWithResponses) CreateDebtWithFormdataBodyWithResponse(ctx context.Context, body CreateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateDebtResponse, error) {
-	rsp, err := c.CreateDebtWithFormdataBody(ctx, body, reqEditors...)
+func (c *ClientWithResponses) CreateDebtWithResponse(ctx context.Context, body CreateDebtJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateDebtResponse, error) {
+	rsp, err := c.CreateDebt(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -2344,8 +2344,8 @@ func (c *ClientWithResponses) UpdateDebtWithBodyWithResponse(ctx context.Context
 	return ParseUpdateDebtResponse(rsp)
 }
 
-func (c *ClientWithResponses) UpdateDebtWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateDebtFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateDebtResponse, error) {
-	rsp, err := c.UpdateDebtWithFormdataBody(ctx, id, body, reqEditors...)
+func (c *ClientWithResponses) UpdateDebtWithResponse(ctx context.Context, id int64, body UpdateDebtJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateDebtResponse, error) {
+	rsp, err := c.UpdateDebt(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -2370,8 +2370,8 @@ func (c *ClientWithResponses) CreateJournalEntryWithBodyWithResponse(ctx context
 	return ParseCreateJournalEntryResponse(rsp)
 }
 
-func (c *ClientWithResponses) CreateJournalEntryWithFormdataBodyWithResponse(ctx context.Context, body CreateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*CreateJournalEntryResponse, error) {
-	rsp, err := c.CreateJournalEntryWithFormdataBody(ctx, body, reqEditors...)
+func (c *ClientWithResponses) CreateJournalEntryWithResponse(ctx context.Context, body CreateJournalEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateJournalEntryResponse, error) {
+	rsp, err := c.CreateJournalEntry(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -2405,8 +2405,8 @@ func (c *ClientWithResponses) UpdateJournalEntryWithBodyWithResponse(ctx context
 	return ParseUpdateJournalEntryResponse(rsp)
 }
 
-func (c *ClientWithResponses) UpdateJournalEntryWithFormdataBodyWithResponse(ctx context.Context, id int64, body UpdateJournalEntryFormdataRequestBody, reqEditors ...RequestEditorFn) (*UpdateJournalEntryResponse, error) {
-	rsp, err := c.UpdateJournalEntryWithFormdataBody(ctx, id, body, reqEditors...)
+func (c *ClientWithResponses) UpdateJournalEntryWithResponse(ctx context.Context, id int64, body UpdateJournalEntryJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateJournalEntryResponse, error) {
+	rsp, err := c.UpdateJournalEntry(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -3842,7 +3842,7 @@ func (response GetIndex500TextResponse) VisitGetIndexResponse(w http.ResponseWri
 }
 
 type CreateActivityRequestObject struct {
-	Body *CreateActivityFormdataRequestBody
+	Body *CreateActivityJSONRequestBody
 }
 
 type CreateActivityResponseObject interface {
@@ -3954,7 +3954,7 @@ func (response GetActivity500TextResponse) VisitGetActivityResponse(w http.Respo
 
 type UpdateActivityRequestObject struct {
 	Id   int64 `json:"id"`
-	Body *UpdateActivityFormdataRequestBody
+	Body *UpdateActivityJSONRequestBody
 }
 
 type UpdateActivityResponseObject interface {
@@ -4069,7 +4069,7 @@ func (response GetContacts500TextResponse) VisitGetContactsResponse(w http.Respo
 }
 
 type CreateContactRequestObject struct {
-	Body *CreateContactFormdataRequestBody
+	Body *CreateContactJSONRequestBody
 }
 
 type CreateContactResponseObject interface {
@@ -4181,7 +4181,7 @@ func (response GetContact500TextResponse) VisitGetContactResponse(w http.Respons
 
 type UpdateContactRequestObject struct {
 	Id   int64 `json:"id"`
-	Body *UpdateContactFormdataRequestBody
+	Body *UpdateContactJSONRequestBody
 }
 
 type UpdateContactResponseObject interface {
@@ -4218,7 +4218,7 @@ func (response UpdateContact500TextResponse) VisitUpdateContactResponse(w http.R
 }
 
 type CreateDebtRequestObject struct {
-	Body *CreateDebtFormdataRequestBody
+	Body *CreateDebtJSONRequestBody
 }
 
 type CreateDebtResponseObject interface {
@@ -4293,7 +4293,7 @@ func (response SettleDebt500TextResponse) VisitSettleDebtResponse(w http.Respons
 
 type UpdateDebtRequestObject struct {
 	Id   int64 `json:"id"`
-	Body *UpdateDebtFormdataRequestBody
+	Body *UpdateDebtJSONRequestBody
 }
 
 type UpdateDebtResponseObject interface {
@@ -4366,7 +4366,7 @@ func (response GetJournalEntries500TextResponse) VisitGetJournalEntriesResponse(
 }
 
 type CreateJournalEntryRequestObject struct {
-	Body *CreateJournalEntryFormdataRequestBody
+	Body *CreateJournalEntryJSONRequestBody
 }
 
 type CreateJournalEntryResponseObject interface {
@@ -4478,7 +4478,7 @@ func (response GetJournalEntry500TextResponse) VisitGetJournalEntryResponse(w ht
 
 type UpdateJournalEntryRequestObject struct {
 	Id   int64 `json:"id"`
-	Body *UpdateJournalEntryFormdataRequestBody
+	Body *UpdateJournalEntryJSONRequestBody
 }
 
 type UpdateJournalEntryResponseObject interface {
@@ -4803,13 +4803,9 @@ func (sh *strictHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
 func (sh *strictHandler) CreateActivity(w http.ResponseWriter, r *http.Request) {
 	var request CreateActivityRequestObject
 
-	if err := r.ParseForm(); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
-		return
-	}
-	var body CreateActivityFormdataRequestBody
-	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+	var body CreateActivityJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
 	}
 	request.Body = &body
@@ -4892,13 +4888,9 @@ func (sh *strictHandler) UpdateActivity(w http.ResponseWriter, r *http.Request, 
 
 	request.Id = id
 
-	if err := r.ParseForm(); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
-		return
-	}
-	var body UpdateActivityFormdataRequestBody
-	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+	var body UpdateActivityJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
 	}
 	request.Body = &body
@@ -4975,13 +4967,9 @@ func (sh *strictHandler) GetContacts(w http.ResponseWriter, r *http.Request) {
 func (sh *strictHandler) CreateContact(w http.ResponseWriter, r *http.Request) {
 	var request CreateContactRequestObject
 
-	if err := r.ParseForm(); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
-		return
-	}
-	var body CreateContactFormdataRequestBody
-	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+	var body CreateContactJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
 	}
 	request.Body = &body
@@ -5064,13 +5052,9 @@ func (sh *strictHandler) UpdateContact(w http.ResponseWriter, r *http.Request, i
 
 	request.Id = id
 
-	if err := r.ParseForm(); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
-		return
-	}
-	var body UpdateContactFormdataRequestBody
-	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+	var body UpdateContactJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
 	}
 	request.Body = &body
@@ -5099,13 +5083,9 @@ func (sh *strictHandler) UpdateContact(w http.ResponseWriter, r *http.Request, i
 func (sh *strictHandler) CreateDebt(w http.ResponseWriter, r *http.Request) {
 	var request CreateDebtRequestObject
 
-	if err := r.ParseForm(); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
-		return
-	}
-	var body CreateDebtFormdataRequestBody
-	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+	var body CreateDebtJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
 	}
 	request.Body = &body
@@ -5162,13 +5142,9 @@ func (sh *strictHandler) UpdateDebt(w http.ResponseWriter, r *http.Request, id i
 
 	request.Id = id
 
-	if err := r.ParseForm(); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
-		return
-	}
-	var body UpdateDebtFormdataRequestBody
-	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+	var body UpdateDebtJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
 	}
 	request.Body = &body
@@ -5221,13 +5197,9 @@ func (sh *strictHandler) GetJournalEntries(w http.ResponseWriter, r *http.Reques
 func (sh *strictHandler) CreateJournalEntry(w http.ResponseWriter, r *http.Request) {
 	var request CreateJournalEntryRequestObject
 
-	if err := r.ParseForm(); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
-		return
-	}
-	var body CreateJournalEntryFormdataRequestBody
-	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+	var body CreateJournalEntryJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
 	}
 	request.Body = &body
@@ -5310,13 +5282,9 @@ func (sh *strictHandler) UpdateJournalEntry(w http.ResponseWriter, r *http.Reque
 
 	request.Id = id
 
-	if err := r.ParseForm(); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode formdata: %w", err))
-		return
-	}
-	var body UpdateJournalEntryFormdataRequestBody
-	if err := runtime.BindForm(&body, r.Form, nil, nil); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't bind formdata: %w", err))
+	var body UpdateJournalEntryJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
 	}
 	request.Body = &body
@@ -5447,43 +5415,43 @@ func (sh *strictHandler) ImportUserData(w http.ResponseWriter, r *http.Request) 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"3V0MdHm//F8AAAD//xl8pa6kRQAA",
+	"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",
+	"eBxFAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

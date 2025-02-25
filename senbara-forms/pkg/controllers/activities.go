@@ -237,7 +237,7 @@ func (c *Controller) HandleDeleteActivity(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	log.Debug("Deleting activity",
+	log.Debug("Deleting activity from DB",
 		"id", id,
 		"contactID", contactID,
 	)

@@ -62,7 +62,7 @@ func (c *Controller) DeleteActivity(ctx context.Context, request api.DeleteActiv
 
 	log.Debug("Handling delete activity")
 
-	log.Debug("Deleting activity",
+	log.Debug("Deleting activity from DB",
 		"id", request.Id,
 	)
 
