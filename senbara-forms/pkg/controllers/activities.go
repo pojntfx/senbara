@@ -348,7 +348,7 @@ func (c *Controller) HandleUpdateActivity(w http.ResponseWriter, r *http.Request
 
 	description := r.FormValue("description")
 
-	log.Debug("Updating activity",
+	log.Debug("Updating activity in DB",
 		"id", id,
 		"name", name,
 		"date", date,

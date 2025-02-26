@@ -74,7 +74,7 @@ func (c *Controller) DeleteActivity(ctx context.Context, request api.DeleteActiv
 		namespace,
 	)
 	if err != nil {
-		log.Warn("Could not delete activity in DB", "err", errors.Join(errCouldNotDeleteFromDB, err))
+		log.Warn("Could not delete activity from DB", "err", errors.Join(errCouldNotDeleteFromDB, err))
 
 		return api.DeleteActivity500TextResponse(errCouldNotDeleteFromDB.Error()), nil
 	}
@@ -88,6 +88,10 @@ func (c *Controller) GetActivity(ctx context.Context, request api.GetActivityReq
 	log := c.log.With("namespace", namespace)
 
 	log.Debug("Handling get activity")
+
+	log.Debug("Getting activity from DB",
+		"id", request.Id,
+	)
 
 	activityAndContact, err := c.persister.GetActivityAndContact(ctx, int32(request.Id), namespace)
 	if err != nil {
@@ -123,6 +127,13 @@ func (c *Controller) UpdateActivity(ctx context.Context, request api.UpdateActiv
 	if v := request.Body.Description; v != nil {
 		description = *v
 	}
+
+	log.Debug("Updating activity in DB",
+		"id", request.Id,
+		"name", request.Body.Name,
+		"date", request.Body.Date.Time,
+		"description", description,
+	)
 
 	updatedActivity, err := c.persister.UpdateActivity(
 		ctx,
