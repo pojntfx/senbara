@@ -277,7 +277,9 @@ func (c *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Debug("Getting contact from DB", "id", id)
+	log.Debug("Getting contact from DB",
+		"id", id,
+	)
 
 	contact, err := c.persister.GetContact(r.Context(), int32(id), userData.Email)
 	if err != nil {
@@ -288,7 +290,9 @@ func (c *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Debug("Getting debts for contact from DB", "id", id)
+	log.Debug("Getting debts for contact from DB",
+		"id", id,
+	)
 
 	debts, err := c.persister.GetDebts(r.Context(), int32(id), userData.Email)
 	if err != nil {
@@ -299,7 +303,9 @@ func (c *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Debug("Getting activities for contact from DB", "id", id)
+	log.Debug("Getting activities for contact from DB",
+		"id", id,
+	)
 
 	activities, err := c.persister.GetActivities(r.Context(), int32(id), userData.Email)
 	if err != nil {

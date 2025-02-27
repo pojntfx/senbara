@@ -143,7 +143,9 @@ func (c *Controller) GetContact(ctx context.Context, request api.GetContactReque
 
 	log.Debug("Handling get contact")
 
-	log.Debug("Getting contact from DB", "id", request.Id)
+	log.Debug("Getting contact from DB",
+		"id", request.Id,
+	)
 
 	rawContact, err := c.persister.GetContact(ctx, int32(request.Id), namespace)
 	if err != nil {
@@ -152,7 +154,10 @@ func (c *Controller) GetContact(ctx context.Context, request api.GetContactReque
 		return api.GetContact500TextResponse(errCouldNotFetchFromDB.Error()), nil
 	}
 
-	log.Debug("Getting debts for contact from DB", "id", request.Id)
+	log.Debug("Getting debts for contact from DB",
+		"id",
+		request.Id,
+	)
 
 	rawDebts, err := c.persister.GetDebts(ctx, int32(request.Id), namespace)
 	if err != nil {
@@ -161,7 +166,10 @@ func (c *Controller) GetContact(ctx context.Context, request api.GetContactReque
 		return api.GetContact500TextResponse(errCouldNotFetchFromDB.Error()), nil
 	}
 
-	log.Debug("Getting activities for contact from DB", "id", request.Id)
+	log.Debug("Getting activities for contact from DB",
+		"id",
+		request.Id,
+	)
 
 	rawActivities, err := c.persister.GetActivities(ctx, int32(request.Id), namespace)
 	if err != nil {

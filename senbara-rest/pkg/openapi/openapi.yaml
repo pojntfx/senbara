@@ -942,8 +942,6 @@ components:
         rating:
           type: integer
           format: int32
-        namespace:
-          type: string
 
     Contact:
       type: object
