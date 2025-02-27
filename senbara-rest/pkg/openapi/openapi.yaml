@@ -624,8 +624,7 @@ paths:
                   type: integer
                   format: int64
                 you_owe:
-                  type: integer
-                  enum: [0, 1]
+                  type: boolean
                 amount:
                   type: number
                   format: float
@@ -715,8 +714,7 @@ paths:
               type: object
               properties:
                 you_owe:
-                  type: integer
-                  enum: [0, 1]
+                  type: boolean
                 amount:
                   type: number
                   format: float
