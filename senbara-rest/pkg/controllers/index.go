@@ -12,13 +12,16 @@ import (
 )
 
 var (
-	errCouldNotFetchFromDB    = errors.New("could not fetch from DB")
-	errCouldNotLogin          = errors.New("could not login")
-	errCouldNotEncodeResponse = errors.New("could not encode response")
-	errCouldNotWriteResponse  = errors.New("could not write response")
-	errCouldNotInsertIntoDB   = errors.New("could not insert into DB")
-	errCouldNotDeleteFromDB   = errors.New("could not delete from DB")
-	errCouldNotUpdateInDB     = errors.New("could not update in DB")
+	errCouldNotFetchFromDB      = errors.New("could not fetch from DB")
+	errCouldNotLogin            = errors.New("could not login")
+	errCouldNotEncodeResponse   = errors.New("could not encode response")
+	errCouldNotReadRequest      = errors.New("could not read request")
+	errCouldNotWriteResponse    = errors.New("could not write response")
+	errCouldNotInsertIntoDB     = errors.New("could not insert into DB")
+	errCouldNotDeleteFromDB     = errors.New("could not delete from DB")
+	errCouldNotUpdateInDB       = errors.New("could not update in DB")
+	errCouldNotStartTransaction = errors.New("could not start transaction")
+	errUnknownEntityName        = errors.New("unknown entity name")
 )
 
 type Controller struct {

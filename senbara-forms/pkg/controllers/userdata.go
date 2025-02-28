@@ -30,12 +30,14 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 
 	log := c.log.With("namespace", userData.Email)
 
-	log.Debug("Handling user data export")
+	log.Debug("Handling export user data")
 
 	w.Header().Set("Content-Type", "application/jsonl")
 	w.Header().Set("Content-Disposition", `attachment; filename="senbara-forms-userdata.jsonl"`)
 
-	encoder := json.NewEncoder(w)
+	log.Debug("Getting user data from DB")
+
+	enc := json.NewEncoder(w)
 
 	if err := c.persister.GetUserData(
 		r.Context(),
@@ -52,7 +54,7 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 
 			journalEntry.ExportedEntityIdentifier.EntityName = EntityNameExportedJournalEntry
 
-			if err := encoder.Encode(journalEntry); err != nil {
+			if err := enc.Encode(journalEntry); err != nil {
 				return errors.Join(errCouldNotWriteResponse, err)
 			}
 
@@ -68,7 +70,7 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 
 			contact.ExportedEntityIdentifier.EntityName = EntityNameExportedContact
 
-			if err := encoder.Encode(contact); err != nil {
+			if err := enc.Encode(contact); err != nil {
 				return errors.Join(errCouldNotWriteResponse, err)
 			}
 
@@ -84,7 +86,7 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 
 			debt.ExportedEntityIdentifier.EntityName = EntityNameExportedDebt
 
-			if err := encoder.Encode(debt); err != nil {
+			if err := enc.Encode(debt); err != nil {
 				return errors.Join(errCouldNotWriteResponse, err)
 			}
 
@@ -100,14 +102,14 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 
 			activity.ExportedEntityIdentifier.EntityName = EntityNameExportedActivity
 
-			if err := encoder.Encode(activity); err != nil {
+			if err := enc.Encode(activity); err != nil {
 				return errors.Join(errCouldNotWriteResponse, err)
 			}
 
 			return nil
 		},
 	); err != nil {
-		log.Warn("Could not export user data from DB", "err", errors.Join(errCouldNotFetchFromDB, err))
+		log.Warn("Could not export user data from DB and encode it", "err", errors.Join(errCouldNotFetchFromDB, errCouldNotEncodeResponse, err))
 
 		http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -129,7 +131,7 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 
 	log := c.log.With("namespace", userData.Email)
 
-	log.Debug("Handling user data import")
+	log.Debug("Handling import user data")
 
 	file, _, err := r.FormFile("userData")
 	if err != nil {
@@ -141,7 +143,9 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 	}
 	defer file.Close()
 
-	decoder := json.NewDecoder(file)
+	log.Debug("Importing user data to DB")
+
+	dec := json.NewDecoder(file)
 
 	createJournalEntry,
 		createContact,
@@ -163,7 +167,7 @@ func (c *Controller) HandleCreateUserData(w http.ResponseWriter, r *http.Request
 
 	for {
 		var b json.RawMessage
-		if err := decoder.Decode(&b); err != nil {
+		if err := dec.Decode(&b); err != nil {
 			if errors.Is(err, io.EOF) {
 				break
 			}
@@ -324,7 +328,9 @@ func (c *Controller) HandleDeleteUserData(w http.ResponseWriter, r *http.Request
 
 	log := c.log.With("namespace", userData.Email)
 
-	log.Debug("Handling user data deletion")
+	log.Debug("Handling delete user data")
+
+	log.Debug("Deleting user data from DB")
 
 	if err := c.persister.DeleteUserData(r.Context(), userData.Email); err != nil {
 		log.Warn("Could not delete user data from DB", "err", errors.Join(errCouldNotDeleteFromDB, err))

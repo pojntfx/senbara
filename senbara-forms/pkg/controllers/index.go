@@ -29,6 +29,7 @@ var (
 	errEmailNotVerified         = errors.New("email not verified")
 	errCouldNotLocalize         = errors.New("could not localize")
 	errCouldNotWriteResponse    = errors.New("could not write response")
+	errCouldNotEncodeResponse   = errors.New("could not encode response")
 	errCouldNotReadRequest      = errors.New("could not read request")
 	errUnknownEntityName        = errors.New("unknown entity name")
 	errCouldNotStartTransaction = errors.New("could not start transaction")
