@@ -106,6 +106,31 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if c == nil {
+		var (
+			contactName  = os.Getenv("CONTACT_NAME")
+			contactURL   = os.Getenv("CONTACT_URL")
+			contactEmail = os.Getenv("CONTACT_EMAIL")
+
+			serverURL         = os.Getenv("SERVER_URL")
+			serverDescription = os.Getenv("SERVER_DESCRIPTION")
+		)
+		if contactName == "" {
+			contactName = "Felicitas Pojtinger"
+		}
+		if contactURL == "" {
+			contactURL = "https://matrix.to/#/@pojntfx:matrix.org"
+		}
+		if contactEmail == "" {
+			contactEmail = "felicitas@pojtinger.com"
+		}
+
+		if serverURL == "" {
+			serverURL = "http://localhost:1337/"
+		}
+		if serverDescription == "" {
+			serverDescription = "Local development server"
+		}
+
 		c = controllers.NewController(
 			slog.New(log.Handler().WithGroup("controller")),
 
@@ -120,6 +145,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 			os.Getenv("PRIVACY_URL"),
 			os.Getenv("IMPRINT_URL"),
+
+			contactName,
+			contactURL,
+			contactEmail,
+
+			serverURL,
+			serverDescription,
 
 			Code,
 		)

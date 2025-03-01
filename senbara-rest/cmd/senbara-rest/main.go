@@ -29,17 +29,22 @@ var (
 )
 
 const (
-	verboseKey         = "verbose"
-	configKey          = "config"
-	laddrKey           = "laddr"
-	pgaddrKey          = "pgaddr"
-	oidcIssuerKey      = "oidc-issuer"
-	oidcClientIDKey    = "oidc-client-id"
-	oidcRedirectURLKey = "oidc-redirect-url"
-	oidcDiscoveryURL   = "oidc-discovery-url"
-	corsOriginsKey     = "cors-origins"
-	privacyURLKey      = "privacy-url"
-	imprintURLKey      = "imprint-url"
+	verboseKey           = "verbose"
+	configKey            = "config"
+	laddrKey             = "laddr"
+	pgaddrKey            = "pgaddr"
+	oidcIssuerKey        = "oidc-issuer"
+	oidcClientIDKey      = "oidc-client-id"
+	oidcRedirectURLKey   = "oidc-redirect-url"
+	oidcDiscoveryURL     = "oidc-discovery-url"
+	corsOriginsKey       = "cors-origins"
+	privacyURLKey        = "privacy-url"
+	imprintURLKey        = "imprint-url"
+	contactNameKey       = "contact-name"
+	contactURLKey        = "contact-url"
+	contactEmailKey      = "contact-email"
+	serverURLKey         = "server-url"
+	serverDescriptionKey = "server-description"
 )
 
 func main() {
@@ -140,6 +145,13 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				viper.GetString(privacyURLKey),
 				viper.GetString(imprintURLKey),
 
+				viper.GetString(contactNameKey),
+				viper.GetString(contactURLKey),
+				viper.GetString(contactEmailKey),
+
+				viper.GetString(serverURLKey),
+				viper.GetString(serverDescriptionKey),
+
 				senbaraRest.Code,
 			)
 
@@ -175,6 +187,11 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 	cmd.PersistentFlags().StringArray(corsOriginsKey, []string{}, "CORS origins to allow")
 	cmd.PersistentFlags().String(privacyURLKey, "", "Privacy policy URL")
 	cmd.PersistentFlags().String(imprintURLKey, "", "Imprint URL")
+	cmd.PersistentFlags().String(contactNameKey, "Felicitas Pojtinger", "Contact name")
+	cmd.PersistentFlags().String(contactURLKey, "https://matrix.to/#/@pojntfx:matrix.org", "Contact URL")
+	cmd.PersistentFlags().String(contactEmailKey, "felicitas@pojtinger.com", "Contact email")
+	cmd.PersistentFlags().String(serverURLKey, "http://localhost:1337/", "Server URL")
+	cmd.PersistentFlags().String(serverDescriptionKey, "Local development server", "Server description")
 
 	if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
 		panic(err)

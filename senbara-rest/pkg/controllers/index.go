@@ -37,6 +37,13 @@ type Controller struct {
 	privacyURL string
 	imprintURL string
 
+	contactName  string
+	contactURL   string
+	contactEmail string
+
+	serverURL         string
+	serverDescription string
+
 	code []byte
 
 	config   *oauth2.Config
@@ -56,7 +63,14 @@ func NewController(
 	oidcDiscoveryURL,
 
 	privacyURL,
-	imprintURL string,
+	imprintURL,
+
+	contactName,
+	contactURL,
+	contactEmail,
+
+	serverURL,
+	serverDescription string,
 
 	code []byte,
 ) *Controller {
@@ -74,6 +88,13 @@ func NewController(
 
 		privacyURL: privacyURL,
 		imprintURL: imprintURL,
+
+		contactName:  contactName,
+		contactURL:   contactURL,
+		contactEmail: contactEmail,
+
+		serverURL:         serverURL,
+		serverDescription: serverDescription,
 
 		code: code,
 	}
