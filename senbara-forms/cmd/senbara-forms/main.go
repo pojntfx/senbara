@@ -12,7 +12,7 @@ import (
 
 	"github.com/adrg/xdg"
 	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
-	senbaraForms "github.com/pojntfx/senbara/senbara-forms/api/senbara-forms"
+	v1 "github.com/pojntfx/senbara/senbara-forms/api/rest/v1"
 	"github.com/pojntfx/senbara/senbara-forms/pkg/controllers"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -124,7 +124,7 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				viper.GetString(privacyURLKey),
 				viper.GetString(imprintURLKey),
 
-				senbaraForms.Code,
+				v1.Code,
 			)
 
 			if err := c.Init(ctx); err != nil {
@@ -134,7 +134,7 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 			log.Info("Listening", "laddr", viper.GetString(laddrKey))
 
 			panic(http.ListenAndServe(viper.GetString(laddrKey), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				senbaraForms.SenbaraFormsHandler(w, r, c)
+				v1.SenbaraFormsHandler(w, r, c)
 			})))
 		},
 	}

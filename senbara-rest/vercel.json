@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/((?!api/senbara-rest).*)",
-      "destination": "/api/senbara-rest?path=/$1"
+      "source": "/((?!api/rest/v1).*)",
+      "destination": "/api/rest/v1?path=/$1"
     }
   ]
 }

@@ -1,6 +1,6 @@
 package models
 
-import "github.com/pojntfx/senbara/senbara-common/pkg/tables"
+import "github.com/pojntfx/senbara/senbara-common/internal/tables"
 
 type (
 	CreateContactParams         = tables.CreateContactParams

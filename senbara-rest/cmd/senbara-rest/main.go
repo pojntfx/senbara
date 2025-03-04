@@ -12,7 +12,7 @@ import (
 
 	"github.com/adrg/xdg"
 	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
-	senbaraRest "github.com/pojntfx/senbara/senbara-rest/api/senbara-rest"
+	v1 "github.com/pojntfx/senbara/senbara-rest/api/openapi/v1"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/controllers"
 	"github.com/spf13/cobra"
@@ -152,7 +152,7 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				viper.GetString(serverURLKey),
 				viper.GetString(serverDescriptionKey),
 
-				senbaraRest.Code,
+				v1.Code,
 			)
 
 			if err := c.Init(ctx); err != nil {
@@ -162,7 +162,7 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 			log.Info("Listening", "laddr", viper.GetString(laddrKey))
 
 			panic(http.ListenAndServe(viper.GetString(laddrKey), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				senbaraRest.SenbaraRESTHandler(
+				v1.SenbaraRESTHandler(
 					w,
 					r,
 

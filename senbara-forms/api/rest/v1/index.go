@@ -1,6 +1,6 @@
-package senbaraForms
+package v1
 
-//go:generate tar czf code.tar.gz --exclude .git --exclude */api/*/code.tar.gz -C ../../.. .
+//go:generate tar czf code.tar.gz --exclude .git --exclude */api/openapi/v1/code.tar.gz -C ../../../ .
 
 import (
 	_ "embed"
@@ -12,7 +12,7 @@ import (
 
 	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
 	"github.com/pojntfx/senbara/senbara-forms/pkg/controllers"
-	"github.com/pojntfx/senbara/senbara-forms/pkg/static"
+	"github.com/pojntfx/senbara/senbara-forms/web/static"
 )
 
 //go:embed code.tar.gz

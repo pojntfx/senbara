@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/leonelquinteros/gotext"
-	"github.com/pojntfx/senbara/senbara-forms/pkg/locales"
+	"github.com/pojntfx/senbara/senbara-forms/config/locales"
 	"golang.org/x/text/language"
 )
 

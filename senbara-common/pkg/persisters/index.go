@@ -7,8 +7,8 @@ import (
 	"database/sql"
 	"log/slog"
 
-	"github.com/pojntfx/senbara/senbara-common/pkg/migrations"
-	"github.com/pojntfx/senbara/senbara-common/pkg/tables"
+	"github.com/pojntfx/senbara/senbara-common/db/migrations"
+	"github.com/pojntfx/senbara/senbara-common/internal/tables"
 	"github.com/pressly/goose/v3"
 )
 
