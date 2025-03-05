@@ -2,6 +2,7 @@ go 1.24.0
 
 use (
 	.
+	./senbara-cli
 	./senbara-common
 	./senbara-forms
 	./senbara-rest
