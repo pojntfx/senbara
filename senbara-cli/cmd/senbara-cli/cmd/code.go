@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var codeCmd = &cobra.Command{
+var codeCommand = &cobra.Command{
 	Use:     "code",
 	Aliases: []string{"cod", "c"},
 	Short:   "Code operations",
@@ -14,5 +14,5 @@ var codeCmd = &cobra.Command{
 func init() {
 	viper.AutomaticEnv()
 
-	rootCmd.AddCommand(codeCmd)
+	indexCommand.AddCommand(codeCommand)
 }

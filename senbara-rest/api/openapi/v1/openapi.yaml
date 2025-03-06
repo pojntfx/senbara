@@ -24,20 +24,20 @@ externalDocs:
 tags:
   - name: meta
     description: Meta operations
+  - name: code
+    description: Source code operations
+  - name: userdata
+    description: User data operations
   - name: index
     description: General operations
   - name: journal
-    description: Journal entries management
+    description: Journal entries operations
   - name: contacts
-    description: Contact management
+    description: Contact operations
   - name: debts
-    description: Debt tracking
+    description: Debt operations
   - name: activities
-    description: Activity management
-  - name: userdata
-    description: User data import/export
-  - name: code
-    description: Source code download
+    description: Activity operations
 paths:
   /openapi.yaml:
     get:

@@ -11,10 +11,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var openapiGetCommand = &cobra.Command{
+var userDataGetCommand = &cobra.Command{
 	Use:     "get",
 	Aliases: []string{"g"},
-	Short:   "Get the OpenAPI spec",
+	Short:   "Export all user data",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
 			return err
@@ -23,25 +23,25 @@ var openapiGetCommand = &cobra.Command{
 		ctx, cancel := context.WithCancel(cmd.Context())
 		defer cancel()
 
-		log.Debug("Getting OpenAPI spec")
+		log.Debug("Getting user data")
 
-		c, err := createClient(false)
+		c, err := createClient(true)
 		if err != nil {
 			return err
 		}
 
-		res, err := c.GetOpenAPISpec(ctx)
+		res, err := c.ExportUserData(ctx)
 		if err != nil {
 			return err
 		}
 
-		log.Debug("Received OpenAPI spec", "status", res.StatusCode)
+		log.Debug("Received user data", "status", res.StatusCode)
 
 		if res.StatusCode != http.StatusOK {
 			return errors.New(res.Status)
 		}
 
-		log.Debug("Writing OpenAPI spec to stdout")
+		log.Debug("Writing user data to stdout")
 
 		if _, err := io.Copy(os.Stdout, res.Body); err != nil {
 			return err
@@ -52,7 +52,9 @@ var openapiGetCommand = &cobra.Command{
 }
 
 func init() {
+	addAuthFlags(userDataGetCommand.PersistentFlags())
+
 	viper.AutomaticEnv()
 
-	openapiCommand.AddCommand(openapiGetCommand)
+	userDataCommand.AddCommand(userDataGetCommand)
 }

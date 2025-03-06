@@ -9,8 +9,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 )
 
 var codeGetCommand = &cobra.Command{
@@ -27,7 +25,7 @@ var codeGetCommand = &cobra.Command{
 
 		log.Debug("Getting code")
 
-		c, err := api.NewClientWithResponses(viper.GetString(raddrKey))
+		c, err := createClient(false)
 		if err != nil {
 			return err
 		}
@@ -56,5 +54,5 @@ var codeGetCommand = &cobra.Command{
 func init() {
 	viper.AutomaticEnv()
 
-	codeCmd.AddCommand(codeGetCommand)
+	codeCommand.AddCommand(codeGetCommand)
 }

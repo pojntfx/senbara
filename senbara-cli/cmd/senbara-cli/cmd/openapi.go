@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var openapiCmd = &cobra.Command{
+var openapiCommand = &cobra.Command{
 	Use:     "openapi",
 	Aliases: []string{"oai", "o"},
 	Short:   "OpenAPI operations",
@@ -14,5 +14,5 @@ var openapiCmd = &cobra.Command{
 func init() {
 	viper.AutomaticEnv()
 
-	rootCmd.AddCommand(openapiCmd)
+	indexCommand.AddCommand(openapiCommand)
 }
