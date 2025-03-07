@@ -23,12 +23,12 @@ var codeGetCommand = &cobra.Command{
 		ctx, cancel := context.WithCancel(cmd.Context())
 		defer cancel()
 
-		log.Debug("Getting code")
-
 		c, err := createClient(false)
 		if err != nil {
 			return err
 		}
+
+		log.Debug("Getting code")
 
 		res, err := c.GetSourceCode(ctx)
 		if err != nil {

@@ -23,12 +23,12 @@ var openapiGetCommand = &cobra.Command{
 		ctx, cancel := context.WithCancel(cmd.Context())
 		defer cancel()
 
-		log.Debug("Getting OpenAPI spec")
-
 		c, err := createClient(false)
 		if err != nil {
 			return err
 		}
+
+		log.Debug("Getting OpenAPI spec")
 
 		res, err := c.GetOpenAPISpec(ctx)
 		if err != nil {

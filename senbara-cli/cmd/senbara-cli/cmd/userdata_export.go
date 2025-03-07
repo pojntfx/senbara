@@ -11,9 +11,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-var userDataGetCommand = &cobra.Command{
-	Use:     "get",
-	Aliases: []string{"g"},
+var userDataExportCommand = &cobra.Command{
+	Use:     "export",
+	Aliases: []string{"exp", "e"},
 	Short:   "Export all user data",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
@@ -23,19 +23,19 @@ var userDataGetCommand = &cobra.Command{
 		ctx, cancel := context.WithCancel(cmd.Context())
 		defer cancel()
 
-		log.Debug("Getting user data")
-
 		c, err := createClient(true)
 		if err != nil {
 			return err
 		}
+
+		log.Debug("Exporting user data")
 
 		res, err := c.ExportUserData(ctx)
 		if err != nil {
 			return err
 		}
 
-		log.Debug("Received user data", "status", res.StatusCode)
+		log.Debug("Exported user data", "status", res.StatusCode)
 
 		if res.StatusCode != http.StatusOK {
 			return errors.New(res.Status)
@@ -52,9 +52,9 @@ var userDataGetCommand = &cobra.Command{
 }
 
 func init() {
-	addAuthFlags(userDataGetCommand.PersistentFlags())
+	addAuthFlags(userDataExportCommand.PersistentFlags())
 
 	viper.AutomaticEnv()
 
-	userDataCommand.AddCommand(userDataGetCommand)
+	userDataCommand.AddCommand(userDataExportCommand)
 }
