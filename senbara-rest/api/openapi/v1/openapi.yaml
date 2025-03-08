@@ -31,7 +31,7 @@ tags:
   - name: index
     description: General operations
   - name: journal
-    description: Journal entries operations
+    description: Journal entry operations
   - name: contacts
     description: Contact operations
   - name: debts
@@ -176,7 +176,7 @@ paths:
     get:
       tags:
         - index
-      summary: Gets counts of contacts and journal entries for the authenticated user
+      summary: Get counts of contacts and journal entries for the authenticated user
       operationId: getIndex
       security:
         - oidc: []
