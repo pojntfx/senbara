@@ -13,14 +13,10 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const (
-	idKey = "id"
-)
-
-var journalGetCommand = &cobra.Command{
-	Use:     "get",
-	Aliases: []string{"g"},
-	Short:   "Get a specific journal entry",
+var journalDeleteCommand = &cobra.Command{
+	Use:     "delete <id>",
+	Aliases: []string{"del", "rm", "d"},
+	Short:   "Delete a journal entry",
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
@@ -40,14 +36,14 @@ var journalGetCommand = &cobra.Command{
 			return err
 		}
 
-		log.Debug("Geting journal entry", "id", id)
+		log.Debug("Deleting journal entry", "id", id)
 
-		res, err := c.GetJournalEntryWithResponse(ctx, int64(id))
+		res, err := c.DeleteJournalEntryWithResponse(ctx, int64(id))
 		if err != nil {
 			return err
 		}
 
-		log.Debug("Got journal entry", "status", res.StatusCode())
+		log.Debug("Deleted journal entry", "status", res.StatusCode())
 
 		if res.StatusCode() != http.StatusOK {
 			return errors.New(res.Status())
@@ -64,11 +60,11 @@ var journalGetCommand = &cobra.Command{
 }
 
 func init() {
-	addAuthFlags(journalGetCommand.PersistentFlags())
+	addAuthFlags(journalDeleteCommand.PersistentFlags())
 
-	journalGetCommand.PersistentFlags().Int64(idKey, 0, "ID of the journal entry")
+	journalDeleteCommand.PersistentFlags().Int64(idKey, 0, "ID of the journal entry")
 
 	viper.AutomaticEnv()
 
-	journalCommand.AddCommand(journalGetCommand)
+	journalCommand.AddCommand(journalDeleteCommand)
 }
