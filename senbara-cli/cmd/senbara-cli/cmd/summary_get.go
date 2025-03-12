@@ -29,7 +29,7 @@ var summaryGetCommand = &cobra.Command{
 			return err
 		}
 
-		log.Debug("Geting summary")
+		log.Debug("Getting summary")
 
 		res, err := c.GetIndexWithResponse(ctx)
 		if err != nil {

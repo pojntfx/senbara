@@ -7,7 +7,7 @@ import (
 
 var journalCommand = &cobra.Command{
 	Use:     "journal",
-	Aliases: []string{"jour", "j"},
+	Aliases: []string{"jou", "j"},
 	Short:   "Journal entry operations",
 }
 
