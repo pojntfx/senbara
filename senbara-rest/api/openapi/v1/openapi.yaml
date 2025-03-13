@@ -799,7 +799,7 @@ paths:
     get:
       tags:
         - activities
-      summary: Get activity
+      summary: Get a specific activity
       operationId: getActivity
       security:
         - oidc: []
