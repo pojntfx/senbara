@@ -5,5 +5,6 @@ use (
 	./senbara-cli
 	./senbara-common
 	./senbara-forms
+	./senbara-gnome
 	./senbara-rest
 )
