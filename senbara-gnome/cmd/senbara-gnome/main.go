@@ -7,7 +7,7 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gio/v2"
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
-	"github.com/pojntfx/senbara/senbara-gnome/pkg/resources"
+	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
 )
 
 func main() {
