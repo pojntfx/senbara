@@ -1,0 +1,28 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.Window main-window {
+    default-width: 960;
+    default-height: 540;
+    title: _("Senbara Forms");
+    visible: true;
+
+    Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+            show-title: false;
+
+            [end]
+            MenuButton {
+                icon-name: "open-menu-symbolic";
+                primary: true;
+            }
+        }
+
+        Adw.StatusPage {
+            title: _("Senbara Forms");
+            description: _("GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
+            icon-name: "open-book-symbolic";
+        }
+    }
+}

@@ -5,40 +5,25 @@ import (
 
 	"github.com/diamondburned/gotk4-adwaita/pkg/adw"
 	"github.com/diamondburned/gotk4/pkg/gio/v2"
+	"github.com/diamondburned/gotk4/pkg/glib/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
+	"github.com/pojntfx/senbara/senbara-gnome/pkg/resources"
 )
 
 func main() {
-	a := adw.NewApplication("com.pojtinger.senbara.gnome", gio.ApplicationNonUnique)
+	r, err := gio.NewResourceFromData(glib.NewBytesWithGo(resources.ResourceContents))
+	if err != nil {
+		panic(err)
+	}
+	gio.ResourcesRegister(r)
 
+	a := adw.NewApplication(resources.AppID, gio.ApplicationNonUnique)
 	a.ConnectActivate(func() {
-		w := adw.NewApplicationWindow(&a.Application)
-		w.SetDefaultSize(960, 540)
-		w.SetTitle("Senbara Forms")
+		b := gtk.NewBuilderFromResource(resources.ResourceWindowPath)
 
-		v := adw.NewToolbarView()
+		w := b.GetObject("main-window").Cast().(*adw.Window)
 
-		h := adw.NewHeaderBar()
-		h.SetShowTitle(false)
-
-		b := gtk.NewMenuButton()
-		b.SetIconName("open-menu-symbolic")
-		b.SetPrimary(true)
-
-		h.PackEnd(b)
-
-		v.AddTopBar(h)
-
-		p := adw.NewStatusPage()
-		p.SetTitle("Senbara Forms")
-		p.SetDescription("Simple personal ERP web application built with HTML forms, OpenID Connect authentication and PostgreSQL data storage. Designed as a reference for modern JS-free Web 2.0 development with Go.")
-		p.SetIconName("open-book-symbolic")
-
-		v.SetContent(p)
-
-		w.SetContent(v)
-
-		w.SetVisible(true)
+		a.AddWindow(&w.Window)
 	})
 
 	if code := a.Run(os.Args); code > 0 {
