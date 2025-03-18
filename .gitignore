@@ -1,3 +1,4 @@
 *.compiled
 *.gresource
 *.ui
+*.mo
