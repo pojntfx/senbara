@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/getkin/kin-openapi/openapi3"
@@ -60,7 +61,6 @@ func NewController(
 	oidcIssuer,
 	oidcClientID,
 	oidcRedirectURL,
-	oidcDiscoveryURL,
 
 	privacyURL,
 	imprintURL,
@@ -84,7 +84,7 @@ func NewController(
 		oidcIssuer:       oidcIssuer,
 		oidcClientID:     oidcClientID,
 		oidcRedirectURL:  oidcRedirectURL,
-		oidcDiscoveryURL: oidcDiscoveryURL,
+		oidcDiscoveryURL: strings.TrimSuffix(oidcIssuer, "/") + "/.well-known/openid-configuration",
 
 		privacyURL: privacyURL,
 		imprintURL: imprintURL,
