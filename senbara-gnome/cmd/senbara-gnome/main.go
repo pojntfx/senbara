@@ -4,6 +4,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/diamondburned/gotk4-adwaita/pkg/adw"
@@ -64,6 +65,27 @@ func main() {
 		panic(err)
 	}
 	gio.ResourcesRegister(r)
+
+	st, err := os.MkdirTemp("", "")
+	if err != nil {
+		panic(err)
+	}
+	defer os.RemoveAll(st)
+
+	sc, err := r.LookupData(resources.ResourceGSchemasCompiledPath, gio.ResourceLookupFlagsNone)
+	if err != nil {
+		panic(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(st, path.Base(resources.ResourceGSchemasCompiledPath)), sc.Data(), os.ModePerm); err != nil {
+		panic(err)
+	}
+
+	if err := os.Setenv("GSETTINGS_SCHEMA_DIR", st); err != nil {
+		panic(err)
+	}
+
+	_ = gio.NewSettings(resources.AppID)
 
 	c := gtk.NewCSSProvider()
 	c.LoadFromResource(resources.ResourceIndexCSSPath)

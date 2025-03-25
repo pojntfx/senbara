@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<schemalist>
+    <schema id="com.pojtinger.felicitas.Senbara" path="/com/pojtinger/felicitas/Senbara/">
+        <key name='oidc-issuer' type='s'>
+            <default>""</default>
+            <summary>OIDC Issuer</summary>
+            <description>OIDC Issuer (i.e. https://pojntfx.eu.auth0.com/)</description>
+        </key>
+    </schema>
+</schemalist>
