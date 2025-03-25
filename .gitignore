@@ -1,4 +1,6 @@
 *.compiled
 *.gresource
 *.ui
+*.css*
+.sass-cache
 *.mo

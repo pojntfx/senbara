@@ -8,6 +8,7 @@ import (
 
 	"github.com/diamondburned/gotk4-adwaita/pkg/adw"
 	gcore "github.com/diamondburned/gotk4/pkg/core/glib"
+	"github.com/diamondburned/gotk4/pkg/gdk/v4"
 	"github.com/diamondburned/gotk4/pkg/gio/v2"
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
@@ -64,11 +65,20 @@ func main() {
 	}
 	gio.ResourcesRegister(r)
 
+	c := gtk.NewCSSProvider()
+	c.LoadFromResource(resources.ResourceIndexCSSPath)
+
 	a := adw.NewApplication(resources.AppID, gio.ApplicationNonUnique)
 	a.ConnectActivate(func() {
-		b := gtk.NewBuilderFromResource(resources.ResourceWindowPath)
+		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
 
 		w := b.GetObject("main-window").Cast().(*adw.Window)
+
+		gtk.StyleContextAddProviderForDisplay(
+			gdk.DisplayGetDefault(),
+			c,
+			gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+		)
 
 		a.AddWindow(&w.Window)
 	})

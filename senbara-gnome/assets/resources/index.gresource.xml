@@ -2,5 +2,6 @@
 <gresources>
     <gresource prefix="/com/pojtinger/felicitas/Senbara">
         <file>window.ui</file>
+        <file>index.css</file>
     </gresource>
 </gresources>

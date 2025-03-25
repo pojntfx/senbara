@@ -11,10 +11,11 @@ const (
 	appPath = "/com/pojtinger/felicitas/Senbara/"
 )
 
-//go:generate sh -c "blueprint-compiler batch-compile . . *.blp && glib-compile-resources index.gresource.xml"
+//go:generate sh -c "blueprint-compiler batch-compile . . *.blp && scss index.scss index.css && glib-compile-resources index.gresource.xml"
 //go:embed index.gresource
 var ResourceContents []byte
 
 var (
-	ResourceWindowPath = path.Join(appPath, "window.ui")
+	ResourceWindowUIPath = path.Join(appPath, "window.ui")
+	ResourceIndexCSSPath = path.Join(appPath, "index.css")
 )
