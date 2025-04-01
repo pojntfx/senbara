@@ -84,7 +84,7 @@ func NewController(
 		oidcIssuer:       oidcIssuer,
 		oidcClientID:     oidcClientID,
 		oidcRedirectURL:  oidcRedirectURL,
-		oidcDiscoveryURL: strings.TrimSuffix(oidcIssuer, "/") + "/.well-known/openid-configuration",
+		oidcDiscoveryURL: strings.TrimSuffix(oidcIssuer, "/") + spec.Components.SecuritySchemes["oidc"].Value.OpenIdConnectUrl,
 
 		privacyURL: privacyURL,
 		imprintURL: imprintURL,
