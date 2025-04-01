@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Senbara Handler
+Comment=Senbara URI scheme handler.
+Exec=senbara-handler %u
+Icon=com.pojtinger.felicitas.SenbaraHandler
+Categories=Utility
+MimeType=x-scheme-handler/senbara;

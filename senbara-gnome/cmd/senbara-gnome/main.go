@@ -90,7 +90,7 @@ func main() {
 	c := gtk.NewCSSProvider()
 	c.LoadFromResource(resources.ResourceIndexCSSPath)
 
-	a := adw.NewApplication(resources.AppID, gio.ApplicationNonUnique)
+	a := adw.NewApplication(resources.AppID, gio.ApplicationDefaultFlags)
 	a.ConnectActivate(func() {
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
 
