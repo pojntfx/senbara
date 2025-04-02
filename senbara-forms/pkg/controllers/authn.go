@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/url"
@@ -306,10 +307,113 @@ func (c *Controller) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, returnURL, http.StatusFound)
 }
 
-func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
+// exchange exchanges the OIDC auth code and state for a user's refresh token and ID token.
+// If authCode is an empty string, it will sign out the user.
+func (c *Controller) exchange(
+	ctx context.Context,
+
+	authCode,
+	state string,
+
+	setRefreshToken,
+	setIDToken func(string, time.Time) error,
+
+	clearRefreshToken,
+	clearIDToken func() error,
+) (
+	signedOut bool,
+	returnURL string,
+
+	err error,
+) {
 	log := c.log.With(
-		"authCode", r.URL.Query().Get("code") != "",
-		"state", r.URL.Query().Get("state"),
+		"authCode", authCode != "",
+		"state", state,
+	)
+
+	c.log.Debug("Handling auth code exchange")
+
+	returnURL, err = url.QueryUnescape(state)
+	if err != nil || strings.TrimSpace(returnURL) == "" {
+		returnURL = "/"
+	}
+
+	log = log.With("returnURL", returnURL)
+
+	// Sign out
+	if strings.TrimSpace(authCode) == "" {
+		log.Debug("Signing out user")
+
+		if err := clearRefreshToken(); err != nil {
+			log.Warn("Could not clear refresh token", "err", errors.Join(errCouldNotClearRefreshToken, err))
+
+			return false, "", errCouldNotClearRefreshToken
+		}
+
+		if err := clearIDToken(); err != nil {
+			log.Warn("Could not clear ID token", "err", errors.Join(errCouldNotClearIDToken, err))
+
+			return false, "", errCouldNotClearIDToken
+		}
+
+		return true, returnURL, nil
+	}
+
+	ru, err := url.Parse(returnURL)
+	if err != nil {
+		log.Warn("Could not parse return URL", "err", errors.Join(errCouldNotLogin, err))
+
+		return false, "", errCouldNotLogin
+	}
+
+	// If the return URL points to login or authorize endpoints, redirect to root instead
+	if apiHandlerPath := ru.Query().Get("path"); ru.Path == "/login" || apiHandlerPath == "/login" || ru.Path == "/authorize" || apiHandlerPath == "/authorize" {
+		returnURL = "/"
+	}
+
+	// Sign in
+	log.Debug("Exchanging auth code for tokens")
+
+	oauth2Token, err := c.config.Exchange(ctx, authCode)
+	if err != nil {
+		log.Warn("Could not exchange auth code", "err", errors.Join(errCouldNotLogin, err))
+
+		return false, "", errCouldNotLogin
+	}
+
+	log.Debug("Setting refresh token, expires in one year")
+
+	if err := setRefreshToken(oauth2Token.RefreshToken, time.Now().Add(time.Hour*24*365)); err != nil {
+		log.Warn("Could not set refresh token", "err", errors.Join(errCouldNotSetRefreshToken, err))
+
+		return false, "", errCouldNotSetRefreshToken
+	}
+
+	idToken, ok := oauth2Token.Extra("id_token").(string)
+	if !ok {
+		log.Warn("Could not extract ID token", "err", errors.Join(errCouldNotLogin, err))
+
+		return false, "", errCouldNotLogin
+	}
+
+	log.Debug("Setting ID token", "expiry", oauth2Token.Expiry)
+
+	if err := setIDToken(idToken, oauth2Token.Expiry); err != nil {
+		log.Warn("Could not set ID token", "err", errors.Join(errCouldNotSetIDToken, err))
+
+		return false, "", errCouldNotSetIDToken
+	}
+
+	return false, returnURL, nil
+}
+
+func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
+	authCode := r.URL.Query().Get("code")
+	state := r.URL.Query().Get("state")
+
+	log := c.log.With(
+		"authCode", authCode != "",
+		"state", state,
 	)
 
 	c.log.Debug("Handling user auth")
@@ -323,40 +427,75 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authCode := r.URL.Query().Get("code")
-	state := r.URL.Query().Get("state")
+	signedOut, returnURL, err := c.exchange(
+		r.Context(),
 
-	returnURL, err := url.QueryUnescape(state)
-	if err != nil || strings.TrimSpace(returnURL) == "" {
-		returnURL = "/"
+		authCode,
+		state,
+
+		func(s string, t time.Time) error {
+			http.SetCookie(w, &http.Cookie{
+				Name:     refreshTokenKey,
+				Value:    s,
+				Expires:  time.Now().Add(time.Hour * 24 * 365),
+				HttpOnly: true,
+				Secure:   true,
+				SameSite: http.SameSiteStrictMode,
+				Path:     "/",
+			})
+
+			return nil
+		},
+		func(s string, t time.Time) error {
+			http.SetCookie(w, &http.Cookie{
+				Name:     idTokenKey,
+				Value:    s,
+				Expires:  t,
+				HttpOnly: true,
+				Secure:   true,
+				SameSite: http.SameSiteStrictMode,
+				Path:     "/",
+			})
+
+			return nil
+		},
+
+		func() error {
+			http.SetCookie(w, &http.Cookie{
+				Name:     refreshTokenKey,
+				Value:    "",
+				MaxAge:   -1,
+				HttpOnly: true,
+				Secure:   true,
+				SameSite: http.SameSiteStrictMode,
+				Path:     "/",
+			})
+
+			return nil
+		},
+		func() error {
+			http.SetCookie(w, &http.Cookie{
+				Name:     idTokenKey,
+				Value:    "",
+				MaxAge:   -1,
+				HttpOnly: true,
+				Secure:   true,
+				SameSite: http.SameSiteStrictMode,
+				Path:     "/",
+			})
+
+			return nil
+		},
+	)
+	if err != nil {
+		log.Warn("Could not exchange the OIDC auth code and state for refresh and ID token", "err", errors.Join(errCouldNotExchange, err))
+
+		http.Error(w, errors.Join(errCouldNotExchange, err).Error(), http.StatusInternalServerError) // All errors returned by `exchange()` are already sanitized
+
+		return
 	}
 
-	log = log.With("returnURL", returnURL)
-
-	// Sign out
-	if strings.TrimSpace(authCode) == "" {
-		log.Debug("Signing out user")
-
-		http.SetCookie(w, &http.Cookie{
-			Name:     refreshTokenKey,
-			Value:    "",
-			MaxAge:   -1,
-			HttpOnly: true,
-			Secure:   true,
-			SameSite: http.SameSiteStrictMode,
-			Path:     "/",
-		})
-
-		http.SetCookie(w, &http.Cookie{
-			Name:     idTokenKey,
-			Value:    "",
-			MaxAge:   -1,
-			HttpOnly: true,
-			Secure:   true,
-			SameSite: http.SameSiteStrictMode,
-			Path:     "/",
-		})
-
+	if signedOut {
 		if err := c.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
 			pageData: pageData{
 				userData: userData{
@@ -379,65 +518,6 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-
-	ru, err := url.Parse(returnURL)
-	if err != nil {
-		log.Warn("Could not parse return URL", "err", errors.Join(errCouldNotLogin, err))
-
-		http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
-
-		return
-	}
-
-	// If the return URL points to login or authorize endpoints, redirect to root instead
-	if apiHandlerPath := ru.Query().Get("path"); ru.Path == "/login" || apiHandlerPath == "/login" || ru.Path == "/authorize" || apiHandlerPath == "/authorize" {
-		returnURL = "/"
-	}
-
-	// Sign in
-	log.Debug("Exchanging auth code for tokens")
-
-	oauth2Token, err := c.config.Exchange(r.Context(), authCode)
-	if err != nil {
-		log.Warn("Could not exchange auth code", "err", errors.Join(errCouldNotLogin, err))
-
-		http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
-
-		return
-	}
-
-	log.Debug("Setting refresh token cookie, expires in one year")
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     refreshTokenKey,
-		Value:    oauth2Token.RefreshToken,
-		Expires:  time.Now().Add(time.Hour * 24 * 365),
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteStrictMode,
-		Path:     "/",
-	})
-
-	idToken, ok := oauth2Token.Extra("id_token").(string)
-	if !ok {
-		log.Warn("Could not extract ID token", "err", errors.Join(errCouldNotLogin, err))
-
-		http.Error(w, errCouldNotLogin.Error(), http.StatusUnauthorized)
-
-		return
-	}
-
-	log.Debug("Setting ID token cookie", "expiry", oauth2Token.Expiry)
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     idTokenKey,
-		Value:    idToken,
-		Expires:  oauth2Token.Expiry,
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteStrictMode,
-		Path:     "/",
-	})
 
 	if err := c.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
 		pageData: pageData{
