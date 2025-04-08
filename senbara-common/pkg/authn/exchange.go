@@ -22,8 +22,9 @@ func (a *Authner) Exchange(
 	clearRefreshToken,
 	clearIDToken func() error,
 ) (
-	signedOut bool,
 	nextURL string,
+
+	signedOut bool,
 
 	err error,
 ) {
@@ -32,7 +33,7 @@ func (a *Authner) Exchange(
 		"state", state,
 	)
 
-	a.log.Debug("Handling auth code exchange")
+	a.log.Debug("Starting auth code exchange")
 
 	nextURL, err = url.QueryUnescape(state)
 	if err != nil || strings.TrimSpace(nextURL) == "" {
@@ -46,23 +47,23 @@ func (a *Authner) Exchange(
 		if err := clearRefreshToken(); err != nil {
 			log.Warn("Could not clear refresh token", "err", errors.Join(errCouldNotClearRefreshToken, err))
 
-			return false, "", errCouldNotClearRefreshToken
+			return "", false, errCouldNotClearRefreshToken
 		}
 
 		if err := clearIDToken(); err != nil {
 			log.Warn("Could not clear ID token", "err", errors.Join(errCouldNotClearIDToken, err))
 
-			return false, "", errCouldNotClearIDToken
+			return "", false, errCouldNotClearIDToken
 		}
 
-		return true, nextURL, nil
+		return nextURL, true, nil
 	}
 
 	ru, err := url.Parse(nextURL)
 	if err != nil {
-		log.Warn("Could not parse return URL", "err", errors.Join(errCouldNotLogin, err))
+		log.Warn("Could not parse return URL", "err", errors.Join(ErrCouldNotLogin, err))
 
-		return false, "", errCouldNotLogin
+		return "", false, ErrCouldNotLogin
 	}
 
 	// If the return URL points to login or authorize endpoints, redirect to root instead
@@ -75,9 +76,9 @@ func (a *Authner) Exchange(
 
 	oauth2Token, err := a.config.Exchange(ctx, authCode)
 	if err != nil {
-		log.Warn("Could not exchange auth code", "err", errors.Join(errCouldNotLogin, err))
+		log.Warn("Could not exchange auth code", "err", errors.Join(ErrCouldNotLogin, err))
 
-		return false, "", errCouldNotLogin
+		return "", false, ErrCouldNotLogin
 	}
 
 	log.Debug("Setting refresh token, expires in one year")
@@ -85,14 +86,14 @@ func (a *Authner) Exchange(
 	if err := setRefreshToken(oauth2Token.RefreshToken, time.Now().Add(time.Hour*24*365)); err != nil {
 		log.Warn("Could not set refresh token", "err", errors.Join(errCouldNotSetRefreshToken, err))
 
-		return false, "", errCouldNotSetRefreshToken
+		return "", false, errCouldNotSetRefreshToken
 	}
 
 	idToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
-		log.Warn("Could not extract ID token", "err", errors.Join(errCouldNotLogin, err))
+		log.Warn("Could not extract ID token", "err", errors.Join(ErrCouldNotLogin, err))
 
-		return false, "", errCouldNotLogin
+		return "", false, ErrCouldNotLogin
 	}
 
 	log.Debug("Setting ID token", "expiry", oauth2Token.Expiry)
@@ -100,8 +101,8 @@ func (a *Authner) Exchange(
 	if err := setIDToken(idToken, oauth2Token.Expiry); err != nil {
 		log.Warn("Could not set ID token", "err", errors.Join(errCouldNotSetIDToken, err))
 
-		return false, "", errCouldNotSetIDToken
+		return "", false, errCouldNotSetIDToken
 	}
 
-	return false, nextURL, nil
+	return nextURL, false, nil
 }

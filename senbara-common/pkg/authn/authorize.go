@@ -3,18 +3,12 @@ package authn
 import (
 	"context"
 	"errors"
-	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
 	"golang.org/x/oauth2"
 )
-
-type UserData struct {
-	Email     string
-	LogoutURL string
-}
 
 // Authorize authorizes a user based on a request and returns their data if it's available. If a user has been
 // previously signed in, but their session has expired, authorize refresh their session. If `loginIfSignedOut` is set
@@ -28,7 +22,7 @@ func (a *Authner) Authorize(
 	returnURL string,
 	currentURL string,
 
-	privacyPolicyConsent bool,
+	privacyPolicyConsentGiven bool,
 
 	refreshToken,
 	idToken *string,
@@ -37,10 +31,11 @@ func (a *Authner) Authorize(
 	setIDToken func(string, time.Time) error,
 ) (
 	nextURL string,
+
 	requirePrivacyConsent bool,
 
-	u UserData,
-	status int,
+	email,
+	logoutURL string,
 
 	err error,
 ) {
@@ -52,19 +47,19 @@ func (a *Authner) Authorize(
 
 	log.Debug("Starting auth flow")
 
-	log.Debug("Checking auth state", "privacyPolicyConsent", privacyPolicyConsent)
+	log.Debug("Checking auth state", "privacyPolicyConsentGiven", privacyPolicyConsentGiven)
 
-	if loginIfSignedOut || privacyPolicyConsent {
+	if loginIfSignedOut || privacyPolicyConsentGiven {
 		if refreshToken == nil {
-			if privacyPolicyConsent {
+			if privacyPolicyConsentGiven {
 				log.Debug("Refresh token cookie is missing and privacy policy consent is given, reauthenticating with auth provider")
 
-				return a.config.AuthCodeURL(url.QueryEscape(returnURL)), false, UserData{}, http.StatusTemporaryRedirect, nil
+				return a.config.AuthCodeURL(url.QueryEscape(returnURL)), false, "", "", nil
 			}
 
 			log.Debug("Refresh token cookie is missing, but can't reauthenticate with auth provider since privacy policy consent is not yet given. Redirecting to privacy policy consent page")
 
-			return "", true, UserData{}, http.StatusTemporaryRedirect, nil
+			return "", true, "", "", nil
 		}
 
 		if idToken == nil {
@@ -78,13 +73,13 @@ func (a *Authner) Authorize(
 
 			log.Debug("ID token cookie is missing and privacy policy consent is given since a valid refresh token exists, reauthenticating with auth provider")
 
-			return a.config.AuthCodeURL(url.QueryEscape(returnURL)), false, UserData{}, http.StatusTemporaryRedirect, nil
+			return a.config.AuthCodeURL(url.QueryEscape(returnURL)), false, "", "", nil
 		}
 	} else {
 		if refreshToken == nil {
 			log.Debug("Refresh token cookie is missing, but logging in the user if the they are signed out is not requested, continuing without auth")
 
-			return "", false, UserData{}, http.StatusOK, nil
+			return "", false, "", "", nil
 		}
 
 		if idToken == nil {
@@ -98,7 +93,7 @@ func (a *Authner) Authorize(
 
 			log.Debug("ID token cookie is missing and privacy policy consent is given since a refresh token exists, reauthenticating with auth provider")
 
-			return a.config.AuthCodeURL(url.QueryEscape(returnURL)), false, UserData{}, http.StatusTemporaryRedirect, nil
+			return a.config.AuthCodeURL(url.QueryEscape(returnURL)), false, "", "", nil
 		}
 	}
 
@@ -114,7 +109,7 @@ func (a *Authner) Authorize(
 		if err != nil {
 			log.Debug("Token refresh failed, reauthenticating with auth provider", "error", err)
 
-			return a.config.AuthCodeURL(url.QueryEscape(returnURL)), false, UserData{}, http.StatusOK, nil
+			return a.config.AuthCodeURL(url.QueryEscape(returnURL)), false, "", "", nil
 		}
 
 		var ok bool
@@ -122,14 +117,14 @@ func (a *Authner) Authorize(
 		if !ok {
 			log.Debug("ID token missing from refreshed refresh token, reauthenticating with auth provider")
 
-			return a.config.AuthCodeURL(url.QueryEscape(returnURL)), false, UserData{}, http.StatusOK, nil
+			return a.config.AuthCodeURL(url.QueryEscape(returnURL)), false, "", "", nil
 		}
 
 		id, err = a.verifier.Verify(ctx, *idToken)
 		if err != nil {
 			log.Debug("Refresh token verification failed, attempting refresh", "error", err)
 
-			return a.config.AuthCodeURL(url.QueryEscape(returnURL)), false, UserData{}, http.StatusOK, nil
+			return a.config.AuthCodeURL(url.QueryEscape(returnURL)), false, "", "", nil
 		}
 
 		if *refreshToken = oauth2Token.RefreshToken; *refreshToken != "" {
@@ -138,7 +133,7 @@ func (a *Authner) Authorize(
 			if err := setRefreshToken(*refreshToken, time.Now().Add(time.Hour*24*365)); err != nil {
 				log.Warn("Could not set refresh token", "err", errors.Join(errCouldNotSetRefreshToken, err))
 
-				return "", false, UserData{}, http.StatusInternalServerError, errCouldNotSetRefreshToken
+				return "", false, "", "", errCouldNotSetRefreshToken
 			}
 		}
 
@@ -147,7 +142,7 @@ func (a *Authner) Authorize(
 		if err := setIDToken(*idToken, oauth2Token.Expiry); err != nil {
 			log.Warn("Could not set ID token", "err", errors.Join(errCouldNotSetIDToken, err))
 
-			return "", false, UserData{}, http.StatusInternalServerError, errCouldNotSetIDToken
+			return "", false, "", "", errCouldNotSetIDToken
 		}
 	}
 
@@ -158,31 +153,28 @@ func (a *Authner) Authorize(
 	if err := id.Claims(&claims); err != nil {
 		log.Debug("Failed to parse ID token claims", "error", err)
 
-		return "", false, UserData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+		return "", false, "", "", errors.Join(ErrCouldNotLogin, err)
 	}
 
 	if !claims.EmailVerified {
 		log.Debug("Email from ID token claims not verified, user is unauthorized", "email", claims.Email)
 
-		return "", false, UserData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, errEmailNotVerified)
+		return "", false, "", "", errors.Join(ErrCouldNotLogin, errEmailNotVerified)
 	}
 
-	logoutURL, err := url.Parse(a.oidcIssuer)
+	lu, err := url.Parse(a.oidcIssuer)
 	if err != nil {
-		return "", false, UserData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+		return "", false, "", "", errors.Join(ErrCouldNotLogin, err)
 	}
 
-	q := logoutURL.Query()
+	q := lu.Query()
 	q.Set("id_token_hint", *idToken)
 	q.Set("post_logout_redirect_uri", a.oidcRedirectURL)
-	logoutURL.RawQuery = q.Encode()
+	lu.RawQuery = q.Encode()
 
-	logoutURL = logoutURL.JoinPath("oidc", "logout")
+	lu = lu.JoinPath("oidc", "logout")
 
 	log.Debug("Auth successful", "email", claims.Email)
 
-	return "", false, UserData{
-		Email:     claims.Email,
-		LogoutURL: logoutURL.String(),
-	}, http.StatusOK, nil
+	return "", false, claims.Email, lu.String(), nil
 }

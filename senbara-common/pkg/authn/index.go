@@ -10,7 +10,8 @@ import (
 )
 
 var (
-	errCouldNotLogin             = errors.New("could not login")
+	ErrCouldNotLogin = errors.New("could not login")
+
 	errEmailNotVerified          = errors.New("email not verified")
 	errCouldNotSetRefreshToken   = errors.New("could not set refresh token")
 	errCouldNotSetIDToken        = errors.New("could not set ID token")

@@ -20,7 +20,8 @@ type pageData struct {
 }
 
 type userData struct {
-	authn.UserData
+	Email     string
+	LogoutURL string
 
 	Locale *gotext.Locale
 }
@@ -43,7 +44,7 @@ func (c *Controller) authorize(
 		"path", r.URL.Path,
 	)
 
-	log.Debug("Starting auth flow")
+	log.Debug("Handling user auth")
 
 	locale, err := c.localize(r)
 	if err != nil {
@@ -84,7 +85,7 @@ func (c *Controller) authorize(
 		idToken = &it.Value
 	}
 
-	nextURL, requirePrivacyConsent, ud, status, err := c.authner.Authorize(
+	nextURL, requirePrivacyConsent, email, logoutURL, err := c.authner.Authorize(
 		r.Context(),
 
 		loginIfSignedOut,
@@ -124,19 +125,30 @@ func (c *Controller) authorize(
 			return nil
 		},
 	)
+	if err != nil {
+		if errors.Is(err, authn.ErrCouldNotLogin) {
+			return false, userData{
+				Locale: locale,
+			}, http.StatusUnauthorized, err
+		}
+
+		return false, userData{
+			Locale: locale,
+		}, http.StatusInternalServerError, err
+	}
 
 	redirected = nextURL != ""
-	u.UserData = ud
-	u.Locale = locale
+	u = userData{
+		Email:     email,
+		LogoutURL: logoutURL,
 
-	if err != nil {
-		return redirected, u, status, err
+		Locale: locale,
 	}
 
 	if redirected {
 		http.Redirect(w, r, nextURL, http.StatusFound)
 
-		return redirected, u, status, nil
+		return redirected, u, http.StatusTemporaryRedirect, nil
 	}
 
 	if requirePrivacyConsent {
@@ -162,10 +174,10 @@ func (c *Controller) authorize(
 
 		log.Debug("Refresh token cookie is missing, but can't reauthenticate with auth provider since privacy policy consent is not yet given. Redirecting to privacy policy consent page")
 
-		return true, u, status, nil
+		return true, u, http.StatusTemporaryRedirect, nil
 	}
 
-	return redirected, u, status, nil
+	return redirected, u, http.StatusOK, nil
 }
 
 type redirectData struct {
@@ -203,7 +215,7 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 		"state", state,
 	)
 
-	log.Debug("Handling user auth")
+	log.Debug("Handling user auth exchange")
 
 	locale, err := c.localize(r)
 	if err != nil {
@@ -214,7 +226,7 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	signedOut, nextURL, err := c.authner.Exchange(
+	nextURL, signedOut, err := c.authner.Exchange(
 		r.Context(),
 
 		authCode,
