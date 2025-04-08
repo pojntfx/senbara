@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/adrg/xdg"
+	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
 	v1 "github.com/pojntfx/senbara/senbara-forms/api/rest/v1"
 	"github.com/pojntfx/senbara/senbara-forms/pkg/controllers"
@@ -112,14 +113,23 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				return err
 			}
 
-			c := controllers.NewController(
-				slog.New(log.Handler().WithGroup("controller")),
-
-				p,
+			a := authn.NewAuthner(
+				slog.New(log.Handler().WithGroup("authner")),
 
 				viper.GetString(oidcIssuerKey),
 				viper.GetString(oidcClientIDKey),
 				viper.GetString(oidcRedirectURLKey),
+			)
+
+			if err := a.Init(ctx); err != nil {
+				return err
+			}
+
+			c := controllers.NewController(
+				slog.New(log.Handler().WithGroup("controller")),
+
+				p,
+				a,
 
 				viper.GetString(privacyURLKey),
 				viper.GetString(imprintURLKey),

@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/lib/pq"
 
+	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
 	"github.com/pojntfx/senbara/senbara-forms/pkg/controllers"
 	"github.com/pojntfx/senbara/senbara-forms/web/static"
@@ -20,6 +21,7 @@ var Code []byte
 
 var (
 	p *persisters.Persister
+	a *authn.Authner
 	c *controllers.Controller
 )
 
@@ -97,15 +99,26 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if a == nil {
+		a = authn.NewAuthner(
+			slog.New(log.Handler().WithGroup("authner")),
+
+			os.Getenv("OIDC_ISSUER"),
+			os.Getenv("OIDC_CLIENT_ID"),
+			os.Getenv("OIDC_REDIRECT_URL"),
+		)
+
+		if err := a.Init(r.Context()); err != nil {
+			panic(err)
+		}
+	}
+
 	if c == nil {
 		c = controllers.NewController(
 			slog.New(log.Handler().WithGroup("controller")),
 
 			p,
-
-			os.Getenv("OIDC_ISSUER"),
-			os.Getenv("OIDC_CLIENT_ID"),
-			os.Getenv("OIDC_REDIRECT_URL"),
+			a,
 
 			os.Getenv("PRIVACY_URL"),
 			os.Getenv("IMPRINT_URL"),

@@ -27,11 +27,7 @@ func NewPersister(log *slog.Logger, pgaddr string) *Persister {
 }
 
 func (p *Persister) Init(ctx context.Context) error {
-	if p.log.Enabled(ctx, slog.LevelDebug) {
-		p.log.Debug("Connecting to database", "addr", p.pgaddr)
-	} else {
-		p.log.Info("Connecting to database")
-	}
+	p.log.Info("Connecting to database")
 
 	var err error
 	p.db, err = sql.Open("postgres", p.pgaddr)

@@ -8,36 +8,30 @@ import (
 	"log/slog"
 	"math"
 
-	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
 	"github.com/pojntfx/senbara/senbara-forms/web/templates"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
-	"golang.org/x/oauth2"
 )
 
 var (
-	errCouldNotRenderTemplate    = errors.New("could not render template")
-	errCouldNotFetchFromDB       = errors.New("could not fetch from DB")
-	errCouldNotParseForm         = errors.New("could not parse form")
-	errInvalidForm               = errors.New("could not use invalid form")
-	errCouldNotInsertIntoDB      = errors.New("could not insert into DB")
-	errCouldNotDeleteFromDB      = errors.New("could not delete from DB")
-	errCouldNotUpdateInDB        = errors.New("could not update in DB")
-	errInvalidQueryParam         = errors.New("could not use invalid query parameter")
-	errCouldNotLogin             = errors.New("could not login")
-	errEmailNotVerified          = errors.New("email not verified")
-	errCouldNotLocalize          = errors.New("could not localize")
-	errCouldNotWriteResponse     = errors.New("could not write response")
-	errCouldNotEncodeResponse    = errors.New("could not encode response")
-	errCouldNotReadRequest       = errors.New("could not read request")
-	errUnknownEntityName         = errors.New("unknown entity name")
-	errCouldNotStartTransaction  = errors.New("could not start transaction")
-	errCouldNotSetRefreshToken   = errors.New("could not set refresh token")
-	errCouldNotSetIDToken        = errors.New("could not set ID token")
-	errCouldNotClearRefreshToken = errors.New("could not clear refresh token")
-	errCouldNotClearIDToken      = errors.New("could not clear ID token")
-	errCouldNotExchange          = errors.New("could not exchange the OIDC auth code and state for refresh and ID token")
+	errCouldNotRenderTemplate   = errors.New("could not render template")
+	errCouldNotFetchFromDB      = errors.New("could not fetch from DB")
+	errCouldNotParseForm        = errors.New("could not parse form")
+	errInvalidForm              = errors.New("could not use invalid form")
+	errCouldNotInsertIntoDB     = errors.New("could not insert into DB")
+	errCouldNotDeleteFromDB     = errors.New("could not delete from DB")
+	errCouldNotUpdateInDB       = errors.New("could not update in DB")
+	errInvalidQueryParam        = errors.New("could not use invalid query parameter")
+	errCouldNotLogin            = errors.New("could not login")
+	errCouldNotLocalize         = errors.New("could not localize")
+	errCouldNotWriteResponse    = errors.New("could not write response")
+	errCouldNotEncodeResponse   = errors.New("could not encode response")
+	errCouldNotReadRequest      = errors.New("could not read request")
+	errUnknownEntityName        = errors.New("unknown entity name")
+	errCouldNotStartTransaction = errors.New("could not start transaction")
+	errCouldNotExchange         = errors.New("could not exchange the OIDC auth code and state for refresh and ID token")
 )
 
 const (
@@ -46,31 +40,23 @@ const (
 )
 
 type Controller struct {
-	log       *slog.Logger
-	tpl       *template.Template
-	persister *persisters.Persister
+	log *slog.Logger
+	tpl *template.Template
 
-	oidcIssuer      string
-	oidcClientID    string
-	oidcRedirectURL string
+	persister *persisters.Persister
+	authner   *authn.Authner
 
 	privacyURL string
 	imprintURL string
 
 	code []byte
-
-	config   *oauth2.Config
-	verifier *oidc.IDTokenVerifier
 }
 
 func NewController(
 	log *slog.Logger,
 
 	persister *persisters.Persister,
-
-	oidcIssuer,
-	oidcClientID,
-	oidcRedirectURL,
+	authner *authn.Authner,
 
 	privacyURL,
 	imprintURL string,
@@ -81,10 +67,7 @@ func NewController(
 		log: log,
 
 		persister: persister,
-
-		oidcIssuer:      oidcIssuer,
-		oidcClientID:    oidcClientID,
-		oidcRedirectURL: oidcRedirectURL,
+		authner:   authner,
 
 		privacyURL: privacyURL,
 		imprintURL: imprintURL,
@@ -123,24 +106,6 @@ func (c *Controller) Init(ctx context.Context) error {
 	}
 
 	c.tpl = tpl
-
-	c.log.Info("Connecting to OIDC issuer", "oidcIssuer", c.oidcIssuer)
-
-	provider, err := oidc.NewProvider(ctx, c.oidcIssuer)
-	if err != nil {
-		return err
-	}
-
-	c.config = &oauth2.Config{
-		ClientID:    c.oidcClientID,
-		RedirectURL: c.oidcRedirectURL,
-		Endpoint:    provider.Endpoint(),
-		Scopes:      []string{oidc.ScopeOpenID, oidc.ScopeOfflineAccess, "email", "email_verified"},
-	}
-
-	c.verifier = provider.Verifier(&oidc.Config{
-		ClientID: c.oidcClientID,
-	})
 
 	return nil
 }
