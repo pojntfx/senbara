@@ -16,6 +16,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
 	middleware "github.com/oapi-codegen/nethttp-middleware"
+	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/controllers"
@@ -26,6 +27,7 @@ var Code []byte
 
 var (
 	p *persisters.Persister
+	a *authn.Authner
 	c *controllers.Controller
 	s *openapi3.T
 )
@@ -97,6 +99,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if a == nil {
+		a = authn.NewAuthner(
+			slog.New(log.Handler().WithGroup("authner")),
+
+			os.Getenv("OIDC_ISSUER"),
+			os.Getenv("OIDC_CLIENT_ID"),
+			os.Getenv("OIDC_REDIRECT_URL"),
+		)
+
+		if err := a.Init(r.Context()); err != nil {
+			panic(err)
+		}
+	}
+
 	if s == nil {
 		var err error
 		s, err = api.GetSwagger()
@@ -135,12 +151,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			slog.New(log.Handler().WithGroup("controller")),
 
 			p,
+			a,
 
 			s,
 
 			os.Getenv("OIDC_ISSUER"),
-			os.Getenv("OIDC_CLIENT_ID"),
-			os.Getenv("OIDC_REDIRECT_URL"),
 
 			os.Getenv("PRIVACY_URL"),
 			os.Getenv("IMPRINT_URL"),
@@ -154,10 +169,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 			Code,
 		)
-
-		if err := c.Init(r.Context()); err != nil {
-			panic(err)
-		}
 	}
 
 	o := []string{}

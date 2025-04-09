@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 
+	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-common/pkg/models"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 )
@@ -18,7 +19,7 @@ const (
 )
 
 func (c *Controller) DeleteUserData(ctx context.Context, request api.DeleteUserDataRequestObject) (api.DeleteUserDataResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -40,7 +41,7 @@ func (c *Controller) DeleteUserData(ctx context.Context, request api.DeleteUserD
 }
 
 func (c *Controller) ExportUserData(ctx context.Context, request api.ExportUserDataRequestObject) (api.ExportUserDataResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -140,7 +141,7 @@ func (c *Controller) ExportUserData(ctx context.Context, request api.ExportUserD
 }
 
 func (c *Controller) ImportUserData(ctx context.Context, request api.ImportUserDataRequestObject) (api.ImportUserDataResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 

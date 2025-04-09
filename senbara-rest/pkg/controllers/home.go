@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 
+	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 )
 
 func (c *Controller) GetIndex(ctx context.Context, request api.GetIndexRequestObject) (api.GetIndexResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 

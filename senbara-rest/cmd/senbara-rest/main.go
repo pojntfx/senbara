@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/adrg/xdg"
+	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-common/pkg/persisters"
 	v1 "github.com/pojntfx/senbara/senbara-rest/api/openapi/v1"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
@@ -119,6 +120,18 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				return err
 			}
 
+			a := authn.NewAuthner(
+				slog.New(log.Handler().WithGroup("authner")),
+
+				viper.GetString(oidcIssuerKey),
+				viper.GetString(oidcClientIDKey),
+				viper.GetString(oidcRedirectURLKey),
+			)
+
+			if err := a.Init(ctx); err != nil {
+				return err
+			}
+
 			s, err := api.GetSwagger()
 			if err != nil {
 				return err
@@ -128,12 +141,11 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				slog.New(log.Handler().WithGroup("controller")),
 
 				p,
+				a,
 
 				s,
 
 				viper.GetString(oidcIssuerKey),
-				viper.GetString(oidcClientIDKey),
-				viper.GetString(oidcRedirectURLKey),
 
 				viper.GetString(privacyURLKey),
 				viper.GetString(imprintURLKey),
@@ -147,10 +159,6 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 
 				v1.Code,
 			)
-
-			if err := c.Init(ctx); err != nil {
-				return err
-			}
 
 			log.Info("Listening", "laddr", viper.GetString(laddrKey))
 

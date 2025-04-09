@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 
+	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 )
 
 func (c *Controller) GetJournalEntries(ctx context.Context, request api.GetJournalEntriesRequestObject) (api.GetJournalEntriesResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -38,7 +39,7 @@ func (c *Controller) GetJournalEntries(ctx context.Context, request api.GetJourn
 }
 
 func (c *Controller) CreateJournalEntry(ctx context.Context, request api.CreateJournalEntryRequestObject) (api.CreateJournalEntryResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -76,7 +77,7 @@ func (c *Controller) CreateJournalEntry(ctx context.Context, request api.CreateJ
 }
 
 func (c *Controller) DeleteJournalEntry(ctx context.Context, request api.DeleteJournalEntryRequestObject) (api.DeleteJournalEntryResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -103,7 +104,7 @@ func (c *Controller) DeleteJournalEntry(ctx context.Context, request api.DeleteJ
 }
 
 func (c *Controller) GetJournalEntry(ctx context.Context, request api.GetJournalEntryRequestObject) (api.GetJournalEntryResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -132,7 +133,7 @@ func (c *Controller) GetJournalEntry(ctx context.Context, request api.GetJournal
 }
 
 func (c *Controller) UpdateJournalEntry(ctx context.Context, request api.UpdateJournalEntryRequestObject) (api.UpdateJournalEntryResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 

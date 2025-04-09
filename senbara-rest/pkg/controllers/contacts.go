@@ -6,11 +6,12 @@ import (
 	"time"
 
 	"github.com/oapi-codegen/runtime/types"
+	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 )
 
 func (c *Controller) GetContacts(ctx context.Context, request api.GetContactsRequestObject) (api.GetContactsResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -51,7 +52,7 @@ func (c *Controller) GetContacts(ctx context.Context, request api.GetContactsReq
 }
 
 func (c *Controller) CreateContact(ctx context.Context, request api.CreateContactRequestObject) (api.CreateContactResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -110,7 +111,7 @@ func (c *Controller) CreateContact(ctx context.Context, request api.CreateContac
 }
 
 func (c *Controller) DeleteContact(ctx context.Context, request api.DeleteContactRequestObject) (api.DeleteContactResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -137,7 +138,7 @@ func (c *Controller) DeleteContact(ctx context.Context, request api.DeleteContac
 }
 
 func (c *Controller) GetContact(ctx context.Context, request api.GetContactRequestObject) (api.GetContactResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -232,7 +233,7 @@ func (c *Controller) GetContact(ctx context.Context, request api.GetContactReque
 }
 
 func (c *Controller) UpdateContact(ctx context.Context, request api.UpdateContactRequestObject) (api.UpdateContactResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 

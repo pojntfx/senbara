@@ -5,11 +5,12 @@ import (
 	"errors"
 	"math"
 
+	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 )
 
 func (c *Controller) CreateDebt(ctx context.Context, request api.CreateDebtRequestObject) (api.CreateDebtResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -60,7 +61,7 @@ func (c *Controller) CreateDebt(ctx context.Context, request api.CreateDebtReque
 }
 
 func (c *Controller) SettleDebt(ctx context.Context, request api.SettleDebtRequestObject) (api.SettleDebtResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -87,7 +88,7 @@ func (c *Controller) SettleDebt(ctx context.Context, request api.SettleDebtReque
 }
 
 func (c *Controller) UpdateDebt(ctx context.Context, request api.UpdateDebtRequestObject) (api.UpdateDebtResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 

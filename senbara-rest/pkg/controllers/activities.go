@@ -5,11 +5,12 @@ import (
 	"errors"
 
 	"github.com/oapi-codegen/runtime/types"
+	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 )
 
 func (c *Controller) CreateActivity(ctx context.Context, request api.CreateActivityRequestObject) (api.CreateActivityResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -56,7 +57,7 @@ func (c *Controller) CreateActivity(ctx context.Context, request api.CreateActiv
 }
 
 func (c *Controller) DeleteActivity(ctx context.Context, request api.DeleteActivityRequestObject) (api.DeleteActivityResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -83,7 +84,7 @@ func (c *Controller) DeleteActivity(ctx context.Context, request api.DeleteActiv
 }
 
 func (c *Controller) GetActivity(ctx context.Context, request api.GetActivityRequestObject) (api.GetActivityResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
@@ -117,7 +118,7 @@ func (c *Controller) GetActivity(ctx context.Context, request api.GetActivityReq
 }
 
 func (c *Controller) UpdateActivity(ctx context.Context, request api.UpdateActivityRequestObject) (api.UpdateActivityResponseObject, error) {
-	namespace := ctx.Value(ContextKeyNamespace).(string)
+	namespace := ctx.Value(authn.ContextKeyNamespace).(string)
 
 	log := c.log.With("namespace", namespace)
 
