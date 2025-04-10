@@ -55,6 +55,7 @@ func main() {
 		w = adw.NewWindow()
 		w.SetVisible(true)
 
+		// TODO: Show "login" button if not already signed in/authenticated and redirect to browser if requested, else show "logout" button
 		l = gtk.NewLabel("Unauthenticated")
 		w.SetContent(l)
 
@@ -111,6 +112,8 @@ func main() {
 			}
 
 			if signedOut {
+				l.SetText("Unauthenticated")
+
 				// TODO: Navigate to internal "start page"/nextURL
 
 				return
