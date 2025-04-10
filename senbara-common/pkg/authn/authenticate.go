@@ -43,9 +43,9 @@ func (c *Authner) AuthenticateRequest(r *http.Request) (string, error) {
 	}
 
 	if !claims.EmailVerified {
-		c.log.Debug("Email from ID token claims not verified, user is unauthenticated", "email", claims.Email)
+		c.log.Debug("Email from ID token claims not verified, user is unauthenticated", "email", claims.Email, "error", errors.Join(ErrCouldNotLogin, errEmailNotVerified))
 
-		return "", ErrCouldNotLogin
+		return "", errors.Join(ErrCouldNotLogin, errEmailNotVerified)
 	}
 
 	c.log.Debug("Authentication successful", "email", claims.Email)

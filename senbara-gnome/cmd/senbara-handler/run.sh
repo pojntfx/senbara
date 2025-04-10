@@ -1,3 +1,5 @@
 #!/bin/bash
 
-go install ./senbara-gnome/cmd/senbara-handler/ && senbara-handler
+set -ex
+
+go install -x ./senbara-gnome/cmd/senbara-handler/ && senbara-handler

@@ -1,16 +1,50 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/diamondburned/gotk4-adwaita/pkg/adw"
 	"github.com/diamondburned/gotk4/pkg/gio/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
+	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
+	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
+	"github.com/zalando/go-keyring"
+)
+
+const (
+	idTokenKey      = "id_token"
+	refreshTokenKey = "refresh_token"
 )
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	opts := &slog.HandlerOptions{}
+	// TODO: Get verbosity level from GSettings
+	if true {
+		opts.Level = slog.LevelDebug
+	}
+	log := slog.New(slog.NewJSONHandler(os.Stderr, opts))
+
+	authner := authn.NewAuthner(
+		slog.New(log.Handler().WithGroup("authner")),
+
+		// TODO: Read from GSettings
+		"https://dev-4op4cmts68nqcenb.us.auth0.com/",
+		"SiNcjPaYVYCOzeVvQAYl4mqhglsSWNY4",
+		"senbara:///authorize",
+	)
+
+	if err := authner.Init(ctx); err != nil {
+		panic(err)
+	}
+
 	a := adw.NewApplication("com.pojtinger.felicitas.SenbaraHandler", gio.ApplicationHandlesOpen)
 
 	var (
@@ -21,7 +55,7 @@ func main() {
 		w = adw.NewWindow()
 		w.SetVisible(true)
 
-		l = gtk.NewLabel("No auth code or state set")
+		l = gtk.NewLabel("Unauthenticated")
 		w.SetContent(l)
 
 		a.AddWindow(&w.Window)
@@ -43,7 +77,58 @@ func main() {
 			authCode := u.Query().Get("code")
 			state := u.Query().Get("state")
 
-			l.SetText(fmt.Sprintf(`Auth code: %v, state: %v`, authCode, state))
+			log := log.With(
+				"authCode", authCode != "",
+				"state", state,
+			)
+
+			log.Debug("Handling user auth exchange")
+
+			_, signedOut, err := authner.Exchange(
+				ctx,
+
+				authCode,
+				state,
+
+				func(s string, t time.Time) error {
+					// TODO: Handle expiry time
+					return keyring.Set(resources.AppID, refreshTokenKey, s)
+				},
+				func(s string, t time.Time) error {
+					// TODO: Handle expiry time
+					return keyring.Set(resources.AppID, idTokenKey, s)
+				},
+
+				func() error {
+					return keyring.Delete(resources.AppID, refreshTokenKey)
+				},
+				func() error {
+					return keyring.Delete(resources.AppID, idTokenKey)
+				},
+			)
+			if err != nil {
+				panic(err)
+			}
+
+			if signedOut {
+				// TODO: Navigate to internal "start page"/nextURL
+
+				return
+			}
+
+			rt, err := keyring.Get(resources.AppID, refreshTokenKey)
+			if err != nil {
+				panic(err)
+			}
+
+			it, err := keyring.Get(resources.AppID, idTokenKey)
+			if err != nil {
+				panic(err)
+			}
+
+			l.SetText(fmt.Sprintf(`Refresh token: %v, ID token: %v`, rt, it))
+
+			// TODO: Navigate to internal "next page"/nextURL
 		}
 	})
 

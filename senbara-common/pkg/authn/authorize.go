@@ -151,20 +151,22 @@ func (a *Authner) Authorize(
 		EmailVerified bool   `json:"email_verified"`
 	}
 	if err := id.Claims(&claims); err != nil {
-		log.Debug("Failed to parse ID token claims", "error", err)
+		log.Debug("Failed to parse ID token claims", "error", errors.Join(ErrCouldNotLogin, err))
 
-		return "", false, "", "", errors.Join(ErrCouldNotLogin, err)
+		return "", false, "", "", ErrCouldNotLogin
 	}
 
 	if !claims.EmailVerified {
-		log.Debug("Email from ID token claims not verified, user is unauthorized", "email", claims.Email)
+		log.Debug("Email from ID token claims not verified, user is unauthorized", "email", claims.Email, "error", errors.Join(ErrCouldNotLogin, errEmailNotVerified))
 
 		return "", false, "", "", errors.Join(ErrCouldNotLogin, errEmailNotVerified)
 	}
 
 	lu, err := url.Parse(a.oidcIssuer)
 	if err != nil {
-		return "", false, "", "", errors.Join(ErrCouldNotLogin, err)
+		log.Debug("Could not parse OIDC issuer URL", "error", errors.Join(ErrCouldNotLogin, err))
+
+		return "", false, "", "", ErrCouldNotLogin
 	}
 
 	q := lu.Query()
