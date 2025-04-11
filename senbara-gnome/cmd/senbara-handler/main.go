@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/url"
@@ -13,6 +14,7 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
 	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
+	"github.com/rymdport/portal/openuri"
 	"github.com/zalando/go-keyring"
 )
 
@@ -55,11 +57,104 @@ func main() {
 		w = adw.NewWindow()
 		w.SetVisible(true)
 
-		// TODO: Show "login" button if not already signed in/authenticated and redirect to browser if requested, else show "logout" button
-		l = gtk.NewLabel("Unauthenticated")
-		w.SetContent(l)
+		b := gtk.NewBox(gtk.OrientationVertical, 4)
+
+		l = gtk.NewLabel("Home")
+		b.Append(l)
+
+		w.SetContent(b)
 
 		a.AddWindow(&w.Window)
+
+		var (
+			refreshToken,
+			idToken *string
+		)
+		rt, err := keyring.Get(resources.AppID, refreshTokenKey)
+		if err != nil {
+			if !errors.Is(err, keyring.ErrNotFound) {
+				panic(err)
+			}
+		} else {
+			refreshToken = &rt
+		}
+
+		it, err := keyring.Get(resources.AppID, idTokenKey)
+		if err != nil {
+			if !errors.Is(err, keyring.ErrNotFound) {
+				panic(err)
+			}
+		} else {
+			idToken = &it
+		}
+
+		nextURL, requirePrivacyConsent, _, logoutURL, err := authner.Authorize(
+			ctx,
+
+			false,
+			"/",
+			"/",
+
+			false,
+
+			refreshToken,
+			idToken,
+
+			func(s string, t time.Time) error {
+				// TODO: Handle expiry time
+				return keyring.Set(resources.AppID, refreshTokenKey, s)
+			},
+			func(s string, t time.Time) error {
+				// TODO: Handle expiry time
+				return keyring.Set(resources.AppID, idTokenKey, s)
+			},
+		)
+		if err != nil {
+			panic(err)
+		}
+
+		redirected := nextURL != ""
+		if redirected {
+			if err := openuri.OpenURI("", nextURL, nil); err != nil {
+				panic(err)
+			}
+
+			return
+		}
+
+		if requirePrivacyConsent {
+			// TODO: Implement privacy consent page
+		}
+
+		if logoutURL != "" {
+			rt, err := keyring.Get(resources.AppID, refreshTokenKey)
+			if err != nil {
+				panic(err)
+			}
+
+			it, err := keyring.Get(resources.AppID, idTokenKey)
+			if err != nil {
+				panic(err)
+			}
+
+			l.SetText(fmt.Sprintf(`Refresh token: %v, ID token: %v`, rt, it))
+
+			// TODO: Add logout button
+
+			// TODO: Navigate to internal "next page"/nextURL
+		} else {
+			bt := gtk.NewButton()
+			bt.SetLabel("Login")
+			bt.ConnectClicked(func() {
+				// TODO: Implement behavior from https://github.com/pojntfx/donna/blob/20af86f20378b5810258395652bbf57d71e2d184/senbara-forms/pkg/controllers/authn.go#L190-L207
+
+				if err := openuri.OpenURI("http://localhost:1337/login", nextURL, nil); err != nil {
+					panic(err)
+				}
+			})
+
+			b.Append(bt)
+		}
 	})
 
 	a.ConnectOpen(func(files []gio.Filer, hint string) {
@@ -112,7 +207,7 @@ func main() {
 			}
 
 			if signedOut {
-				l.SetText("Unauthenticated")
+				l.SetText("Home")
 
 				// TODO: Navigate to internal "start page"/nextURL
 
