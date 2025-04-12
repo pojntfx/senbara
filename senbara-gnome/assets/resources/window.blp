@@ -7,26 +7,195 @@ Adw.Window main-window {
     title: _("Senbara Forms");
     visible: true;
 
-    Adw.ToolbarView {
-        [top]
-        Adw.HeaderBar {
-            show-title: false;
+    Adw.NavigationView main-navigation {
+        Adw.NavigationPage {
+            title: _("Loading Senbara Forms");
+            tag: "loading-config";
 
-            [end]
-            MenuButton {
-                icon-name: "open-menu-symbolic";
-                primary: true;
+            Adw.ToolbarView {
+                [top]
+                Adw.HeaderBar {
+                    show-title: false;
+
+                    [end]
+                    MenuButton {
+                        icon-name: "open-menu-symbolic";
+                        primary: true;
+                        menu-model: setup-menu;
+                    }
+                }
+
+                Adw.StatusPage {
+                    title: _("Loading Senbara Forms");
+                    description: _("Checking configuration ...");
+
+                    Adw.Spinner {
+                        width-request: 48;
+                        height-request: 48;
+                    }
+                }
             }
         }
 
-        Adw.StatusPage {
+        Adw.NavigationPage {
             title: _("Senbara Forms");
-            description: _("GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
-            icon-name: "open-book-symbolic";
+            tag: "login";
+            can-pop: false;
 
-            styles [
-                "status-page",
-            ]
+            Adw.ToolbarView {
+                [top]
+                Adw.HeaderBar {
+                    show-title: false;
+
+                    [end]
+                    MenuButton {
+                        icon-name: "open-menu-symbolic";
+                        primary: true;
+                        menu-model: setup-menu;
+                    }
+                }
+
+                Adw.StatusPage {
+                    title: _("Senbara Forms");
+                    description: _("GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
+                    icon-name: "open-book-symbolic";
+
+                    Button login-button {
+                        halign: center;
+                        label: _("Login");
+
+                        styles [
+                            "suggested-action",
+                        ]
+                    }
+                }
+            }
+        }
+
+        // TODO: Add authentication & server setup page
+        Adw.NavigationPage {
+            title: _("Privacy policy consent");
+            tag: "privacy-policy";
+
+            Adw.ToolbarView {
+                [top]
+                Adw.HeaderBar {
+                    show-title: false;
+
+                    [end]
+                    MenuButton {
+                        icon-name: "open-menu-symbolic";
+                        primary: true;
+                        menu-model: setup-menu;
+                    }
+
+                    [end]
+                    Button continue-button {
+                        label: _("Continue");
+                        sensitive: false;
+
+                        styles [
+                            "suggested-action",
+                        ]
+                    }
+                }
+
+                Adw.StatusPage {
+                    title: _("Privacy policy consent");
+                    icon-name: "license-symbolic";
+
+                    CheckButton privacy-policy-checkbutton {
+                        halign: center;
+
+                        Label {
+                            use-markup: true;
+                            label: _(" I have read and understood the <a href=\"https://felicitas.pojtinger.com/privacy/dynamic\">privacy policy</a>");
+                        }
+                    }
+                }
+            }
+        }
+
+        Adw.NavigationPage {
+            title: _("Signing you in");
+            tag: "exchange";
+
+            Adw.ToolbarView {
+                [top]
+                Adw.HeaderBar {
+                    show-title: false;
+
+                    [end]
+                    MenuButton {
+                        icon-name: "open-menu-symbolic";
+                        primary: true;
+                        menu-model: setup-menu;
+                    }
+                }
+
+                Adw.StatusPage {
+                    title: _("Signing you in");
+                    description: _("Waiting for authorization from browser ...");
+
+                    Adw.Spinner {
+                        width-request: 48;
+                        height-request: 48;
+                    }
+                }
+            }
+        }
+
+        Adw.NavigationPage {
+            title: _("Senbara Forms");
+            tag: "home";
+            can-pop: false;
+
+            Adw.ToolbarView {
+                [top]
+                Adw.HeaderBar {
+                    show-title: false;
+
+                    [end]
+                    MenuButton {
+                        icon-name: "open-menu-symbolic";
+                        primary: true;
+                        menu-model: main-menu;
+                    }
+                }
+
+                Adw.StatusPage {
+                    title: _("Senbara Forms");
+                    description: _("GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
+                    icon-name: "open-book-symbolic";
+                }
+            }
+        }
+    }
+}
+
+menu setup-menu {
+    section {
+        item {
+            label: _("About Senbara Forms");
+            action: "app.about";
+        }
+    }
+}
+
+menu main-menu {
+    section {
+        label: _("Account");
+
+        item {
+            label: _("Logout");
+            action: "app.logout";
+        }
+    }
+
+    section {
+        item {
+            label: _("About Senbara Forms");
+            action: "app.about";
         }
     }
 }

@@ -1,11 +1,14 @@
 package main
 
 import (
+	"errors"
 	"io"
 	"io/fs"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 
 	"github.com/diamondburned/gotk4-adwaita/pkg/adw"
 	gcore "github.com/diamondburned/gotk4/pkg/core/glib"
@@ -15,6 +18,12 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
 	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
 	"github.com/pojntfx/senbara/senbara-gnome/config/locales"
+	"github.com/rymdport/portal/openuri"
+	"github.com/zalando/go-keyring"
+)
+
+const (
+	refreshTokenKey = "refresh_token"
 )
 
 func main() {
@@ -96,11 +105,101 @@ func main() {
 
 		w := b.GetObject("main-window").Cast().(*adw.Window)
 
+		nv := b.GetObject("main-navigation").Cast().(*adw.NavigationView)
+
+		lb := b.GetObject("login-button").Cast().(*gtk.Button)
+		lb.ConnectClicked(func() {
+			nv.PushByTag("privacy-policy")
+		})
+
+		ppcb := b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
+		cb := b.GetObject("continue-button").Cast().(*gtk.Button)
+
+		ppcb.ConnectToggled(func() {
+			cb.SetSensitive(ppcb.Active())
+		})
+
+		nv.ConnectPopped(func(page *adw.NavigationPage) {
+			if page.Tag() == "privacy-policy" {
+				ppcb.SetActive(false)
+			}
+		})
+
+		cb.ConnectClicked(func() {
+			nv.PushByTag("exchange")
+		})
+
+		nv.ConnectPushed(func() {
+			if nv.VisiblePage().Tag() == "exchange" {
+				if err := openuri.OpenURI("", "https://example.com/", nil); err != nil {
+					panic(err)
+				}
+
+				time.AfterFunc(time.Second*2, func() {
+					if err := keyring.Set(resources.AppID, refreshTokenKey, "testvalue"); err != nil {
+						panic(err)
+					}
+
+					if nv.VisiblePage().Tag() == "exchange" {
+						nv.PushByTag("home")
+					}
+				})
+			}
+		})
+
+		logoutAction := gio.NewSimpleAction("logout", nil)
+		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
+			if err := keyring.Delete(resources.AppID, refreshTokenKey); err != nil {
+				panic(err)
+			}
+
+			nv.PopToTag("loading-config")
+		})
+		a.AddAction(logoutAction)
+
+		aboutAction := gio.NewSimpleAction("about", nil)
+		aboutAction.ConnectActivate(func(parameter *glib.Variant) {
+			log.Println("Showing about screen")
+		})
+		a.AddAction(aboutAction)
+
 		gtk.StyleContextAddProviderForDisplay(
 			gdk.DisplayGetDefault(),
 			c,
 			gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
 		)
+
+		hydrateFromConfig := func() {
+			// TODO: Check if existing auth configuration works here, if not try to renew
+			// ID token or sign in again. If no configuration is set or it is not recoverable,
+			// clear configuration (although the library should do that automatically) and
+			// continue to login page for setup.
+			time.AfterFunc(time.Millisecond*500, func() {
+				if _, err := keyring.Get(resources.AppID, refreshTokenKey); err != nil {
+					if errors.Is(err, keyring.ErrNotFound) {
+						nv.PushByTag("login")
+					} else {
+						panic(err)
+					}
+				} else {
+					nv.PushByTag("home")
+				}
+			})
+		}
+
+		nv.ConnectPushed(func() {
+			if nv.VisiblePage().Tag() == "loading-config" {
+				hydrateFromConfig()
+			}
+		})
+
+		nv.ConnectPopped(func(page *adw.NavigationPage) {
+			if nv.VisiblePage().Tag() == "loading-config" {
+				hydrateFromConfig()
+			}
+		})
+
+		hydrateFromConfig()
 
 		a.AddWindow(&w.Window)
 	})
