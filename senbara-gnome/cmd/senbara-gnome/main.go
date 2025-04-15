@@ -109,23 +109,45 @@ func main() {
 
 		lb := b.GetObject("login-button").Cast().(*gtk.Button)
 		lb.ConnectClicked(func() {
+			nv.PushByTag("select-server")
+		})
+
+		sse := b.GetObject("select-server-input").Cast().(*adw.EntryRow)
+		sscb := b.GetObject("select-server-continue-button").Cast().(*gtk.Button)
+
+		sse.ConnectChanged(func() {
+			if sse.TextLength() > 0 {
+				sscb.SetSensitive(true)
+			} else {
+				sscb.SetSensitive(false)
+			}
+		})
+
+		nv.ConnectPopped(func(page *adw.NavigationPage) {
+			if page.Tag() == "select-server" {
+				sse.SetText("")
+				sscb.SetSensitive(false)
+			}
+		})
+
+		sscb.ConnectClicked(func() {
 			nv.PushByTag("privacy-policy")
 		})
 
-		ppcb := b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
-		cb := b.GetObject("continue-button").Cast().(*gtk.Button)
+		ppckb := b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
+		ppcb := b.GetObject("privacy-policy-continue-button").Cast().(*gtk.Button)
 
-		ppcb.ConnectToggled(func() {
-			cb.SetSensitive(ppcb.Active())
+		ppckb.ConnectToggled(func() {
+			ppcb.SetSensitive(ppckb.Active())
 		})
 
 		nv.ConnectPopped(func(page *adw.NavigationPage) {
 			if page.Tag() == "privacy-policy" {
-				ppcb.SetActive(false)
+				ppckb.SetActive(false)
 			}
 		})
 
-		cb.ConnectClicked(func() {
+		ppcb.ConnectClicked(func() {
 			nv.PushByTag("exchange")
 		})
 

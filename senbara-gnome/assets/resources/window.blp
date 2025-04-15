@@ -72,7 +72,51 @@ Adw.Window main-window {
             }
         }
 
-        // TODO: Add authentication & server setup page
+        Adw.NavigationPage {
+            title: _("Select server");
+            tag: "select-server";
+
+            Adw.ToolbarView {
+                [top]
+                Adw.HeaderBar {
+                    show-title: false;
+
+                    [end]
+                    MenuButton {
+                        icon-name: "open-menu-symbolic";
+                        primary: true;
+                        menu-model: setup-menu;
+                    }
+
+                    [end]
+                    Button select-server-continue-button {
+                        label: _("Continue");
+                        sensitive: false;
+
+                        styles [
+                            "suggested-action",
+                        ]
+                    }
+                }
+
+                Adw.StatusPage {
+                    title: _("Where is your server?");
+                    description: _("Enter the Senbara server address you want to connect to.");
+                    icon-name: "network-server-symbolic";
+
+                    Adw.Clamp {
+                        maximum-size: 400;
+
+                        Adw.PreferencesGroup {
+                            Adw.EntryRow select-server-input {
+                                title: _("Server URL");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         Adw.NavigationPage {
             title: _("Privacy policy consent");
             tag: "privacy-policy";
@@ -90,7 +134,7 @@ Adw.Window main-window {
                     }
 
                     [end]
-                    Button continue-button {
+                    Button privacy-policy-continue-button {
                         label: _("Continue");
                         sensitive: false;
 
