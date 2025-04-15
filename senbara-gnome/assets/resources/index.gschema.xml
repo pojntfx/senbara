@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <schemalist>
     <schema id="com.pojtinger.felicitas.Senbara" path="/com/pojtinger/felicitas/Senbara/">
-        <key name='oidc-issuer' type='s'>
+        <key name="server-url" type="s">
+            <default>""</default>
+            <summary>Server URL</summary>
+            <description>Server URL (e.g. https://rest.senbara.p8.lu/)</description>
+        </key>
+        <key name="oidc-issuer" type="s">
             <default>""</default>
             <summary>OIDC Issuer</summary>
-            <description>OIDC Issuer (i.e. https://pojntfx.eu.auth0.com/)</description>
+            <description>OIDC Issuer (e.g. https://pojntfx.eu.auth0.com/)</description>
         </key>
-        <key name='oidc-client-id' type='s'>
+        <key name="oidc-client-id" type="s">
             <default>""</default>
             <summary>OIDC Client ID</summary>
-            <description>OIDC Client ID (i.e. myoidcclientid)</description>
-        </key>
-        <key name='oidc-redirect-url' type='s'>
-            <default>"senbara:///authorize"</default>
-            <summary>OIDC Redirect URL</summary>
-            <description>URL to redirect to after OIDC authentication</description>
+            <description>OIDC Client ID (e.g. myoidcclientid)</description>
         </key>
     </schema>
 </schemalist>

@@ -101,15 +101,23 @@ Adw.Window main-window {
 
                 Adw.StatusPage {
                     title: _("Where is your server?");
-                    description: _("Enter the Senbara server address you want to connect to.");
+                    description: _("Enter the configuration for the Senbara server you want to connect to.");
                     icon-name: "network-server-symbolic";
 
                     Adw.Clamp {
                         maximum-size: 400;
 
                         Adw.PreferencesGroup {
-                            Adw.EntryRow select-server-input {
-                                title: _("Server URL");
+                            Adw.EntryRow select-server-url-input {
+                                title: _("Server URL (e.g. https://rest.senbara.p8.lu/)");
+                            }
+
+                            Adw.EntryRow select-server-oidc-issuer-input {
+                                title: _("OIDC Issuer (e.g. https://pojntfx.eu.auth0.com/)");
+                            }
+
+                            Adw.EntryRow select-server-oidc-client-id-input {
+                                title: _("OIDC Client ID (e.g. myoidcclientid)");
                             }
                         }
                     }

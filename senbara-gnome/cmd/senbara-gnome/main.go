@@ -22,10 +22,6 @@ import (
 	"github.com/zalando/go-keyring"
 )
 
-const (
-	refreshTokenKey = "refresh_token"
-)
-
 func main() {
 	i18t, err := os.MkdirTemp("", "")
 	if err != nil {
@@ -94,7 +90,7 @@ func main() {
 		panic(err)
 	}
 
-	_ = gio.NewSettings(resources.AppID)
+	settings := gio.NewSettings(resources.AppID)
 
 	c := gtk.NewCSSProvider()
 	c.LoadFromResource(resources.ResourceIndexCSSPath)
@@ -112,21 +108,45 @@ func main() {
 			nv.PushByTag("select-server")
 		})
 
-		sse := b.GetObject("select-server-input").Cast().(*adw.EntryRow)
+		var (
+			ssui  = b.GetObject("select-server-url-input").Cast().(*adw.EntryRow)
+			ssuoi = b.GetObject("select-server-oidc-issuer-input").Cast().(*adw.EntryRow)
+			ssuoc = b.GetObject("select-server-oidc-client-id-input").Cast().(*adw.EntryRow)
+		)
+
+		settings.Bind(resources.SettingServerURLKey, ssui.Object, "text", gio.SettingsBindDefault)
+		settings.Bind(resources.SettingOIDCIssuerKey, ssuoi.Object, "text", gio.SettingsBindDefault)
+		settings.Bind(resources.SettingOIDCClientIDKey, ssuoc.Object, "text", gio.SettingsBindDefault)
+
 		sscb := b.GetObject("select-server-continue-button").Cast().(*gtk.Button)
 
-		sse.ConnectChanged(func() {
-			if sse.TextLength() > 0 {
+		checkCanContinueSelectServer := func() {
+			if len(settings.String(resources.SettingServerURLKey)) > 0 &&
+				len(settings.String(resources.SettingOIDCIssuerKey)) > 0 &&
+				len(settings.String(resources.SettingOIDCClientIDKey)) > 0 {
 				sscb.SetSensitive(true)
 			} else {
 				sscb.SetSensitive(false)
 			}
+		}
+
+		settings.ConnectChanged(func(key string) {
+			if key == resources.SettingServerURLKey ||
+				key == resources.SettingOIDCIssuerKey ||
+				key == resources.SettingOIDCClientIDKey {
+				checkCanContinueSelectServer()
+			}
+		})
+
+		nv.ConnectPushed(func() {
+			if nv.VisiblePage().Tag() == "select-server" {
+				checkCanContinueSelectServer()
+			}
 		})
 
 		nv.ConnectPopped(func(page *adw.NavigationPage) {
-			if page.Tag() == "select-server" {
-				sse.SetText("")
-				sscb.SetSensitive(false)
+			if nv.VisiblePage().Tag() == "select-server" {
+				checkCanContinueSelectServer()
 			}
 		})
 
@@ -158,7 +178,7 @@ func main() {
 				}
 
 				time.AfterFunc(time.Second*2, func() {
-					if err := keyring.Set(resources.AppID, refreshTokenKey, "testvalue"); err != nil {
+					if err := keyring.Set(resources.AppID, resources.SecretRefreshTokenKey, "testvalue"); err != nil {
 						panic(err)
 					}
 
@@ -171,7 +191,7 @@ func main() {
 
 		logoutAction := gio.NewSimpleAction("logout", nil)
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
-			if err := keyring.Delete(resources.AppID, refreshTokenKey); err != nil {
+			if err := keyring.Delete(resources.AppID, resources.SecretRefreshTokenKey); err != nil {
 				panic(err)
 			}
 
@@ -197,7 +217,7 @@ func main() {
 			// clear configuration (although the library should do that automatically) and
 			// continue to login page for setup.
 			time.AfterFunc(time.Millisecond*500, func() {
-				if _, err := keyring.Get(resources.AppID, refreshTokenKey); err != nil {
+				if _, err := keyring.Get(resources.AppID, resources.SecretRefreshTokenKey); err != nil {
 					if errors.Is(err, keyring.ErrNotFound) {
 						nv.PushByTag("login")
 					} else {
