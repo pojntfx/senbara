@@ -119,6 +119,7 @@ func main() {
 		settings.Bind(resources.SettingOIDCClientIDKey, ssuoc.Object, "text", gio.SettingsBindDefault)
 
 		sscb := b.GetObject("select-server-continue-button").Cast().(*gtk.Button)
+		sscs := b.GetObject("select-server-continue-spinner").Cast().(*gtk.Widget)
 
 		checkCanContinueSelectServer := func() {
 			if len(settings.String(resources.SettingServerURLKey)) > 0 &&
@@ -151,7 +152,14 @@ func main() {
 		})
 
 		sscb.ConnectClicked(func() {
-			nv.PushByTag("privacy-policy")
+			sscb.SetSensitive(false)
+			sscs.SetVisible(true)
+
+			time.AfterFunc(time.Millisecond*500, func() {
+				defer sscs.SetVisible(false)
+
+				nv.PushByTag("privacy-policy")
+			})
 		})
 
 		ppckb := b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)

@@ -90,8 +90,19 @@ Adw.Window main-window {
 
                     [end]
                     Button select-server-continue-button {
-                        label: _("Continue");
                         sensitive: false;
+
+                        Box {
+                            spacing: 10;
+
+                            Adw.Spinner select-server-continue-spinner {
+                                visible: false;
+                            }
+
+                            Label {
+                                label: _("Continue");
+                            }
+                        }
 
                         styles [
                             "suggested-action",
