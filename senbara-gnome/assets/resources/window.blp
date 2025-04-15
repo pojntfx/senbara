@@ -233,6 +233,35 @@ Adw.Window main-window {
                 }
             }
         }
+
+        Adw.NavigationPage {
+            title: _("Signing you out");
+            tag: "exchange-logout";
+
+            Adw.ToolbarView {
+                [top]
+                Adw.HeaderBar {
+                    show-title: false;
+
+                    [end]
+                    MenuButton {
+                        icon-name: "open-menu-symbolic";
+                        primary: true;
+                        menu-model: setup-menu;
+                    }
+                }
+
+                Adw.StatusPage {
+                    title: _("Signing you out");
+                    description: _("Waiting for authorization from browser ...");
+
+                    Adw.Spinner {
+                        width-request: 48;
+                        height-request: 48;
+                    }
+                }
+            }
+        }
     }
 }
 

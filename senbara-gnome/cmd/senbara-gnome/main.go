@@ -197,13 +197,27 @@ func main() {
 			}
 		})
 
+		nv.ConnectPushed(func() {
+			if nv.VisiblePage().Tag() == "exchange-logout" {
+				if err := openuri.OpenURI("", "https://example.com/", nil); err != nil {
+					panic(err)
+				}
+
+				time.AfterFunc(time.Second*2, func() {
+					if err := keyring.Delete(resources.AppID, resources.SecretRefreshTokenKey); err != nil {
+						panic(err)
+					}
+
+					if nv.VisiblePage().Tag() == "exchange-logout" {
+						nv.PopToTag("loading-config")
+					}
+				})
+			}
+		})
+
 		logoutAction := gio.NewSimpleAction("logout", nil)
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
-			if err := keyring.Delete(resources.AppID, resources.SecretRefreshTokenKey); err != nil {
-				panic(err)
-			}
-
-			nv.PopToTag("loading-config")
+			nv.PushByTag("exchange-logout")
 		})
 		a.AddAction(logoutAction)
 
