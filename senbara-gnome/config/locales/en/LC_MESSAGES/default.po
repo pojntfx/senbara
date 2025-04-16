@@ -4,3 +4,6 @@ msgstr ""
 
 msgid "Senbara Forms"
 msgstr "Senbara Forms"
+
+msgid "GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go."
+msgstr "GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go."

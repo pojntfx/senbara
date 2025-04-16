@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/fs"
 	"log"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -95,11 +96,13 @@ func main() {
 	c := gtk.NewCSSProvider()
 	c.LoadFromResource(resources.ResourceIndexCSSPath)
 
-	a := adw.NewApplication(resources.AppID, gio.ApplicationDefaultFlags)
+	a := adw.NewApplication(resources.AppID, gio.ApplicationHandlesOpen)
+
+	var w *adw.Window
 	a.ConnectActivate(func() {
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
 
-		w := b.GetObject("main-window").Cast().(*adw.Window)
+		w = b.GetObject("main-window").Cast().(*adw.Window)
 
 		nv := b.GetObject("main-navigation").Cast().(*adw.NavigationView)
 
@@ -266,6 +269,23 @@ func main() {
 		hydrateFromConfig()
 
 		a.AddWindow(&w.Window)
+	})
+
+	a.ConnectOpen(func(files []gio.Filer, hint string) {
+		if w == nil {
+			a.Activate()
+		} else {
+			w.Present()
+		}
+
+		for _, r := range files {
+			u, err := url.Parse(r.URI())
+			if err != nil {
+				panic(err)
+			}
+
+			log.Println("Handling URI", u)
+		}
 	})
 
 	if code := a.Run(os.Args); code > 0 {
