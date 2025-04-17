@@ -167,12 +167,17 @@ Adw.Window main-window {
                     title: _("Privacy policy consent");
                     icon-name: "license-symbolic";
 
-                    CheckButton privacy-policy-checkbutton {
+                    Box {
                         halign: center;
+
+                        CheckButton privacy-policy-checkbutton {
+                            halign: center;
+                            label: _("I have read and understood the");
+                        }
 
                         Label {
                             use-markup: true;
-                            label: _(" I have read and understood the <a href=\"https://felicitas.pojtinger.com/privacy/dynamic\">privacy policy</a>");
+                            label: _("<a href=\"https://felicitas.pojtinger.com/privacy/dynamic\">privacy policy</a>");
                         }
                     }
                 }

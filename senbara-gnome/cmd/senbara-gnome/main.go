@@ -1,15 +1,18 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"io"
 	"io/fs"
-	"log"
+	"log/slog"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"time"
+
+	"gopkg.in/yaml.v2"
 
 	"github.com/diamondburned/gotk4-adwaita/pkg/adw"
 	gcore "github.com/diamondburned/gotk4/pkg/core/glib"
@@ -17,13 +20,26 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gio/v2"
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
 	"github.com/pojntfx/senbara/senbara-gnome/config/locales"
+	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 	"github.com/rymdport/portal/openuri"
 	"github.com/zalando/go-keyring"
 )
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	opts := &slog.HandlerOptions{}
+	// TODO: Get verbosity level from GSettings
+	if true {
+		opts.Level = slog.LevelDebug
+	}
+	log := slog.New(slog.NewJSONHandler(os.Stderr, opts))
+
 	i18t, err := os.MkdirTemp("", "")
 	if err != nil {
 		panic(err)
@@ -158,11 +174,51 @@ func main() {
 			sscb.SetSensitive(false)
 			sscs.SetVisible(true)
 
-			time.AfterFunc(time.Millisecond*500, func() {
+			go func() {
 				defer sscs.SetVisible(false)
 
+				var (
+					serverURL    = settings.String(resources.SettingServerURLKey)
+					oidcIssuer   = settings.String(resources.SettingOIDCIssuerKey)
+					oidcClientID = settings.String(resources.SettingOIDCClientIDKey)
+				)
+
+				authner := authn.NewAuthner(
+					slog.New(log.Handler().WithGroup("authner")),
+
+					oidcIssuer,
+					oidcClientID,
+					"senbara:///authorize",
+				)
+
+				if err := authner.Init(ctx); err != nil {
+					// TODO: Display error by marking entry fields as errored and with a toast
+					panic(err)
+				}
+
+				client, err := api.NewClientWithResponses(serverURL)
+				if err != nil {
+					// TODO: Display error by marking entry fields as errored and with a toast
+					panic(err)
+				}
+
+				res, err := client.GetOpenAPISpec(ctx)
+				if err != nil {
+					// TODO: Display error by marking entry fields as errored and with a toast
+					panic(err)
+				}
+
+				var spec *openapi3.T
+				if err := yaml.NewDecoder(res.Body).Decode(&spec); err != nil {
+					// TODO: Display error by marking entry fields as errored and with a toast
+					panic(err)
+				}
+
+				// TODO: Add privacy policy URL to checkbox label content
+				log.Info("Received privacy policy URL", "url", spec.Info.TermsOfService)
+
 				nv.PushByTag("privacy-policy")
-			})
+			}()
 		})
 
 		ppckb := b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
@@ -226,7 +282,7 @@ func main() {
 
 		aboutAction := gio.NewSimpleAction("about", nil)
 		aboutAction.ConnectActivate(func(parameter *glib.Variant) {
-			log.Println("Showing about screen")
+			log.Info("Showing about screen")
 		})
 		a.AddAction(aboutAction)
 
@@ -284,7 +340,7 @@ func main() {
 				panic(err)
 			}
 
-			log.Println("Handling URI", u)
+			log.Info("Handling URI", "uri", u)
 		}
 	})
 
