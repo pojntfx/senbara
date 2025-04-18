@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"html/template"
 	"io"
 	"io/fs"
 	"log/slog"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"gopkg.in/yaml.v2"
@@ -28,6 +30,11 @@ import (
 	"github.com/rymdport/portal/openuri"
 	"github.com/zalando/go-keyring"
 )
+
+type linkTemplateData struct {
+	Href  string
+	Label string
+}
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -114,6 +121,11 @@ func main() {
 
 	a := adw.NewApplication(resources.AppID, gio.ApplicationHandlesOpen)
 
+	lt, err := template.New("").Parse(`<a href="{{ .Href }}">{{ .Label }}</a>`)
+	if err != nil {
+		panic(err)
+	}
+
 	var w *adw.Window
 	a.ConnectActivate(func() {
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
@@ -170,6 +182,8 @@ func main() {
 			}
 		})
 
+		ppl := b.GetObject("privacy-policy-link").Cast().(*gtk.Label)
+
 		sscb.ConnectClicked(func() {
 			sscb.SetSensitive(false)
 			sscs.SetVisible(true)
@@ -214,8 +228,16 @@ func main() {
 					panic(err)
 				}
 
-				// TODO: Add privacy policy URL to checkbox label content
-				log.Info("Received privacy policy URL", "url", spec.Info.TermsOfService)
+				var ltsb strings.Builder
+				if err := lt.Execute(&ltsb, linkTemplateData{
+					Href:  spec.Info.TermsOfService,
+					Label: gcore.Local("privacy policy"),
+				}); err != nil {
+					// TODO: Display error by marking entry fields as errored and with a toast
+					panic(err)
+				}
+
+				ppl.SetLabel(ltsb.String())
 
 				nv.PushByTag("privacy-policy")
 			}()
