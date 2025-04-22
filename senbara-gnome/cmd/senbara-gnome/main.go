@@ -126,13 +126,17 @@ func main() {
 		panic(err)
 	}
 
-	var w *adw.Window
+	var (
+		w       *adw.Window
+		nv      *adw.NavigationView
+		authner *authn.Authner
+	)
 	a.ConnectActivate(func() {
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
 
 		w = b.GetObject("main-window").Cast().(*adw.Window)
 
-		nv := b.GetObject("main-navigation").Cast().(*adw.NavigationView)
+		nv = b.GetObject("main-navigation").Cast().(*adw.NavigationView)
 
 		lb := b.GetObject("login-button").Cast().(*gtk.Button)
 		lb.ConnectClicked(func() {
@@ -197,7 +201,7 @@ func main() {
 					oidcClientID = settings.String(resources.SettingOIDCClientIDKey)
 				)
 
-				authner := authn.NewAuthner(
+				authner = authn.NewAuthner(
 					slog.New(log.Handler().WithGroup("authner")),
 
 					oidcIssuer,
@@ -237,6 +241,8 @@ func main() {
 					panic(err)
 				}
 
+				// TODO: Call authner.Authorize() here and navigate accordingly
+
 				ppl.SetLabel(ltsb.String())
 
 				nv.PushByTag("privacy-policy")
@@ -257,24 +263,66 @@ func main() {
 		})
 
 		ppcb.ConnectClicked(func() {
-			nv.PushByTag("exchange")
-		})
+			var (
+				refreshToken,
+				idToken *string
+			)
+			rt, err := keyring.Get(resources.AppID, resources.SecretRefreshTokenKey)
+			if err != nil {
+				if !errors.Is(err, keyring.ErrNotFound) {
+					panic(err)
+				}
+			} else {
+				refreshToken = &rt
+			}
 
-		nv.ConnectPushed(func() {
-			if nv.VisiblePage().Tag() == "exchange" {
-				if err := openuri.OpenURI("", "https://example.com/", nil); err != nil {
+			it, err := keyring.Get(resources.AppID, resources.SecretIDTokenKey)
+			if err != nil {
+				if !errors.Is(err, keyring.ErrNotFound) {
+					panic(err)
+				}
+			} else {
+				idToken = &it
+			}
+
+			nextURL, requirePrivacyConsent, _, _, err := authner.Authorize( // TODO: Handle requirePrivacyConsent
+				ctx,
+
+				true,
+				"/",
+				"/",
+
+				true,
+
+				refreshToken,
+				idToken,
+
+				func(s string, t time.Time) error {
+					// TODO: Handle expiry time
+					return keyring.Set(resources.AppID, resources.SecretRefreshTokenKey, s)
+				},
+				func(s string, t time.Time) error {
+					// TODO: Handle expiry time
+					return keyring.Set(resources.AppID, resources.SecretIDTokenKey, s)
+				},
+			)
+			if err != nil {
+				panic(err)
+			}
+
+			redirected := nextURL != ""
+			if redirected {
+				nv.PushByTag("exchange")
+
+				if err := openuri.OpenURI("", nextURL, nil); err != nil {
 					panic(err)
 				}
 
-				time.AfterFunc(time.Second*2, func() {
-					if err := keyring.Set(resources.AppID, resources.SecretRefreshTokenKey, "testvalue"); err != nil {
-						panic(err)
-					}
+				return
+			}
 
-					if nv.VisiblePage().Tag() == "exchange" {
-						nv.PushByTag("home")
-					}
-				})
+			if requirePrivacyConsent {
+				// TODO: Implement privacy consent page
 			}
 		})
 
@@ -299,6 +347,8 @@ func main() {
 		logoutAction := gio.NewSimpleAction("logout", nil)
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
 			nv.PushByTag("exchange-logout")
+
+			// TODO: Open proper logout URL
 		})
 		a.AddAction(logoutAction)
 
@@ -315,6 +365,8 @@ func main() {
 		)
 
 		hydrateFromConfig := func() {
+			// TODO: Call authner.Authorize() here and navigate accordingly
+
 			// TODO: Check if existing auth configuration works here, if not try to renew
 			// ID token or sign in again. If no configuration is set or it is not recoverable,
 			// clear configuration (although the library should do that automatically) and
@@ -363,6 +415,54 @@ func main() {
 			}
 
 			log.Info("Handling URI", "uri", u)
+
+			authCode := u.Query().Get("code")
+			state := u.Query().Get("state")
+
+			log := log.With(
+				"authCode", authCode != "",
+				"state", state,
+			)
+
+			log.Debug("Handling user auth exchange")
+
+			_, signedOut, err := authner.Exchange(
+				ctx,
+
+				authCode,
+				state,
+
+				func(s string, t time.Time) error {
+					// TODO: Handle expiry time
+					return keyring.Set(resources.AppID, resources.SecretRefreshTokenKey, s)
+				},
+				func(s string, t time.Time) error {
+					// TODO: Handle expiry time
+					return keyring.Set(resources.AppID, resources.SecretIDTokenKey, s)
+				},
+
+				func() error {
+					return keyring.Delete(resources.AppID, resources.SecretRefreshTokenKey)
+				},
+				func() error {
+					return keyring.Delete(resources.AppID, resources.SecretIDTokenKey)
+				},
+			)
+			if err != nil {
+				panic(err)
+			}
+
+			if signedOut {
+				if nv.VisiblePage().Tag() == "exchange-logout" {
+					nv.PopToTag("loading-config")
+				}
+
+				return
+			}
+
+			if nv.VisiblePage().Tag() == "exchange" {
+				nv.PushByTag("home")
+			}
 		}
 	})
 

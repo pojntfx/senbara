@@ -15,6 +15,7 @@ const (
 	SettingOIDCClientIDKey = "oidc-client-id"
 
 	SecretRefreshTokenKey = "refresh-token"
+	SecretIDTokenKey      = "id-token"
 )
 
 //go:generate sh -c "blueprint-compiler batch-compile . . *.blp && sass .:. && glib-compile-schemas . && glib-compile-resources *.gresource.xml"
