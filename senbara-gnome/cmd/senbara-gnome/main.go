@@ -127,9 +127,10 @@ func main() {
 	}
 
 	var (
-		w       *adw.Window
-		nv      *adw.NavigationView
-		authner *authn.Authner
+		w         *adw.Window
+		nv        *adw.NavigationView
+		authner   *authn.Authner
+		logoutURL string
 	)
 	a.ConnectActivate(func() {
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
@@ -285,7 +286,7 @@ func main() {
 				idToken = &it
 			}
 
-			nextURL, requirePrivacyConsent, _, _, err := authner.Authorize( // TODO: Handle requirePrivacyConsent
+			nextURL, requirePrivacyConsent, _, l, err := authner.Authorize( // TODO: Handle requirePrivacyConsent
 				ctx,
 
 				true,
@@ -310,6 +311,8 @@ func main() {
 				panic(err)
 			}
 
+			logoutURL = l
+
 			redirected := nextURL != ""
 			if redirected {
 				nv.PushByTag("exchange")
@@ -326,29 +329,13 @@ func main() {
 			}
 		})
 
-		nv.ConnectPushed(func() {
-			if nv.VisiblePage().Tag() == "exchange-logout" {
-				if err := openuri.OpenURI("", "https://example.com/", nil); err != nil {
-					panic(err)
-				}
-
-				time.AfterFunc(time.Second*2, func() {
-					if err := keyring.Delete(resources.AppID, resources.SecretRefreshTokenKey); err != nil {
-						panic(err)
-					}
-
-					if nv.VisiblePage().Tag() == "exchange-logout" {
-						nv.PopToTag("loading-config")
-					}
-				})
-			}
-		})
-
 		logoutAction := gio.NewSimpleAction("logout", nil)
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
 			nv.PushByTag("exchange-logout")
 
-			// TODO: Open proper logout URL
+			if err := openuri.OpenURI("", logoutURL, nil); err != nil {
+				panic(err)
+			}
 		})
 		a.AddAction(logoutAction)
 
@@ -365,23 +352,96 @@ func main() {
 		)
 
 		hydrateFromConfig := func() {
-			// TODO: Call authner.Authorize() here and navigate accordingly
+			var (
+				oidcIssuer   = settings.String(resources.SettingOIDCIssuerKey)
+				oidcClientID = settings.String(resources.SettingOIDCClientIDKey)
+			)
 
-			// TODO: Check if existing auth configuration works here, if not try to renew
-			// ID token or sign in again. If no configuration is set or it is not recoverable,
-			// clear configuration (although the library should do that automatically) and
-			// continue to login page for setup.
-			time.AfterFunc(time.Millisecond*500, func() {
-				if _, err := keyring.Get(resources.AppID, resources.SecretRefreshTokenKey); err != nil {
-					if errors.Is(err, keyring.ErrNotFound) {
-						nv.PushByTag("login")
-					} else {
-						panic(err)
-					}
-				} else {
-					nv.PushByTag("home")
+			if authner == nil {
+				authner = authn.NewAuthner(
+					slog.New(log.Handler().WithGroup("authner")),
+
+					oidcIssuer,
+					oidcClientID,
+					"senbara:///authorize",
+				)
+
+				if err := authner.Init(ctx); err != nil {
+					nv.PushByTag("login")
+
+					return
 				}
-			})
+			}
+
+			var (
+				refreshToken,
+				idToken *string
+			)
+			rt, err := keyring.Get(resources.AppID, resources.SecretRefreshTokenKey)
+			if err != nil {
+				if !errors.Is(err, keyring.ErrNotFound) {
+					panic(err)
+				}
+			} else {
+				refreshToken = &rt
+			}
+
+			it, err := keyring.Get(resources.AppID, resources.SecretIDTokenKey)
+			if err != nil {
+				if !errors.Is(err, keyring.ErrNotFound) {
+					panic(err)
+				}
+			} else {
+				idToken = &it
+			}
+
+			nextURL, requirePrivacyConsent, _, l, err := authner.Authorize( // TODO: Handle requirePrivacyConsent
+				ctx,
+
+				true,
+				"/",
+				"/",
+
+				true,
+
+				refreshToken,
+				idToken,
+
+				func(s string, t time.Time) error {
+					// TODO: Handle expiry time
+					return keyring.Set(resources.AppID, resources.SecretRefreshTokenKey, s)
+				},
+				func(s string, t time.Time) error {
+					// TODO: Handle expiry time
+					return keyring.Set(resources.AppID, resources.SecretIDTokenKey, s)
+				},
+			)
+			if err != nil {
+				panic(err)
+			}
+
+			logoutURL = l
+
+			redirected := nextURL != ""
+			if redirected {
+				nv.PushByTag("exchange")
+
+				if err := openuri.OpenURI("", nextURL, nil); err != nil {
+					panic(err)
+				}
+
+				return
+			}
+
+			if requirePrivacyConsent {
+				// TODO: Implement privacy consent page
+			}
+
+			if logoutURL != "" {
+				nv.PushByTag("home")
+			} else {
+				nv.PushByTag("login")
+			}
 		}
 
 		nv.ConnectPushed(func() {
