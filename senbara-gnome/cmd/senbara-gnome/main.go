@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/fs"
 	"log/slog"
+	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -14,26 +15,31 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/yaml.v2"
-
 	"github.com/diamondburned/gotk4-adwaita/pkg/adw"
 	gcore "github.com/diamondburned/gotk4/pkg/core/glib"
 	"github.com/diamondburned/gotk4/pkg/gdk/v4"
 	"github.com/diamondburned/gotk4/pkg/gio/v2"
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
 	"github.com/pojntfx/senbara/senbara-gnome/config/locales"
-	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 	"github.com/rymdport/portal/openuri"
 	"github.com/zalando/go-keyring"
+)
+
+var (
+	errCouldNotLogin = errors.New("could not login")
 )
 
 type linkTemplateData struct {
 	Href  string
 	Label string
+}
+
+type userData struct {
+	Email     string
+	LogoutURL string
 }
 
 func main() {
@@ -121,83 +127,143 @@ func main() {
 
 	a := adw.NewApplication(resources.AppID, gio.ApplicationHandlesOpen)
 
-	lt, err := template.New("").Parse(`<a href="{{ .Href }}">{{ .Label }}</a>`)
+	_, err = template.New("").Parse(`<a href="{{ .Href }}">{{ .Label }}</a>`)
 	if err != nil {
 		panic(err)
 	}
 
 	var (
-		w         *adw.Window
-		nv        *adw.NavigationView
-		authner   *authn.Authner
-		logoutURL string
+		w       *adw.Window
+		authner *authn.Authner
 	)
+
+	authorize := func(
+		ctx context.Context,
+
+		nv *adw.NavigationView,
+
+		privacyPolicyConsentGiven bool,
+
+		loginIfSignedOut bool,
+	) (
+		redirected bool,
+
+		u userData,
+		status int,
+
+		err error,
+	) {
+		log := log.With(
+			"loginIfSignedOut", loginIfSignedOut,
+			"path", nv.VisiblePage().Tag(),
+		)
+
+		log.Debug("Handling user auth")
+
+		var (
+			refreshToken,
+			idToken *string
+		)
+		rt, err := keyring.Get(resources.AppID, resources.SecretRefreshTokenKey)
+		if err != nil {
+			if !errors.Is(err, keyring.ErrNotFound) {
+				log.Debug("Failed to read refresh token cookie", "error", err)
+
+				return false, userData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+			}
+		} else {
+			refreshToken = &rt
+		}
+
+		it, err := keyring.Get(resources.AppID, resources.SecretIDTokenKey)
+		if err != nil {
+			if !errors.Is(err, keyring.ErrNotFound) {
+				log.Debug("Failed to read ID token cookie", "error", err)
+
+				return false, userData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+			}
+		} else {
+			idToken = &it
+		}
+
+		nextURL, requirePrivacyConsent, email, logoutURL, err := authner.Authorize(
+			ctx,
+
+			loginIfSignedOut,
+
+			nv.VisiblePage().Tag(),
+			nv.VisiblePage().Tag(),
+
+			privacyPolicyConsentGiven,
+
+			refreshToken,
+			idToken,
+
+			func(s string, t time.Time) error {
+				// TODO: Handle expiry time
+				return keyring.Set(resources.AppID, resources.SecretRefreshTokenKey, s)
+			},
+			func(s string, t time.Time) error {
+				// TODO: Handle expiry time
+				return keyring.Set(resources.AppID, resources.SecretIDTokenKey, s)
+			},
+		)
+		if err != nil {
+			if errors.Is(err, authn.ErrCouldNotLogin) {
+				return false, userData{}, http.StatusUnauthorized, err
+			}
+
+			return false, userData{}, http.StatusInternalServerError, err
+		}
+
+		redirected = nextURL != ""
+		u = userData{
+			Email:     email,
+			LogoutURL: logoutURL,
+		}
+
+		if redirected {
+			nv.PushByTag("exchange")
+
+			if err := openuri.OpenURI("", nextURL, nil); err != nil {
+				panic(err)
+			}
+
+			return redirected, u, http.StatusTemporaryRedirect, nil
+		}
+
+		if requirePrivacyConsent {
+			nv.PushByTag("privacy-policy")
+
+			log.Debug("Refresh token cookie is missing, but can't reauthenticate with auth provider since privacy policy consent is not yet given. Redirecting to privacy policy consent page")
+
+			return true, u, http.StatusTemporaryRedirect, nil
+		}
+
+		return redirected, u, http.StatusOK, nil
+	}
+
 	a.ConnectActivate(func() {
+		gtk.StyleContextAddProviderForDisplay(
+			gdk.DisplayGetDefault(),
+			c,
+			gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+		)
+
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
 
 		w = b.GetObject("main-window").Cast().(*adw.Window)
 
-		nv = b.GetObject("main-navigation").Cast().(*adw.NavigationView)
+		nv := b.GetObject("main-navigation").Cast().(*adw.NavigationView)
 
-		lb := b.GetObject("login-button").Cast().(*gtk.Button)
-		lb.ConnectClicked(func() {
-			nv.PushByTag("select-server")
-		})
+		ppckb := b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
 
-		var (
-			ssui  = b.GetObject("select-server-url-input").Cast().(*adw.EntryRow)
-			ssuoi = b.GetObject("select-server-oidc-issuer-input").Cast().(*adw.EntryRow)
-			ssuoc = b.GetObject("select-server-oidc-client-id-input").Cast().(*adw.EntryRow)
-		)
-
-		settings.Bind(resources.SettingServerURLKey, ssui.Object, "text", gio.SettingsBindDefault)
-		settings.Bind(resources.SettingOIDCIssuerKey, ssuoi.Object, "text", gio.SettingsBindDefault)
-		settings.Bind(resources.SettingOIDCClientIDKey, ssuoc.Object, "text", gio.SettingsBindDefault)
-
-		sscb := b.GetObject("select-server-continue-button").Cast().(*gtk.Button)
-		sscs := b.GetObject("select-server-continue-spinner").Cast().(*gtk.Widget)
-
-		checkCanContinueSelectServer := func() {
-			if len(settings.String(resources.SettingServerURLKey)) > 0 &&
-				len(settings.String(resources.SettingOIDCIssuerKey)) > 0 &&
-				len(settings.String(resources.SettingOIDCClientIDKey)) > 0 {
-				sscb.SetSensitive(true)
-			} else {
-				sscb.SetSensitive(false)
-			}
-		}
-
-		settings.ConnectChanged(func(key string) {
-			if key == resources.SettingServerURLKey ||
-				key == resources.SettingOIDCIssuerKey ||
-				key == resources.SettingOIDCClientIDKey {
-				checkCanContinueSelectServer()
-			}
-		})
-
-		nv.ConnectPushed(func() {
-			if nv.VisiblePage().Tag() == "select-server" {
-				checkCanContinueSelectServer()
-			}
-		})
-
-		nv.ConnectPopped(func(page *adw.NavigationPage) {
-			if nv.VisiblePage().Tag() == "select-server" {
-				checkCanContinueSelectServer()
-			}
-		})
-
-		ppl := b.GetObject("privacy-policy-link").Cast().(*gtk.Label)
-
-		sscb.ConnectClicked(func() {
-			sscb.SetSensitive(false)
-			sscs.SetVisible(true)
-
-			go func() {
-				defer sscs.SetVisible(false)
+		handleNavigation := func() {
+			switch nv.VisiblePage().Tag() {
+			case "loading-config":
+				log.Info("Handling loading-config")
 
 				var (
-					serverURL    = settings.String(resources.SettingServerURLKey)
 					oidcIssuer   = settings.String(resources.SettingOIDCIssuerKey)
 					oidcClientID = settings.String(resources.SettingOIDCClientIDKey)
 				)
@@ -211,252 +277,45 @@ func main() {
 				)
 
 				if err := authner.Init(ctx); err != nil {
-					// TODO: Display error by marking entry fields as errored and with a toast
-					panic(err)
-				}
+					log.Info("Could not initialize authner, redirecting to login", "err", err)
 
-				client, err := api.NewClientWithResponses(serverURL)
-				if err != nil {
-					// TODO: Display error by marking entry fields as errored and with a toast
-					panic(err)
-				}
-
-				res, err := client.GetOpenAPISpec(ctx)
-				if err != nil {
-					// TODO: Display error by marking entry fields as errored and with a toast
-					panic(err)
-				}
-
-				var spec *openapi3.T
-				if err := yaml.NewDecoder(res.Body).Decode(&spec); err != nil {
-					// TODO: Display error by marking entry fields as errored and with a toast
-					panic(err)
-				}
-
-				var ltsb strings.Builder
-				if err := lt.Execute(&ltsb, linkTemplateData{
-					Href:  spec.Info.TermsOfService,
-					Label: gcore.Local("privacy policy"),
-				}); err != nil {
-					// TODO: Display error by marking entry fields as errored and with a toast
-					panic(err)
-				}
-
-				// TODO: Call authner.Authorize() here and navigate accordingly
-
-				ppl.SetLabel(ltsb.String())
-
-				nv.PushByTag("privacy-policy")
-			}()
-		})
-
-		ppckb := b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
-		ppcb := b.GetObject("privacy-policy-continue-button").Cast().(*gtk.Button)
-
-		ppckb.ConnectToggled(func() {
-			ppcb.SetSensitive(ppckb.Active())
-		})
-
-		nv.ConnectPopped(func(page *adw.NavigationPage) {
-			if page.Tag() == "privacy-policy" {
-				ppckb.SetActive(false)
-			}
-		})
-
-		ppcb.ConnectClicked(func() {
-			var (
-				refreshToken,
-				idToken *string
-			)
-			rt, err := keyring.Get(resources.AppID, resources.SecretRefreshTokenKey)
-			if err != nil {
-				if !errors.Is(err, keyring.ErrNotFound) {
-					panic(err)
-				}
-			} else {
-				refreshToken = &rt
-			}
-
-			it, err := keyring.Get(resources.AppID, resources.SecretIDTokenKey)
-			if err != nil {
-				if !errors.Is(err, keyring.ErrNotFound) {
-					panic(err)
-				}
-			} else {
-				idToken = &it
-			}
-
-			nextURL, requirePrivacyConsent, _, l, err := authner.Authorize( // TODO: Handle requirePrivacyConsent
-				ctx,
-
-				true,
-				"/",
-				"/",
-
-				true,
-
-				refreshToken,
-				idToken,
-
-				func(s string, t time.Time) error {
-					// TODO: Handle expiry time
-					return keyring.Set(resources.AppID, resources.SecretRefreshTokenKey, s)
-				},
-				func(s string, t time.Time) error {
-					// TODO: Handle expiry time
-					return keyring.Set(resources.AppID, resources.SecretIDTokenKey, s)
-				},
-			)
-			if err != nil {
-				panic(err)
-			}
-
-			logoutURL = l
-
-			redirected := nextURL != ""
-			if redirected {
-				nv.PushByTag("exchange")
-
-				if err := openuri.OpenURI("", nextURL, nil); err != nil {
-					panic(err)
-				}
-
-				return
-			}
-
-			if requirePrivacyConsent {
-				// TODO: Implement privacy consent page
-			}
-		})
-
-		logoutAction := gio.NewSimpleAction("logout", nil)
-		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
-			nv.PushByTag("exchange-logout")
-
-			if err := openuri.OpenURI("", logoutURL, nil); err != nil {
-				panic(err)
-			}
-		})
-		a.AddAction(logoutAction)
-
-		aboutAction := gio.NewSimpleAction("about", nil)
-		aboutAction.ConnectActivate(func(parameter *glib.Variant) {
-			log.Info("Showing about screen")
-		})
-		a.AddAction(aboutAction)
-
-		gtk.StyleContextAddProviderForDisplay(
-			gdk.DisplayGetDefault(),
-			c,
-			gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
-		)
-
-		hydrateFromConfig := func() {
-			var (
-				oidcIssuer   = settings.String(resources.SettingOIDCIssuerKey)
-				oidcClientID = settings.String(resources.SettingOIDCClientIDKey)
-			)
-
-			if authner == nil {
-				authner = authn.NewAuthner(
-					slog.New(log.Handler().WithGroup("authner")),
-
-					oidcIssuer,
-					oidcClientID,
-					"senbara:///authorize",
-				)
-
-				if err := authner.Init(ctx); err != nil {
 					nv.PushByTag("login")
 
 					return
 				}
-			}
 
-			var (
-				refreshToken,
-				idToken *string
-			)
-			rt, err := keyring.Get(resources.AppID, resources.SecretRefreshTokenKey)
-			if err != nil {
-				if !errors.Is(err, keyring.ErrNotFound) {
-					panic(err)
-				}
-			} else {
-				refreshToken = &rt
-			}
+				_, userData, _, err := authorize(
+					ctx,
 
-			it, err := keyring.Get(resources.AppID, resources.SecretIDTokenKey)
-			if err != nil {
-				if !errors.Is(err, keyring.ErrNotFound) {
-					panic(err)
-				}
-			} else {
-				idToken = &it
-			}
+					nv,
 
-			nextURL, requirePrivacyConsent, _, l, err := authner.Authorize( // TODO: Handle requirePrivacyConsent
-				ctx,
+					ppckb.Active(),
 
-				true,
-				"/",
-				"/",
+					false,
+				)
+				if err != nil {
+					log.Warn("Could not authorize user for index page", "err", err)
 
-				true,
-
-				refreshToken,
-				idToken,
-
-				func(s string, t time.Time) error {
-					// TODO: Handle expiry time
-					return keyring.Set(resources.AppID, resources.SecretRefreshTokenKey, s)
-				},
-				func(s string, t time.Time) error {
-					// TODO: Handle expiry time
-					return keyring.Set(resources.AppID, resources.SecretIDTokenKey, s)
-				},
-			)
-			if err != nil {
-				panic(err)
-			}
-
-			logoutURL = l
-
-			redirected := nextURL != ""
-			if redirected {
-				nv.PushByTag("exchange")
-
-				if err := openuri.OpenURI("", nextURL, nil); err != nil {
 					panic(err)
 				}
 
-				return
-			}
+				if strings.TrimSpace(userData.Email) != "" {
+					nv.PushByTag("home")
 
-			if requirePrivacyConsent {
-				// TODO: Implement privacy consent page
-			}
+					return
+				}
 
-			if logoutURL != "" {
-				nv.PushByTag("home")
-			} else {
 				nv.PushByTag("login")
 			}
 		}
 
-		nv.ConnectPushed(func() {
-			if nv.VisiblePage().Tag() == "loading-config" {
-				hydrateFromConfig()
-			}
-		})
-
 		nv.ConnectPopped(func(page *adw.NavigationPage) {
-			if nv.VisiblePage().Tag() == "loading-config" {
-				hydrateFromConfig()
-			}
+			handleNavigation()
 		})
+		nv.ConnectPushed(handleNavigation)
+		nv.ConnectReplaced(handleNavigation)
 
-		hydrateFromConfig()
+		handleNavigation()
 
 		a.AddWindow(&w.Window)
 	})
@@ -469,59 +328,9 @@ func main() {
 		}
 
 		for _, r := range files {
-			u, err := url.Parse(r.URI())
+			_, err := url.Parse(r.URI())
 			if err != nil {
 				panic(err)
-			}
-
-			log.Info("Handling URI", "uri", u)
-
-			authCode := u.Query().Get("code")
-			state := u.Query().Get("state")
-
-			log := log.With(
-				"authCode", authCode != "",
-				"state", state,
-			)
-
-			log.Debug("Handling user auth exchange")
-
-			_, signedOut, err := authner.Exchange(
-				ctx,
-
-				authCode,
-				state,
-
-				func(s string, t time.Time) error {
-					// TODO: Handle expiry time
-					return keyring.Set(resources.AppID, resources.SecretRefreshTokenKey, s)
-				},
-				func(s string, t time.Time) error {
-					// TODO: Handle expiry time
-					return keyring.Set(resources.AppID, resources.SecretIDTokenKey, s)
-				},
-
-				func() error {
-					return keyring.Delete(resources.AppID, resources.SecretRefreshTokenKey)
-				},
-				func() error {
-					return keyring.Delete(resources.AppID, resources.SecretIDTokenKey)
-				},
-			)
-			if err != nil {
-				panic(err)
-			}
-
-			if signedOut {
-				if nv.VisiblePage().Tag() == "exchange-logout" {
-					nv.PopToTag("loading-config")
-				}
-
-				return
-			}
-
-			if nv.VisiblePage().Tag() == "exchange" {
-				nv.PushByTag("home")
 			}
 		}
 	})

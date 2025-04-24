@@ -2,19 +2,19 @@
 <schemalist>
     <schema id="com.pojtinger.felicitas.Senbara" path="/com/pojtinger/felicitas/Senbara/">
         <key name="server-url" type="s">
-            <default>""</default>
+            <default>"http://localhost:1337"</default>
             <summary>Server URL</summary>
             <description>Server URL (e.g. https://rest.senbara.p8.lu/)</description>
         </key>
         <key name="oidc-issuer" type="s">
-            <default>""</default>
+            <default>"https://dev-4op4cmts68nqcenb.us.auth0.com/"</default>
             <summary>OIDC Issuer</summary>
-            <description>OIDC Issuer (e.g. https://pojntfx.eu.auth0.com/)</description>
+            <description>OIDC Issuer (e.g. https://dev-4op4cmts68nqcenb.us.auth0.com/)</description>
         </key>
         <key name="oidc-client-id" type="s">
-            <default>""</default>
+            <default>"SiNcjPaYVYCOzeVvQAYl4mqhglsSWNY4"</default>
             <summary>OIDC Client ID</summary>
-            <description>OIDC Client ID (e.g. myoidcclientid)</description>
+            <description>OIDC Client ID (e.g. SiNcjPaYVYCOzeVvQAYl4mqhglsSWNY4)</description>
         </key>
     </schema>
 </schemalist>
