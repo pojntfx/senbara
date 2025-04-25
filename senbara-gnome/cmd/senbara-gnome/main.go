@@ -21,11 +21,14 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gio/v2"
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
 	"github.com/pojntfx/senbara/senbara-gnome/config/locales"
+	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 	"github.com/rymdport/portal/openuri"
 	"github.com/zalando/go-keyring"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -127,7 +130,7 @@ func main() {
 
 	a := adw.NewApplication(resources.AppID, gio.ApplicationHandlesOpen)
 
-	_, err = template.New("").Parse(`<a href="{{ .Href }}">{{ .Label }}</a>`)
+	lt, err := template.New("").Parse(`<a href="{{ .Href }}">{{ .Label }}</a>`)
 	if err != nil {
 		panic(err)
 	}
@@ -252,32 +255,118 @@ func main() {
 
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
 
-		w = b.GetObject("main-window").Cast().(*adw.Window)
+		var (
+			w  = b.GetObject("main-window").Cast().(*adw.Window)
+			nv = b.GetObject("main-navigation").Cast().(*adw.NavigationView)
 
-		nv := b.GetObject("main-navigation").Cast().(*adw.NavigationView)
+			ppckb = b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
 
-		ppckb := b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
+			lb = b.GetObject("login-button").Cast().(*gtk.Button)
+
+			ssui  = b.GetObject("select-server-url-input").Cast().(*adw.EntryRow)
+			ssuoi = b.GetObject("select-server-oidc-issuer-input").Cast().(*adw.EntryRow)
+			ssuoc = b.GetObject("select-server-oidc-client-id-input").Cast().(*adw.EntryRow)
+			sscb  = b.GetObject("select-server-continue-button").Cast().(*gtk.Button)
+			sscs  = b.GetObject("select-server-continue-spinner").Cast().(*gtk.Widget)
+
+			ppl = b.GetObject("privacy-policy-link").Cast().(*gtk.Label)
+		)
+
+		lb.ConnectClicked(func() {
+			nv.PushByTag("select-server")
+		})
+
+		settings.Bind(resources.SettingServerURLKey, ssui.Object, "text", gio.SettingsBindDefault)
+		settings.Bind(resources.SettingOIDCIssuerKey, ssuoi.Object, "text", gio.SettingsBindDefault)
+		settings.Bind(resources.SettingOIDCClientIDKey, ssuoc.Object, "text", gio.SettingsBindDefault)
+
+		updateSelectServerContinueButtonSensitive := func() {
+			if len(settings.String(resources.SettingServerURLKey)) > 0 &&
+				len(settings.String(resources.SettingOIDCIssuerKey)) > 0 &&
+				len(settings.String(resources.SettingOIDCClientIDKey)) > 0 {
+				sscb.SetSensitive(true)
+			} else {
+				sscb.SetSensitive(false)
+			}
+		}
+
+		settings.ConnectChanged(func(key string) {
+			if key == resources.SettingServerURLKey ||
+				key == resources.SettingOIDCIssuerKey ||
+				key == resources.SettingOIDCClientIDKey {
+				updateSelectServerContinueButtonSensitive()
+			}
+		})
+
+		checkConfiguration := func() error {
+			var (
+				serverURL    = settings.String(resources.SettingServerURLKey)
+				oidcIssuer   = settings.String(resources.SettingOIDCIssuerKey)
+				oidcClientID = settings.String(resources.SettingOIDCClientIDKey)
+			)
+
+			authner = authn.NewAuthner(
+				slog.New(log.Handler().WithGroup("authner")),
+
+				oidcIssuer,
+				oidcClientID,
+				"senbara:///authorize",
+			)
+
+			if err := authner.Init(ctx); err != nil {
+				return err
+			}
+
+			client, err := api.NewClientWithResponses(serverURL)
+			if err != nil {
+				return err
+			}
+
+			res, err := client.GetOpenAPISpec(ctx)
+			if err != nil {
+				return err
+			}
+
+			var spec *openapi3.T
+			if err := yaml.NewDecoder(res.Body).Decode(&spec); err != nil {
+				return err
+			}
+
+			var ltsb strings.Builder
+			if err := lt.Execute(&ltsb, linkTemplateData{
+				Href:  spec.Info.TermsOfService,
+				Label: gcore.Local("privacy policy"),
+			}); err != nil {
+				return err
+			}
+
+			ppl.SetLabel(ltsb.String())
+
+			return nil
+		}
+
+		sscb.ConnectClicked(func() {
+			sscb.SetSensitive(false)
+			sscs.SetVisible(true)
+
+			go func() {
+				defer sscs.SetVisible(false)
+
+				if err := checkConfiguration(); err != nil {
+					panic(err)
+				}
+
+				nv.PushByTag("privacy-policy")
+			}()
+		})
 
 		handleNavigation := func() {
 			switch nv.VisiblePage().Tag() {
 			case "loading-config":
 				log.Info("Handling loading-config")
 
-				var (
-					oidcIssuer   = settings.String(resources.SettingOIDCIssuerKey)
-					oidcClientID = settings.String(resources.SettingOIDCClientIDKey)
-				)
-
-				authner = authn.NewAuthner(
-					slog.New(log.Handler().WithGroup("authner")),
-
-					oidcIssuer,
-					oidcClientID,
-					"senbara:///authorize",
-				)
-
-				if err := authner.Init(ctx); err != nil {
-					log.Info("Could not initialize authner, redirecting to login", "err", err)
+				if err := checkConfiguration(); err != nil {
+					log.Info("Could not check configuration, redirecting to login", "err", err)
 
 					nv.PushByTag("login")
 
@@ -306,6 +395,10 @@ func main() {
 				}
 
 				nv.PushByTag("login")
+			case "select-server":
+				log.Info("Handling select-server")
+
+				updateSelectServerContinueButtonSensitive()
 			}
 		}
 
