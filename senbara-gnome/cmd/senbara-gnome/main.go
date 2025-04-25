@@ -139,6 +139,7 @@ func main() {
 		w       *adw.Window
 		nv      *adw.NavigationView
 		authner *authn.Authner
+		u       userData
 	)
 
 	authorize := func(
@@ -152,7 +153,6 @@ func main() {
 	) (
 		redirected bool,
 
-		u userData,
 		status int,
 
 		err error,
@@ -173,7 +173,7 @@ func main() {
 			if !errors.Is(err, keyring.ErrNotFound) {
 				log.Debug("Failed to read refresh token cookie", "error", err)
 
-				return false, userData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+				return false, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
 			}
 		} else {
 			refreshToken = &rt
@@ -184,7 +184,7 @@ func main() {
 			if !errors.Is(err, keyring.ErrNotFound) {
 				log.Debug("Failed to read ID token cookie", "error", err)
 
-				return false, userData{}, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+				return false, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
 			}
 		} else {
 			idToken = &it
@@ -214,10 +214,10 @@ func main() {
 		)
 		if err != nil {
 			if errors.Is(err, authn.ErrCouldNotLogin) {
-				return false, userData{}, http.StatusUnauthorized, err
+				return false, http.StatusUnauthorized, err
 			}
 
-			return false, userData{}, http.StatusInternalServerError, err
+			return false, http.StatusInternalServerError, err
 		}
 
 		redirected = nextURL != ""
@@ -233,7 +233,7 @@ func main() {
 				panic(err)
 			}
 
-			return redirected, u, http.StatusTemporaryRedirect, nil
+			return redirected, http.StatusTemporaryRedirect, nil
 		}
 
 		if requirePrivacyConsent {
@@ -241,10 +241,10 @@ func main() {
 
 			log.Debug("Refresh token cookie is missing, but can't reauthenticate with auth provider since privacy policy consent is not yet given. Redirecting to privacy policy consent page")
 
-			return true, u, http.StatusTemporaryRedirect, nil
+			return true, http.StatusTemporaryRedirect, nil
 		}
 
-		return redirected, u, http.StatusOK, nil
+		return redirected, http.StatusOK, nil
 	}
 
 	a.ConnectActivate(func() {
@@ -273,10 +273,6 @@ func main() {
 
 			ppckb = b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
 			ppcb  = b.GetObject("privacy-policy-continue-button").Cast().(*gtk.Button)
-		)
-
-		var (
-			logoutURL string
 		)
 
 		lb.ConnectClicked(func() {
@@ -374,7 +370,7 @@ func main() {
 		ppcb.ConnectClicked(func() {
 			log.Debug("Logging in user")
 
-			redirected, userData, _, err := authorize(
+			redirected, _, err := authorize(
 				ctx,
 
 				nv,
@@ -391,8 +387,6 @@ func main() {
 				return
 			}
 
-			logoutURL = userData.LogoutURL
-
 			nv.PushByTag("home")
 		})
 
@@ -400,7 +394,7 @@ func main() {
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
 			nv.PushByTag("exchange-logout")
 
-			if err := openuri.OpenURI("", logoutURL, nil); err != nil {
+			if err := openuri.OpenURI("", u.LogoutURL, nil); err != nil {
 				panic(err)
 			}
 		})
@@ -425,7 +419,7 @@ func main() {
 					return
 				}
 
-				_, userData, _, err := authorize(
+				_, _, err := authorize(
 					ctx,
 
 					nv,
@@ -440,15 +434,14 @@ func main() {
 					panic(err)
 				}
 
-				if strings.TrimSpace(userData.Email) != "" {
-					logoutURL = userData.LogoutURL
-
+				if strings.TrimSpace(u.Email) != "" {
 					nv.PushByTag("home")
 
 					return
 				}
 
 				nv.PushByTag("login")
+
 			case "select-server":
 				log.Info("Handling select-server")
 
@@ -459,7 +452,7 @@ func main() {
 			case "home":
 				log.Info("Handling home")
 
-				redirected, userData, _, err := authorize(
+				redirected, _, err := authorize(
 					ctx,
 
 					nv,
@@ -475,8 +468,6 @@ func main() {
 				} else if redirected {
 					return
 				}
-
-				logoutURL = userData.LogoutURL
 			}
 		}
 
