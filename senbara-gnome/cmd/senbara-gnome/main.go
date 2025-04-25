@@ -275,6 +275,10 @@ func main() {
 			ppcb  = b.GetObject("privacy-policy-continue-button").Cast().(*gtk.Button)
 		)
 
+		var (
+			logoutURL string
+		)
+
 		lb.ConnectClicked(func() {
 			nv.PushByTag("select-server")
 		})
@@ -370,7 +374,7 @@ func main() {
 		ppcb.ConnectClicked(func() {
 			log.Debug("Logging in user")
 
-			redirected, _, _, err := authorize(
+			redirected, userData, _, err := authorize(
 				ctx,
 
 				nv,
@@ -387,8 +391,26 @@ func main() {
 				return
 			}
 
+			logoutURL = userData.LogoutURL
+
 			nv.PushByTag("home")
 		})
+
+		logoutAction := gio.NewSimpleAction("logout", nil)
+		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
+			nv.PushByTag("exchange-logout")
+
+			if err := openuri.OpenURI("", logoutURL, nil); err != nil {
+				panic(err)
+			}
+		})
+		a.AddAction(logoutAction)
+
+		aboutAction := gio.NewSimpleAction("about", nil)
+		aboutAction.ConnectActivate(func(parameter *glib.Variant) {
+			log.Info("Opening about menu")
+		})
+		a.AddAction(aboutAction)
 
 		handleNavigation := func() {
 			switch nv.VisiblePage().Tag() {
@@ -419,6 +441,8 @@ func main() {
 				}
 
 				if strings.TrimSpace(userData.Email) != "" {
+					logoutURL = userData.LogoutURL
+
 					nv.PushByTag("home")
 
 					return
@@ -428,18 +452,35 @@ func main() {
 			case "select-server":
 				log.Info("Handling select-server")
 
+				ppckb.SetActive(false)
+
 				updateSelectServerContinueButtonSensitive()
+
+			case "home":
+				log.Info("Handling home")
+
+				redirected, userData, _, err := authorize(
+					ctx,
+
+					nv,
+
+					ppckb.Active(),
+
+					true,
+				)
+				if err != nil {
+					log.Warn("Could not authorize user for login page", "err", err)
+
+					panic(err)
+				} else if redirected {
+					return
+				}
+
+				logoutURL = userData.LogoutURL
 			}
 		}
 
 		nv.ConnectPopped(func(page *adw.NavigationPage) {
-			switch page.Tag() {
-			case "privacy-policy":
-				log.Info("Handling privacy-policy being popped")
-
-				ppckb.SetActive(false)
-			}
-
 			handleNavigation()
 		})
 		nv.ConnectPushed(handleNavigation)
