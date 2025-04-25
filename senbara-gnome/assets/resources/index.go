@@ -11,7 +11,6 @@ const (
 	appPath = "/com/pojtinger/felicitas/Senbara/"
 
 	SettingServerURLKey    = "server-url"
-	SettingOIDCIssuerKey   = "oidc-issuer"
 	SettingOIDCClientIDKey = "oidc-client-id"
 
 	SecretRefreshTokenKey = "refresh-token"

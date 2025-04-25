@@ -64,6 +64,7 @@ github.com/pojntfx/senbara/senbara-common v0.0.0-20250410071138-94d3723b65a5/go.
 github.com/pojntfx/senbara/senbara-rest v0.0.0-20250410071138-94d3723b65a5 h1:c6eT6WKwct1VvrShiffV7i7wOk/mIMIId835YO8BJNM=
 github.com/pojntfx/senbara/senbara-rest v0.0.0-20250410071138-94d3723b65a5/go.mod h1:ZhSP7QVLpwrxuELx6qsXDbkcL3B+nynQFuGzqNweXXE=
 github.com/rogpeppe/go-internal v1.13.1 h1:KvO1DLK/DRN07sQ1LQKScxyZJuNnedQ5/wKSR38lUII=
+github.com/rogpeppe/go-internal v1.13.1/go.mod h1:uMEvuHeurkdAXX61udpOXGD/AzZDWNMNyH2VO9fmH0o=
 github.com/rymdport/portal v0.4.1 h1:2dnZhjf5uEaeDjeF/yBIeeRo6pNI2QAKm7kq1w/kbnA=
 github.com/rymdport/portal v0.4.1/go.mod h1:kFF4jslnJ8pD5uCi17brj/ODlfIidOxlgUDTO5ncnC4=
 github.com/spkg/bom v0.0.0-20160624110644-59b7046e48ad/go.mod h1:qLr4V1qq6nMqFKkMo8ZTx3f+BZEkzsRUY10Xsm2mwU0=

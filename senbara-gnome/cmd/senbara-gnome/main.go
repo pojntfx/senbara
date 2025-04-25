@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"html/template"
 	"io"
@@ -35,6 +36,17 @@ import (
 var (
 	errCouldNotLogin = errors.New("could not login")
 )
+
+type oidcConfig struct {
+	Issuer string `json:"issuer"`
+}
+
+type oidcSpec struct {
+	Info       openapi3.Info `yaml:"info"`
+	Components struct {
+		SecuritySchemes map[string]openapi3.SecurityScheme `yaml:"securitySchemes"`
+	} `yaml:"components"`
+}
 
 type linkTemplateData struct {
 	Href  string
@@ -300,7 +312,6 @@ func main() {
 			lb = b.GetObject("login-button").Cast().(*gtk.Button)
 
 			ssui  = b.GetObject("select-server-url-input").Cast().(*adw.EntryRow)
-			ssuoi = b.GetObject("select-server-oidc-issuer-input").Cast().(*adw.EntryRow)
 			ssuoc = b.GetObject("select-server-oidc-client-id-input").Cast().(*adw.EntryRow)
 			sscb  = b.GetObject("select-server-continue-button").Cast().(*gtk.Button)
 			sscs  = b.GetObject("select-server-continue-spinner").Cast().(*gtk.Widget)
@@ -315,12 +326,10 @@ func main() {
 		})
 
 		settings.Bind(resources.SettingServerURLKey, ssui.Object, "text", gio.SettingsBindDefault)
-		settings.Bind(resources.SettingOIDCIssuerKey, ssuoi.Object, "text", gio.SettingsBindDefault)
 		settings.Bind(resources.SettingOIDCClientIDKey, ssuoc.Object, "text", gio.SettingsBindDefault)
 
 		updateSelectServerContinueButtonSensitive := func() {
 			if len(settings.String(resources.SettingServerURLKey)) > 0 &&
-				len(settings.String(resources.SettingOIDCIssuerKey)) > 0 &&
 				len(settings.String(resources.SettingOIDCClientIDKey)) > 0 {
 				sscb.SetSensitive(true)
 			} else {
@@ -330,7 +339,6 @@ func main() {
 
 		settings.ConnectChanged(func(key string) {
 			if key == resources.SettingServerURLKey ||
-				key == resources.SettingOIDCIssuerKey ||
 				key == resources.SettingOIDCClientIDKey {
 				updateSelectServerContinueButtonSensitive()
 			}
@@ -339,21 +347,8 @@ func main() {
 		checkConfiguration := func() error {
 			var (
 				serverURL    = settings.String(resources.SettingServerURLKey)
-				oidcIssuer   = settings.String(resources.SettingOIDCIssuerKey)
 				oidcClientID = settings.String(resources.SettingOIDCClientIDKey)
 			)
-
-			authner = authn.NewAuthner(
-				slog.New(log.Handler().WithGroup("authner")),
-
-				oidcIssuer,
-				oidcClientID,
-				"senbara:///authorize",
-			)
-
-			if err := authner.Init(ctx); err != nil {
-				return err
-			}
 
 			client, err := api.NewClientWithResponses(serverURL)
 			if err != nil {
@@ -365,7 +360,14 @@ func main() {
 				return err
 			}
 
-			var spec *openapi3.T
+			if res.StatusCode != http.StatusOK {
+				return errors.New(res.Status)
+			}
+
+			// We can't just use `*openapi3.T` here because the security schemes
+			// can't be parsed with YAML, only with JSON (due to the go-jsonpointer requirement),
+			// and  we can't switch to JSON since it can't be streaming encoded by the server
+			var spec oidcSpec
 			if err := yaml.NewDecoder(res.Body).Decode(&spec); err != nil {
 				return err
 			}
@@ -379,6 +381,32 @@ func main() {
 			}
 
 			ppl.SetLabel(ltsb.String())
+
+			res, err = http.Get(spec.Components.SecuritySchemes["oidc"].OpenIdConnectUrl)
+			if err != nil {
+				return err
+			}
+
+			if res.StatusCode != http.StatusOK {
+				return errors.New(res.Status)
+			}
+
+			var p oidcConfig
+			if err := json.NewDecoder(res.Body).Decode(&p); err != nil {
+				return err
+			}
+
+			authner = authn.NewAuthner(
+				slog.New(log.Handler().WithGroup("authner")),
+
+				p.Issuer,
+				oidcClientID,
+				"senbara:///authorize",
+			)
+
+			if err := authner.Init(ctx); err != nil {
+				return err
+			}
 
 			return nil
 		}

@@ -6,11 +6,6 @@
             <summary>Server URL</summary>
             <description>Server URL (e.g. https://rest.senbara.p8.lu/)</description>
         </key>
-        <key name="oidc-issuer" type="s">
-            <default>"https://dev-4op4cmts68nqcenb.us.auth0.com/"</default>
-            <summary>OIDC Issuer</summary>
-            <description>OIDC Issuer (e.g. https://dev-4op4cmts68nqcenb.us.auth0.com/)</description>
-        </key>
         <key name="oidc-client-id" type="s">
             <default>"SiNcjPaYVYCOzeVvQAYl4mqhglsSWNY4"</default>
             <summary>OIDC Client ID</summary>
