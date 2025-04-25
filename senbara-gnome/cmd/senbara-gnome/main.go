@@ -226,7 +226,7 @@ func main() {
 		}
 
 		if redirected {
-			nv.PushByTag("exchange")
+			nv.ReplaceWithTags([]string{"exchange"})
 
 			if err := openuri.OpenURI("", nextURL, nil); err != nil {
 				log.Debug("Could not open nextURL", "error", err)
@@ -403,27 +403,12 @@ func main() {
 		})
 
 		ppcb.ConnectClicked(func() {
-			log.Debug("Logging in user")
-
-			redirected, _, _, err := authorize(
-				ctx,
-
-				true,
-			)
-			if err != nil {
-				log.Warn("Could not authorize user for login page", "err", err)
-
-				panic(err)
-			} else if redirected {
-				return
-			}
-
 			nv.PushByTag("home")
 		})
 
 		logoutAction := gio.NewSimpleAction("logout", nil)
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
-			nv.PushByTag("exchange-logout")
+			nv.ReplaceWithTags([]string{"exchange-logout"})
 
 			if err := openuri.OpenURI("", u.LogoutURL, nil); err != nil {
 				panic(err)
@@ -439,7 +424,7 @@ func main() {
 
 		handleNavigation := func() {
 			switch nv.VisiblePage().Tag() {
-			case "loading-config":
+			case "/":
 				log.Info("Handling loading-config")
 
 				if err := checkConfiguration(); err != nil {
@@ -547,7 +532,7 @@ func main() {
 
 			log.Debug("Handling user auth exchange")
 
-			_, signedOut, err := authner.Exchange(
+			nextURL, signedOut, err := authner.Exchange(
 				ctx,
 
 				authCode,
@@ -573,13 +558,15 @@ func main() {
 				panic(err)
 			}
 
-			if signedOut {
-				nv.PopToTag("loading-config")
-
-				return
+			// In the web version, redirecting to the home page after signing out is possible without
+			// authentication. In the GNOME version, that is not the case since the unauthenticated
+			// page is a separate page from home, so we need to rewrite the path to distinguish
+			// between the two manually
+			if signedOut && nextURL == "home" {
+				nextURL = "/"
 			}
 
-			nv.PushByTag("home")
+			nv.ReplaceWithTags([]string{nextURL})
 		}
 	})
 
