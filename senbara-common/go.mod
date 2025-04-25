@@ -6,6 +6,7 @@ tool github.com/sqlc-dev/sqlc/cmd/sqlc
 
 require (
 	github.com/coreos/go-oidc/v3 v3.14.1
+	github.com/oapi-codegen/runtime v1.1.1
 	github.com/pressly/goose/v3 v3.24.2
 	golang.org/x/oauth2 v0.29.0
 )

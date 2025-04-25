@@ -90,6 +90,8 @@ func addAuthFlags(f *pflag.FlagSet) {
 func createClient(auth bool) (*api.ClientWithResponses, error) {
 	opts := []api.ClientOption{}
 	if auth {
+		log.Debug("Creating authenticated client")
+
 		if !viper.IsSet(tokenKey) {
 			log.Debug("Missing token")
 
@@ -104,6 +106,8 @@ func createClient(auth bool) (*api.ClientWithResponses, error) {
 		}
 
 		opts = append(opts, api.WithRequestEditorFn(a.Intercept))
+	} else {
+		log.Debug("Creating unauthenticated client")
 	}
 
 	return api.NewClientWithResponses(

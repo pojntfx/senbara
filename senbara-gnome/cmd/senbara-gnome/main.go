@@ -22,6 +22,7 @@ import (
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oapi-codegen/oapi-codegen/v2/pkg/securityprovider"
 	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
 	"github.com/pojntfx/senbara/senbara-gnome/config/locales"
@@ -139,20 +140,18 @@ func main() {
 		w       *adw.Window
 		nv      *adw.NavigationView
 		authner *authn.Authner
+		ppckb   *gtk.CheckButton
 		u       userData
 	)
 
 	authorize := func(
 		ctx context.Context,
 
-		nv *adw.NavigationView,
-
-		privacyPolicyConsentGiven bool,
-
 		loginIfSignedOut bool,
 	) (
 		redirected bool,
 
+		client *api.ClientWithResponses,
 		status int,
 
 		err error,
@@ -173,7 +172,7 @@ func main() {
 			if !errors.Is(err, keyring.ErrNotFound) {
 				log.Debug("Failed to read refresh token cookie", "error", err)
 
-				return false, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+				return false, nil, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
 			}
 		} else {
 			refreshToken = &rt
@@ -184,7 +183,7 @@ func main() {
 			if !errors.Is(err, keyring.ErrNotFound) {
 				log.Debug("Failed to read ID token cookie", "error", err)
 
-				return false, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+				return false, nil, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
 			}
 		} else {
 			idToken = &it
@@ -198,7 +197,7 @@ func main() {
 			nv.VisiblePage().Tag(),
 			nv.VisiblePage().Tag(),
 
-			privacyPolicyConsentGiven,
+			ppckb.Active(),
 
 			refreshToken,
 			idToken,
@@ -214,10 +213,10 @@ func main() {
 		)
 		if err != nil {
 			if errors.Is(err, authn.ErrCouldNotLogin) {
-				return false, http.StatusUnauthorized, err
+				return false, nil, http.StatusUnauthorized, err
 			}
 
-			return false, http.StatusInternalServerError, err
+			return false, nil, http.StatusInternalServerError, err
 		}
 
 		redirected = nextURL != ""
@@ -230,10 +229,12 @@ func main() {
 			nv.PushByTag("exchange")
 
 			if err := openuri.OpenURI("", nextURL, nil); err != nil {
-				panic(err)
+				log.Debug("Could not open nextURL", "error", err)
+
+				return false, nil, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
 			}
 
-			return redirected, http.StatusTemporaryRedirect, nil
+			return redirected, nil, http.StatusTemporaryRedirect, nil
 		}
 
 		if requirePrivacyConsent {
@@ -241,10 +242,43 @@ func main() {
 
 			log.Debug("Refresh token cookie is missing, but can't reauthenticate with auth provider since privacy policy consent is not yet given. Redirecting to privacy policy consent page")
 
-			return true, http.StatusTemporaryRedirect, nil
+			return true, nil, http.StatusTemporaryRedirect, nil
 		}
 
-		return redirected, http.StatusOK, nil
+		opts := []api.ClientOption{}
+		if strings.TrimSpace(u.Email) != "" {
+			log.Debug("Creating authenticated client")
+
+			it, err = keyring.Get(resources.AppID, resources.SecretIDTokenKey)
+			if err != nil {
+				log.Debug("Failed to read ID token cookie", "error", err)
+
+				return false, nil, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+			}
+
+			a, err := securityprovider.NewSecurityProviderBearerToken(it)
+			if err != nil {
+				log.Debug("Could not create bearer token security provider", "error", err)
+
+				return false, nil, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+			}
+
+			opts = append(opts, api.WithRequestEditorFn(a.Intercept))
+		} else {
+			log.Debug("Creating unauthenticated client")
+		}
+
+		client, err = api.NewClientWithResponses(
+			settings.String(resources.SettingServerURLKey),
+			opts...,
+		)
+		if err != nil {
+			log.Debug("Could not create authenticated API client", "error", err)
+
+			return false, nil, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
+		}
+
+		return redirected, client, http.StatusOK, nil
 	}
 
 	a.ConnectActivate(func() {
@@ -260,6 +294,8 @@ func main() {
 
 		nv = b.GetObject("main-navigation").Cast().(*adw.NavigationView)
 
+		ppckb = b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
+
 		var (
 			lb = b.GetObject("login-button").Cast().(*gtk.Button)
 
@@ -271,8 +307,7 @@ func main() {
 
 			ppl = b.GetObject("privacy-policy-link").Cast().(*gtk.Label)
 
-			ppckb = b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
-			ppcb  = b.GetObject("privacy-policy-continue-button").Cast().(*gtk.Button)
+			ppcb = b.GetObject("privacy-policy-continue-button").Cast().(*gtk.Button)
 		)
 
 		lb.ConnectClicked(func() {
@@ -370,12 +405,8 @@ func main() {
 		ppcb.ConnectClicked(func() {
 			log.Debug("Logging in user")
 
-			redirected, _, err := authorize(
+			redirected, _, _, err := authorize(
 				ctx,
-
-				nv,
-
-				ppckb.Active(),
 
 				true,
 			)
@@ -419,12 +450,8 @@ func main() {
 					return
 				}
 
-				_, _, err := authorize(
+				_, _, _, err := authorize(
 					ctx,
-
-					nv,
-
-					ppckb.Active(),
 
 					false,
 				)
@@ -452,12 +479,8 @@ func main() {
 			case "home":
 				log.Info("Handling home")
 
-				redirected, _, err := authorize(
+				redirected, c, _, err := authorize(
 					ctx,
-
-					nv,
-
-					ppckb.Active(),
 
 					true,
 				)
@@ -467,6 +490,25 @@ func main() {
 					panic(err)
 				} else if redirected {
 					return
+				}
+
+				log.Debug("Getting summary")
+
+				res, err := c.GetIndexWithResponse(ctx)
+				if err != nil {
+					panic(err)
+				}
+
+				log.Debug("Got summary", "status", res.StatusCode())
+
+				if res.StatusCode() != http.StatusOK {
+					panic(errors.New(res.Status()))
+				}
+
+				log.Debug("Writing summary to stdout")
+
+				if err := yaml.NewEncoder(os.Stdout).Encode(res.JSON200); err != nil {
+					panic(err)
 				}
 			}
 		}
