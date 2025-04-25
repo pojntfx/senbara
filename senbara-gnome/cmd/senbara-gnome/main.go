@@ -137,6 +137,7 @@ func main() {
 
 	var (
 		w       *adw.Window
+		nv      *adw.NavigationView
 		authner *authn.Authner
 	)
 
@@ -255,12 +256,11 @@ func main() {
 
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
 
+		w = b.GetObject("main-window").Cast().(*adw.Window)
+
+		nv = b.GetObject("main-navigation").Cast().(*adw.NavigationView)
+
 		var (
-			w  = b.GetObject("main-window").Cast().(*adw.Window)
-			nv = b.GetObject("main-navigation").Cast().(*adw.NavigationView)
-
-			ppckb = b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
-
 			lb = b.GetObject("login-button").Cast().(*gtk.Button)
 
 			ssui  = b.GetObject("select-server-url-input").Cast().(*adw.EntryRow)
@@ -270,6 +270,9 @@ func main() {
 			sscs  = b.GetObject("select-server-continue-spinner").Cast().(*gtk.Widget)
 
 			ppl = b.GetObject("privacy-policy-link").Cast().(*gtk.Label)
+
+			ppckb = b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
+			ppcb  = b.GetObject("privacy-policy-continue-button").Cast().(*gtk.Button)
 		)
 
 		lb.ConnectClicked(func() {
@@ -360,6 +363,33 @@ func main() {
 			}()
 		})
 
+		ppckb.ConnectToggled(func() {
+			ppcb.SetSensitive(ppckb.Active())
+		})
+
+		ppcb.ConnectClicked(func() {
+			log.Debug("Logging in user")
+
+			redirected, _, _, err := authorize(
+				ctx,
+
+				nv,
+
+				ppckb.Active(),
+
+				true,
+			)
+			if err != nil {
+				log.Warn("Could not authorize user for login page", "err", err)
+
+				panic(err)
+			} else if redirected {
+				return
+			}
+
+			nv.PushByTag("home")
+		})
+
 		handleNavigation := func() {
 			switch nv.VisiblePage().Tag() {
 			case "loading-config":
@@ -403,6 +433,13 @@ func main() {
 		}
 
 		nv.ConnectPopped(func(page *adw.NavigationPage) {
+			switch page.Tag() {
+			case "privacy-policy":
+				log.Info("Handling privacy-policy being popped")
+
+				ppckb.SetActive(false)
+			}
+
 			handleNavigation()
 		})
 		nv.ConnectPushed(handleNavigation)
@@ -421,10 +458,54 @@ func main() {
 		}
 
 		for _, r := range files {
-			_, err := url.Parse(r.URI())
+			u, err := url.Parse(r.URI())
 			if err != nil {
 				panic(err)
 			}
+
+			authCode := u.Query().Get("code")
+			state := u.Query().Get("state")
+
+			log := log.With(
+				"authCode", authCode != "",
+				"state", state,
+			)
+
+			log.Debug("Handling user auth exchange")
+
+			_, signedOut, err := authner.Exchange(
+				ctx,
+
+				authCode,
+				state,
+
+				func(s string, t time.Time) error {
+					// TODO: Handle expiry time
+					return keyring.Set(resources.AppID, resources.SecretRefreshTokenKey, s)
+				},
+				func(s string, t time.Time) error {
+					// TODO: Handle expiry time
+					return keyring.Set(resources.AppID, resources.SecretIDTokenKey, s)
+				},
+
+				func() error {
+					return keyring.Delete(resources.AppID, resources.SecretRefreshTokenKey)
+				},
+				func() error {
+					return keyring.Delete(resources.AppID, resources.SecretIDTokenKey)
+				},
+			)
+			if err != nil {
+				panic(err)
+			}
+
+			if signedOut {
+				nv.PopToTag("loading-config")
+
+				return
+			}
+
+			nv.PushByTag("home")
 		}
 	})
 
