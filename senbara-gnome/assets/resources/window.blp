@@ -39,7 +39,7 @@ Adw.Window main-window {
 
         Adw.NavigationPage {
             title: _("Senbara Forms");
-            tag: "login";
+            tag: "welcome";
             can-pop: false;
 
             Adw.ToolbarView {
@@ -73,8 +73,8 @@ Adw.Window main-window {
         }
 
         Adw.NavigationPage {
-            title: _("Select server");
-            tag: "select-server";
+            title: _("Select Senbara server");
+            tag: "select-senbara-server";
 
             Adw.ToolbarView {
                 [top]
@@ -89,13 +89,13 @@ Adw.Window main-window {
                     }
 
                     [end]
-                    Button select-server-continue-button {
+                    Button select-senbara-server-continue-button {
                         sensitive: false;
 
                         Box {
                             spacing: 10;
 
-                            Adw.Spinner select-server-continue-spinner {
+                            Adw.Spinner select-senbara-server-continue-spinner {
                                 visible: false;
                             }
 
@@ -111,7 +111,7 @@ Adw.Window main-window {
                 }
 
                 Adw.StatusPage {
-                    title: _("Where is your server?");
+                    title: _("Where is your Senbara server?");
                     description: _("Enter the configuration for the Senbara server you want to connect to.");
                     icon-name: "network-server-symbolic";
 
@@ -119,12 +119,8 @@ Adw.Window main-window {
                         maximum-size: 400;
 
                         Adw.PreferencesGroup {
-                            Adw.EntryRow select-server-url-input {
-                                title: _("Server URL (e.g. https://rest.senbara.p8.lu/)");
-                            }
-
-                            Adw.EntryRow select-server-oidc-client-id-input {
-                                title: _("OIDC Client ID (e.g. myoidcclientid)");
+                            Adw.EntryRow select-senbara-server-url-input {
+                                title: _("Senbara Server URL (e.g. https://rest.senbara.p8.lu/)");
                             }
                         }
                     }
@@ -181,6 +177,99 @@ Adw.Window main-window {
         }
 
         Adw.NavigationPage {
+            title: _("Senbara Forms");
+            tag: "preview";
+            can-pop: false;
+
+            Adw.ToolbarView {
+                [top]
+                Adw.HeaderBar {
+                    show-title: false;
+                    // TODO: Add manual back button action that allows going back to select-senbara-server page
+
+                    [end]
+                    MenuButton {
+                        icon-name: "open-menu-symbolic";
+                        primary: true;
+                        menu-model: setup-menu;
+                    }
+
+                    [end]
+                    Button preview-login-button {
+                        label: _("Login");
+                        sensitive: false;
+
+                        styles [
+                            "suggested-action",
+                        ]
+                    }
+                }
+
+                Adw.StatusPage {
+                    title: _("Senbara Forms");
+                    description: _("(Preview) GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
+                    icon-name: "open-book-symbolic";
+                }
+            }
+        }
+
+        Adw.NavigationPage {
+            title: _("Setup authentication server");
+            tag: "setup-authn-server";
+
+            Adw.ToolbarView {
+                [top]
+                Adw.HeaderBar {
+                    show-title: false;
+
+                    [end]
+                    MenuButton {
+                        icon-name: "open-menu-symbolic";
+                        primary: true;
+                        menu-model: setup-menu;
+                    }
+
+                    [end]
+                    Button setup-authn-server-continue-button {
+                        sensitive: false;
+
+                        Box {
+                            spacing: 10;
+
+                            Adw.Spinner setup-authn-server-continue-spinner {
+                                visible: false;
+                            }
+
+                            Label {
+                                label: _("Continue");
+                            }
+                        }
+
+                        styles [
+                            "suggested-action",
+                        ]
+                    }
+                }
+
+                Adw.StatusPage {
+                    title: _("How do you want to authenticate?");
+                    description: _("Enter the configuration for the authentication server you want to connect to.");
+                    icon-name: "auth-fingerprint-symbolic";
+
+                    Adw.Clamp {
+                        maximum-size: 400;
+
+                        Adw.PreferencesGroup {
+                            Adw.EntryRow setup-authn-server-oidc-client-id-input {
+                                title: _("OIDC Client ID (e.g. myoidcclientid)");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Adw.NavigationPage {
             title: _("Signing you in");
             tag: "exchange";
 
@@ -223,13 +312,13 @@ Adw.Window main-window {
                     MenuButton {
                         icon-name: "open-menu-symbolic";
                         primary: true;
-                        menu-model: main-menu;
+                        menu-model: home-menu;
                     }
                 }
 
                 Adw.StatusPage {
                     title: _("Senbara Forms");
-                    description: _("GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
+                    description: _("(Authenticated) GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
                     icon-name: "open-book-symbolic";
                 }
             }
@@ -275,7 +364,7 @@ menu setup-menu {
     }
 }
 
-menu main-menu {
+menu home-menu {
     section {
         label: _("Account");
 

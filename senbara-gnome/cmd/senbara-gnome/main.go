@@ -311,43 +311,58 @@ func main() {
 		var (
 			lb = b.GetObject("login-button").Cast().(*gtk.Button)
 
-			ssui  = b.GetObject("select-server-url-input").Cast().(*adw.EntryRow)
-			ssuoc = b.GetObject("select-server-oidc-client-id-input").Cast().(*adw.EntryRow)
-			sscb  = b.GetObject("select-server-continue-button").Cast().(*gtk.Button)
-			sscs  = b.GetObject("select-server-continue-spinner").Cast().(*gtk.Widget)
+			sssui = b.GetObject("select-senbara-server-url-input").Cast().(*adw.EntryRow)
+			ssscb = b.GetObject("select-senbara-server-continue-button").Cast().(*gtk.Button)
+			ssscs = b.GetObject("select-senbara-server-continue-spinner").Cast().(*gtk.Widget)
 
-			ppl = b.GetObject("privacy-policy-link").Cast().(*gtk.Label)
-
+			ppl  = b.GetObject("privacy-policy-link").Cast().(*gtk.Label)
 			ppcb = b.GetObject("privacy-policy-continue-button").Cast().(*gtk.Button)
+
+			spec oidcSpec
+
+			sasoc = b.GetObject("setup-authn-server-oidc-client-id-input").Cast().(*adw.EntryRow)
+			sascb = b.GetObject("setup-authn-server-continue-button").Cast().(*gtk.Button)
+			sascs = b.GetObject("setup-authn-server-continue-spinner").Cast().(*gtk.Widget)
 		)
 
 		lb.ConnectClicked(func() {
-			nv.PushByTag("select-server")
+			nv.PushByTag("select-senbara-server")
 		})
 
-		settings.Bind(resources.SettingServerURLKey, ssui.Object, "text", gio.SettingsBindDefault)
-		settings.Bind(resources.SettingOIDCClientIDKey, ssuoc.Object, "text", gio.SettingsBindDefault)
+		settings.Bind(resources.SettingServerURLKey, sssui.Object, "text", gio.SettingsBindDefault)
+		settings.Bind(resources.SettingOIDCClientIDKey, sasoc.Object, "text", gio.SettingsBindDefault)
 
-		updateSelectServerContinueButtonSensitive := func() {
-			if len(settings.String(resources.SettingServerURLKey)) > 0 &&
-				len(settings.String(resources.SettingOIDCClientIDKey)) > 0 {
-				sscb.SetSensitive(true)
+		updateSelectSenbaraServerContinueButtonSensitive := func() {
+			if len(settings.String(resources.SettingServerURLKey)) > 0 {
+				ssscb.SetSensitive(true)
 			} else {
-				sscb.SetSensitive(false)
+				ssscb.SetSensitive(false)
 			}
 		}
 
 		settings.ConnectChanged(func(key string) {
-			if key == resources.SettingServerURLKey ||
-				key == resources.SettingOIDCClientIDKey {
-				updateSelectServerContinueButtonSensitive()
+			if key == resources.SettingServerURLKey {
+				updateSelectSenbaraServerContinueButtonSensitive()
 			}
 		})
 
-		checkConfiguration := func() error {
+		updateSelectAuthnServerContinueButtonSensitive := func() {
+			if len(settings.String(resources.SettingOIDCClientIDKey)) > 0 {
+				sascb.SetSensitive(true)
+			} else {
+				sascb.SetSensitive(false)
+			}
+		}
+
+		settings.ConnectChanged(func(key string) {
+			if key == resources.SettingOIDCClientIDKey {
+				updateSelectAuthnServerContinueButtonSensitive()
+			}
+		})
+
+		checkSenbaraServerConfiguration := func() error {
 			var (
-				serverURL    = settings.String(resources.SettingServerURLKey)
-				oidcClientID = settings.String(resources.SettingOIDCClientIDKey)
+				serverURL = settings.String(resources.SettingServerURLKey)
 			)
 
 			client, err := api.NewClientWithResponses(serverURL)
@@ -367,7 +382,6 @@ func main() {
 			// We can't just use `*openapi3.T` here because the security schemes
 			// can't be parsed with YAML, only with JSON (due to the go-jsonpointer requirement),
 			// and  we can't switch to JSON since it can't be streaming encoded by the server
-			var spec oidcSpec
 			if err := yaml.NewDecoder(res.Body).Decode(&spec); err != nil {
 				return err
 			}
@@ -382,7 +396,15 @@ func main() {
 
 			ppl.SetLabel(ltsb.String())
 
-			res, err = http.Get(spec.Components.SecuritySchemes["oidc"].OpenIdConnectUrl)
+			return nil
+		}
+
+		checkAuthnServerConfiguration := func() error {
+			var (
+				oidcClientID = settings.String(resources.SettingOIDCClientIDKey)
+			)
+
+			res, err := http.Get(spec.Components.SecuritySchemes["oidc"].OpenIdConnectUrl)
 			if err != nil {
 				return err
 			}
@@ -411,14 +433,14 @@ func main() {
 			return nil
 		}
 
-		sscb.ConnectClicked(func() {
-			sscb.SetSensitive(false)
-			sscs.SetVisible(true)
+		ssscb.ConnectClicked(func() {
+			ssscb.SetSensitive(false)
+			ssscs.SetVisible(true)
 
 			go func() {
-				defer sscs.SetVisible(false)
+				defer ssscs.SetVisible(false)
 
-				if err := checkConfiguration(); err != nil {
+				if err := checkSenbaraServerConfiguration(); err != nil {
 					panic(err)
 				}
 
@@ -431,7 +453,22 @@ func main() {
 		})
 
 		ppcb.ConnectClicked(func() {
-			nv.PushByTag("home")
+			nv.PushByTag("setup-authn-server") // TODO: Push preview page here instead (fetch unauthenticated API endpoints there)
+		})
+
+		sascb.ConnectClicked(func() {
+			sascb.SetSensitive(false)
+			sascs.SetVisible(true)
+
+			go func() {
+				defer sascs.SetVisible(false)
+
+				if err := checkAuthnServerConfiguration(); err != nil {
+					panic(err)
+				}
+
+				nv.PushByTag("home")
+			}()
 		})
 
 		logoutAction := gio.NewSimpleAction("logout", nil)
@@ -455,10 +492,18 @@ func main() {
 			case "/":
 				log.Info("Handling loading-config")
 
-				if err := checkConfiguration(); err != nil {
-					log.Info("Could not check configuration, redirecting to login", "err", err)
+				if err := checkSenbaraServerConfiguration(); err != nil {
+					log.Info("Could not check Senbara server configuration, redirecting to login", "err", err)
 
-					nv.PushByTag("login")
+					nv.PushByTag("welcome")
+
+					return
+				}
+
+				if err := checkAuthnServerConfiguration(); err != nil {
+					log.Info("Could not check authn server configuration, redirecting to login", "err", err)
+
+					nv.PushByTag("welcome")
 
 					return
 				}
@@ -480,14 +525,19 @@ func main() {
 					return
 				}
 
-				nv.PushByTag("login")
+				nv.PushByTag("welcome")
 
-			case "select-server":
-				log.Info("Handling select-server")
+			case "select-senbara-server":
+				log.Info("Handling select-senbara-server")
 
 				ppckb.SetActive(false)
 
-				updateSelectServerContinueButtonSensitive()
+				updateSelectSenbaraServerContinueButtonSensitive()
+
+			case "setup-authn-server":
+				log.Info("Handling setup-authn-server")
+
+				updateSelectAuthnServerContinueButtonSensitive()
 
 			case "home":
 				log.Info("Handling home")
@@ -587,7 +637,7 @@ func main() {
 			}
 
 			// In the web version, redirecting to the home page after signing out is possible without
-			// authentication. In the GNOME version, that is not the case since the unauthenticated
+			// authn. In the GNOME version, that is not the case since the unauthenticated
 			// page is a separate page from home, so we need to rewrite the path to distinguish
 			// between the two manually
 			if signedOut && nextURL == "home" {
