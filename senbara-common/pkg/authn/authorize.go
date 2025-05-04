@@ -49,7 +49,7 @@ func (a *Authner) Authorize(
 
 	log.Debug("Checking auth state", "privacyPolicyConsentGiven", privacyPolicyConsentGiven)
 
-	if loginIfSignedOut || privacyPolicyConsentGiven {
+	if loginIfSignedOut {
 		if refreshToken == nil {
 			if privacyPolicyConsentGiven {
 				log.Debug("Refresh token cookie is missing and privacy policy consent is given, reauthenticating with auth provider")
