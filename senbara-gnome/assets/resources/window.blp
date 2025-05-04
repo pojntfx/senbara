@@ -60,9 +60,9 @@ Adw.Window main-window {
                     description: _("GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
                     icon-name: "open-book-symbolic";
 
-                    Button login-button {
+                    Button setup-button {
                         halign: center;
-                        label: _("Login");
+                        label: _("Get started");
 
                         styles [
                             "suggested-action",
@@ -129,54 +129,6 @@ Adw.Window main-window {
         }
 
         Adw.NavigationPage {
-            title: _("Privacy policy consent");
-            tag: "privacy-policy";
-
-            Adw.ToolbarView {
-                [top]
-                Adw.HeaderBar {
-                    show-title: false;
-
-                    [end]
-                    MenuButton {
-                        icon-name: "open-menu-symbolic";
-                        primary: true;
-                        menu-model: setup-menu;
-                    }
-
-                    [end]
-                    Button privacy-policy-continue-button {
-                        label: _("Continue");
-                        sensitive: false;
-
-                        styles [
-                            "suggested-action",
-                        ]
-                    }
-                }
-
-                Adw.StatusPage {
-                    title: _("Privacy policy consent");
-                    icon-name: "license-symbolic";
-
-                    Box {
-                        halign: center;
-
-                        CheckButton privacy-policy-checkbutton {
-                            halign: center;
-                            label: _("I have read and understood the");
-                        }
-
-                        Label privacy-policy-link {
-                            use-markup: true;
-                            label: _("privacy policy");
-                        }
-                    }
-                }
-            }
-        }
-
-        Adw.NavigationPage {
             title: _("Senbara Forms");
             tag: "preview";
             can-pop: false;
@@ -196,8 +148,17 @@ Adw.Window main-window {
 
                     [end]
                     Button preview-login-button {
-                        label: _("Login");
-                        sensitive: false;
+                        Box {
+                            spacing: 10;
+
+                            Adw.Spinner preview-login-spinner {
+                                visible: false;
+                            }
+
+                            Label {
+                                label: _("Login");
+                            }
+                        }
 
                         styles [
                             "suggested-action",
@@ -263,6 +224,54 @@ Adw.Window main-window {
                             Adw.EntryRow setup-authn-server-oidc-client-id-input {
                                 title: _("OIDC Client ID (e.g. myoidcclientid)");
                             }
+                        }
+                    }
+                }
+            }
+        }
+
+        Adw.NavigationPage {
+            title: _("Privacy policy consent");
+            tag: "privacy-policy";
+
+            Adw.ToolbarView {
+                [top]
+                Adw.HeaderBar {
+                    show-title: false;
+
+                    [end]
+                    MenuButton {
+                        icon-name: "open-menu-symbolic";
+                        primary: true;
+                        menu-model: setup-menu;
+                    }
+
+                    [end]
+                    Button privacy-policy-continue-button {
+                        label: _("Continue");
+                        sensitive: false;
+
+                        styles [
+                            "suggested-action",
+                        ]
+                    }
+                }
+
+                Adw.StatusPage {
+                    title: _("Privacy policy consent");
+                    icon-name: "license-symbolic";
+
+                    Box {
+                        halign: center;
+
+                        CheckButton privacy-policy-checkbutton {
+                            halign: center;
+                            label: _("I have read and understood the");
+                        }
+
+                        Label privacy-policy-link {
+                            use-markup: true;
+                            label: _("privacy policy");
                         }
                     }
                 }

@@ -309,23 +309,27 @@ func main() {
 		ppckb = b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
 
 		var (
-			lb = b.GetObject("login-button").Cast().(*gtk.Button)
+			sb = b.GetObject("setup-button").Cast().(*gtk.Button)
 
 			sssui = b.GetObject("select-senbara-server-url-input").Cast().(*adw.EntryRow)
 			ssscb = b.GetObject("select-senbara-server-continue-button").Cast().(*gtk.Button)
 			ssscs = b.GetObject("select-senbara-server-continue-spinner").Cast().(*gtk.Widget)
 
-			ppl  = b.GetObject("privacy-policy-link").Cast().(*gtk.Label)
-			ppcb = b.GetObject("privacy-policy-continue-button").Cast().(*gtk.Button)
+			ppl = b.GetObject("privacy-policy-link").Cast().(*gtk.Label)
 
 			spec oidcSpec
+
+			plb = b.GetObject("preview-login-button").Cast().(*gtk.Button)
+			pls = b.GetObject("preview-login-spinner").Cast().(*gtk.Widget)
+
+			ppcb = b.GetObject("privacy-policy-continue-button").Cast().(*gtk.Button)
 
 			sasoc = b.GetObject("setup-authn-server-oidc-client-id-input").Cast().(*adw.EntryRow)
 			sascb = b.GetObject("setup-authn-server-continue-button").Cast().(*gtk.Button)
 			sascs = b.GetObject("setup-authn-server-continue-spinner").Cast().(*gtk.Widget)
 		)
 
-		lb.ConnectClicked(func() {
+		sb.ConnectClicked(func() {
 			nv.PushByTag("select-senbara-server")
 		})
 
@@ -370,10 +374,14 @@ func main() {
 				return err
 			}
 
+			log.Debug("Getting OpenAPI spec")
+
 			res, err := client.GetOpenAPISpec(ctx)
 			if err != nil {
 				return err
 			}
+
+			log.Debug("Got OpenAPI spec", "status", res.StatusCode)
 
 			if res.StatusCode != http.StatusOK {
 				return errors.New(res.Status)
@@ -444,6 +452,22 @@ func main() {
 					panic(err)
 				}
 
+				nv.PushByTag("preview")
+			}()
+		})
+
+		plb.ConnectClicked(func() {
+			plb.SetSensitive(false)
+			pls.SetVisible(true)
+
+			go func() {
+				defer plb.SetSensitive(true)
+				defer pls.SetVisible(false)
+
+				if err := checkSenbaraServerConfiguration(); err != nil {
+					panic(err)
+				}
+
 				nv.PushByTag("privacy-policy")
 			}()
 		})
@@ -453,7 +477,7 @@ func main() {
 		})
 
 		ppcb.ConnectClicked(func() {
-			nv.PushByTag("setup-authn-server") // TODO: Push preview page here instead (fetch unauthenticated API endpoints there)
+			nv.PushByTag("setup-authn-server")
 		})
 
 		sascb.ConnectClicked(func() {
@@ -534,6 +558,41 @@ func main() {
 
 				updateSelectSenbaraServerContinueButtonSensitive()
 
+			case "preview":
+				log.Info("Handling preview")
+
+				redirected, c, _, err := authorize(
+					ctx,
+
+					false,
+				)
+				if err != nil {
+					log.Warn("Could not authorize user for home page", "err", err)
+
+					panic(err)
+				} else if redirected {
+					return
+				}
+
+				log.Debug("Getting OpenAPI spec")
+
+				res, err := c.GetOpenAPISpec(ctx)
+				if err != nil {
+					panic(err)
+				}
+
+				log.Debug("Got OpenAPI spec", "status", res.StatusCode)
+
+				if res.StatusCode != http.StatusOK {
+					panic(errors.New(res.Status))
+				}
+
+				log.Debug("Writing OpenAPI spec to stdout")
+
+				if _, err := io.Copy(os.Stdout, res.Body); err != nil {
+					panic(err)
+				}
+
 			case "setup-authn-server":
 				log.Info("Handling setup-authn-server")
 
@@ -548,7 +607,7 @@ func main() {
 					true,
 				)
 				if err != nil {
-					log.Warn("Could not authorize user for login page", "err", err)
+					log.Warn("Could not authorize user for home page", "err", err)
 
 					panic(err)
 				} else if redirected {
