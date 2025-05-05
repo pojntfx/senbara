@@ -28,7 +28,6 @@ import (
 	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
 	"github.com/pojntfx/senbara/senbara-gnome/config/locales"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
-	"github.com/rymdport/portal/openuri"
 	"github.com/zalando/go-keyring"
 	"gopkg.in/yaml.v2"
 )
@@ -240,7 +239,21 @@ func main() {
 		if redirected {
 			nv.ReplaceWithTags([]string{"exchange"})
 
-			if err := openuri.OpenURI("", nextURL, nil); err != nil {
+			var (
+				fl = gtk.NewURILauncher(nextURL)
+				cc = make(chan error)
+			)
+			fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
+				if err := fl.LaunchFinish(res); err != nil {
+					cc <- err
+
+					return
+				}
+
+				cc <- nil
+			})
+
+			if err := <-cc; err != nil {
 				log.Debug("Could not open nextURL", "error", err)
 
 				return false, nil, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
@@ -499,11 +512,28 @@ func main() {
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
 			nv.ReplaceWithTags([]string{"exchange-logout"})
 
-			if err := openuri.OpenURI("", u.LogoutURL, nil); err != nil {
-				panic(err)
-			}
+			go func() {
+				var (
+					fl = gtk.NewURILauncher(u.LogoutURL)
+					cc = make(chan error)
+				)
+				fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
+					if err := fl.LaunchFinish(res); err != nil {
+						cc <- err
+
+						return
+					}
+
+					cc <- nil
+				})
+
+				if err := <-cc; err != nil {
+					panic(err)
+				}
+			}()
 		})
 		a.AddAction(logoutAction)
+
 
 		aboutAction := gio.NewSimpleAction("about", nil)
 		aboutAction.ConnectActivate(func(parameter *glib.Variant) {

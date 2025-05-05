@@ -11,7 +11,6 @@ require (
 	github.com/oapi-codegen/oapi-codegen/v2 v2.4.1
 	github.com/pojntfx/senbara/senbara-common v0.0.0-20250410071138-94d3723b65a5
 	github.com/pojntfx/senbara/senbara-rest v0.0.0-20250410071138-94d3723b65a5
-	github.com/rymdport/portal v0.4.1
 	github.com/zalando/go-keyring v0.2.6
 	gopkg.in/yaml.v2 v2.4.0
 )
