@@ -124,7 +124,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if c == nil {
 		var (
 			contactName  = os.Getenv("CONTACT_NAME")
-			contactURL   = os.Getenv("CONTACT_URL")
 			contactEmail = os.Getenv("CONTACT_EMAIL")
 
 			serverURL         = os.Getenv("SERVER_URL")
@@ -132,9 +131,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		)
 		if contactName == "" {
 			contactName = "Felicitas Pojtinger"
-		}
-		if contactURL == "" {
-			contactURL = "https://matrix.to/#/@pojntfx:matrix.org"
 		}
 		if contactEmail == "" {
 			contactEmail = "felicitas@pojtinger.com"
@@ -161,7 +157,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			os.Getenv("IMPRINT_URL"),
 
 			contactName,
-			contactURL,
 			contactEmail,
 
 			serverURL,

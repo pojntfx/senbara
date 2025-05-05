@@ -40,7 +40,6 @@ const (
 	privacyURLKey        = "privacy-url"
 	imprintURLKey        = "imprint-url"
 	contactNameKey       = "contact-name"
-	contactURLKey        = "contact-url"
 	contactEmailKey      = "contact-email"
 	serverURLKey         = "server-url"
 	serverDescriptionKey = "server-description"
@@ -151,7 +150,6 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				viper.GetString(imprintURLKey),
 
 				viper.GetString(contactNameKey),
-				viper.GetString(contactURLKey),
 				viper.GetString(contactEmailKey),
 
 				viper.GetString(serverURLKey),
@@ -188,7 +186,6 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 	cmd.PersistentFlags().String(privacyURLKey, "", "Privacy policy URL")
 	cmd.PersistentFlags().String(imprintURLKey, "", "Imprint URL")
 	cmd.PersistentFlags().String(contactNameKey, "Felicitas Pojtinger", "Contact name")
-	cmd.PersistentFlags().String(contactURLKey, "https://matrix.to/#/@pojntfx:matrix.org", "Contact URL")
 	cmd.PersistentFlags().String(contactEmailKey, "felicitas@pojtinger.com", "Contact email")
 	cmd.PersistentFlags().String(serverURLKey, "http://localhost:1337/", "Server URL")
 	cmd.PersistentFlags().String(serverDescriptionKey, "Local development server", "Server description")

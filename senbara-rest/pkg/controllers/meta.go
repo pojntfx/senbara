@@ -13,12 +13,8 @@ func (c *Controller) GetOpenAPISpec(ctx context.Context, request api.GetOpenAPIS
 	c.log.Debug("Handling getting OpenAPI Spec")
 
 	s := *c.spec
-	s.Info.Description = `REST API for a simple personal ERP web application built with the Go standard library, OpenID Connect authentication and PostgreSQL data storage. Designed as a reference for modern REST API development with Go.
-
-Imprint: ` + c.imprintURL
 	s.Info.TermsOfService = c.privacyURL
 	s.Info.Contact.Name = c.contactName
-	s.Info.Contact.URL = c.contactURL
 	s.Info.Contact.Email = c.contactEmail
 	s.Servers[0].URL = c.serverURL
 	s.Servers[0].Description = c.serverDescription

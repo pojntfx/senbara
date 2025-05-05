@@ -36,7 +36,6 @@ type Controller struct {
 	imprintURL string
 
 	contactName  string
-	contactURL   string
 	contactEmail string
 
 	serverURL         string
@@ -59,7 +58,6 @@ func NewController(
 	imprintURL,
 
 	contactName,
-	contactURL,
 	contactEmail,
 
 	serverURL,
@@ -81,7 +79,6 @@ func NewController(
 		imprintURL: imprintURL,
 
 		contactName:  contactName,
-		contactURL:   contactURL,
 		contactEmail: contactEmail,
 
 		serverURL:         serverURL,

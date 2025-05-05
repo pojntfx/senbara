@@ -2,14 +2,11 @@ openapi: 3.1.1
 info:
   title: Senbara REST API v1
   summary: Personal ERP REST API using the Go stdlib, OIDC and PostgreSQL
-  description: |- # Filled out at runtime
-    REST API for a simple personal ERP web application built with the Go standard library, OpenID Connect authentication and PostgreSQL data storage. Designed as a reference for modern REST API development with Go.
-
-    Imprint: https://felicitas.pojtinger.com/imprint
+  description: REST API for a simple personal ERP web application built with the Go standard library, OpenID Connect authentication and PostgreSQL data storage. Designed as a reference for modern REST API development with Go. 
   termsOfService: https://felicitas.pojtinger.com/privacy/dynamic # Filled out at runtime
   contact:
     name: Felicitas Pojtinger # Filled out at runtime
-    url: https://matrix.to/#/@pojntfx:matrix.org # Filled out at runtime
+    url: https://felicitas.pojtinger.com/imprint # Filled out at runtime
     email: felicitas@pojtinger.com # Filled out at runtime
   license:
     name: AGPL-3.0
@@ -104,7 +101,7 @@ paths:
             Content-Disposition:
               schema:
                 type: string
-              example: 'attachment; filename="senbara-forms-userdata.jsonl"'
+              example: 'attachment; filename="userdata.jsonl"'
         "403":
           description: Unauthorized
           content:
