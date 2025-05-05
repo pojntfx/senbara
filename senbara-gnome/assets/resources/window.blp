@@ -137,13 +137,12 @@ Adw.Window main-window {
                 [top]
                 Adw.HeaderBar {
                     show-title: false;
-                    // TODO: Add manual back button action that allows going back to select-senbara-server page
 
                     [end]
                     MenuButton {
                         icon-name: "open-menu-symbolic";
                         primary: true;
-                        menu-model: setup-menu;
+                        menu-model: preview-menu;
                     }
 
                     [end]
@@ -187,7 +186,7 @@ Adw.Window main-window {
                     MenuButton {
                         icon-name: "open-menu-symbolic";
                         primary: true;
-                        menu-model: setup-menu;
+                        menu-model: preview-menu;
                     }
 
                     [end]
@@ -243,7 +242,7 @@ Adw.Window main-window {
                     MenuButton {
                         icon-name: "open-menu-symbolic";
                         primary: true;
-                        menu-model: setup-menu;
+                        menu-model: preview-menu;
                     }
 
                     [end]
@@ -291,7 +290,7 @@ Adw.Window main-window {
                     MenuButton {
                         icon-name: "open-menu-symbolic";
                         primary: true;
-                        menu-model: setup-menu;
+                        menu-model: preview-menu;
                     }
                 }
 
@@ -346,7 +345,7 @@ Adw.Window main-window {
                     MenuButton {
                         icon-name: "open-menu-symbolic";
                         primary: true;
-                        menu-model: setup-menu;
+                        menu-model: preview-menu;
                     }
                 }
 
@@ -365,7 +364,43 @@ Adw.Window main-window {
 }
 
 menu setup-menu {
+    item {
+        label: _("About Senbara Forms");
+        action: "app.about";
+    }
+}
+
+menu preview-menu {
+    item {
+        label: _("Restart setup");
+        action: "app.restartSetup";
+    }
+
     section {
+        submenu {
+            label: _("About Senbara REST");
+
+            item {
+                label: _("License");
+                action: "app.license";
+            }
+
+            item {
+                label: _("Code");
+                action: "app.code";
+            }
+
+            item {
+                label: _("Privacy");
+                action: "app.privacy";
+            }
+
+            item {
+                label: _("Imprint");
+                action: "app.imprint";
+            }
+        }
+
         item {
             label: _("About Senbara Forms");
             action: "app.about";
@@ -374,16 +409,36 @@ menu setup-menu {
 }
 
 menu home-menu {
-    section {
-        label: _("Account");
-
-        item {
-            label: _("Logout");
-            action: "app.logout";
-        }
+    item {
+        label: _("Logout");
+        action: "app.logout";
     }
 
     section {
+        submenu {
+            label: _("About Senbara REST");
+
+            item {
+                label: _("License");
+                action: "app.license";
+            }
+
+            item {
+                label: _("Code");
+                action: "app.code";
+            }
+
+            item {
+                label: _("Privacy");
+                action: "app.privacy";
+            }
+
+            item {
+                label: _("Imprint");
+                action: "app.imprint";
+            }
+        }
+
         item {
             label: _("About Senbara Forms");
             action: "app.about";

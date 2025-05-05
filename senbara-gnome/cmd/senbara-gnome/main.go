@@ -534,6 +534,139 @@ func main() {
 		})
 		a.AddAction(logoutAction)
 
+		licenseAction := gio.NewSimpleAction("license", nil)
+		licenseAction.ConnectActivate(func(parameter *glib.Variant) {
+			log.Info("Handling getting license action", "url", spec.Info.License.URL)
+
+			go func() {
+				var (
+					fl = gtk.NewURILauncher(spec.Info.License.URL)
+					cc = make(chan error)
+				)
+				fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
+					if err := fl.LaunchFinish(res); err != nil {
+						cc <- err
+
+						return
+					}
+
+					cc <- nil
+				})
+
+				if err := <-cc; err != nil {
+					panic(err)
+				}
+			}()
+		})
+		a.AddAction(licenseAction)
+
+		privacyAction := gio.NewSimpleAction("privacy", nil)
+		privacyAction.ConnectActivate(func(parameter *glib.Variant) {
+			log.Info("Handling getting privacy action", "url", spec.Info.TermsOfService)
+
+			go func() {
+				var (
+					fl = gtk.NewURILauncher(spec.Info.TermsOfService)
+					cc = make(chan error)
+				)
+				fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
+					if err := fl.LaunchFinish(res); err != nil {
+						cc <- err
+
+						return
+					}
+
+					cc <- nil
+				})
+
+				if err := <-cc; err != nil {
+					panic(err)
+				}
+			}()
+		})
+		a.AddAction(privacyAction)
+
+		imprintAction := gio.NewSimpleAction("imprint", nil)
+		imprintAction.ConnectActivate(func(parameter *glib.Variant) {
+			log.Info("Handling getting imprint action", "url", spec.Info.Contact.URL)
+
+			go func() {
+				var (
+					fl = gtk.NewURILauncher(spec.Info.Contact.URL)
+					cc = make(chan error)
+				)
+				fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
+					if err := fl.LaunchFinish(res); err != nil {
+						cc <- err
+
+						return
+					}
+
+					cc <- nil
+				})
+
+				if err := <-cc; err != nil {
+					panic(err)
+				}
+			}()
+		})
+		a.AddAction(imprintAction)
+
+		codeAction := gio.NewSimpleAction("code", nil)
+		codeAction.ConnectActivate(func(parameter *glib.Variant) {
+			log.Info("Handling getting code action")
+
+			redirected, c, _, err := authorize(
+				ctx,
+
+				false,
+			)
+			if err != nil {
+				log.Warn("Could not authorize user for getting code action", "err", err)
+
+				panic(err)
+			} else if redirected {
+				return
+			}
+
+			log.Debug("Getting code")
+
+			res, err := c.GetSourceCode(ctx)
+			if err != nil {
+				panic(err)
+			}
+
+			log.Debug("Received code", "status", res.StatusCode)
+
+			if res.StatusCode != http.StatusOK {
+				panic(errors.New(res.Status))
+			}
+
+			log.Debug("Writing code to file")
+
+			fd := gtk.NewFileDialog()
+			fd.SetTitle(gcore.Local("Senbara REST source code"))
+			fd.SetInitialName("code.tar.gz")
+			fd.Save(ctx, &w.Window, func(r gio.AsyncResulter) {
+				fp, err := fd.SaveFinish(r)
+				if err != nil {
+					panic(err)
+				}
+
+				log.Debug("Writing code to file", "path", fp.Path())
+
+				f, err := os.OpenFile(fp.Path(), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+				if err != nil {
+					panic(err)
+				}
+				defer f.Close()
+
+				if _, err := io.Copy(f, res.Body); err != nil {
+					panic(err)
+				}
+			})
+		})
+		a.AddAction(codeAction)
 
 		aboutAction := gio.NewSimpleAction("about", nil)
 		aboutAction.ConnectActivate(func(parameter *glib.Variant) {
