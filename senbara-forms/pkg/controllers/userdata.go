@@ -33,7 +33,7 @@ func (c *Controller) HandleUserData(w http.ResponseWriter, r *http.Request) {
 	log.Debug("Handling export user data")
 
 	w.Header().Set("Content-Type", "application/jsonl")
-	w.Header().Set("Content-Disposition", `attachment; filename="senbara-forms-userdata.jsonl"`)
+	w.Header().Set("Content-Disposition", `attachment; filename="userdata.jsonl"`)
 
 	log.Debug("Getting user data from DB")
 

@@ -135,7 +135,7 @@ func (c *Controller) ExportUserData(ctx context.Context, request api.ExportUserD
 	return api.ExportUserData200ApplicationjsonlResponse{
 		Body: reader,
 		Headers: api.ExportUserData200ResponseHeaders{
-			ContentDisposition: `attachment; filename="senbara-forms-userdata.jsonl"`,
+			ContentDisposition: `attachment; filename="userdata.jsonl"`,
 		},
 	}, nil
 }
