@@ -62,7 +62,8 @@ func (a *Authner) Init(ctx context.Context) error {
 	}
 
 	a.verifier = provider.Verifier(&oidc.Config{
-		ClientID: a.oidcClientID,
+		ClientID:          a.oidcClientID,
+		SkipClientIDCheck: a.oidcClientID == "",
 	})
 
 	return nil

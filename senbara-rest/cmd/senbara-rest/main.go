@@ -21,11 +21,9 @@ import (
 )
 
 var (
-	errMissingOIDCIssuer      = errors.New("missing OIDC issuer")
-	errMissingOIDCClientID    = errors.New("missing OIDC client ID")
-	errMissingOIDCRedirectURL = errors.New("missing OIDC redirect URL")
-	errMissingPrivacyURL      = errors.New("missing privacy policy URL")
-	errMissingImprintURL      = errors.New("missing imprint URL")
+	errMissingOIDCIssuer = errors.New("missing OIDC issuer")
+	errMissingPrivacyURL = errors.New("missing privacy policy URL")
+	errMissingImprintURL = errors.New("missing imprint URL")
 )
 
 const (
@@ -34,8 +32,6 @@ const (
 	laddrKey             = "laddr"
 	pgaddrKey            = "pgaddr"
 	oidcIssuerKey        = "oidc-issuer"
-	oidcClientIDKey      = "oidc-client-id"
-	oidcRedirectURLKey   = "oidc-redirect-url"
 	corsOriginsKey       = "cors-origins"
 	privacyURLKey        = "privacy-url"
 	imprintURLKey        = "imprint-url"
@@ -97,14 +93,6 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				return errMissingOIDCIssuer
 			}
 
-			if !viper.IsSet(oidcClientIDKey) {
-				return errMissingOIDCClientID
-			}
-
-			if !viper.IsSet(oidcRedirectURLKey) {
-				return errMissingOIDCRedirectURL
-			}
-
 			if !viper.IsSet(privacyURLKey) {
 				return errMissingPrivacyURL
 			}
@@ -123,8 +111,8 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				slog.New(log.Handler().WithGroup("authner")),
 
 				viper.GetString(oidcIssuerKey),
-				viper.GetString(oidcClientIDKey),
-				viper.GetString(oidcRedirectURLKey),
+				"",
+				"",
 			)
 
 			if err := a.Init(ctx); err != nil {
@@ -180,8 +168,6 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 	cmd.PersistentFlags().StringP(laddrKey, "l", ":1337", "Listen address (port can also be set with `PORT` env variable)")
 	cmd.PersistentFlags().StringP(pgaddrKey, "p", "postgresql://postgres@localhost:5432/senbara?sslmode=disable", "Database address")
 	cmd.PersistentFlags().String(oidcIssuerKey, "", "OIDC Issuer (e.g. https://pojntfx.eu.auth0.com/)")
-	cmd.PersistentFlags().String(oidcClientIDKey, "", "OIDC Client ID (e.g. myoidcclientid))")
-	cmd.PersistentFlags().String(oidcRedirectURLKey, "http://localhost:1337/authorize", "OIDC redirect URL")
 	cmd.PersistentFlags().StringArray(corsOriginsKey, []string{}, "CORS origins to allow")
 	cmd.PersistentFlags().String(privacyURLKey, "", "Privacy policy URL")
 	cmd.PersistentFlags().String(imprintURLKey, "", "Imprint URL")
