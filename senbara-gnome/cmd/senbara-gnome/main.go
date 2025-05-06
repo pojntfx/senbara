@@ -875,10 +875,18 @@ func main() {
 				},
 
 				func() error {
-					return keyring.Delete(resources.AppID, resources.SecretRefreshTokenKey)
+					if err := keyring.Delete(resources.AppID, resources.SecretRefreshTokenKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
+						return err
+					}
+
+					return nil
 				},
 				func() error {
-					return keyring.Delete(resources.AppID, resources.SecretIDTokenKey)
+					if err := keyring.Delete(resources.AppID, resources.SecretIDTokenKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
+						return err
+					}
+
+					return nil
 				},
 			)
 			if err != nil {
