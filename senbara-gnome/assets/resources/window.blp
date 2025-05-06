@@ -21,7 +21,7 @@ Adw.Window main-window {
                     MenuButton {
                         icon-name: "open-menu-symbolic";
                         primary: true;
-                        menu-model: setup-menu;
+                        menu-model: server-setup-menu;
                     }
                 }
 
@@ -51,7 +51,7 @@ Adw.Window main-window {
                     MenuButton {
                         icon-name: "open-menu-symbolic";
                         primary: true;
-                        menu-model: setup-menu;
+                        menu-model: server-setup-menu;
                     }
                 }
 
@@ -85,7 +85,7 @@ Adw.Window main-window {
                     MenuButton {
                         icon-name: "open-menu-symbolic";
                         primary: true;
-                        menu-model: setup-menu;
+                        menu-model: server-setup-menu;
                     }
 
                     [end]
@@ -186,7 +186,7 @@ Adw.Window main-window {
                     MenuButton {
                         icon-name: "open-menu-symbolic";
                         primary: true;
-                        menu-model: preview-menu;
+                        menu-model: auth-setup-menu;
                     }
 
                     [end]
@@ -242,7 +242,7 @@ Adw.Window main-window {
                     MenuButton {
                         icon-name: "open-menu-symbolic";
                         primary: true;
-                        menu-model: preview-menu;
+                        menu-model: auth-setup-menu;
                     }
 
                     [end]
@@ -363,7 +363,7 @@ Adw.Window main-window {
     }
 }
 
-menu setup-menu {
+menu server-setup-menu {
     item {
         label: _("About Senbara Forms");
         action: "app.about";
@@ -376,6 +376,39 @@ menu preview-menu {
         action: "app.restartSetup";
     }
 
+    section {
+        submenu {
+            label: _("About Senbara REST");
+
+            item {
+                label: _("License");
+                action: "app.license";
+            }
+
+            item {
+                label: _("Code");
+                action: "app.code";
+            }
+
+            item {
+                label: _("Privacy");
+                action: "app.privacy";
+            }
+
+            item {
+                label: _("Imprint");
+                action: "app.imprint";
+            }
+        }
+
+        item {
+            label: _("About Senbara Forms");
+            action: "app.about";
+        }
+    }
+}
+
+menu auth-setup-menu {
     section {
         submenu {
             label: _("About Senbara REST");

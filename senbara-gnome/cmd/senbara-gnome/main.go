@@ -508,6 +508,12 @@ func main() {
 			}()
 		})
 
+		restartSetupAction := gio.NewSimpleAction("restartSetup", nil)
+		restartSetupAction.ConnectActivate(func(parameter *glib.Variant) {
+			nv.ReplaceWithTags([]string{"welcome"})
+		})
+		a.AddAction(restartSetupAction)
+
 		logoutAction := gio.NewSimpleAction("logout", nil)
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
 			nv.ReplaceWithTags([]string{"exchange-logout"})
