@@ -340,6 +340,9 @@ func main() {
 			sasoc = b.GetObject("setup-authn-server-oidc-client-id-input").Cast().(*adw.EntryRow)
 			sascb = b.GetObject("setup-authn-server-continue-button").Cast().(*gtk.Button)
 			sascs = b.GetObject("setup-authn-server-continue-spinner").Cast().(*gtk.Widget)
+
+			ecb  = b.GetObject("exchange-cancel-button").Cast().(*gtk.Button)
+			elcb = b.GetObject("exchange-logout-cancel-button").Cast().(*gtk.Button)
 		)
 
 		sb.ConnectClicked(func() {
@@ -508,11 +511,19 @@ func main() {
 			}()
 		})
 
-		restartSetupAction := gio.NewSimpleAction("restartSetup", nil)
-		restartSetupAction.ConnectActivate(func(parameter *glib.Variant) {
+		selectDifferentServerAction := gio.NewSimpleAction("selectDifferentServer", nil)
+		selectDifferentServerAction.ConnectActivate(func(parameter *glib.Variant) {
 			nv.ReplaceWithTags([]string{"welcome"})
 		})
-		a.AddAction(restartSetupAction)
+		a.AddAction(selectDifferentServerAction)
+
+		ecb.ConnectClicked(func() {
+			nv.ReplaceWithTags([]string{"welcome"})
+		})
+
+		elcb.ConnectClicked(func() {
+			nv.ReplaceWithTags([]string{"home"})
+		})
 
 		logoutAction := gio.NewSimpleAction("logout", nil)
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
@@ -712,6 +723,12 @@ func main() {
 					panic(err)
 				}
 
+				if settings.Boolean(resources.SettingAnonymousMode) {
+					nv.PushByTag("preview")
+
+					return
+				}
+
 				if strings.TrimSpace(u.Email) != "" {
 					nv.PushByTag("home")
 
@@ -742,6 +759,8 @@ func main() {
 				} else if redirected {
 					return
 				}
+
+				settings.SetBoolean(resources.SettingAnonymousMode, true)
 
 				log.Debug("Getting OpenAPI spec")
 
@@ -782,6 +801,8 @@ func main() {
 				} else if redirected {
 					return
 				}
+
+				settings.SetBoolean(resources.SettingAnonymousMode, false)
 
 				log.Debug("Getting summary")
 

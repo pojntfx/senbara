@@ -11,5 +11,10 @@
             <summary>OIDC Client ID</summary>
             <description>OIDC Client ID (e.g. SiNcjPaYVYCOzeVvQAYl4mqhglsSWNY4)</description>
         </key>
+        <key name="anonymous-mode" type="b">
+            <default>false</default>
+            <summary>Anonymous</summary>
+            <description>Whether to browse anonymously</description>
+        </key>
     </schema>
 </schemalist>

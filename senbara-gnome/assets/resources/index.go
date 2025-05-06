@@ -12,6 +12,7 @@ const (
 
 	SettingServerURLKey    = "server-url"
 	SettingOIDCClientIDKey = "oidc-client-id"
+	SettingAnonymousMode   = "anonymous-mode"
 
 	SecretRefreshTokenKey = "refresh-token"
 	SecretIDTokenKey      = "id-token"

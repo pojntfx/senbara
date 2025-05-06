@@ -286,11 +286,16 @@ Adw.Window main-window {
                 Adw.HeaderBar {
                     show-title: false;
 
+                    [start]
+                    Button exchange-cancel-button {
+                        label: _("Cancel");
+                    }
+
                     [end]
                     MenuButton {
                         icon-name: "open-menu-symbolic";
                         primary: true;
-                        menu-model: preview-menu;
+                        menu-model: auth-setup-menu;
                     }
                 }
 
@@ -341,11 +346,16 @@ Adw.Window main-window {
                 Adw.HeaderBar {
                     show-title: false;
 
+                    [start]
+                    Button exchange-logout-cancel-button {
+                        label: _("Cancel");
+                    }
+
                     [end]
                     MenuButton {
                         icon-name: "open-menu-symbolic";
                         primary: true;
-                        menu-model: preview-menu;
+                        menu-model: auth-setup-menu;
                     }
                 }
 
@@ -372,8 +382,8 @@ menu server-setup-menu {
 
 menu preview-menu {
     item {
-        label: _("Restart setup");
-        action: "app.restartSetup";
+        label: _("Select different Senbara server");
+        action: "app.selectDifferentServer";
     }
 
     section {
