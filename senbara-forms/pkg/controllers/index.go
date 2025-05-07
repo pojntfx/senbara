@@ -37,6 +37,10 @@ var (
 const (
 	idTokenKey      = "id_token"
 	refreshTokenKey = "refresh_token"
+
+	stateNonceKey       = "state_nonce"
+	pkceCodeVerifierKey = "pkce_code_verifier"
+	oidcNonceKey        = "oidc_nonce"
 )
 
 type Controller struct {

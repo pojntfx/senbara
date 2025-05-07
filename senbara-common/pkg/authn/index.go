@@ -12,11 +12,20 @@ import (
 var (
 	ErrCouldNotLogin = errors.New("could not login")
 
-	errEmailNotVerified          = errors.New("email not verified")
-	errCouldNotSetRefreshToken   = errors.New("could not set refresh token")
-	errCouldNotSetIDToken        = errors.New("could not set ID token")
+	errEmailNotVerified        = errors.New("email not verified")
+	errCouldNotSetRefreshToken = errors.New("could not set refresh token")
+	errCouldNotSetIDToken      = errors.New("could not set ID token")
+
+	errCouldNotSetStateNonce       = errors.New("could not set state nonce")
+	errCouldNotSetPKCECodeVerifier = errors.New("could not set PKCE code verifier")
+	errCouldNotSetOIDCNonce        = errors.New("could not set OIDC nonce")
+
 	errCouldNotClearRefreshToken = errors.New("could not clear refresh token")
 	errCouldNotClearIDToken      = errors.New("could not clear ID token")
+
+	errCouldNotClearStateNonce       = errors.New("could not clear state nonce")
+	errCouldNotClearPKCECodeVerifier = errors.New("could not clear PKCE code verifier")
+	errCouldNotClearOIDCNonce        = errors.New("could not clear OIDC nonce")
 )
 
 type Authner struct {

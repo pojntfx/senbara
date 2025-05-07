@@ -124,6 +124,43 @@ func (c *Controller) authorize(
 
 			return nil
 		},
+
+		func(s string) error {
+			http.SetCookie(w, &http.Cookie{
+				Name:     stateNonceKey,
+				Value:    s,
+				HttpOnly: true,
+				Secure:   true,
+				SameSite: http.SameSiteStrictMode,
+				Path:     "/",
+			})
+
+			return nil
+		},
+		func(s string) error {
+			http.SetCookie(w, &http.Cookie{
+				Name:     pkceCodeVerifierKey,
+				Value:    s,
+				HttpOnly: true,
+				Secure:   true,
+				SameSite: http.SameSiteStrictMode,
+				Path:     "/",
+			})
+
+			return nil
+		},
+		func(s string) error {
+			http.SetCookie(w, &http.Cookie{
+				Name:     oidcNonceKey,
+				Value:    s,
+				HttpOnly: true,
+				Secure:   true,
+				SameSite: http.SameSiteStrictMode,
+				Path:     "/",
+			})
+
+			return nil
+		},
 	)
 	if err != nil {
 		if errors.Is(err, authn.ErrCouldNotLogin) {
@@ -226,11 +263,42 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	stateNonce, err := r.Cookie(stateNonceKey)
+	if err != nil {
+		log.Warn("Failed to read state nonce cookie", "err", errors.Join(errCouldNotExchange, err))
+
+		http.Error(w, errCouldNotExchange.Error(), http.StatusInternalServerError)
+
+		return
+	}
+
+	pkceCodeVerifier, err := r.Cookie(pkceCodeVerifierKey)
+	if err != nil {
+		log.Warn("Failed to read PKCE code verifier cookie", "err", errors.Join(errCouldNotExchange, err))
+
+		http.Error(w, errCouldNotExchange.Error(), http.StatusInternalServerError)
+
+		return
+	}
+
+	oidcNonce, err := r.Cookie(oidcNonceKey)
+	if err != nil {
+		log.Warn("Failed to read OIDC nonce cookie", "err", errors.Join(errCouldNotExchange, err))
+
+		http.Error(w, errCouldNotExchange.Error(), http.StatusInternalServerError)
+
+		return
+	}
+
 	nextURL, signedOut, err := c.authner.Exchange(
 		r.Context(),
 
 		authCode,
 		state,
+
+		stateNonce.Value,
+		pkceCodeVerifier.Value,
+		oidcNonce.Value,
 
 		func(s string, t time.Time) error {
 			http.SetCookie(w, &http.Cookie{
@@ -275,6 +343,46 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 		func() error {
 			http.SetCookie(w, &http.Cookie{
 				Name:     idTokenKey,
+				Value:    "",
+				MaxAge:   -1,
+				HttpOnly: true,
+				Secure:   true,
+				SameSite: http.SameSiteStrictMode,
+				Path:     "/",
+			})
+
+			return nil
+		},
+
+		func() error {
+			http.SetCookie(w, &http.Cookie{
+				Name:     stateNonceKey,
+				Value:    "",
+				MaxAge:   -1,
+				HttpOnly: true,
+				Secure:   true,
+				SameSite: http.SameSiteStrictMode,
+				Path:     "/",
+			})
+
+			return nil
+		},
+		func() error {
+			http.SetCookie(w, &http.Cookie{
+				Name:     pkceCodeVerifierKey,
+				Value:    "",
+				MaxAge:   -1,
+				HttpOnly: true,
+				Secure:   true,
+				SameSite: http.SameSiteStrictMode,
+				Path:     "/",
+			})
+
+			return nil
+		},
+		func() error {
+			http.SetCookie(w, &http.Cookie{
+				Name:     oidcNonceKey,
 				Value:    "",
 				MaxAge:   -1,
 				HttpOnly: true,
