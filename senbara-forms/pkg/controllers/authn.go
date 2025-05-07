@@ -105,7 +105,7 @@ func (c *Controller) authorize(
 				Expires:  t,
 				HttpOnly: true,
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
+				SameSite: http.SameSiteLaxMode,
 				Path:     "/",
 			})
 
@@ -118,7 +118,7 @@ func (c *Controller) authorize(
 				Expires:  t,
 				HttpOnly: true,
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
+				SameSite: http.SameSiteLaxMode,
 				Path:     "/",
 			})
 
@@ -131,7 +131,7 @@ func (c *Controller) authorize(
 				Value:    s,
 				HttpOnly: true,
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
+				SameSite: http.SameSiteLaxMode,
 				Path:     "/",
 			})
 
@@ -143,7 +143,7 @@ func (c *Controller) authorize(
 				Value:    s,
 				HttpOnly: true,
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
+				SameSite: http.SameSiteLaxMode,
 				Path:     "/",
 			})
 
@@ -155,7 +155,7 @@ func (c *Controller) authorize(
 				Value:    s,
 				HttpOnly: true,
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
+				SameSite: http.SameSiteLaxMode,
 				Path:     "/",
 			})
 
@@ -290,7 +290,7 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	nextURL, signedOut, err := c.authner.Exchange(
+	nextURL, _, err := c.authner.Exchange(
 		r.Context(),
 
 		authCode,
@@ -307,7 +307,7 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 				Expires:  t,
 				HttpOnly: true,
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
+				SameSite: http.SameSiteLaxMode,
 				Path:     "/",
 			})
 
@@ -320,7 +320,7 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 				Expires:  t,
 				HttpOnly: true,
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
+				SameSite: http.SameSiteLaxMode,
 				Path:     "/",
 			})
 
@@ -334,7 +334,7 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 				MaxAge:   -1,
 				HttpOnly: true,
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
+				SameSite: http.SameSiteLaxMode,
 				Path:     "/",
 			})
 
@@ -347,7 +347,7 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 				MaxAge:   -1,
 				HttpOnly: true,
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
+				SameSite: http.SameSiteLaxMode,
 				Path:     "/",
 			})
 
@@ -361,7 +361,7 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 				MaxAge:   -1,
 				HttpOnly: true,
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
+				SameSite: http.SameSiteLaxMode,
 				Path:     "/",
 			})
 
@@ -374,7 +374,7 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 				MaxAge:   -1,
 				HttpOnly: true,
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
+				SameSite: http.SameSiteLaxMode,
 				Path:     "/",
 			})
 
@@ -387,7 +387,7 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 				MaxAge:   -1,
 				HttpOnly: true,
 				Secure:   true,
-				SameSite: http.SameSiteStrictMode,
+				SameSite: http.SameSiteLaxMode,
 				Path:     "/",
 			})
 
@@ -402,47 +402,5 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if signedOut {
-		if err := c.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
-			pageData: pageData{
-				userData: userData{
-					Locale: locale,
-				},
-
-				Page:       locale.Get("Signing you out ..."),
-				PrivacyURL: c.privacyURL,
-				ImprintURL: c.imprintURL,
-			},
-
-			Href: nextURL,
-		}); err != nil {
-			log.Warn("Could not render sign out template", "err", errors.Join(errCouldNotRenderTemplate, err))
-
-			http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
-
-			return
-		}
-
-		return
-	}
-
-	if err := c.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
-		pageData: pageData{
-			userData: userData{
-				Locale: locale,
-			},
-
-			Page:       locale.Get("Signing you in ..."),
-			PrivacyURL: c.privacyURL,
-			ImprintURL: c.imprintURL,
-		},
-
-		Href: nextURL,
-	}); err != nil {
-		log.Warn("Could not render sign in template", "err", errors.Join(errCouldNotRenderTemplate, err))
-
-		http.Error(w, errCouldNotRenderTemplate.Error(), http.StatusInternalServerError)
-
-		return
-	}
+	http.Redirect(w, r, nextURL, http.StatusFound)
 }
