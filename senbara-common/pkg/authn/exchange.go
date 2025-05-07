@@ -46,6 +46,25 @@ func (a *Authner) Exchange(
 
 	a.log.Debug("Starting auth code exchange")
 
+	// Sign out
+	if strings.TrimSpace(authCode) == "" {
+		log.Debug("Signing out user")
+
+		if err := clearRefreshToken(); err != nil {
+			log.Warn("Could not clear refresh token", "err", errors.Join(errCouldNotClearRefreshToken, err))
+
+			return "", false, errCouldNotClearRefreshToken
+		}
+
+		if err := clearIDToken(); err != nil {
+			log.Warn("Could not clear ID token", "err", errors.Join(errCouldNotClearIDToken, err))
+
+			return "", false, errCouldNotClearIDToken
+		}
+
+		return nextURL, true, nil
+	}
+
 	jsonOIDCState, err := url.QueryUnescape(state)
 	if err != nil {
 		log.Warn("Could not parse OIDC state", "err", errors.Join(ErrCouldNotLogin, err))
@@ -75,25 +94,6 @@ func (a *Authner) Exchange(
 	nextURL = rawOIDCState.NextURL
 	if strings.TrimSpace(nextURL) == "" {
 		nextURL = "/"
-	}
-
-	// Sign out
-	if strings.TrimSpace(authCode) == "" {
-		log.Debug("Signing out user")
-
-		if err := clearRefreshToken(); err != nil {
-			log.Warn("Could not clear refresh token", "err", errors.Join(errCouldNotClearRefreshToken, err))
-
-			return "", false, errCouldNotClearRefreshToken
-		}
-
-		if err := clearIDToken(); err != nil {
-			log.Warn("Could not clear ID token", "err", errors.Join(errCouldNotClearIDToken, err))
-
-			return "", false, errCouldNotClearIDToken
-		}
-
-		return nextURL, true, nil
 	}
 
 	ru, err := url.Parse(nextURL)
