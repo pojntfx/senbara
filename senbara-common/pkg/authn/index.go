@@ -26,6 +26,8 @@ var (
 	errCouldNotClearStateNonce       = errors.New("could not clear state nonce")
 	errCouldNotClearPKCECodeVerifier = errors.New("could not clear PKCE code verifier")
 	errCouldNotClearOIDCNonce        = errors.New("could not clear OIDC nonce")
+
+	errCouldNotGetAuthCodeURL = errors.New("could not get auth code URL")
 )
 
 type Authner struct {

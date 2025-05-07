@@ -60,50 +60,61 @@ func (a *Authner) Authorize(
 
 	log.Debug("Checking auth state", "privacyPolicyConsentGiven", privacyPolicyConsentGiven)
 
-	var (
-		stateNonce       = oauth2.GenerateVerifier()
-		pkceCodeVerifier = oauth2.GenerateVerifier()
-		oidcNonce        = oauth2.GenerateVerifier()
-	)
+	getAuthCodeURL := func(returnURL string) (string, error) {
+		var (
+			stateNonce       = oauth2.GenerateVerifier()
+			pkceCodeVerifier = oauth2.GenerateVerifier()
+			oidcNonce        = oauth2.GenerateVerifier()
+		)
 
-	if err := setStateNonce(stateNonce); err != nil {
-		log.Warn("Could not set state nonce", "err", errors.Join(errCouldNotSetStateNonce, err))
+		if err := setStateNonce(stateNonce); err != nil {
+			log.Warn("Could not set state nonce", "err", errors.Join(errCouldNotSetStateNonce, err))
 
-		return "", false, "", "", errCouldNotSetStateNonce
+			return "", errCouldNotSetStateNonce
+		}
+
+		if err := setPKCECodeVerifier(pkceCodeVerifier); err != nil {
+			log.Warn("Could not set PKCE code verifier", "err", errors.Join(errCouldNotSetPKCECodeVerifier, err))
+
+			return "", errCouldNotSetPKCECodeVerifier
+		}
+
+		if err := setOIDCNonce(oidcNonce); err != nil {
+			log.Warn("Could not set OIDC nonce", "err", errors.Join(errCouldNotSetOIDCNonce, err))
+
+			return "", errCouldNotSetOIDCNonce
+		}
+
+		rawOIDCState := oidcState{
+			Nonce:   stateNonce,
+			NextURL: returnURL,
+		}
+
+		jsonOIDCState, err := json.Marshal(rawOIDCState)
+		if err != nil {
+			log.Debug("Failed to marshal OIDC state", "error", errors.Join(ErrCouldNotLogin, err))
+
+			return "", ErrCouldNotLogin
+		}
+
+		state := url.QueryEscape(string(jsonOIDCState))
+
+		return a.config.AuthCodeURL(state, oidc.Nonce(oidcNonce), oauth2.S256ChallengeOption(pkceCodeVerifier)), nil
 	}
-
-	if err := setPKCECodeVerifier(pkceCodeVerifier); err != nil {
-		log.Warn("Could not set PKCE code verifier", "err", errors.Join(errCouldNotSetPKCECodeVerifier, err))
-
-		return "", false, "", "", errCouldNotSetPKCECodeVerifier
-	}
-
-	if err := setOIDCNonce(oidcNonce); err != nil {
-		log.Warn("Could not set OIDC nonce", "err", errors.Join(errCouldNotSetOIDCNonce, err))
-
-		return "", false, "", "", errCouldNotSetOIDCNonce
-	}
-
-	rawOIDCState := oidcState{
-		Nonce:   stateNonce,
-		NextURL: returnURL,
-	}
-
-	jsonOIDCState, err := json.Marshal(rawOIDCState)
-	if err != nil {
-		log.Debug("Failed to marshal OIDC state", "error", errors.Join(ErrCouldNotLogin, err))
-
-		return "", false, "", "", ErrCouldNotLogin
-	}
-
-	state := url.QueryEscape(string(jsonOIDCState))
 
 	if loginIfSignedOut {
 		if refreshToken == nil {
 			if privacyPolicyConsentGiven {
 				log.Debug("Refresh token cookie is missing and privacy policy consent is given, reauthenticating with auth provider")
 
-				return a.config.AuthCodeURL(state, oidc.Nonce(oidcNonce), oauth2.S256ChallengeOption(pkceCodeVerifier)), false, "", "", nil
+				authCodeURL, err := getAuthCodeURL(returnURL)
+				if err != nil {
+					log.Warn("Could not get auth code URL", "err", errors.Join(errCouldNotGetAuthCodeURL, err))
+
+					return "", false, "", "", errCouldNotGetAuthCodeURL
+				}
+
+				return authCodeURL, false, "", "", nil
 			}
 
 			log.Debug("Refresh token cookie is missing, but can't reauthenticate with auth provider since privacy policy consent is not yet given. Redirecting to privacy policy consent page")
@@ -118,20 +129,17 @@ func (a *Authner) Authorize(
 			// tokens in Auth0, which requires users to re-read and re-accept the privacy policy.
 			// Here, we don't use the HTTP Referer header, but instead the current URL, since we don't redirect
 			// with "redirect.html"
-			rawOIDCState.NextURL = currentURL
-
-			jsonOIDCState, err := json.Marshal(rawOIDCState)
-			if err != nil {
-				log.Debug("Failed to marshal OIDC state", "error", errors.Join(ErrCouldNotLogin, err))
-
-				return "", false, "", "", ErrCouldNotLogin
-			}
-
-			state := url.QueryEscape(string(jsonOIDCState))
 
 			log.Debug("ID token cookie is missing and privacy policy consent is given since a valid refresh token exists, reauthenticating with auth provider")
 
-			return a.config.AuthCodeURL(state, oidc.Nonce(oidcNonce), oauth2.S256ChallengeOption(pkceCodeVerifier)), false, "", "", nil
+			authCodeURL, err := getAuthCodeURL(currentURL)
+			if err != nil {
+				log.Warn("Could not get auth code URL", "err", errors.Join(errCouldNotGetAuthCodeURL, err))
+
+				return "", false, "", "", errCouldNotGetAuthCodeURL
+			}
+
+			return authCodeURL, false, "", "", nil
 		}
 	} else {
 		if refreshToken == nil {
@@ -147,20 +155,17 @@ func (a *Authner) Authorize(
 			// tokens in Auth0, which requires users to re-read and re-accept the privacy policy.
 			// Here, we don't use the HTTP Referer header, but instead the current URL, since we don't redirect
 			// with "redirect.html"
-			rawOIDCState.NextURL = currentURL
-
-			jsonOIDCState, err := json.Marshal(rawOIDCState)
-			if err != nil {
-				log.Debug("Failed to marshal OIDC state", "error", errors.Join(ErrCouldNotLogin, err))
-
-				return "", false, "", "", ErrCouldNotLogin
-			}
-
-			state := url.QueryEscape(string(jsonOIDCState))
 
 			log.Debug("ID token cookie is missing and privacy policy consent is given since a refresh token exists, reauthenticating with auth provider")
 
-			return a.config.AuthCodeURL(state, oidc.Nonce(oidcNonce), oauth2.S256ChallengeOption(pkceCodeVerifier)), false, "", "", nil
+			authCodeURL, err := getAuthCodeURL(currentURL)
+			if err != nil {
+				log.Warn("Could not get auth code URL", "err", errors.Join(errCouldNotGetAuthCodeURL, err))
+
+				return "", false, "", "", errCouldNotGetAuthCodeURL
+			}
+
+			return authCodeURL, false, "", "", nil
 		}
 	}
 
@@ -176,7 +181,14 @@ func (a *Authner) Authorize(
 		if err != nil {
 			log.Debug("Token refresh failed, reauthenticating with auth provider", "error", err)
 
-			return a.config.AuthCodeURL(state, oidc.Nonce(oidcNonce), oauth2.S256ChallengeOption(pkceCodeVerifier)), false, "", "", nil
+			authCodeURL, err := getAuthCodeURL(returnURL)
+			if err != nil {
+				log.Warn("Could not get auth code URL", "err", errors.Join(errCouldNotGetAuthCodeURL, err))
+
+				return "", false, "", "", errCouldNotGetAuthCodeURL
+			}
+
+			return authCodeURL, false, "", "", nil
 		}
 
 		var ok bool
@@ -184,14 +196,28 @@ func (a *Authner) Authorize(
 		if !ok {
 			log.Debug("ID token missing from refreshed refresh token, reauthenticating with auth provider")
 
-			return a.config.AuthCodeURL(state, oidc.Nonce(oidcNonce), oauth2.S256ChallengeOption(pkceCodeVerifier)), false, "", "", nil
+			authCodeURL, err := getAuthCodeURL(returnURL)
+			if err != nil {
+				log.Warn("Could not get auth code URL", "err", errors.Join(errCouldNotGetAuthCodeURL, err))
+
+				return "", false, "", "", errCouldNotGetAuthCodeURL
+			}
+
+			return authCodeURL, false, "", "", nil
 		}
 
 		id, err = a.verifier.Verify(ctx, *idToken)
 		if err != nil {
 			log.Debug("Refresh token verification failed, attempting refresh", "error", err)
 
-			return a.config.AuthCodeURL(state, oidc.Nonce(oidcNonce), oauth2.S256ChallengeOption(pkceCodeVerifier)), false, "", "", nil
+			authCodeURL, err := getAuthCodeURL(returnURL)
+			if err != nil {
+				log.Warn("Could not get auth code URL", "err", errors.Join(errCouldNotGetAuthCodeURL, err))
+
+				return "", false, "", "", errCouldNotGetAuthCodeURL
+			}
+
+			return authCodeURL, false, "", "", nil
 		}
 
 		if *refreshToken = oauth2Token.RefreshToken; *refreshToken != "" {

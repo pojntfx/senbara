@@ -254,40 +254,48 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 
 	log.Debug("Handling user auth exchange")
 
-	locale, err := c.localize(r)
+	var (
+		stateNonce,
+		pkceCodeVerifier,
+		oidcNonce string
+	)
+	sn, err := r.Cookie(stateNonceKey)
 	if err != nil {
-		log.Warn("Could not localize auth page", "err", errors.Join(errCouldNotLocalize, err))
+		if !errors.Is(err, http.ErrNoCookie) {
+			log.Warn("Failed to read state nonce cookie", "err", errors.Join(errCouldNotExchange, err))
 
-		http.Error(w, errCouldNotLocalize.Error(), http.StatusInternalServerError)
+			http.Error(w, errCouldNotExchange.Error(), http.StatusInternalServerError)
 
-		return
+			return
+		}
+	} else {
+		stateNonce = sn.Value
 	}
 
-	stateNonce, err := r.Cookie(stateNonceKey)
+	pcv, err := r.Cookie(pkceCodeVerifierKey)
 	if err != nil {
-		log.Warn("Failed to read state nonce cookie", "err", errors.Join(errCouldNotExchange, err))
+		if !errors.Is(err, http.ErrNoCookie) {
+			log.Warn("Failed to read PKCE code verifier cookie", "err", errors.Join(errCouldNotExchange, err))
 
-		http.Error(w, errCouldNotExchange.Error(), http.StatusInternalServerError)
+			http.Error(w, errCouldNotExchange.Error(), http.StatusInternalServerError)
 
-		return
+			return
+		}
+	} else {
+		pkceCodeVerifier = pcv.Value
 	}
 
-	pkceCodeVerifier, err := r.Cookie(pkceCodeVerifierKey)
+	on, err := r.Cookie(oidcNonceKey)
 	if err != nil {
-		log.Warn("Failed to read PKCE code verifier cookie", "err", errors.Join(errCouldNotExchange, err))
+		if !errors.Is(err, http.ErrNoCookie) {
+			log.Warn("Failed to read OIDC nonce cookie", "err", errors.Join(errCouldNotExchange, err))
 
-		http.Error(w, errCouldNotExchange.Error(), http.StatusInternalServerError)
+			http.Error(w, errCouldNotExchange.Error(), http.StatusInternalServerError)
 
-		return
-	}
-
-	oidcNonce, err := r.Cookie(oidcNonceKey)
-	if err != nil {
-		log.Warn("Failed to read OIDC nonce cookie", "err", errors.Join(errCouldNotExchange, err))
-
-		http.Error(w, errCouldNotExchange.Error(), http.StatusInternalServerError)
-
-		return
+			return
+		}
+	} else {
+		oidcNonce = on.Value
 	}
 
 	nextURL, _, err := c.authner.Exchange(
@@ -296,9 +304,9 @@ func (c *Controller) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 		authCode,
 		state,
 
-		stateNonce.Value,
-		pkceCodeVerifier.Value,
-		oidcNonce.Value,
+		stateNonce,
+		pkceCodeVerifier,
+		oidcNonce,
 
 		func(s string, t time.Time) error {
 			http.SetCookie(w, &http.Cookie{
