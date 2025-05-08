@@ -255,7 +255,7 @@ func (a *Authner) Authorize(
 		return "", false, "", "", errors.Join(ErrCouldNotLogin, errEmailNotVerified)
 	}
 
-	lu, err := url.Parse(a.oidcIssuer)
+	lu, err := url.Parse(a.logoutURL)
 	if err != nil {
 		log.Debug("Could not parse OIDC issuer URL", "error", errors.Join(ErrCouldNotLogin, err))
 
@@ -266,8 +266,6 @@ func (a *Authner) Authorize(
 	q.Set("id_token_hint", *idToken)
 	q.Set("post_logout_redirect_uri", a.oidcRedirectURL)
 	lu.RawQuery = q.Encode()
-
-	lu = lu.JoinPath("oidc", "logout")
 
 	log.Debug("Auth successful", "email", claims.Email)
 

@@ -2,8 +2,11 @@ package authn
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"log/slog"
+	"net/http"
+	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
@@ -30,6 +33,10 @@ var (
 	errCouldNotGetAuthCodeURL = errors.New("could not get auth code URL")
 )
 
+type oidcConfig struct {
+	EndSessionEndpoint string `json:"end_session_endpoint"`
+}
+
 type Authner struct {
 	log *slog.Logger
 
@@ -39,6 +46,8 @@ type Authner struct {
 
 	config   *oauth2.Config
 	verifier *oidc.IDTokenVerifier
+
+	logoutURL string
 }
 
 func NewAuthner(
@@ -76,6 +85,22 @@ func (a *Authner) Init(ctx context.Context) error {
 		ClientID:          a.oidcClientID,
 		SkipClientIDCheck: a.oidcClientID == "",
 	})
+
+	res, err := http.Get(strings.TrimSuffix(a.oidcIssuer, "/") + "/.well-known/openid-configuration")
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New(res.Status)
+	}
+
+	var p oidcConfig
+	if err := json.NewDecoder(res.Body).Decode(&p); err != nil {
+		return err
+	}
+
+	a.logoutURL = p.EndSessionEndpoint
 
 	return nil
 }
