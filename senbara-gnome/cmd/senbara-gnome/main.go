@@ -221,6 +221,16 @@ func main() {
 				// TODO: Handle expiry time
 				return keyring.Set(resources.AppID, resources.SecretIDTokenKey, s)
 			},
+
+			func(s string) error {
+				return keyring.Set(resources.AppID, resources.SecretStateNonceKey, s)
+			},
+			func(s string) error {
+				return keyring.Set(resources.AppID, resources.SecretPKCECodeVerifierKey, s)
+			},
+			func(s string) error {
+				return keyring.Set(resources.AppID, resources.SecretOIDCNonceKey, s)
+			},
 		)
 		if err != nil {
 			if errors.Is(err, authn.ErrCouldNotLogin) {
@@ -859,11 +869,53 @@ func main() {
 
 			log.Debug("Handling user auth exchange")
 
+			var (
+				stateNonce,
+				pkceCodeVerifier,
+				oidcNonce string
+			)
+			sn, err := keyring.Get(resources.AppID, resources.SecretStateNonceKey)
+			if err != nil {
+				if !errors.Is(err, keyring.ErrNotFound) {
+					log.Debug("Failed to read state nonce cookie", "error", err)
+
+					panic(errors.Join(errCouldNotLogin, err))
+				}
+			} else {
+				stateNonce = sn
+			}
+
+			pcv, err := keyring.Get(resources.AppID, resources.SecretPKCECodeVerifierKey)
+			if err != nil {
+				if !errors.Is(err, keyring.ErrNotFound) {
+					log.Debug("Failed to read PKCE code verifier cookie", "error", err)
+
+					panic(errors.Join(errCouldNotLogin, err))
+				}
+			} else {
+				pkceCodeVerifier = pcv
+			}
+
+			on, err := keyring.Get(resources.AppID, resources.SecretOIDCNonceKey)
+			if err != nil {
+				if !errors.Is(err, keyring.ErrNotFound) {
+					log.Debug("Failed to read OIDC nonce cookie", "error", err)
+
+					panic(errors.Join(errCouldNotLogin, err))
+				}
+			} else {
+				oidcNonce = on
+			}
+
 			nextURL, signedOut, err := authner.Exchange(
 				ctx,
 
 				authCode,
 				state,
+
+				stateNonce,
+				pkceCodeVerifier,
+				oidcNonce,
 
 				func(s string, t time.Time) error {
 					// TODO: Handle expiry time
@@ -883,6 +935,28 @@ func main() {
 				},
 				func() error {
 					if err := keyring.Delete(resources.AppID, resources.SecretIDTokenKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
+						return err
+					}
+
+					return nil
+				},
+
+				func() error {
+					if err := keyring.Delete(resources.AppID, resources.SecretStateNonceKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
+						return err
+					}
+
+					return nil
+				},
+				func() error {
+					if err := keyring.Delete(resources.AppID, resources.SecretPKCECodeVerifierKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
+						return err
+					}
+
+					return nil
+				},
+				func() error {
+					if err := keyring.Delete(resources.AppID, resources.SecretOIDCNonceKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
 						return err
 					}
 

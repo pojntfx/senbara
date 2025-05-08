@@ -16,6 +16,10 @@ const (
 
 	SecretRefreshTokenKey = "refresh-token"
 	SecretIDTokenKey      = "id-token"
+
+	SecretStateNonceKey       = "state-nonce"
+	SecretPKCECodeVerifierKey = "pkce-code_verifier"
+	SecretOIDCNonceKey        = "oidc-nonce"
 )
 
 //go:generate sh -c "blueprint-compiler batch-compile . . *.blp && sass .:. && glib-compile-schemas . && glib-compile-resources *.gresource.xml"
