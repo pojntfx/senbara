@@ -85,15 +85,13 @@ func (c *Controller) authorize(
 		idToken = &it.Value
 	}
 
-	nextURL, requirePrivacyConsent, email, logoutURL, err := c.authner.Authorize(
+	nextURL, email, logoutURL, err := c.authner.Authorize(
 		r.Context(),
 
 		loginIfSignedOut,
 
 		r.Header.Get("Referer"),
 		r.URL.String(),
-
-		r.FormValue("consent") == "on",
 
 		refreshToken,
 		idToken,
@@ -188,40 +186,7 @@ func (c *Controller) authorize(
 		return redirected, u, http.StatusTemporaryRedirect, nil
 	}
 
-	if requirePrivacyConsent {
-		if err := c.tpl.ExecuteTemplate(w, "redirect.html", redirectData{
-			pageData: pageData{
-				userData: userData{
-					Locale: locale,
-				},
-
-				Page:       locale.Get("Privacy policy consent"),
-				PrivacyURL: c.privacyURL,
-				ImprintURL: c.imprintURL,
-			},
-
-			RequiresPrivacyPolicyConsent: true,
-		}); err != nil {
-			log.Warn("Could not render privacy policy consent template", "err", errors.Join(errCouldNotRenderTemplate, err))
-
-			return false, userData{
-				Locale: locale,
-			}, http.StatusInternalServerError, errors.Join(errCouldNotRenderTemplate, err)
-		}
-
-		log.Debug("Refresh token cookie is missing, but can't reauthenticate with auth provider since privacy policy consent is not yet given. Redirecting to privacy policy consent page")
-
-		return true, u, http.StatusTemporaryRedirect, nil
-	}
-
 	return redirected, u, http.StatusOK, nil
-}
-
-type redirectData struct {
-	pageData
-
-	Href                         string
-	RequiresPrivacyPolicyConsent bool
 }
 
 func (c *Controller) HandleLogin(w http.ResponseWriter, r *http.Request) {

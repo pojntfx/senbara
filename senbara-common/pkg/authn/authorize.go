@@ -29,8 +29,6 @@ func (a *Authner) Authorize(
 	returnURL string,
 	currentURL string,
 
-	privacyPolicyConsentGiven bool,
-
 	refreshToken,
 	idToken *string,
 
@@ -42,8 +40,6 @@ func (a *Authner) Authorize(
 	setOIDCNonce func(string) error,
 ) (
 	nextURL string,
-
-	requirePrivacyConsent bool,
 
 	email,
 	logoutURL string,
@@ -58,7 +54,7 @@ func (a *Authner) Authorize(
 
 	log.Debug("Starting auth flow")
 
-	log.Debug("Checking auth state", "privacyPolicyConsentGiven", privacyPolicyConsentGiven)
+	log.Debug("Checking auth state")
 
 	getAuthCodeURL := func(returnURL string) (string, error) {
 		var (
@@ -104,22 +100,17 @@ func (a *Authner) Authorize(
 
 	if loginIfSignedOut {
 		if refreshToken == nil {
-			if privacyPolicyConsentGiven {
-				log.Debug("Refresh token cookie is missing and privacy policy consent is given, reauthenticating with auth provider")
+			log.Debug("Refresh token cookie is missing, reauthenticating with auth provider")
 
-				authCodeURL, err := getAuthCodeURL(returnURL)
-				if err != nil {
-					log.Warn("Could not get auth code URL", "err", errors.Join(errCouldNotGetAuthCodeURL, err))
+			authCodeURL, err := getAuthCodeURL(returnURL)
+			if err != nil {
+				log.Warn("Could not get auth code URL", "err", errors.Join(errCouldNotGetAuthCodeURL, err))
 
-					return "", false, "", "", errCouldNotGetAuthCodeURL
-				}
-
-				return authCodeURL, false, "", "", nil
+				return "", "", "", errCouldNotGetAuthCodeURL
 			}
 
-			log.Debug("Refresh token cookie is missing, but can't reauthenticate with auth provider since privacy policy consent is not yet given. Redirecting to privacy policy consent page")
+			return authCodeURL, "", "", nil
 
-			return "", true, "", "", nil
 		}
 
 		if idToken == nil {
@@ -130,22 +121,22 @@ func (a *Authner) Authorize(
 			// Here, we don't use the HTTP Referer header, but instead the current URL, since we don't redirect
 			// with "redirect.html"
 
-			log.Debug("ID token cookie is missing and privacy policy consent is given since a valid refresh token exists, reauthenticating with auth provider")
+			log.Debug("ID token cookie is missing, reauthenticating with auth provider")
 
 			authCodeURL, err := getAuthCodeURL(currentURL)
 			if err != nil {
 				log.Warn("Could not get auth code URL", "err", errors.Join(errCouldNotGetAuthCodeURL, err))
 
-				return "", false, "", "", errCouldNotGetAuthCodeURL
+				return "", "", "", errCouldNotGetAuthCodeURL
 			}
 
-			return authCodeURL, false, "", "", nil
+			return authCodeURL, "", "", nil
 		}
 	} else {
 		if refreshToken == nil {
 			log.Debug("Refresh token cookie is missing, but logging in the user if the they are signed out is not requested, continuing without auth")
 
-			return "", false, "", "", nil
+			return "", "", "", nil
 		}
 
 		if idToken == nil {
@@ -156,16 +147,16 @@ func (a *Authner) Authorize(
 			// Here, we don't use the HTTP Referer header, but instead the current URL, since we don't redirect
 			// with "redirect.html"
 
-			log.Debug("ID token cookie is missing and privacy policy consent is given since a refresh token exists, reauthenticating with auth provider")
+			log.Debug("ID token cookie is missing, reauthenticating with auth provider")
 
 			authCodeURL, err := getAuthCodeURL(currentURL)
 			if err != nil {
 				log.Warn("Could not get auth code URL", "err", errors.Join(errCouldNotGetAuthCodeURL, err))
 
-				return "", false, "", "", errCouldNotGetAuthCodeURL
+				return "", "", "", errCouldNotGetAuthCodeURL
 			}
 
-			return authCodeURL, false, "", "", nil
+			return authCodeURL, "", "", nil
 		}
 	}
 
@@ -185,10 +176,10 @@ func (a *Authner) Authorize(
 			if err != nil {
 				log.Warn("Could not get auth code URL", "err", errors.Join(errCouldNotGetAuthCodeURL, err))
 
-				return "", false, "", "", errCouldNotGetAuthCodeURL
+				return "", "", "", errCouldNotGetAuthCodeURL
 			}
 
-			return authCodeURL, false, "", "", nil
+			return authCodeURL, "", "", nil
 		}
 
 		var ok bool
@@ -200,10 +191,10 @@ func (a *Authner) Authorize(
 			if err != nil {
 				log.Warn("Could not get auth code URL", "err", errors.Join(errCouldNotGetAuthCodeURL, err))
 
-				return "", false, "", "", errCouldNotGetAuthCodeURL
+				return "", "", "", errCouldNotGetAuthCodeURL
 			}
 
-			return authCodeURL, false, "", "", nil
+			return authCodeURL, "", "", nil
 		}
 
 		id, err = a.verifier.Verify(ctx, *idToken)
@@ -214,10 +205,10 @@ func (a *Authner) Authorize(
 			if err != nil {
 				log.Warn("Could not get auth code URL", "err", errors.Join(errCouldNotGetAuthCodeURL, err))
 
-				return "", false, "", "", errCouldNotGetAuthCodeURL
+				return "", "", "", errCouldNotGetAuthCodeURL
 			}
 
-			return authCodeURL, false, "", "", nil
+			return authCodeURL, "", "", nil
 		}
 
 		if *refreshToken = oauth2Token.RefreshToken; *refreshToken != "" {
@@ -226,7 +217,7 @@ func (a *Authner) Authorize(
 			if err := setRefreshToken(*refreshToken, time.Now().Add(time.Hour*24*365)); err != nil {
 				log.Warn("Could not set refresh token", "err", errors.Join(errCouldNotSetRefreshToken, err))
 
-				return "", false, "", "", errCouldNotSetRefreshToken
+				return "", "", "", errCouldNotSetRefreshToken
 			}
 		}
 
@@ -235,7 +226,7 @@ func (a *Authner) Authorize(
 		if err := setIDToken(*idToken, oauth2Token.Expiry); err != nil {
 			log.Warn("Could not set ID token", "err", errors.Join(errCouldNotSetIDToken, err))
 
-			return "", false, "", "", errCouldNotSetIDToken
+			return "", "", "", errCouldNotSetIDToken
 		}
 	}
 
@@ -246,20 +237,20 @@ func (a *Authner) Authorize(
 	if err := id.Claims(&claims); err != nil {
 		log.Debug("Failed to parse ID token claims", "error", errors.Join(ErrCouldNotLogin, err))
 
-		return "", false, "", "", ErrCouldNotLogin
+		return "", "", "", ErrCouldNotLogin
 	}
 
 	if !claims.EmailVerified {
 		log.Debug("Email from ID token claims not verified, user is unauthorized", "email", claims.Email, "error", errors.Join(ErrCouldNotLogin, errEmailNotVerified))
 
-		return "", false, "", "", errors.Join(ErrCouldNotLogin, errEmailNotVerified)
+		return "", "", "", errors.Join(ErrCouldNotLogin, errEmailNotVerified)
 	}
 
 	lu, err := url.Parse(a.logoutURL)
 	if err != nil {
 		log.Debug("Could not parse OIDC issuer URL", "error", errors.Join(ErrCouldNotLogin, err))
 
-		return "", false, "", "", ErrCouldNotLogin
+		return "", "", "", ErrCouldNotLogin
 	}
 
 	q := lu.Query()
@@ -269,5 +260,5 @@ func (a *Authner) Authorize(
 
 	log.Debug("Auth successful", "email", claims.Email)
 
-	return "", false, claims.Email, lu.String(), nil
+	return "", claims.Email, lu.String(), nil
 }

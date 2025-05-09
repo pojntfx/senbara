@@ -236,18 +236,6 @@ msgstr "Privacy"
 msgid "Imprint"
 msgstr "Imprint"
 
-msgid "I have read and understood the "
-msgstr "I have read and understood the "
-
-msgid "privacy policy"
-msgstr "privacy policy"
-
-msgid "Privacy policy consent suffix"
-msgstr " "
-
-msgid "Privacy policy consent"
-msgstr "Privacy policy consent"
-
 # Misc
 msgid "Markdown"
 msgstr "Markdown"

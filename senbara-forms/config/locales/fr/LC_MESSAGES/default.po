@@ -236,18 +236,6 @@ msgstr "Politique de confidentialité"
 msgid "Imprint"
 msgstr "Mentions légales"
 
-msgid "I have read and understood the "
-msgstr "J'ai lu et compris la "
-
-msgid "privacy policy"
-msgstr "politique de confidentialité"
-
-msgid "Privacy policy consent suffix"
-msgstr " "
-
-msgid "Privacy policy consent"
-msgstr "Consentement à la politique de confidentialité"
-
 # Misc
 msgid "Markdown"
 msgstr "le langage Markdown"

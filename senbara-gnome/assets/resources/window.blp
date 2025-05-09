@@ -230,54 +230,6 @@ Adw.Window main-window {
         }
 
         Adw.NavigationPage {
-            title: _("Privacy policy consent");
-            tag: "privacy-policy";
-
-            Adw.ToolbarView {
-                [top]
-                Adw.HeaderBar {
-                    show-title: false;
-
-                    [end]
-                    MenuButton {
-                        icon-name: "open-menu-symbolic";
-                        primary: true;
-                        menu-model: auth-setup-menu;
-                    }
-
-                    [end]
-                    Button privacy-policy-continue-button {
-                        label: _("Continue");
-                        sensitive: false;
-
-                        styles [
-                            "suggested-action",
-                        ]
-                    }
-                }
-
-                Adw.StatusPage {
-                    title: _("Privacy policy consent");
-                    icon-name: "license-symbolic";
-
-                    Box {
-                        halign: center;
-
-                        CheckButton privacy-policy-checkbutton {
-                            halign: center;
-                            label: _("I have read and understood the");
-                        }
-
-                        Label privacy-policy-link {
-                            use-markup: true;
-                            label: _("privacy policy");
-                        }
-                    }
-                }
-            }
-        }
-
-        Adw.NavigationPage {
             title: _("Signing you in");
             tag: "exchange";
 

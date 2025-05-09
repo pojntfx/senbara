@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"html/template"
 	"io"
 	"io/fs"
 	"log/slog"
@@ -142,16 +141,10 @@ func main() {
 
 	a := adw.NewApplication(resources.AppID, gio.ApplicationHandlesOpen)
 
-	lt, err := template.New("").Parse(`<a href="{{ .Href }}">{{ .Label }}</a>`)
-	if err != nil {
-		panic(err)
-	}
-
 	var (
 		w       *adw.Window
 		nv      *adw.NavigationView
 		authner *authn.Authner
-		ppckb   *gtk.CheckButton
 		u       userData
 	)
 
@@ -200,15 +193,13 @@ func main() {
 			idToken = &it
 		}
 
-		nextURL, requirePrivacyConsent, email, logoutURL, err := authner.Authorize(
+		nextURL, email, logoutURL, err := authner.Authorize(
 			ctx,
 
 			loginIfSignedOut,
 
 			nv.VisiblePage().Tag(),
 			nv.VisiblePage().Tag(),
-
-			ppckb.Active(),
 
 			refreshToken,
 			idToken,
@@ -272,14 +263,6 @@ func main() {
 			return redirected, nil, http.StatusTemporaryRedirect, nil
 		}
 
-		if requirePrivacyConsent {
-			nv.PushByTag("privacy-policy")
-
-			log.Debug("Refresh token cookie is missing, but can't reauthenticate with auth provider since privacy policy consent is not yet given. Redirecting to privacy policy consent page")
-
-			return true, nil, http.StatusTemporaryRedirect, nil
-		}
-
 		opts := []api.ClientOption{}
 		if strings.TrimSpace(u.Email) != "" {
 			log.Debug("Creating authenticated client")
@@ -329,8 +312,6 @@ func main() {
 
 		nv = b.GetObject("main-navigation").Cast().(*adw.NavigationView)
 
-		ppckb = b.GetObject("privacy-policy-checkbutton").Cast().(*gtk.CheckButton)
-
 		var (
 			sb = b.GetObject("setup-button").Cast().(*gtk.Button)
 
@@ -338,14 +319,10 @@ func main() {
 			ssscb = b.GetObject("select-senbara-server-continue-button").Cast().(*gtk.Button)
 			ssscs = b.GetObject("select-senbara-server-continue-spinner").Cast().(*gtk.Widget)
 
-			ppl = b.GetObject("privacy-policy-link").Cast().(*gtk.Label)
-
 			spec oidcSpec
 
 			plb = b.GetObject("preview-login-button").Cast().(*gtk.Button)
 			pls = b.GetObject("preview-login-spinner").Cast().(*gtk.Widget)
-
-			ppcb = b.GetObject("privacy-policy-continue-button").Cast().(*gtk.Button)
 
 			sasoc = b.GetObject("setup-authn-server-oidc-client-id-input").Cast().(*adw.EntryRow)
 			sascb = b.GetObject("setup-authn-server-continue-button").Cast().(*gtk.Button)
@@ -420,16 +397,6 @@ func main() {
 				return err
 			}
 
-			var ltsb strings.Builder
-			if err := lt.Execute(&ltsb, linkTemplateData{
-				Href:  spec.Info.TermsOfService,
-				Label: gcore.Local("privacy policy"),
-			}); err != nil {
-				return err
-			}
-
-			ppl.SetLabel(ltsb.String())
-
 			return nil
 		}
 
@@ -494,16 +461,8 @@ func main() {
 					panic(err)
 				}
 
-				nv.PushByTag("privacy-policy")
+				nv.PushByTag("setup-authn-server")
 			}()
-		})
-
-		ppckb.ConnectToggled(func() {
-			ppcb.SetSensitive(ppckb.Active())
-		})
-
-		ppcb.ConnectClicked(func() {
-			nv.PushByTag("setup-authn-server")
 		})
 
 		sascb.ConnectClicked(func() {
@@ -749,8 +708,6 @@ func main() {
 
 			case "select-senbara-server":
 				log.Info("Handling select-senbara-server")
-
-				ppckb.SetActive(false)
 
 				updateSelectSenbaraServerContinueButtonSensitive()
 
