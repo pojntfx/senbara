@@ -50,6 +50,11 @@ func (a *Authner) Exchange(
 	if strings.TrimSpace(authCode) == "" {
 		log.Debug("Signing out user")
 
+		nextURL = state
+		if strings.TrimSpace(nextURL) == "" {
+			nextURL = "/"
+		}
+
 		if err := clearRefreshToken(); err != nil {
 			log.Warn("Could not clear refresh token", "err", errors.Join(errCouldNotClearRefreshToken, err))
 
