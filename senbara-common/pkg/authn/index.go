@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"path"
 	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -13,6 +14,9 @@ import (
 )
 
 var (
+	// See https://openid.net/specs/openid-connect-discovery-1_0-errata2.html#ProviderConfig
+	OIDCDiscoverySuffix = path.Join("/", ".well-known", "openid-configuration")
+
 	ErrCouldNotLogin = errors.New("could not login")
 
 	errEmailNotVerified        = errors.New("email not verified")
@@ -86,7 +90,7 @@ func (a *Authner) Init(ctx context.Context) error {
 		SkipClientIDCheck: a.oidcClientID == "",
 	})
 
-	res, err := http.Get(strings.TrimSuffix(a.oidcIssuer, "/") + "/.well-known/openid-configuration")
+	res, err := http.Get(strings.TrimSuffix(a.oidcIssuer, "/") + OIDCDiscoverySuffix)
 	if err != nil {
 		return err
 	}

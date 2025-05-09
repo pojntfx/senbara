@@ -73,7 +73,7 @@ func NewController(
 
 		spec: spec,
 
-		oidcDiscoveryURL: strings.TrimSuffix(oidcIssuer, "/") + spec.Components.SecuritySchemes["oidc"].Value.OpenIdConnectUrl,
+		oidcDiscoveryURL: strings.TrimSuffix(oidcIssuer, "/") + authn.OIDCDiscoverySuffix,
 
 		privacyURL: privacyURL,
 		imprintURL: imprintURL,
