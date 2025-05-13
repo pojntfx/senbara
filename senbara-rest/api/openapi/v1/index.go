@@ -100,10 +100,21 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if a == nil {
+		o, err := authn.DiscoverOIDCProviderConfiguration(
+			r.Context(),
+
+			strings.TrimSuffix(os.Getenv("OIDC_ISSUER"), "/")+authn.OIDCWellKnownURLSuffix,
+		)
+		if err != nil {
+			panic(err)
+		}
+
 		a = authn.NewAuthner(
 			slog.New(log.Handler().WithGroup("authner")),
 
-			os.Getenv("OIDC_ISSUER"),
+			o.Issuer,
+			o.EndSessionEndpoint,
+
 			os.Getenv("OIDC_CLIENT_ID"),
 			os.Getenv("OIDC_REDIRECT_URL"),
 		)

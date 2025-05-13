@@ -2,21 +2,14 @@ package authn
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"log/slog"
-	"net/http"
-	"path"
-	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
 )
 
 var (
-	// See https://openid.net/specs/openid-connect-discovery-1_0-errata2.html#ProviderConfig
-	OIDCDiscoverySuffix = path.Join("/", ".well-known", "openid-configuration")
-
 	ErrCouldNotLogin = errors.New("could not login")
 
 	errEmailNotVerified        = errors.New("email not verified")
@@ -37,34 +30,34 @@ var (
 	errCouldNotGetAuthCodeURL = errors.New("could not get auth code URL")
 )
 
-type oidcConfig struct {
-	EndSessionEndpoint string `json:"end_session_endpoint"`
-}
-
 type Authner struct {
 	log *slog.Logger
 
 	oidcIssuer,
+	oidcEndSessionEndpoint,
+
 	oidcClientID,
 	oidcRedirectURL string
 
 	config   *oauth2.Config
 	verifier *oidc.IDTokenVerifier
-
-	logoutURL string
 }
 
 func NewAuthner(
 	log *slog.Logger,
 
 	oidcIssuer,
+	oidcEndSessionEndpoint,
+
 	oidcClientID,
 	oidcRedirectURL string,
 ) *Authner {
 	return &Authner{
 		log: log,
 
-		oidcIssuer:      oidcIssuer,
+		oidcIssuer:             oidcIssuer,
+		oidcEndSessionEndpoint: oidcEndSessionEndpoint,
+
 		oidcClientID:    oidcClientID,
 		oidcRedirectURL: oidcRedirectURL,
 	}
@@ -89,22 +82,6 @@ func (a *Authner) Init(ctx context.Context) error {
 		ClientID:          a.oidcClientID,
 		SkipClientIDCheck: a.oidcClientID == "",
 	})
-
-	res, err := http.Get(strings.TrimSuffix(a.oidcIssuer, "/") + OIDCDiscoverySuffix)
-	if err != nil {
-		return err
-	}
-
-	if res.StatusCode != http.StatusOK {
-		return errors.New(res.Status)
-	}
-
-	var p oidcConfig
-	if err := json.NewDecoder(res.Body).Decode(&p); err != nil {
-		return err
-	}
-
-	a.logoutURL = p.EndSessionEndpoint
 
 	return nil
 }

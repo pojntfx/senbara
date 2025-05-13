@@ -107,10 +107,21 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				return err
 			}
 
+			o, err := authn.DiscoverOIDCProviderConfiguration(
+				ctx,
+
+				strings.TrimSuffix(viper.GetString(oidcIssuerKey), "/")+authn.OIDCWellKnownURLSuffix,
+			)
+			if err != nil {
+				return err
+			}
+
 			a := authn.NewAuthner(
 				slog.New(log.Handler().WithGroup("authner")),
 
-				viper.GetString(oidcIssuerKey),
+				o.Issuer,
+				o.EndSessionEndpoint,
+
 				"",
 				"",
 			)

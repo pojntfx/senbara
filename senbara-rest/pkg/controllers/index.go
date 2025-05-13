@@ -73,7 +73,7 @@ func NewController(
 
 		spec: spec,
 
-		oidcDiscoveryURL: strings.TrimSuffix(oidcIssuer, "/") + authn.OIDCDiscoverySuffix,
+		oidcDiscoveryURL: strings.TrimSuffix(oidcIssuer, "/") + authn.OIDCWellKnownURLSuffix,
 
 		privacyURL: privacyURL,
 		imprintURL: imprintURL,

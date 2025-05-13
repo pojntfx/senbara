@@ -246,7 +246,7 @@ func (a *Authner) Authorize(
 		return "", "", "", errors.Join(ErrCouldNotLogin, errEmailNotVerified)
 	}
 
-	lu, err := url.Parse(a.logoutURL)
+	lu, err := url.Parse(a.oidcEndSessionEndpoint)
 	if err != nil {
 		log.Debug("Could not parse OIDC issuer URL", "error", errors.Join(ErrCouldNotLogin, err))
 

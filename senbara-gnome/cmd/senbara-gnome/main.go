@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"io"
 	"io/fs"
@@ -35,11 +34,7 @@ var (
 	errCouldNotLogin = errors.New("could not login")
 )
 
-type oidcConfig struct {
-	Issuer string `json:"issuer"`
-}
-
-type oidcSpec struct {
+type openAPISpec struct {
 	Info       openapi3.Info `yaml:"info"`
 	Components struct {
 		SecuritySchemes map[string]openapi3.SecurityScheme `yaml:"securitySchemes"`
@@ -319,7 +314,7 @@ func main() {
 			ssscb = b.GetObject("select-senbara-server-continue-button").Cast().(*gtk.Button)
 			ssscs = b.GetObject("select-senbara-server-continue-spinner").Cast().(*gtk.Widget)
 
-			spec oidcSpec
+			spec openAPISpec
 
 			plb = b.GetObject("preview-login-button").Cast().(*gtk.Button)
 			pls = b.GetObject("preview-login-spinner").Cast().(*gtk.Widget)
@@ -405,24 +400,21 @@ func main() {
 				oidcClientID = settings.String(resources.SettingOIDCClientIDKey)
 			)
 
-			res, err := http.Get(spec.Components.SecuritySchemes["oidc"].OpenIdConnectUrl)
+			o, err := authn.DiscoverOIDCProviderConfiguration(
+				ctx,
+
+				spec.Components.SecuritySchemes["oidc"].OpenIdConnectUrl,
+			)
 			if err != nil {
-				return err
-			}
-
-			if res.StatusCode != http.StatusOK {
-				return errors.New(res.Status)
-			}
-
-			var p oidcConfig
-			if err := json.NewDecoder(res.Body).Decode(&p); err != nil {
 				return err
 			}
 
 			authner = authn.NewAuthner(
 				slog.New(log.Handler().WithGroup("authner")),
 
-				p.Issuer,
+				o.Issuer,
+				o.EndSessionEndpoint,
+
 				oidcClientID,
 				"senbara:///authorize",
 			)
