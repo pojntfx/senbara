@@ -10,9 +10,12 @@ const (
 
 	appPath = "/com/pojtinger/felicitas/Senbara/"
 
-	SettingServerURLKey    = "server-url"
-	SettingOIDCClientIDKey = "oidc-client-id"
-	SettingAnonymousMode   = "anonymous-mode"
+	SettingServerURLKey             = "server-url"
+	SettingRegistrationClientURIKey = "registration-client-uri"
+	SettingOIDCClientIDKey          = "oidc-client-id"
+	SettingAnonymousMode            = "anonymous-mode"
+
+	SecretRegistrationAccessToken = "registration-access-token"
 
 	SecretRefreshTokenKey = "refresh-token"
 	SecretIDTokenKey      = "id-token"

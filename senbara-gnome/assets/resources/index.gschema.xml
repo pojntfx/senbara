@@ -6,12 +6,22 @@
             <summary>Server URL</summary>
             <description>Server URL (e.g. https://rest.senbara.p8.lu/)</description>
         </key>
-        <key name="oidc-client-id" type="s">
-            <default>"SiNcjPaYVYCOzeVvQAYl4mqhglsSWNY4"</default>
-            <summary>OIDC Client ID</summary>
-            <description>OIDC Client ID (e.g. SiNcjPaYVYCOzeVvQAYl4mqhglsSWNY4)</description>
+        <key name="registration-client-uri"
+            type="s">
+            <default>""</default>
+            <summary>Registration Client URI</summary>
+            <description>
+                Registration Client ID (e.g.
+                https://heuristic-rhodes-wqkaaxzmwj.projects.oryapis.com/oauth2/register/6e950052-70fa-4ebd-96f8-352d3b477d58)</description>
         </key>
-        <key name="anonymous-mode" type="b">
+        <key
+            name="oidc-client-id" type="s">
+            <default>""</default>
+            <summary>OIDC Client ID</summary>
+            <description>OIDC Client ID (e.g. 6e950052-70fa-4ebd-96f8-352d3b477d58)</description>
+        </key>
+        <key
+            name="anonymous-mode" type="b">
             <default>false</default>
             <summary>Anonymous</summary>
             <description>Whether to browse anonymously</description>

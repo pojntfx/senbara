@@ -31,7 +31,12 @@ import (
 )
 
 var (
-	errCouldNotLogin = errors.New("could not login")
+	errCouldNotLogin            = errors.New("could not login")
+	errCouldNotWriteSettingsKey = errors.New("could not write settings key")
+)
+
+const (
+	redirectURL = "senbara:///authorize"
 )
 
 type openAPISpec struct {
@@ -39,11 +44,6 @@ type openAPISpec struct {
 	Components struct {
 		SecuritySchemes map[string]openapi3.SecurityScheme `yaml:"securitySchemes"`
 	} `yaml:"components"`
-}
-
-type linkTemplateData struct {
-	Href  string
-	Label string
 }
 
 type userData struct {
@@ -319,10 +319,6 @@ func main() {
 			plb = b.GetObject("preview-login-button").Cast().(*gtk.Button)
 			pls = b.GetObject("preview-login-spinner").Cast().(*gtk.Widget)
 
-			sasoc = b.GetObject("setup-authn-server-oidc-client-id-input").Cast().(*adw.EntryRow)
-			sascb = b.GetObject("setup-authn-server-continue-button").Cast().(*gtk.Button)
-			sascs = b.GetObject("setup-authn-server-continue-spinner").Cast().(*gtk.Widget)
-
 			ecb  = b.GetObject("exchange-cancel-button").Cast().(*gtk.Button)
 			elcb = b.GetObject("exchange-logout-cancel-button").Cast().(*gtk.Button)
 		)
@@ -332,7 +328,6 @@ func main() {
 		})
 
 		settings.Bind(resources.SettingServerURLKey, sssui.Object, "text", gio.SettingsBindDefault)
-		settings.Bind(resources.SettingOIDCClientIDKey, sasoc.Object, "text", gio.SettingsBindDefault)
 
 		updateSelectSenbaraServerContinueButtonSensitive := func() {
 			if len(settings.String(resources.SettingServerURLKey)) > 0 {
@@ -342,23 +337,25 @@ func main() {
 			}
 		}
 
-		settings.ConnectChanged(func(key string) {
-			if key == resources.SettingServerURLKey {
-				updateSelectSenbaraServerContinueButtonSensitive()
+		deregisterOIDCClient := func() {
+			// TODO: De-register OIDC client through API if OIDC client ID is != ""
+			if ok := settings.SetString(resources.SettingOIDCClientIDKey, ""); !ok {
+				panic(errCouldNotWriteSettingsKey)
 			}
-		})
 
-		updateSelectAuthnServerContinueButtonSensitive := func() {
-			if len(settings.String(resources.SettingOIDCClientIDKey)) > 0 {
-				sascb.SetSensitive(true)
-			} else {
-				sascb.SetSensitive(false)
+			if ok := settings.SetString(resources.SettingRegistrationClientURIKey, ""); !ok {
+				panic(errCouldNotWriteSettingsKey)
+			}
+
+			if err := keyring.Delete(resources.AppID, resources.SecretRegistrationAccessToken); err != nil && !errors.Is(err, keyring.ErrNotFound) {
+				panic(err)
 			}
 		}
 
 		settings.ConnectChanged(func(key string) {
-			if key == resources.SettingOIDCClientIDKey {
-				updateSelectAuthnServerContinueButtonSensitive()
+			if key == resources.SettingServerURLKey {
+				updateSelectSenbaraServerContinueButtonSensitive()
+				deregisterOIDCClient()
 			}
 		})
 
@@ -396,10 +393,6 @@ func main() {
 		}
 
 		checkAuthnServerConfiguration := func() error {
-			var (
-				oidcClientID = settings.String(resources.SettingOIDCClientIDKey)
-			)
-
 			o, err := authn.DiscoverOIDCProviderConfiguration(
 				ctx,
 
@@ -409,6 +402,28 @@ func main() {
 				return err
 			}
 
+			oidcClientID := settings.String(resources.SettingOIDCClientIDKey)
+			if oidcClientID == "" {
+				c, err := authn.RegisterOIDCClient(ctx, o, "Senbara GNOME", redirectURL)
+				if err != nil {
+					return err
+				}
+
+				if ok := settings.SetString(resources.SettingOIDCClientIDKey, c.ClientID); !ok {
+					return errCouldNotWriteSettingsKey
+				}
+
+				if ok := settings.SetString(resources.SettingRegistrationClientURIKey, c.RegistrationClientURI); !ok {
+					return errCouldNotWriteSettingsKey
+				}
+
+				if err := keyring.Set(resources.AppID, resources.SecretRegistrationAccessToken, c.RegistrationAccessToken); err != nil {
+					return err
+				}
+
+				oidcClientID = c.ClientID
+			}
+
 			authner = authn.NewAuthner(
 				slog.New(log.Handler().WithGroup("authner")),
 
@@ -416,7 +431,7 @@ func main() {
 				o.EndSessionEndpoint,
 
 				oidcClientID,
-				"senbara:///authorize",
+				redirectURL,
 			)
 
 			if err := authner.Init(ctx); err != nil {
@@ -452,17 +467,6 @@ func main() {
 				if err := checkSenbaraServerConfiguration(); err != nil {
 					panic(err)
 				}
-
-				nv.PushByTag("setup-authn-server")
-			}()
-		})
-
-		sascb.ConnectClicked(func() {
-			sascb.SetSensitive(false)
-			sascs.SetVisible(true)
-
-			go func() {
-				defer sascs.SetVisible(false)
 
 				if err := checkAuthnServerConfiguration(); err != nil {
 					panic(err)
@@ -703,6 +707,7 @@ func main() {
 				log.Info("Handling select-senbara-server")
 
 				updateSelectSenbaraServerContinueButtonSensitive()
+				deregisterOIDCClient()
 
 			case "preview":
 				log.Info("Handling preview")
@@ -741,11 +746,6 @@ func main() {
 				if _, err := io.Copy(os.Stdout, res.Body); err != nil {
 					panic(err)
 				}
-
-			case "setup-authn-server":
-				log.Info("Handling setup-authn-server")
-
-				updateSelectAuthnServerContinueButtonSensitive()
 
 			case "home":
 				log.Info("Handling home")
