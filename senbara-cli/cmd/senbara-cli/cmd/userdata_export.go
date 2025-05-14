@@ -34,6 +34,7 @@ var userDataExportCommand = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		defer res.Body.Close()
 
 		log.Debug("Exported user data", "status", res.StatusCode)
 

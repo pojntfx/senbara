@@ -34,6 +34,7 @@ var openapiGetCommand = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		defer res.Body.Close()
 
 		log.Debug("Received OpenAPI spec", "status", res.StatusCode)
 

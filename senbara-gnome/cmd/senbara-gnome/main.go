@@ -613,6 +613,7 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
+			defer res.Body.Close()
 
 			log.Debug("Received code", "status", res.StatusCode)
 
@@ -727,6 +728,7 @@ func main() {
 				if err != nil {
 					panic(err)
 				}
+				defer res.Body.Close()
 
 				log.Debug("Got OpenAPI spec", "status", res.StatusCode)
 

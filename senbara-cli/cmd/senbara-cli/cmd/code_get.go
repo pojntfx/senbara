@@ -34,6 +34,7 @@ var codeGetCommand = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		defer res.Body.Close()
 
 		log.Debug("Received code", "status", res.StatusCode)
 

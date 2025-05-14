@@ -43,10 +43,16 @@ func RegisterOIDCClient(
 		return nil, err
 	}
 
-	res, err := http.Post(providerConfiguration.RegistrationEndpoint, "application/json", bytes.NewBuffer(b))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, providerConfiguration.RegistrationEndpoint, bytes.NewBuffer(b))
 	if err != nil {
 		return nil, err
 	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusCreated {
 		return nil, errors.New(res.Status)
