@@ -337,25 +337,48 @@ func main() {
 			}
 		}
 
-		deregisterOIDCClient := func() {
-			// TODO: De-register OIDC client through API if OIDC client ID is != ""
+		deregisterOIDCClient := func() error {
+			if registrationClientURI := settings.String(resources.SettingRegistrationClientURIKey); registrationClientURI != "" {
+				registrationAccessToken, err := keyring.Get(resources.AppID, resources.SecretRegistrationAccessToken)
+				if err != nil {
+					return err
+				}
+
+				if err := authn.DeregisterOIDCClient(
+					ctx,
+
+					registrationAccessToken,
+					registrationClientURI,
+				); err != nil {
+					return err
+				}
+
+				if ok := settings.SetString(resources.SettingRegistrationClientURIKey, ""); !ok {
+					return errCouldNotWriteSettingsKey
+				}
+
+				if err := keyring.Delete(resources.AppID, resources.SecretRegistrationAccessToken); err != nil && !errors.Is(err, keyring.ErrNotFound) {
+					return err
+				}
+			}
+
+			// We indiscriminately clear the client ID, even if the client was never registered
+			// via OIDC dynamic client registration so that we can switch Senbara servers (which
+			// configure different OIDC endpoints and thus expect different OIDC client IDs) properly
 			if ok := settings.SetString(resources.SettingOIDCClientIDKey, ""); !ok {
-				panic(errCouldNotWriteSettingsKey)
+				return errCouldNotWriteSettingsKey
 			}
 
-			if ok := settings.SetString(resources.SettingRegistrationClientURIKey, ""); !ok {
-				panic(errCouldNotWriteSettingsKey)
-			}
-
-			if err := keyring.Delete(resources.AppID, resources.SecretRegistrationAccessToken); err != nil && !errors.Is(err, keyring.ErrNotFound) {
-				panic(err)
-			}
+			return nil
 		}
 
 		settings.ConnectChanged(func(key string) {
 			if key == resources.SettingServerURLKey {
+				if err := deregisterOIDCClient(); err != nil {
+					panic(err)
+				}
+
 				updateSelectSenbaraServerContinueButtonSensitive()
-				deregisterOIDCClient()
 			}
 		})
 
@@ -392,7 +415,7 @@ func main() {
 			return nil
 		}
 
-		checkAuthnServerConfiguration := func() error {
+		setupAuthn := func(registerClient bool) error {
 			o, err := authn.DiscoverOIDCProviderConfiguration(
 				ctx,
 
@@ -403,7 +426,7 @@ func main() {
 			}
 
 			oidcClientID := settings.String(resources.SettingOIDCClientIDKey)
-			if oidcClientID == "" {
+			if oidcClientID == "" && registerClient {
 				c, err := authn.RegisterOIDCClient(ctx, o, "Senbara GNOME", redirectURL)
 				if err != nil {
 					return err
@@ -468,7 +491,7 @@ func main() {
 					panic(err)
 				}
 
-				if err := checkAuthnServerConfiguration(); err != nil {
+				if err := setupAuthn(true); err != nil {
 					panic(err)
 				}
 
@@ -670,8 +693,8 @@ func main() {
 					return
 				}
 
-				if err := checkAuthnServerConfiguration(); err != nil {
-					log.Info("Could not check authn server configuration, redirecting to login", "err", err)
+				if err := setupAuthn(false); err != nil {
+					log.Info("Could not setup authn, redirecting to login", "err", err)
 
 					nv.PushByTag("welcome")
 
@@ -706,8 +729,11 @@ func main() {
 			case "select-senbara-server":
 				log.Info("Handling select-senbara-server")
 
+				if err := deregisterOIDCClient(); err != nil {
+					panic(err)
+				}
+
 				updateSelectSenbaraServerContinueButtonSensitive()
-				deregisterOIDCClient()
 
 			case "preview":
 				log.Info("Handling preview")
