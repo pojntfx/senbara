@@ -48,6 +48,8 @@ func RegisterOIDCClient(
 		return nil, err
 	}
 
+	req.Header.Set("Content-Type", "application/json")
+
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
