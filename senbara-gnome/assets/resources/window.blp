@@ -62,7 +62,18 @@ Adw.Window main-window {
 
                     Button setup-button {
                         halign: center;
-                        label: _("Get started");
+
+                        Box {
+                            spacing: 10;
+
+                            Adw.Spinner setup-spinner {
+                                visible: false;
+                            }
+
+                            Label {
+                                label: _("Get started");
+                            }
+                        }
 
                         styles [
                             "suggested-action",
@@ -271,8 +282,15 @@ Adw.Window main-window {
 
 menu server-setup-menu {
     item {
-        label: _("About Senbara Forms");
-        action: "app.about";
+        label: _("Deregister client");
+        action: "app.deregisterClient";
+    }
+
+    section {
+        item {
+            label: _("About Senbara Forms");
+            action: "app.about";
+        }
     }
 }
 

@@ -310,6 +310,7 @@ func main() {
 
 		var (
 			sb = b.GetObject("setup-button").Cast().(*gtk.Button)
+			ss = b.GetObject("setup-spinner").Cast().(*gtk.Widget)
 
 			sssui = b.GetObject("select-senbara-server-url-input").Cast().(*adw.EntryRow)
 			ssscb = b.GetObject("select-senbara-server-continue-button").Cast().(*gtk.Button)
@@ -377,6 +378,29 @@ func main() {
 			return nil
 		}
 
+		deregisterClientAction := gio.NewSimpleAction("deregisterClient", nil)
+		deregisterClientAction.ConnectActivate(func(parameter *glib.Variant) {
+			ssscb.SetSensitive(false)
+			sb.SetSensitive(false)
+			ssscs.SetVisible(true)
+			ss.SetVisible(true)
+
+			go func() {
+				defer sb.SetSensitive(true)
+				defer ssscs.SetVisible(false)
+				defer ss.SetVisible(false)
+
+				if err := deregisterOIDCClient(); err != nil {
+					panic(err)
+				}
+
+				deregisterClientAction.SetEnabled(false)
+
+				updateSelectSenbaraServerContinueButtonSensitive()
+			}()
+		})
+		a.AddAction(deregisterClientAction)
+
 		settings.ConnectChanged(func(key string) {
 			if key == resources.SettingServerURLKey {
 				ssscb.SetSensitive(false)
@@ -388,6 +412,8 @@ func main() {
 					if err := deregisterOIDCClient(); err != nil {
 						panic(err)
 					}
+
+					deregisterClientAction.SetEnabled(false)
 
 					updateSelectSenbaraServerContinueButtonSensitive()
 				}()
@@ -458,6 +484,8 @@ func main() {
 
 				oidcClientID = c.ClientID
 			}
+
+			deregisterClientAction.SetEnabled(oidcClientID != "")
 
 			authner = authn.NewAuthner(
 				slog.New(log.Handler().WithGroup("authner")),
@@ -750,6 +778,8 @@ func main() {
 					if err := deregisterOIDCClient(); err != nil {
 						panic(err)
 					}
+
+					deregisterClientAction.SetEnabled(false)
 
 					updateSelectSenbaraServerContinueButtonSensitive()
 				}()
