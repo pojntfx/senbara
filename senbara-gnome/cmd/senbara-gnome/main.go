@@ -12,6 +12,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/diamondburned/gotk4-adwaita/pkg/adw"
@@ -337,7 +338,11 @@ func main() {
 			}
 		}
 
+		var deregistrationLock sync.Mutex
 		deregisterOIDCClient := func() error {
+			deregistrationLock.Lock()
+			defer deregistrationLock.Unlock()
+
 			if registrationClientURI := settings.String(resources.SettingRegistrationClientURIKey); registrationClientURI != "" {
 				registrationAccessToken, err := keyring.Get(resources.AppID, resources.SecretRegistrationAccessToken)
 				if err != nil {
@@ -374,11 +379,18 @@ func main() {
 
 		settings.ConnectChanged(func(key string) {
 			if key == resources.SettingServerURLKey {
-				if err := deregisterOIDCClient(); err != nil {
-					panic(err)
-				}
+				ssscb.SetSensitive(false)
+				ssscs.SetVisible(true)
 
-				updateSelectSenbaraServerContinueButtonSensitive()
+				go func() {
+					defer ssscs.SetVisible(false)
+
+					if err := deregisterOIDCClient(); err != nil {
+						panic(err)
+					}
+
+					updateSelectSenbaraServerContinueButtonSensitive()
+				}()
 			}
 		})
 
@@ -729,11 +741,18 @@ func main() {
 			case "select-senbara-server":
 				log.Info("Handling select-senbara-server")
 
-				if err := deregisterOIDCClient(); err != nil {
-					panic(err)
-				}
+				ssscb.SetSensitive(false)
+				ssscs.SetVisible(true)
 
-				updateSelectSenbaraServerContinueButtonSensitive()
+				go func() {
+					defer ssscs.SetVisible(false)
+
+					if err := deregisterOIDCClient(); err != nil {
+						panic(err)
+					}
+
+					updateSelectSenbaraServerContinueButtonSensitive()
+				}()
 
 			case "preview":
 				log.Info("Handling preview")
