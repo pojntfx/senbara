@@ -379,6 +379,11 @@ func main() {
 		}
 
 		deregisterClientAction := gio.NewSimpleAction("deregisterClient", nil)
+
+		updateDeregisterClientActionEnabled := func() {
+			deregisterClientAction.SetEnabled(settings.String(resources.SettingOIDCClientIDKey) != "")
+		}
+
 		deregisterClientAction.ConnectActivate(func(parameter *glib.Variant) {
 			ssscb.SetSensitive(false)
 			sb.SetSensitive(false)
@@ -394,8 +399,7 @@ func main() {
 					panic(err)
 				}
 
-				deregisterClientAction.SetEnabled(false)
-
+				updateDeregisterClientActionEnabled()
 				updateSelectSenbaraServerContinueButtonSensitive()
 			}()
 		})
@@ -413,8 +417,7 @@ func main() {
 						panic(err)
 					}
 
-					deregisterClientAction.SetEnabled(false)
-
+					updateDeregisterClientActionEnabled()
 					updateSelectSenbaraServerContinueButtonSensitive()
 				}()
 			}
@@ -485,7 +488,7 @@ func main() {
 				oidcClientID = c.ClientID
 			}
 
-			deregisterClientAction.SetEnabled(oidcClientID != "")
+			updateDeregisterClientActionEnabled()
 
 			authner = authn.NewAuthner(
 				slog.New(log.Handler().WithGroup("authner")),
@@ -728,6 +731,8 @@ func main() {
 				if err := checkSenbaraServerConfiguration(); err != nil {
 					log.Info("Could not check Senbara server configuration, redirecting to login", "err", err)
 
+					updateDeregisterClientActionEnabled()
+
 					nv.PushByTag("welcome")
 
 					return
@@ -779,8 +784,7 @@ func main() {
 						panic(err)
 					}
 
-					deregisterClientAction.SetEnabled(false)
-
+					updateDeregisterClientActionEnabled()
 					updateSelectSenbaraServerContinueButtonSensitive()
 				}()
 
