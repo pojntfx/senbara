@@ -746,7 +746,7 @@ func main() {
 					return
 				}
 
-				_, _, _, err := authorize(
+				redirected, _, _, err := authorize(
 					ctx,
 
 					false,
@@ -755,6 +755,8 @@ func main() {
 					log.Warn("Could not authorize user for index page", "err", err)
 
 					panic(err)
+				} else if redirected {
+					return
 				}
 
 				if settings.Boolean(resources.SettingAnonymousMode) {

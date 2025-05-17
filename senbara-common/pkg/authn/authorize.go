@@ -170,6 +170,18 @@ func (a *Authner) Authorize(
 			RefreshToken: *refreshToken,
 		}).Token()
 		if err != nil {
+			// If we get an error during token refresh (or other errors below that
+			// could potentially be recovered from with a retry), but the user hasn't
+			// requested to be logged in if they are signed out, then don't return an error,
+			// instead drop the user into the anonymous view. This is necessary since we can't
+			// refresh a token if it was issued by a different provider, e.g. if the OIDC provider
+			// that the Senbara server is configured for has changed
+			if !loginIfSignedOut {
+				log.Debug("Token refresh failed, but logging in the user if the they are signed out is not requested, continuing without auth")
+
+				return "", "", "", nil
+			}
+
 			log.Debug("Token refresh failed, reauthenticating with auth provider", "error", err)
 
 			authCodeURL, err := getAuthCodeURL(returnURL)
@@ -185,6 +197,12 @@ func (a *Authner) Authorize(
 		var ok bool
 		*idToken, ok = oauth2Token.Extra("id_token").(string)
 		if !ok {
+			if !loginIfSignedOut {
+				log.Debug("ID token missing from refreshed refresh token, but logging in the user if the they are signed out is not requested, continuing without auth")
+
+				return "", "", "", nil
+			}
+
 			log.Debug("ID token missing from refreshed refresh token, reauthenticating with auth provider")
 
 			authCodeURL, err := getAuthCodeURL(returnURL)
@@ -199,6 +217,12 @@ func (a *Authner) Authorize(
 
 		id, err = a.verifier.Verify(ctx, *idToken)
 		if err != nil {
+			if !loginIfSignedOut {
+				log.Debug("Refresh token verification failed, but logging in the user if the they are signed out is not requested, continuing without auth")
+
+				return "", "", "", nil
+			}
+
 			log.Debug("Refresh token verification failed, attempting refresh", "error", err)
 
 			authCodeURL, err := getAuthCodeURL(returnURL)
@@ -235,12 +259,24 @@ func (a *Authner) Authorize(
 		EmailVerified bool   `json:"email_verified"`
 	}
 	if err := id.Claims(&claims); err != nil {
+		if !loginIfSignedOut {
+			log.Debug("Failed to parse ID token claims, but logging in the user if the they are signed out is not requested, continuing without auth")
+
+			return "", "", "", nil
+		}
+
 		log.Debug("Failed to parse ID token claims", "error", errors.Join(ErrCouldNotLogin, err))
 
 		return "", "", "", ErrCouldNotLogin
 	}
 
 	if !claims.EmailVerified {
+		if !loginIfSignedOut {
+			log.Debug("Email from ID token claims not verified, user is unauthorized, but logging in the user if the they are signed out is not requested, continuing without auth")
+
+			return "", "", "", nil
+		}
+
 		log.Debug("Email from ID token claims not verified, user is unauthorized", "email", claims.Email, "error", errors.Join(ErrCouldNotLogin, errEmailNotVerified))
 
 		return "", "", "", errors.Join(ErrCouldNotLogin, errEmailNotVerified)
