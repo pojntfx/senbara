@@ -2,7 +2,7 @@ openapi: 3.1.1
 info:
   title: Senbara REST API v1
   summary: Personal ERP REST API using the Go stdlib, OIDC and PostgreSQL
-  description: REST API for a simple personal ERP web application built with the Go standard library, OpenID Connect authentication and PostgreSQL data storage. Designed as a reference for modern REST API development with Go. 
+  description: REST API for a simple personal ERP web application built with the Go standard library, OpenID Connect authentication and PostgreSQL data storage. Designed as a reference for modern REST API development with Go.
   termsOfService: https://felicitas.pojtinger.com/privacy/dynamic # Filled out at runtime
   contact:
     name: Felicitas Pojtinger # Filled out at runtime
@@ -1033,3 +1033,4 @@ components:
     oidc:
       type: openIdConnect
       openIdConnectUrl: /.well-known/openid-configuration # Filled out at runtime
+      x-oidc-dcr-initial-access-token-portal-url: ~ # Filled out at runtime

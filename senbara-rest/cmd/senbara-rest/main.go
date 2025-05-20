@@ -27,18 +27,19 @@ var (
 )
 
 const (
-	verboseKey           = "verbose"
-	configKey            = "config"
-	laddrKey             = "laddr"
-	pgaddrKey            = "pgaddr"
-	oidcIssuerKey        = "oidc-issuer"
-	corsOriginsKey       = "cors-origins"
-	privacyURLKey        = "privacy-url"
-	imprintURLKey        = "imprint-url"
-	contactNameKey       = "contact-name"
-	contactEmailKey      = "contact-email"
-	serverURLKey         = "server-url"
-	serverDescriptionKey = "server-description"
+	verboseKey                            = "verbose"
+	configKey                             = "config"
+	laddrKey                              = "laddr"
+	pgaddrKey                             = "pgaddr"
+	oidcIssuerKey                         = "oidc-issuer"
+	oidcDcrInitialAccessTokenPortalUrlKey = "oidc-dcr-initial-access-token-portal-url"
+	corsOriginsKey                        = "cors-origins"
+	privacyURLKey                         = "privacy-url"
+	imprintURLKey                         = "imprint-url"
+	contactNameKey                        = "contact-name"
+	contactEmailKey                       = "contact-email"
+	serverURLKey                          = "server-url"
+	serverDescriptionKey                  = "server-description"
 )
 
 func main() {
@@ -144,6 +145,7 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				s,
 
 				viper.GetString(oidcIssuerKey),
+				viper.GetString(oidcDcrInitialAccessTokenPortalUrlKey),
 
 				viper.GetString(privacyURLKey),
 				viper.GetString(imprintURLKey),
@@ -179,6 +181,7 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 	cmd.PersistentFlags().StringP(laddrKey, "l", ":1337", "Listen address (port can also be set with `PORT` env variable)")
 	cmd.PersistentFlags().StringP(pgaddrKey, "p", "postgresql://postgres@localhost:5432/senbara?sslmode=disable", "Database address")
 	cmd.PersistentFlags().String(oidcIssuerKey, "", "OIDC Issuer (e.g. https://pojntfx.eu.auth0.com/)")
+	cmd.PersistentFlags().String(oidcDcrInitialAccessTokenPortalUrlKey, "", "OIDC DCR initial access token portal URL")
 	cmd.PersistentFlags().StringArray(corsOriginsKey, []string{}, "CORS origins to allow")
 	cmd.PersistentFlags().String(privacyURLKey, "", "Privacy policy URL")
 	cmd.PersistentFlags().String(imprintURLKey, "", "Imprint URL")

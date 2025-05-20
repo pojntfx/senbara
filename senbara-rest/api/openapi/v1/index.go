@@ -163,6 +163,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			s,
 
 			os.Getenv("OIDC_ISSUER"),
+			os.Getenv("OIDC_DCR_INITIAL_ACCESS_TOKEN_PORTAL_URL"),
 
 			os.Getenv("PRIVACY_URL"),
 			os.Getenv("IMPRINT_URL"),

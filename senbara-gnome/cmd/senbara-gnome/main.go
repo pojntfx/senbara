@@ -43,7 +43,10 @@ const (
 type openAPISpec struct {
 	Info       openapi3.Info `yaml:"info"`
 	Components struct {
-		SecuritySchemes map[string]openapi3.SecurityScheme `yaml:"securitySchemes"`
+		SecuritySchemes map[string]struct {
+			OpenIdConnectUrl                                string  `yaml:"openIdConnectUrl"`
+			XOidcDcrInitialAccessTokenPortalUrlExtensionKey *string `yaml:"x-oidc-dcr-initial-access-token-portal-url"`
+		} `yaml:"securitySchemes"`
 	} `yaml:"components"`
 }
 
@@ -536,6 +539,12 @@ func main() {
 
 				if err := setupAuthn(true); err != nil {
 					panic(err)
+				}
+
+				if v := spec.Components.SecuritySchemes["oidc"].XOidcDcrInitialAccessTokenPortalUrlExtensionKey; v != nil {
+					nv.PushByTag("register")
+
+					return
 				}
 
 				nv.PushByTag("home")

@@ -20,6 +20,10 @@ func (c *Controller) GetOpenAPISpec(ctx context.Context, request api.GetOpenAPIS
 	s.Servers[0].Description = c.serverDescription
 	s.Components.SecuritySchemes["oidc"].Value.OpenIdConnectUrl = c.oidcDiscoveryURL
 
+	if c.oidcDcrInitialAccessTokenPortalUrl != "" {
+		s.Components.SecuritySchemes["oidc"].Value.Extensions[api.OidcDcrInitialAccessTokenPortalUrlExtensionKey] = c.oidcDcrInitialAccessTokenPortalUrl
+	}
+
 	reader, writer := io.Pipe()
 	enc := yaml.NewEncoder(writer)
 	go func() {

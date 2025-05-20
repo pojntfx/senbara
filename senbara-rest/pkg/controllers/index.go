@@ -30,7 +30,8 @@ type Controller struct {
 
 	spec *openapi3.T
 
-	oidcDiscoveryURL string
+	oidcDiscoveryURL                   string
+	oidcDcrInitialAccessTokenPortalUrl string
 
 	privacyURL string
 	imprintURL string
@@ -53,6 +54,7 @@ func NewController(
 	spec *openapi3.T,
 
 	oidcIssuer,
+	oidcDcrInitialAccessTokenPortalUrl,
 
 	privacyURL,
 	imprintURL,
@@ -73,7 +75,8 @@ func NewController(
 
 		spec: spec,
 
-		oidcDiscoveryURL: strings.TrimSuffix(oidcIssuer, "/") + authn.OIDCWellKnownURLSuffix,
+		oidcDiscoveryURL:                   strings.TrimSuffix(oidcIssuer, "/") + authn.OIDCWellKnownURLSuffix,
+		oidcDcrInitialAccessTokenPortalUrl: oidcDcrInitialAccessTokenPortalUrl,
 
 		privacyURL: privacyURL,
 		imprintURL: imprintURL,
