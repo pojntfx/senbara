@@ -185,6 +185,96 @@ Adw.Window main-window {
         }
 
         Adw.NavigationPage {
+            title: _("Register Senbara Forms");
+            tag: "register";
+
+            Adw.ToolbarView {
+                [top]
+                Adw.HeaderBar {
+                    show-title: false;
+
+                    [end]
+                    MenuButton {
+                        icon-name: "open-menu-symbolic";
+                        primary: true;
+                        menu-model: preview-menu;
+                    }
+                }
+
+                Adw.StatusPage {
+                    title: _("Registration required");
+                    description: _("This Senbara server requires that you register Senbara Forms manually before using it.");
+                    icon-name: "configure-symbolic";
+
+                    Button register-button {
+                        halign: center;
+                        label: _("Register Senbara Forms");
+
+                        styles [
+                            "suggested-action",
+                        ]
+                    }
+                }
+            }
+        }
+
+        Adw.NavigationPage {
+            title: _("Set initial access token");
+            tag: "set-initial-access-token";
+
+            Adw.ToolbarView {
+                [top]
+                Adw.HeaderBar {
+                    show-title: false;
+
+                    [end]
+                    MenuButton {
+                        icon-name: "open-menu-symbolic";
+                        primary: true;
+                        menu-model: server-setup-menu;
+                    }
+
+                    [end]
+                    Button set-initial-access-token-login-button {
+                        sensitive: false;
+
+                        Box {
+                            spacing: 10;
+
+                            Adw.Spinner set-initial-access-token-login-spinner {
+                                visible: false;
+                            }
+
+                            Label {
+                                label: _("Login");
+                            }
+                        }
+
+                        styles [
+                            "suggested-action",
+                        ]
+                    }
+                }
+
+                Adw.StatusPage {
+                    title: _("Set initial access token");
+                    description: _("Enter the initial access token you've received from the Senbara server.");
+                    icon-name: "network-server-symbolic";
+
+                    Adw.Clamp {
+                        maximum-size: 400;
+
+                        Adw.PreferencesGroup {
+                            Adw.EntryRow set-initial-access-token-input {
+                                title: _("Senbara Server initial access token (e.g. myinitialaccesstoken)");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Adw.NavigationPage {
             title: _("Signing you in");
             tag: "exchange";
 
