@@ -36,7 +36,7 @@ tags:
   - name: activities
     description: Activity operations
 paths:
-  /openapi.yaml:
+  /openapi.json:
     get:
       tags:
         - meta
@@ -46,9 +46,21 @@ paths:
         "200":
           description: OpenAPI spec retrieved successfully
           content:
-            application/yaml:
+            # This should be `application/json`, but using it isn't possible here since it expects a `map[string]interface{}`
+            # to be passed to the encoder, which the OpenAPI spec can't be represented by. In OpenAPI v3.1, it is possible to
+            # reference a JSON schema URL, which is published for a OpenAPI specification (see
+            # https://stackoverflow.com/questions/71121399/how-do-i-incorporate-json-schema-into-my-openapi-file). The code
+            # generator doesn't support this yet, but once https://github.com/oapi-codegen/oapi-codegen/issues/373 is
+            # resolved, switch to that instead.
+            application/octet-stream:
               schema:
                 type: object
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                enum: ["application/json"]
+              example: application/json
         "500":
           description: An internal error occurred
           content:

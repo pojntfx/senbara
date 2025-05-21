@@ -20,8 +20,6 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/yaml.v2"
-
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oapi-codegen/runtime"
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
@@ -1427,7 +1425,7 @@ func NewGetOpenAPISpecRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/openapi.yaml")
+	operationPath := fmt.Sprintf("/openapi.json")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2077,7 +2075,6 @@ func (r UpdateJournalEntryResponse) StatusCode() int {
 type GetOpenAPISpecResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	YAML200      *map[string]interface{}
 }
 
 // Status returns HTTPResponse.Status
@@ -2927,16 +2924,6 @@ func ParseGetOpenAPISpecResponse(rsp *http.Response) (*GetOpenAPISpecResponse, e
 		HTTPResponse: rsp,
 	}
 
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "yaml") && rsp.StatusCode == 200:
-		var dest map[string]interface{}
-		if err := yaml.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.YAML200 = &dest
-
-	}
-
 	return response, nil
 }
 
@@ -3048,7 +3035,7 @@ type ServerInterface interface {
 	// (PUT /journal/{id})
 	UpdateJournalEntry(w http.ResponseWriter, r *http.Request, id int64)
 	// Get the OpenAPI spec
-	// (GET /openapi.yaml)
+	// (GET /openapi.json)
 	GetOpenAPISpec(w http.ResponseWriter, r *http.Request)
 	// Delete all user data
 	// (DELETE /userdata)
@@ -3778,7 +3765,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("DELETE "+options.BaseURL+"/journal/{id}", wrapper.DeleteJournalEntry)
 	m.HandleFunc("GET "+options.BaseURL+"/journal/{id}", wrapper.GetJournalEntry)
 	m.HandleFunc("PUT "+options.BaseURL+"/journal/{id}", wrapper.UpdateJournalEntry)
-	m.HandleFunc("GET "+options.BaseURL+"/openapi.yaml", wrapper.GetOpenAPISpec)
+	m.HandleFunc("GET "+options.BaseURL+"/openapi.json", wrapper.GetOpenAPISpec)
 	m.HandleFunc("DELETE "+options.BaseURL+"/userdata", wrapper.DeleteUserData)
 	m.HandleFunc("GET "+options.BaseURL+"/userdata", wrapper.ExportUserData)
 	m.HandleFunc("POST "+options.BaseURL+"/userdata", wrapper.ImportUserData)
@@ -4502,16 +4489,22 @@ type GetOpenAPISpecResponseObject interface {
 	VisitGetOpenAPISpecResponse(w http.ResponseWriter) error
 }
 
-type GetOpenAPISpec200ApplicationyamlResponse struct {
+type GetOpenAPISpec200ResponseHeaders struct {
+	ContentType string
+}
+
+type GetOpenAPISpec200ApplicationoctetStreamResponse struct {
 	Body          io.Reader
+	Headers       GetOpenAPISpec200ResponseHeaders
 	ContentLength int64
 }
 
-func (response GetOpenAPISpec200ApplicationyamlResponse) VisitGetOpenAPISpecResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/yaml")
+func (response GetOpenAPISpec200ApplicationoctetStreamResponse) VisitGetOpenAPISpecResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/octet-stream")
 	if response.ContentLength != 0 {
 		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
 	}
+	w.Header().Set("Content-Type", fmt.Sprint(response.Headers.ContentType))
 	w.WriteHeader(200)
 
 	if closer, ok := response.Body.(io.ReadCloser); ok {
@@ -4714,7 +4707,7 @@ type StrictServerInterface interface {
 	// (PUT /journal/{id})
 	UpdateJournalEntry(ctx context.Context, request UpdateJournalEntryRequestObject) (UpdateJournalEntryResponseObject, error)
 	// Get the OpenAPI spec
-	// (GET /openapi.yaml)
+	// (GET /openapi.json)
 	GetOpenAPISpec(ctx context.Context, request GetOpenAPISpecRequestObject) (GetOpenAPISpecResponseObject, error)
 	// Delete all user data
 	// (DELETE /userdata)
@@ -5396,42 +5389,42 @@ func (sh *strictHandler) ImportUserData(w http.ResponseWriter, r *http.Request) 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

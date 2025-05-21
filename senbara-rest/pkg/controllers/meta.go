@@ -2,11 +2,11 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
-	"gopkg.in/yaml.v2"
 )
 
 func (c *Controller) GetOpenAPISpec(ctx context.Context, request api.GetOpenAPISpecRequestObject) (api.GetOpenAPISpecResponseObject, error) {
@@ -25,10 +25,9 @@ func (c *Controller) GetOpenAPISpec(ctx context.Context, request api.GetOpenAPIS
 	}
 
 	reader, writer := io.Pipe()
-	enc := yaml.NewEncoder(writer)
+	enc := json.NewEncoder(writer)
 	go func() {
 		defer writer.Close()
-		defer enc.Close()
 
 		if err := enc.Encode(s); err != nil {
 			c.log.Warn("Could not encode OpenAPI response", "err", errors.Join(errCouldNotEncodeResponse, err))
@@ -39,7 +38,10 @@ func (c *Controller) GetOpenAPISpec(ctx context.Context, request api.GetOpenAPIS
 		}
 	}()
 
-	return api.GetOpenAPISpec200ApplicationyamlResponse{
+	return api.GetOpenAPISpec200ApplicationoctetStreamResponse{
 		Body: reader,
+		Headers: api.GetOpenAPISpec200ResponseHeaders{
+			ContentType: "application/json",
+		},
 	}, nil
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"io/fs"
@@ -28,7 +29,7 @@ import (
 	"github.com/pojntfx/senbara/senbara-gnome/config/locales"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 	"github.com/zalando/go-keyring"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -39,16 +40,6 @@ var (
 const (
 	redirectURL = "senbara:///authorize"
 )
-
-type openAPISpec struct {
-	Info       openapi3.Info `yaml:"info"`
-	Components struct {
-		SecuritySchemes map[string]struct {
-			OpenIdConnectUrl                                string  `yaml:"openIdConnectUrl"`
-			XOidcDcrInitialAccessTokenPortalUrlExtensionKey *string `yaml:"x-oidc-dcr-initial-access-token-portal-url"`
-		} `yaml:"securitySchemes"`
-	} `yaml:"components"`
-}
 
 type userData struct {
 	Email     string
@@ -319,7 +310,7 @@ func main() {
 			ssscb = b.GetObject("select-senbara-server-continue-button").Cast().(*gtk.Button)
 			ssscs = b.GetObject("select-senbara-server-continue-spinner").Cast().(*gtk.Widget)
 
-			spec openAPISpec
+			spec openapi3.T
 
 			plb = b.GetObject("preview-login-button").Cast().(*gtk.Button)
 			pls = b.GetObject("preview-login-spinner").Cast().(*gtk.Widget)
@@ -449,10 +440,7 @@ func main() {
 				return errors.New(res.Status)
 			}
 
-			// We can't just use `*openapi3.T` here because the security schemes
-			// can't be parsed with YAML, only with JSON (due to the go-jsonpointer requirement),
-			// and  we can't switch to JSON since it can't be streaming encoded by the server
-			if err := yaml.NewDecoder(res.Body).Decode(&spec); err != nil {
+			if err := json.NewDecoder(res.Body).Decode(&spec); err != nil {
 				return err
 			}
 
@@ -463,7 +451,7 @@ func main() {
 			o, err := authn.DiscoverOIDCProviderConfiguration(
 				ctx,
 
-				spec.Components.SecuritySchemes["oidc"].OpenIdConnectUrl,
+				spec.Components.SecuritySchemes["oidc"].Value.OpenIdConnectUrl,
 			)
 			if err != nil {
 				return err
@@ -541,7 +529,7 @@ func main() {
 					panic(err)
 				}
 
-				if v := spec.Components.SecuritySchemes["oidc"].XOidcDcrInitialAccessTokenPortalUrlExtensionKey; v != nil {
+				if v := spec.Components.SecuritySchemes["oidc"].Value.Extensions[api.OidcDcrInitialAccessTokenPortalUrlExtensionKey]; v != nil {
 					nv.PushByTag("register")
 
 					return
