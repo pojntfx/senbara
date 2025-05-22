@@ -203,7 +203,7 @@ Adw.Window main-window {
 
                 Adw.StatusPage {
                     title: _("Registration required");
-                    description: _("This Senbara server requires that you register Senbara Forms manually before using it.");
+                    description: _("This Senbara server requires that you register Senbara Forms manually before signing in.");
                     icon-name: "configure-symbolic";
 
                     Button register-button {
@@ -265,7 +265,7 @@ Adw.Window main-window {
                         maximum-size: 400;
 
                         Adw.PreferencesGroup {
-                            Adw.EntryRow set-initial-access-token-input {
+                            Adw.PasswordEntryRow set-initial-access-token-input {
                                 title: _("Senbara Server initial access token (e.g. myinitialaccesstoken)");
                             }
                         }

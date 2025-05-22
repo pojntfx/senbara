@@ -315,6 +315,14 @@ func main() {
 			plb = b.GetObject("preview-login-button").Cast().(*gtk.Button)
 			pls = b.GetObject("preview-login-spinner").Cast().(*gtk.Widget)
 
+			oidcDcrInitialAccessTokenPortalUrl string
+
+			rb = b.GetObject("register-button").Cast().(*gtk.Button)
+
+			siati  = b.GetObject("set-initial-access-token-input").Cast().(*adw.PasswordEntryRow)
+			siatlb = b.GetObject("set-initial-access-token-login-button").Cast().(*gtk.Button)
+			siatls = b.GetObject("set-initial-access-token-login-spinner").Cast().(*gtk.Widget)
+
 			ecb  = b.GetObject("exchange-cancel-button").Cast().(*gtk.Button)
 			elcb = b.GetObject("exchange-logout-cancel-button").Cast().(*gtk.Button)
 		)
@@ -530,9 +538,67 @@ func main() {
 				}
 
 				if v := spec.Components.SecuritySchemes["oidc"].Value.Extensions[api.OidcDcrInitialAccessTokenPortalUrlExtensionKey]; v != nil {
-					nv.PushByTag("register")
+					vv, ok := v.(string)
+					if ok {
+						oidcDcrInitialAccessTokenPortalUrl = vv
 
-					return
+						nv.PushByTag("register")
+
+						return
+					}
+				}
+
+				nv.PushByTag("home")
+			}()
+		})
+
+		rb.ConnectClicked(func() {
+			go func() {
+				var (
+					fl = gtk.NewURILauncher(oidcDcrInitialAccessTokenPortalUrl)
+					cc = make(chan error)
+				)
+				fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
+					if err := fl.LaunchFinish(res); err != nil {
+						cc <- err
+
+						return
+					}
+
+					cc <- nil
+				})
+
+				if err := <-cc; err != nil {
+					panic(err)
+				}
+
+				nv.PushByTag("set-initial-access-token")
+			}()
+		})
+
+		siati.ConnectChanged(func() {
+			if siati.TextLength() > 0 {
+				siatlb.SetSensitive(true)
+			} else {
+				siatlb.SetSensitive(false)
+			}
+		})
+
+		siatlb.ConnectClicked(func() {
+			siatlb.SetSensitive(false)
+			siatls.SetVisible(true)
+
+			go func() {
+				defer siatlb.SetSensitive(true)
+				defer siatls.SetVisible(false)
+
+				if err := checkSenbaraServerConfiguration(); err != nil {
+					panic(err)
+				}
+
+				// TODO: Pass `siati.Text()` as the initial access token to the client registration endpoint
+				if err := setupAuthn(true); err != nil {
+					panic(err)
 				}
 
 				nv.PushByTag("home")
