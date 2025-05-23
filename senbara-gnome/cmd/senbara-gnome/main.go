@@ -467,7 +467,16 @@ func main() {
 
 			oidcClientID := settings.String(resources.SettingOIDCClientIDKey)
 			if oidcClientID == "" && registerClient {
-				c, err := authn.RegisterOIDCClient(ctx, o, "Senbara GNOME", redirectURL)
+				c, err := authn.RegisterOIDCClient(
+					ctx,
+
+					o,
+
+					"Senbara GNOME",
+					redirectURL,
+
+					siati.Text(),
+				)
 				if err != nil {
 					return err
 				}
@@ -596,7 +605,6 @@ func main() {
 					panic(err)
 				}
 
-				// TODO: Pass `siati.Text()` as the initial access token to the client registration endpoint
 				if err := setupAuthn(true); err != nil {
 					panic(err)
 				}
@@ -890,6 +898,11 @@ func main() {
 				if _, err := io.Copy(os.Stdout, res.Body); err != nil {
 					panic(err)
 				}
+
+			case "register":
+				log.Info("Handling register")
+
+				siati.SetText("")
 
 			case "home":
 				log.Info("Handling home")

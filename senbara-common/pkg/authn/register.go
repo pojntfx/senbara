@@ -30,6 +30,8 @@ func RegisterOIDCClient(
 
 	clientName,
 	redirectURL string,
+
+	initialAccessToken string,
 ) (*OIDCClientRegistrationResponse, error) {
 	b, err := json.Marshal(oidcClientRegistrationRequest{
 		TokenEndpointAuthMethod: "none",
@@ -49,6 +51,9 @@ func RegisterOIDCClient(
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	if initialAccessToken != "" {
+		req.Header.Set("Authorization", "Bearer "+initialAccessToken)
+	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
