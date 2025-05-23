@@ -104,6 +104,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		o, err := authn.DiscoverOIDCProviderConfiguration(
 			r.Context(),
 
+			slog.New(log.Handler().WithGroup("oidcDiscovery")),
+
 			strings.TrimSuffix(os.Getenv("OIDC_ISSUER"), "/")+authn.OIDCWellKnownURLSuffix,
 		)
 		if err != nil {

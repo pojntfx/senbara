@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 )
 
@@ -26,6 +27,8 @@ type oidcClientRegistrationRequest struct {
 func RegisterOIDCClient(
 	ctx context.Context,
 
+	log *slog.Logger,
+
 	providerConfiguration *OIDCProviderConfiguration,
 
 	clientName,
@@ -33,6 +36,17 @@ func RegisterOIDCClient(
 
 	initialAccessToken string,
 ) (*OIDCClientRegistrationResponse, error) {
+	l := log.With(
+		"providerConfiguration", providerConfiguration,
+
+		"clientName", clientName,
+		"redirectURL", redirectURL,
+
+		"initialAccessToken", initialAccessToken != "",
+	)
+
+	l.Debug("Starting OIDC client registration")
+
 	b, err := json.Marshal(oidcClientRegistrationRequest{
 		TokenEndpointAuthMethod: "none",
 		ClientName:              clientName,
@@ -47,6 +61,8 @@ func RegisterOIDCClient(
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, providerConfiguration.RegistrationEndpoint, bytes.NewBuffer(b))
 	if err != nil {
+		l.Debug("Could not create OIDC client registration request", "error", err)
+
 		return nil, err
 	}
 
@@ -57,16 +73,22 @@ func RegisterOIDCClient(
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
+		l.Debug("Could not send OIDC client registration request", "error", err)
+
 		return nil, err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusCreated {
+		l.Debug("OIDC client registration request returned an unexpected status", "statusCode", res.StatusCode)
+
 		return nil, errors.New(res.Status)
 	}
 
 	var r OIDCClientRegistrationResponse
 	if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
+		l.Debug("Could not decode OIDC client registration response", "error", err)
+
 		return nil, err
 	}
 

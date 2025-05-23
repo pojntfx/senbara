@@ -64,10 +64,14 @@ func NewAuthner(
 }
 
 func (a *Authner) Init(ctx context.Context) error {
-	a.log.Info("Connecting to OIDC issuer", "oidcIssuer", a.oidcIssuer)
+	log := a.log.With("oidcIssuer", a.oidcIssuer)
+
+	log.Info("Connecting to OIDC issuer")
 
 	provider, err := oidc.NewProvider(ctx, a.oidcIssuer)
 	if err != nil {
+		log.Debug("Could not create OIDC provider", "error", err)
+
 		return err
 	}
 

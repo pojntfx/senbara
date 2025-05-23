@@ -116,6 +116,8 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 			o, err := authn.DiscoverOIDCProviderConfiguration(
 				ctx,
 
+				slog.New(log.Handler().WithGroup("oidcDiscovery")),
+
 				strings.TrimSuffix(viper.GetString(oidcIssuerKey), "/")+authn.OIDCWellKnownURLSuffix,
 			)
 			if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"path"
 )
@@ -22,25 +23,39 @@ type OIDCProviderConfiguration struct {
 func DiscoverOIDCProviderConfiguration(
 	ctx context.Context,
 
+	log *slog.Logger,
+
 	wellKnownURL string,
 ) (*OIDCProviderConfiguration, error) {
+	l := log.With("wellKnownURL", wellKnownURL)
+
+	l.Debug("Starting OIDC provider configuration discovery")
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, wellKnownURL, nil)
 	if err != nil {
+		l.Debug("Could not create OIDC provider configuration discovery request", "error", err)
+
 		return nil, err
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
+		l.Debug("Could not send OIDC provider configuration discovery request", "error", err)
+
 		return nil, err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
+		l.Debug("OIDC provider configuration discovery request returned an unexpected status", "statusCode", res.StatusCode)
+
 		return nil, errors.New(res.Status)
 	}
 
 	var p OIDCProviderConfiguration
 	if err := json.NewDecoder(res.Body).Decode(&p); err != nil {
+		l.Debug("Could not decode discovered OIDC provider configuration", "error", err)
+
 		return nil, err
 	}
 

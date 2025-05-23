@@ -355,6 +355,8 @@ func main() {
 				if err := authn.DeregisterOIDCClient(
 					ctx,
 
+					slog.New(log.Handler().WithGroup("oidcDeregistration")),
+
 					registrationAccessToken,
 					registrationClientURI,
 				); err != nil {
@@ -459,6 +461,8 @@ func main() {
 			o, err := authn.DiscoverOIDCProviderConfiguration(
 				ctx,
 
+				slog.New(log.Handler().WithGroup("oidcDiscovery")),
+
 				spec.Components.SecuritySchemes["oidc"].Value.OpenIdConnectUrl,
 			)
 			if err != nil {
@@ -469,6 +473,8 @@ func main() {
 			if oidcClientID == "" && registerClient {
 				c, err := authn.RegisterOIDCClient(
 					ctx,
+
+					slog.New(log.Handler().WithGroup("oidcRegistration")),
 
 					o,
 
