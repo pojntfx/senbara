@@ -51,6 +51,7 @@ func (c *Controller) HandleJournal(w http.ResponseWriter, r *http.Request) {
 
 			Page:       userData.Locale.Get("Journal"),
 			PrivacyURL: c.privacyURL,
+			TosURL:     c.tosURL,
 			ImprintURL: c.imprintURL,
 		},
 		Entries: journalEntries,
@@ -84,6 +85,7 @@ func (c *Controller) HandleAddJournal(w http.ResponseWriter, r *http.Request) {
 
 		Page:       userData.Locale.Get("Add a journal entry"),
 		PrivacyURL: c.privacyURL,
+		TosURL:     c.tosURL,
 		ImprintURL: c.imprintURL,
 	}); err != nil {
 		log.Warn("Could not render template for adding journal entry", "err", errors.Join(errCouldNotRenderTemplate, err))
@@ -281,6 +283,7 @@ func (c *Controller) HandleEditJournal(w http.ResponseWriter, r *http.Request) {
 
 			Page:       userData.Locale.Get("Edit journal entry"),
 			PrivacyURL: c.privacyURL,
+			TosURL:     c.tosURL,
 			ImprintURL: c.imprintURL,
 		},
 		Entry: journalEntry,
@@ -442,6 +445,7 @@ func (c *Controller) HandleViewJournal(w http.ResponseWriter, r *http.Request) {
 
 			Page:       journalEntry.Title,
 			PrivacyURL: c.privacyURL,
+			TosURL:     c.tosURL,
 			ImprintURL: c.imprintURL,
 
 			BackURL: "/journal",

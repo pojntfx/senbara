@@ -135,6 +135,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			a,
 
 			os.Getenv("PRIVACY_URL"),
+			os.Getenv("TOS_URL"),
 			os.Getenv("IMPRINT_URL"),
 
 			Code,

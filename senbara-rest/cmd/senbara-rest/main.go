@@ -23,6 +23,7 @@ import (
 var (
 	errMissingOIDCIssuer = errors.New("missing OIDC issuer")
 	errMissingPrivacyURL = errors.New("missing privacy policy URL")
+	errMissingTOSURL     = errors.New("missing terms of service URL")
 	errMissingImprintURL = errors.New("missing imprint URL")
 )
 
@@ -35,6 +36,7 @@ const (
 	oidcDcrInitialAccessTokenPortalUrlKey = "oidc-dcr-initial-access-token-portal-url"
 	corsOriginsKey                        = "cors-origins"
 	privacyURLKey                         = "privacy-url"
+	tosURLKey                             = "tos-url"
 	imprintURLKey                         = "imprint-url"
 	contactNameKey                        = "contact-name"
 	contactEmailKey                       = "contact-email"
@@ -98,6 +100,10 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				return errMissingPrivacyURL
 			}
 
+			if !viper.IsSet(tosURLKey) {
+				return errMissingTOSURL
+			}
+
 			if !viper.IsSet(imprintURLKey) {
 				return errMissingImprintURL
 			}
@@ -150,6 +156,7 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				viper.GetString(oidcDcrInitialAccessTokenPortalUrlKey),
 
 				viper.GetString(privacyURLKey),
+				viper.GetString(tosURLKey),
 				viper.GetString(imprintURLKey),
 
 				viper.GetString(contactNameKey),
@@ -186,6 +193,7 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 	cmd.PersistentFlags().String(oidcDcrInitialAccessTokenPortalUrlKey, "", "OIDC DCR initial access token portal URL")
 	cmd.PersistentFlags().StringArray(corsOriginsKey, []string{}, "CORS origins to allow")
 	cmd.PersistentFlags().String(privacyURLKey, "", "Privacy policy URL")
+	cmd.PersistentFlags().String(tosURLKey, "", "Terms of service URL")
 	cmd.PersistentFlags().String(imprintURLKey, "", "Imprint URL")
 	cmd.PersistentFlags().String(contactNameKey, "Felicitas Pojtinger", "Contact name")
 	cmd.PersistentFlags().String(contactEmailKey, "felicitas@pojtinger.com", "Contact email")

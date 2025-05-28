@@ -55,6 +55,7 @@ func (c *Controller) HandleContacts(w http.ResponseWriter, r *http.Request) {
 
 			Page:       userData.Locale.Get("Contacts"),
 			PrivacyURL: c.privacyURL,
+			TosURL:     c.tosURL,
 			ImprintURL: c.imprintURL,
 		},
 		Entries: contacts,
@@ -88,6 +89,7 @@ func (c *Controller) HandleAddContact(w http.ResponseWriter, r *http.Request) {
 
 		Page:       userData.Locale.Get("Add a contact"),
 		PrivacyURL: c.privacyURL,
+		TosURL:     c.tosURL,
 		ImprintURL: c.imprintURL,
 	}); err != nil {
 		log.Warn("Could not render template for adding a contact", "err", errors.Join(errCouldNotRenderTemplate, err))
@@ -322,6 +324,7 @@ func (c *Controller) HandleViewContact(w http.ResponseWriter, r *http.Request) {
 
 			Page:       contact.FirstName + " " + contact.LastName,
 			PrivacyURL: c.privacyURL,
+			TosURL:     c.tosURL,
 			ImprintURL: c.imprintURL,
 
 			BackURL: "/contacts",
@@ -525,6 +528,7 @@ func (c *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {
 
 			Page:       userData.Locale.Get("Edit contact"),
 			PrivacyURL: c.privacyURL,
+			TosURL:     c.tosURL,
 			ImprintURL: c.imprintURL,
 		},
 		Entry: contact,

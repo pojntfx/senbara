@@ -14,6 +14,7 @@ type pageData struct {
 
 	Page       string
 	PrivacyURL string
+	TosURL     string
 	ImprintURL string
 
 	BackURL string

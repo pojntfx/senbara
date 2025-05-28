@@ -233,6 +233,9 @@ msgstr "Code"
 msgid "Privacy"
 msgstr "Politique de confidentialité"
 
+msgid "Terms of Service"
+msgstr "Conditions d'utilisation"
+
 msgid "Imprint"
 msgstr "Mentions légales"
 

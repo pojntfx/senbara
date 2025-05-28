@@ -59,6 +59,7 @@ func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 
 				Page:       userData.Locale.Get("Home"),
 				PrivacyURL: c.privacyURL,
+				TosURL:     c.tosURL,
 				ImprintURL: c.imprintURL,
 			},
 			ContactsCount:       contactsCount,
@@ -96,6 +97,7 @@ func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 
 		Page:       userData.Locale.Get("Page not found"),
 		PrivacyURL: c.privacyURL,
+		TosURL:     c.tosURL,
 		ImprintURL: c.imprintURL,
 	}); err != nil {
 		log.Warn("Could not render page not found template", "err", errors.Join(errCouldNotRenderTemplate, err))

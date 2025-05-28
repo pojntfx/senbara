@@ -51,6 +51,7 @@ type Controller struct {
 	authner   *authn.Authner
 
 	privacyURL string
+	tosURL     string
 	imprintURL string
 
 	code []byte
@@ -63,6 +64,7 @@ func NewController(
 	authner *authn.Authner,
 
 	privacyURL,
+	tosURL,
 	imprintURL string,
 
 	code []byte,
@@ -74,6 +76,7 @@ func NewController(
 		authner:   authner,
 
 		privacyURL: privacyURL,
+		tosURL:     tosURL,
 		imprintURL: imprintURL,
 
 		code: code,

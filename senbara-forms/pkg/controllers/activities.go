@@ -67,6 +67,7 @@ func (c *Controller) HandleAddActivity(w http.ResponseWriter, r *http.Request) {
 
 			Page:       userData.Locale.Get("Add an activity"),
 			PrivacyURL: c.privacyURL,
+			TosURL:     c.tosURL,
 			ImprintURL: c.imprintURL,
 		},
 		Entry: contact,
@@ -428,6 +429,7 @@ func (c *Controller) HandleEditActivity(w http.ResponseWriter, r *http.Request) 
 
 			Page:       userData.Locale.Get("Edit activity"),
 			PrivacyURL: c.privacyURL,
+			TosURL:     c.tosURL,
 			ImprintURL: c.imprintURL,
 		},
 		Entry: activityAndContact,
@@ -512,6 +514,7 @@ func (c *Controller) HandleViewActivity(w http.ResponseWriter, r *http.Request) 
 
 			Page:       activityAndContact.Name,
 			PrivacyURL: c.privacyURL,
+			TosURL:     c.tosURL,
 			ImprintURL: c.imprintURL,
 
 			BackURL: fmt.Sprintf("/contacts/view?id=%v", contactID),

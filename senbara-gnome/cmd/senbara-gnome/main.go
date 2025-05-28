@@ -35,6 +35,7 @@ import (
 var (
 	errCouldNotLogin            = errors.New("could not login")
 	errCouldNotWriteSettingsKey = errors.New("could not write settings key")
+	errMissingPrivacyURL        = errors.New("missing privacy policy URL")
 )
 
 const (
@@ -687,7 +688,43 @@ func main() {
 
 		privacyAction := gio.NewSimpleAction("privacy", nil)
 		privacyAction.ConnectActivate(func(parameter *glib.Variant) {
-			log.Info("Handling getting privacy action", "url", spec.Info.TermsOfService)
+			var privacyURL string
+			if v := spec.Info.Extensions[api.PrivacyPolicyExtensionKey]; v != nil {
+				vv, ok := v.(string)
+				if ok {
+					privacyURL = vv
+				} else {
+					panic(errMissingPrivacyURL)
+				}
+			}
+
+			log.Info("Handling getting privacy action", "url", privacyURL)
+
+			go func() {
+				var (
+					fl = gtk.NewURILauncher(privacyURL)
+					cc = make(chan error)
+				)
+				fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
+					if err := fl.LaunchFinish(res); err != nil {
+						cc <- err
+
+						return
+					}
+
+					cc <- nil
+				})
+
+				if err := <-cc; err != nil {
+					panic(err)
+				}
+			}()
+		})
+		a.AddAction(privacyAction)
+
+		tosAction := gio.NewSimpleAction("tos", nil)
+		tosAction.ConnectActivate(func(parameter *glib.Variant) {
+			log.Info("Handling getting terms of service action", "url", spec.Info.TermsOfService)
 
 			go func() {
 				var (
@@ -709,7 +746,7 @@ func main() {
 				}
 			}()
 		})
-		a.AddAction(privacyAction)
+		a.AddAction(tosAction)
 
 		imprintAction := gio.NewSimpleAction("imprint", nil)
 		imprintAction.ConnectActivate(func(parameter *glib.Variant) {

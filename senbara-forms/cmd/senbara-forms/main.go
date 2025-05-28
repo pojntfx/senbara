@@ -24,6 +24,7 @@ var (
 	errMissingOIDCClientID    = errors.New("missing OIDC client ID")
 	errMissingOIDCRedirectURL = errors.New("missing OIDC redirect URL")
 	errMissingPrivacyURL      = errors.New("missing privacy policy URL")
+	errMissingTOSURL          = errors.New("missing terms of service URL")
 	errMissingImprintURL      = errors.New("missing imprint URL")
 )
 
@@ -36,6 +37,7 @@ const (
 	oidcClientIDKey    = "oidc-client-id"
 	oidcRedirectURLKey = "oidc-redirect-url"
 	privacyURLKey      = "privacy-url"
+	tosURLKey          = "tos-url"
 	imprintURLKey      = "imprint-url"
 )
 
@@ -103,6 +105,10 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				return errMissingPrivacyURL
 			}
 
+			if !viper.IsSet(tosURLKey) {
+				return errMissingTOSURL
+			}
+
 			if !viper.IsSet(imprintURLKey) {
 				return errMissingImprintURL
 			}
@@ -145,6 +151,7 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 				a,
 
 				viper.GetString(privacyURLKey),
+				viper.GetString(tosURLKey),
 				viper.GetString(imprintURLKey),
 
 				v1.Code,
@@ -170,6 +177,7 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 	cmd.PersistentFlags().String(oidcClientIDKey, "", "OIDC Client ID (e.g. myoidcclientid))")
 	cmd.PersistentFlags().String(oidcRedirectURLKey, "http://localhost:1337/authorize", "OIDC redirect URL")
 	cmd.PersistentFlags().String(privacyURLKey, "", "Privacy policy URL")
+	cmd.PersistentFlags().String(tosURLKey, "", "Terms of service URL")
 	cmd.PersistentFlags().String(imprintURLKey, "", "Imprint URL")
 
 	if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {

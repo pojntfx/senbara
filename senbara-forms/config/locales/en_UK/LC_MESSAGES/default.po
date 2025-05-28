@@ -233,6 +233,9 @@ msgstr "Code"
 msgid "Privacy"
 msgstr "Privacy"
 
+msgid "Terms of Service"
+msgstr "Terms of Service"
+
 msgid "Imprint"
 msgstr "Imprint"
 

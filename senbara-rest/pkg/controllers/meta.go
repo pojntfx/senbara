@@ -13,7 +13,8 @@ func (c *Controller) GetOpenAPISpec(ctx context.Context, request api.GetOpenAPIS
 	c.log.Debug("Handling getting OpenAPI Spec")
 
 	s := *c.spec
-	s.Info.TermsOfService = c.privacyURL
+	s.Info.Extensions[api.PrivacyPolicyExtensionKey] = c.privacyURL
+	s.Info.TermsOfService = c.tosURL
 	s.Info.Contact.Name = c.contactName
 	s.Info.Contact.Email = c.contactEmail
 	s.Servers[0].URL = c.serverURL

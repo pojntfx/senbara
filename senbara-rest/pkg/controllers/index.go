@@ -34,6 +34,7 @@ type Controller struct {
 	oidcDcrInitialAccessTokenPortalUrl string
 
 	privacyURL string
+	tosURL     string
 	imprintURL string
 
 	contactName  string
@@ -57,6 +58,7 @@ func NewController(
 	oidcDcrInitialAccessTokenPortalUrl,
 
 	privacyURL,
+	tosURL,
 	imprintURL,
 
 	contactName,
@@ -79,6 +81,7 @@ func NewController(
 		oidcDcrInitialAccessTokenPortalUrl: oidcDcrInitialAccessTokenPortalUrl,
 
 		privacyURL: privacyURL,
+		tosURL:     tosURL,
 		imprintURL: imprintURL,
 
 		contactName:  contactName,
