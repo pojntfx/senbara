@@ -7,362 +7,364 @@ Adw.Window main-window {
     title: _("Senbara Forms");
     visible: true;
 
-    Adw.NavigationView main-navigation {
-        Adw.NavigationPage {
-            title: _("Loading Senbara Forms");
-            tag: "/";
+    Adw.ToastOverlay main-toasts-overlay {
+        Adw.NavigationView main-navigation {
+            Adw.NavigationPage {
+                title: _("Loading Senbara Forms");
+                tag: "/";
 
-            Adw.ToolbarView {
-                [top]
-                Adw.HeaderBar {
-                    show-title: false;
+                Adw.ToolbarView {
+                    [top]
+                    Adw.HeaderBar {
+                        show-title: false;
 
-                    [end]
-                    MenuButton {
-                        icon-name: "open-menu-symbolic";
-                        primary: true;
-                        menu-model: server-setup-menu;
-                    }
-                }
-
-                Adw.StatusPage {
-                    title: _("Loading Senbara Forms");
-                    description: _("Checking configuration ...");
-
-                    Adw.Spinner {
-                        width-request: 48;
-                        height-request: 48;
-                    }
-                }
-            }
-        }
-
-        Adw.NavigationPage {
-            title: _("Senbara Forms");
-            tag: "/welcome";
-            can-pop: false;
-
-            Adw.ToolbarView {
-                [top]
-                Adw.HeaderBar {
-                    show-title: false;
-
-                    [end]
-                    MenuButton {
-                        icon-name: "open-menu-symbolic";
-                        primary: true;
-                        menu-model: server-setup-menu;
-                    }
-                }
-
-                Adw.StatusPage {
-                    title: _("Senbara Forms");
-                    description: _("GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
-                    icon-name: "open-book-symbolic";
-
-                    Button welcome-get-started-button {
-                        halign: center;
-
-                        Box {
-                            spacing: 10;
-
-                            Adw.Spinner welcome-get-started-spinner {
-                                visible: false;
-                            }
-
-                            Label {
-                                label: _("Get started");
-                            }
+                        [end]
+                        MenuButton {
+                            icon-name: "open-menu-symbolic";
+                            primary: true;
+                            menu-model: server-setup-menu;
                         }
-
-                        styles [
-                            "suggested-action",
-                        ]
-                    }
-                }
-            }
-        }
-
-        Adw.NavigationPage {
-            title: _("Select Senbara server");
-            tag: "/config/server-url";
-
-            Adw.ToolbarView {
-                [top]
-                Adw.HeaderBar {
-                    show-title: false;
-
-                    [end]
-                    MenuButton {
-                        icon-name: "open-menu-symbolic";
-                        primary: true;
-                        menu-model: server-setup-menu;
                     }
 
-                    [end]
-                    Button config-server-url-continue-button {
-                        sensitive: false;
+                    Adw.StatusPage {
+                        title: _("Loading Senbara Forms");
+                        description: _("Checking configuration ...");
 
-                        Box {
-                            spacing: 10;
-
-                            Adw.Spinner config-server-url-continue-spinner {
-                                visible: false;
-                            }
-
-                            Label {
-                                label: _("Continue");
-                            }
-                        }
-
-                        styles [
-                            "suggested-action",
-                        ]
-                    }
-                }
-
-                Adw.StatusPage {
-                    title: _("Where is your Senbara server?");
-                    description: _("Enter the configuration for the Senbara server you want to connect to.");
-                    icon-name: "network-server-symbolic";
-
-                    Adw.Clamp {
-                        maximum-size: 400;
-
-                        Adw.PreferencesGroup {
-                            Adw.EntryRow config-server-url-input {
-                                title: _("Senbara Server URL (e.g. https://rest.senbara.p8.lu/)");
-                            }
+                        Adw.Spinner {
+                            width-request: 48;
+                            height-request: 48;
                         }
                     }
                 }
             }
-        }
 
-        Adw.NavigationPage {
-            title: _("Senbara Forms");
-            tag: "/preview";
-            can-pop: false;
+            Adw.NavigationPage {
+                title: _("Senbara Forms");
+                tag: "/welcome";
+                can-pop: false;
 
-            Adw.ToolbarView {
-                [top]
-                Adw.HeaderBar {
-                    show-title: false;
+                Adw.ToolbarView {
+                    [top]
+                    Adw.HeaderBar {
+                        show-title: false;
 
-                    [end]
-                    MenuButton {
-                        icon-name: "open-menu-symbolic";
-                        primary: true;
-                        menu-model: preview-menu;
-                    }
-
-                    [end]
-                    Button preview-login-button {
-                        Box {
-                            spacing: 10;
-
-                            Adw.Spinner preview-login-spinner {
-                                visible: false;
-                            }
-
-                            Label {
-                                label: _("Login");
-                            }
+                        [end]
+                        MenuButton {
+                            icon-name: "open-menu-symbolic";
+                            primary: true;
+                            menu-model: server-setup-menu;
                         }
-
-                        styles [
-                            "suggested-action",
-                        ]
                     }
-                }
 
-                Adw.StatusPage {
-                    title: _("Senbara Forms");
-                    description: _("(Preview) GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
-                    icon-name: "open-book-symbolic";
-                }
-            }
-        }
+                    Adw.StatusPage {
+                        title: _("Senbara Forms");
+                        description: _("GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
+                        icon-name: "open-book-symbolic";
 
-        Adw.NavigationPage {
-            title: _("Register Senbara Forms");
-            tag: "/register";
+                        Button welcome-get-started-button {
+                            halign: center;
 
-            Adw.ToolbarView {
-                [top]
-                Adw.HeaderBar {
-                    show-title: false;
+                            Box {
+                                spacing: 10;
 
-                    [end]
-                    MenuButton {
-                        icon-name: "open-menu-symbolic";
-                        primary: true;
-                        menu-model: preview-menu;
-                    }
-                }
+                                Adw.Spinner welcome-get-started-spinner {
+                                    visible: false;
+                                }
 
-                Adw.StatusPage {
-                    title: _("Registration required");
-                    description: _("You need to manually register Senbara Forms before you can sign in to this server.");
-                    icon-name: "configure-symbolic";
+                                Label {
+                                    label: _("Get started");
+                                }
+                            }
 
-                    Button register-register-button {
-                        halign: center;
-                        label: _("Register");
-
-                        styles [
-                            "suggested-action",
-                        ]
+                            styles [
+                                "suggested-action",
+                            ]
+                        }
                     }
                 }
             }
-        }
 
-        Adw.NavigationPage {
-            title: _("What's your initial access token?");
-            tag: "/config/initial-access-token";
+            Adw.NavigationPage {
+                title: _("Select Senbara server");
+                tag: "/config/server-url";
 
-            Adw.ToolbarView {
-                [top]
-                Adw.HeaderBar {
-                    show-title: false;
+                Adw.ToolbarView {
+                    [top]
+                    Adw.HeaderBar {
+                        show-title: false;
 
-                    [end]
-                    MenuButton {
-                        icon-name: "open-menu-symbolic";
-                        primary: true;
-                        menu-model: server-setup-menu;
-                    }
-
-                    [end]
-                    Button config-initial-access-token-login-button {
-                        sensitive: false;
-
-                        Box {
-                            spacing: 10;
-
-                            Adw.Spinner config-initial-access-token-login-spinner {
-                                visible: false;
-                            }
-
-                            Label {
-                                label: _("Login");
-                            }
+                        [end]
+                        MenuButton {
+                            icon-name: "open-menu-symbolic";
+                            primary: true;
+                            menu-model: server-setup-menu;
                         }
 
-                        styles [
-                            "suggested-action",
-                        ]
+                        [end]
+                        Button config-server-url-continue-button {
+                            sensitive: false;
+
+                            Box {
+                                spacing: 10;
+
+                                Adw.Spinner config-server-url-continue-spinner {
+                                    visible: false;
+                                }
+
+                                Label {
+                                    label: _("Continue");
+                                }
+                            }
+
+                            styles [
+                                "suggested-action",
+                            ]
+                        }
                     }
-                }
 
-                Adw.StatusPage {
-                    title: _("Set initial access token");
-                    description: _("Enter the initial access token you've received from the Senbara server.");
-                    icon-name: "network-server-symbolic";
+                    Adw.StatusPage {
+                        title: _("Where is your Senbara server?");
+                        description: _("Enter the configuration for the Senbara server you want to connect to.");
+                        icon-name: "network-server-symbolic";
 
-                    Adw.Clamp {
-                        maximum-size: 400;
+                        Adw.Clamp {
+                            maximum-size: 400;
 
-                        Adw.PreferencesGroup {
-                            Adw.PasswordEntryRow config-initial-access-token-input {
-                                title: _("Initial access token");
+                            Adw.PreferencesGroup {
+                                Adw.EntryRow config-server-url-input {
+                                    title: _("Senbara Server URL (e.g. https://rest.senbara.p8.lu/)");
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        Adw.NavigationPage {
-            title: _("Signing you in");
-            tag: "/exchange/login";
+            Adw.NavigationPage {
+                title: _("Senbara Forms");
+                tag: "/preview";
+                can-pop: false;
 
-            Adw.ToolbarView {
-                [top]
-                Adw.HeaderBar {
-                    show-title: false;
+                Adw.ToolbarView {
+                    [top]
+                    Adw.HeaderBar {
+                        show-title: false;
 
-                    [start]
-                    Button exchange-login-cancel-button {
-                        label: _("Cancel");
+                        [end]
+                        MenuButton {
+                            icon-name: "open-menu-symbolic";
+                            primary: true;
+                            menu-model: preview-menu;
+                        }
+
+                        [end]
+                        Button preview-login-button {
+                            Box {
+                                spacing: 10;
+
+                                Adw.Spinner preview-login-spinner {
+                                    visible: false;
+                                }
+
+                                Label {
+                                    label: _("Login");
+                                }
+                            }
+
+                            styles [
+                                "suggested-action",
+                            ]
+                        }
                     }
 
-                    [end]
-                    MenuButton {
-                        icon-name: "open-menu-symbolic";
-                        primary: true;
-                        menu-model: auth-setup-menu;
-                    }
-                }
-
-                Adw.StatusPage {
-                    title: _("Signing you in");
-                    description: _("Waiting for authorization from browser ...");
-
-                    Adw.Spinner {
-                        width-request: 48;
-                        height-request: 48;
+                    Adw.StatusPage {
+                        title: _("Senbara Forms");
+                        description: _("(Preview) GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
+                        icon-name: "open-book-symbolic";
                     }
                 }
             }
-        }
 
-        Adw.NavigationPage {
-            title: _("Senbara Forms");
-            tag: "/home";
-            can-pop: false;
+            Adw.NavigationPage {
+                title: _("Register Senbara Forms");
+                tag: "/register";
 
-            Adw.ToolbarView {
-                [top]
-                Adw.HeaderBar {
-                    show-title: false;
+                Adw.ToolbarView {
+                    [top]
+                    Adw.HeaderBar {
+                        show-title: false;
 
-                    [end]
-                    MenuButton {
-                        icon-name: "open-menu-symbolic";
-                        primary: true;
-                        menu-model: home-menu;
+                        [end]
+                        MenuButton {
+                            icon-name: "open-menu-symbolic";
+                            primary: true;
+                            menu-model: preview-menu;
+                        }
                     }
-                }
 
-                Adw.StatusPage {
-                    title: _("Senbara Forms");
-                    description: _("(Authenticated) GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
-                    icon-name: "open-book-symbolic";
+                    Adw.StatusPage {
+                        title: _("Registration required");
+                        description: _("You need to manually register Senbara Forms before you can sign in to this server.");
+                        icon-name: "configure-symbolic";
+
+                        Button register-register-button {
+                            halign: center;
+                            label: _("Register");
+
+                            styles [
+                                "suggested-action",
+                            ]
+                        }
+                    }
                 }
             }
-        }
 
-        Adw.NavigationPage {
-            title: _("Signing you out");
-            tag: "/exchange/logout";
+            Adw.NavigationPage {
+                title: _("What's your initial access token?");
+                tag: "/config/initial-access-token";
 
-            Adw.ToolbarView {
-                [top]
-                Adw.HeaderBar {
-                    show-title: false;
+                Adw.ToolbarView {
+                    [top]
+                    Adw.HeaderBar {
+                        show-title: false;
 
-                    [start]
-                    Button exchange-logout-cancel-button {
-                        label: _("Cancel");
+                        [end]
+                        MenuButton {
+                            icon-name: "open-menu-symbolic";
+                            primary: true;
+                            menu-model: server-setup-menu;
+                        }
+
+                        [end]
+                        Button config-initial-access-token-login-button {
+                            sensitive: false;
+
+                            Box {
+                                spacing: 10;
+
+                                Adw.Spinner config-initial-access-token-login-spinner {
+                                    visible: false;
+                                }
+
+                                Label {
+                                    label: _("Login");
+                                }
+                            }
+
+                            styles [
+                                "suggested-action",
+                            ]
+                        }
                     }
 
-                    [end]
-                    MenuButton {
-                        icon-name: "open-menu-symbolic";
-                        primary: true;
-                        menu-model: auth-setup-menu;
+                    Adw.StatusPage {
+                        title: _("Set initial access token");
+                        description: _("Enter the initial access token you've received from the Senbara server.");
+                        icon-name: "network-server-symbolic";
+
+                        Adw.Clamp {
+                            maximum-size: 400;
+
+                            Adw.PreferencesGroup {
+                                Adw.PasswordEntryRow config-initial-access-token-input {
+                                    title: _("Initial access token");
+                                }
+                            }
+                        }
                     }
                 }
+            }
 
-                Adw.StatusPage {
-                    title: _("Signing you out");
-                    description: _("Waiting for authorization from browser ...");
+            Adw.NavigationPage {
+                title: _("Signing you in");
+                tag: "/exchange/login";
 
-                    Adw.Spinner {
-                        width-request: 48;
-                        height-request: 48;
+                Adw.ToolbarView {
+                    [top]
+                    Adw.HeaderBar {
+                        show-title: false;
+
+                        [start]
+                        Button exchange-login-cancel-button {
+                            label: _("Cancel");
+                        }
+
+                        [end]
+                        MenuButton {
+                            icon-name: "open-menu-symbolic";
+                            primary: true;
+                            menu-model: auth-setup-menu;
+                        }
+                    }
+
+                    Adw.StatusPage {
+                        title: _("Signing you in");
+                        description: _("Waiting for authorization from browser ...");
+
+                        Adw.Spinner {
+                            width-request: 48;
+                            height-request: 48;
+                        }
+                    }
+                }
+            }
+
+            Adw.NavigationPage {
+                title: _("Senbara Forms");
+                tag: "/home";
+                can-pop: false;
+
+                Adw.ToolbarView {
+                    [top]
+                    Adw.HeaderBar {
+                        show-title: false;
+
+                        [end]
+                        MenuButton {
+                            icon-name: "open-menu-symbolic";
+                            primary: true;
+                            menu-model: home-menu;
+                        }
+                    }
+
+                    Adw.StatusPage {
+                        title: _("Senbara Forms");
+                        description: _("(Authenticated) GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
+                        icon-name: "open-book-symbolic";
+                    }
+                }
+            }
+
+            Adw.NavigationPage {
+                title: _("Signing you out");
+                tag: "/exchange/logout";
+
+                Adw.ToolbarView {
+                    [top]
+                    Adw.HeaderBar {
+                        show-title: false;
+
+                        [start]
+                        Button exchange-logout-cancel-button {
+                            label: _("Cancel");
+                        }
+
+                        [end]
+                        MenuButton {
+                            icon-name: "open-menu-symbolic";
+                            primary: true;
+                            menu-model: auth-setup-menu;
+                        }
+                    }
+
+                    Adw.StatusPage {
+                        title: _("Signing you out");
+                        description: _("Waiting for authorization from browser ...");
+
+                        Adw.Spinner {
+                            width-request: 48;
+                            height-request: 48;
+                        }
                     }
                 }
             }

@@ -135,6 +135,7 @@ func main() {
 	var (
 		w       *adw.Window
 		nv      *adw.NavigationView
+		mto     *adw.ToastOverlay
 		authner *authn.Authner
 		u       userData
 	)
@@ -290,6 +291,20 @@ func main() {
 		return redirected, client, http.StatusOK, nil
 	}
 
+	handlePanic := func(err error) {
+		rawError := err.Error()
+		i18nErr := gcore.Local(rawError)
+
+		log.Error(
+			"An unexpected error occured, showing error message to user",
+			"rawError", rawError,
+			"i18nErr", i18nErr,
+		)
+
+		// TODO: Add option to copy error message
+		mto.AddToast(adw.NewToast(i18nErr))
+	}
+
 	a.ConnectActivate(func() {
 		gtk.StyleContextAddProviderForDisplay(
 			gdk.DisplayGetDefault(),
@@ -302,6 +317,8 @@ func main() {
 		w = b.GetObject("main-window").Cast().(*adw.Window)
 
 		nv = b.GetObject("main-navigation").Cast().(*adw.NavigationView)
+
+		mto = b.GetObject("main-toasts-overlay").Cast().(*adw.ToastOverlay)
 
 		var (
 			welcomeGetStartedButton  = b.GetObject("welcome-get-started-button").Cast().(*gtk.Button)
@@ -401,7 +418,9 @@ func main() {
 				defer welcomeGetStartedSpinner.SetVisible(false)
 
 				if err := deregisterOIDCClient(); err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 
 				updateDeregisterClientActionEnabled()
@@ -419,7 +438,9 @@ func main() {
 					defer configServerURLContinueSpinner.SetVisible(false)
 
 					if err := deregisterOIDCClient(); err != nil {
-						panic(err)
+						handlePanic(err)
+
+						return
 					}
 
 					updateDeregisterClientActionEnabled()
@@ -530,7 +551,9 @@ func main() {
 				defer configServerURLContinueSpinner.SetVisible(false)
 
 				if err := checkSenbaraServerConfiguration(); err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 
 				nv.PushByTag(resources.PagePreview)
@@ -546,11 +569,15 @@ func main() {
 				defer previewLoginSpinner.SetVisible(false)
 
 				if err := checkSenbaraServerConfiguration(); err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 
 				if err := setupAuthn(true); err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 
 				if v := spec.Components.SecuritySchemes["oidc"].Value.Extensions[api.OidcDcrInitialAccessTokenPortalUrlExtensionKey]; v != nil {
@@ -585,7 +612,9 @@ func main() {
 				})
 
 				if err := <-cc; err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 
 				nv.PushByTag(resources.PageConfigInitialAccessToken)
@@ -609,11 +638,15 @@ func main() {
 				defer configInitialAccessTokenLoginSpinner.SetVisible(false)
 
 				if err := checkSenbaraServerConfiguration(); err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 
 				if err := setupAuthn(true); err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 
 				nv.PushByTag(resources.PageHome)
@@ -654,7 +687,9 @@ func main() {
 				})
 
 				if err := <-cc; err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 			}()
 		})
@@ -680,7 +715,9 @@ func main() {
 				})
 
 				if err := <-cc; err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 			}()
 		})
@@ -716,7 +753,9 @@ func main() {
 				})
 
 				if err := <-cc; err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 			}()
 		})
@@ -742,7 +781,9 @@ func main() {
 				})
 
 				if err := <-cc; err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 			}()
 		})
@@ -768,7 +809,9 @@ func main() {
 				})
 
 				if err := <-cc; err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 			}()
 		})
@@ -786,7 +829,9 @@ func main() {
 			if err != nil {
 				log.Warn("Could not authorize user for getting code action", "err", err)
 
-				panic(err)
+				handlePanic(err)
+
+				return
 			} else if redirected {
 				return
 			}
@@ -795,7 +840,9 @@ func main() {
 
 			res, err := c.GetSourceCode(ctx)
 			if err != nil {
-				panic(err)
+				handlePanic(err)
+
+				return
 			}
 			defer res.Body.Close()
 
@@ -813,19 +860,25 @@ func main() {
 			fd.Save(ctx, &w.Window, func(r gio.AsyncResulter) {
 				fp, err := fd.SaveFinish(r)
 				if err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 
 				log.Debug("Writing code to file", "path", fp.Path())
 
 				f, err := os.OpenFile(fp.Path(), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
 				if err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 				defer f.Close()
 
 				if _, err := io.Copy(f, res.Body); err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 			})
 		})
@@ -873,7 +926,9 @@ func main() {
 				if err != nil {
 					log.Warn("Could not authorize user for index page", "err", err)
 
-					panic(err)
+					handlePanic(err)
+
+					return
 				} else if redirected {
 					return
 				}
@@ -902,7 +957,9 @@ func main() {
 					defer configServerURLContinueSpinner.SetVisible(false)
 
 					if err := deregisterOIDCClient(); err != nil {
-						panic(err)
+						handlePanic(err)
+
+						return
 					}
 
 					updateDeregisterClientActionEnabled()
@@ -920,7 +977,9 @@ func main() {
 				if err != nil {
 					log.Warn("Could not authorize user for home page", "err", err)
 
-					panic(err)
+					handlePanic(err)
+
+					return
 				} else if redirected {
 					return
 				}
@@ -931,7 +990,9 @@ func main() {
 
 				res, err := c.GetOpenAPISpec(ctx)
 				if err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 				defer res.Body.Close()
 
@@ -944,7 +1005,9 @@ func main() {
 				log.Debug("Writing OpenAPI spec to stdout")
 
 				if _, err := io.Copy(os.Stdout, res.Body); err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 
 			case resources.PageRegister:
@@ -963,7 +1026,9 @@ func main() {
 				if err != nil {
 					log.Warn("Could not authorize user for home page", "err", err)
 
-					panic(err)
+					handlePanic(err)
+
+					return
 				} else if redirected {
 					return
 				}
@@ -974,7 +1039,9 @@ func main() {
 
 				res, err := c.GetIndexWithResponse(ctx)
 				if err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 
 				log.Debug("Got summary", "status", res.StatusCode())
@@ -986,7 +1053,9 @@ func main() {
 				log.Debug("Writing summary to stdout")
 
 				if err := yaml.NewEncoder(os.Stdout).Encode(res.JSON200); err != nil {
-					panic(err)
+					handlePanic(err)
+
+					return
 				}
 			}
 		}
@@ -1012,7 +1081,9 @@ func main() {
 		for _, r := range files {
 			u, err := url.Parse(r.URI())
 			if err != nil {
-				panic(err)
+				handlePanic(err)
+
+				return
 			}
 
 			authCode := u.Query().Get("code")
@@ -1120,7 +1191,9 @@ func main() {
 				},
 			)
 			if err != nil {
-				panic(err)
+				handlePanic(err)
+
+				return
 			}
 
 			// In the web version, redirecting to the home page after signing out is possible without
