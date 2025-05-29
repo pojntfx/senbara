@@ -229,7 +229,7 @@ func main() {
 		}
 
 		if redirected {
-			nv.ReplaceWithTags([]string{"exchange"})
+			nv.ReplaceWithTags([]string{resources.PageExchangeLogin})
 
 			var (
 				fl = gtk.NewURILauncher(nextURL)
@@ -304,41 +304,41 @@ func main() {
 		nv = b.GetObject("main-navigation").Cast().(*adw.NavigationView)
 
 		var (
-			sb = b.GetObject("setup-button").Cast().(*gtk.Button)
-			ss = b.GetObject("setup-spinner").Cast().(*gtk.Widget)
+			welcomeGetStartedButton  = b.GetObject("welcome-get-started-button").Cast().(*gtk.Button)
+			welcomeGetStartedSpinner = b.GetObject("welcome-get-started-spinner").Cast().(*gtk.Widget)
 
-			sssui = b.GetObject("select-senbara-server-url-input").Cast().(*adw.EntryRow)
-			ssscb = b.GetObject("select-senbara-server-continue-button").Cast().(*gtk.Button)
-			ssscs = b.GetObject("select-senbara-server-continue-spinner").Cast().(*gtk.Widget)
+			configServerURLInput           = b.GetObject("config-server-url-input").Cast().(*adw.EntryRow)
+			configServerURLContinueButton  = b.GetObject("config-server-url-continue-button").Cast().(*gtk.Button)
+			configServerURLContinueSpinner = b.GetObject("config-server-url-continue-spinner").Cast().(*gtk.Widget)
 
 			spec openapi3.T
 
-			plb = b.GetObject("preview-login-button").Cast().(*gtk.Button)
-			pls = b.GetObject("preview-login-spinner").Cast().(*gtk.Widget)
+			previewLoginButton  = b.GetObject("preview-login-button").Cast().(*gtk.Button)
+			previewLoginSpinner = b.GetObject("preview-login-spinner").Cast().(*gtk.Widget)
 
 			oidcDcrInitialAccessTokenPortalUrl string
 
-			rb = b.GetObject("register-button").Cast().(*gtk.Button)
+			registerRegisterButton = b.GetObject("register-register-button").Cast().(*gtk.Button)
 
-			siati  = b.GetObject("set-initial-access-token-input").Cast().(*adw.PasswordEntryRow)
-			siatlb = b.GetObject("set-initial-access-token-login-button").Cast().(*gtk.Button)
-			siatls = b.GetObject("set-initial-access-token-login-spinner").Cast().(*gtk.Widget)
+			configInitialAccessTokenInput        = b.GetObject("config-initial-access-token-input").Cast().(*adw.PasswordEntryRow)
+			configInitialAccessTokenLoginButton  = b.GetObject("config-initial-access-token-login-button").Cast().(*gtk.Button)
+			configInitialAccessTokenLoginSpinner = b.GetObject("config-initial-access-token-login-spinner").Cast().(*gtk.Widget)
 
-			ecb  = b.GetObject("exchange-cancel-button").Cast().(*gtk.Button)
-			elcb = b.GetObject("exchange-logout-cancel-button").Cast().(*gtk.Button)
+			exchangeLoginCancelButton  = b.GetObject("exchange-login-cancel-button").Cast().(*gtk.Button)
+			exchangeLogoutCancelButton = b.GetObject("exchange-logout-cancel-button").Cast().(*gtk.Button)
 		)
 
-		sb.ConnectClicked(func() {
-			nv.PushByTag("select-senbara-server")
+		welcomeGetStartedButton.ConnectClicked(func() {
+			nv.PushByTag(resources.PageConfigServerURL)
 		})
 
-		settings.Bind(resources.SettingServerURLKey, sssui.Object, "text", gio.SettingsBindDefault)
+		settings.Bind(resources.SettingServerURLKey, configServerURLInput.Object, "text", gio.SettingsBindDefault)
 
-		updateSelectSenbaraServerContinueButtonSensitive := func() {
+		updateConfigServerURLContinueButtonSensitive := func() {
 			if len(settings.String(resources.SettingServerURLKey)) > 0 {
-				ssscb.SetSensitive(true)
+				configServerURLContinueButton.SetSensitive(true)
 			} else {
-				ssscb.SetSensitive(false)
+				configServerURLContinueButton.SetSensitive(false)
 			}
 		}
 
@@ -390,40 +390,40 @@ func main() {
 		}
 
 		deregisterClientAction.ConnectActivate(func(parameter *glib.Variant) {
-			ssscb.SetSensitive(false)
-			sb.SetSensitive(false)
-			ssscs.SetVisible(true)
-			ss.SetVisible(true)
+			configServerURLContinueButton.SetSensitive(false)
+			welcomeGetStartedButton.SetSensitive(false)
+			configServerURLContinueSpinner.SetVisible(true)
+			welcomeGetStartedSpinner.SetVisible(true)
 
 			go func() {
-				defer sb.SetSensitive(true)
-				defer ssscs.SetVisible(false)
-				defer ss.SetVisible(false)
+				defer welcomeGetStartedButton.SetSensitive(true)
+				defer configServerURLContinueSpinner.SetVisible(false)
+				defer welcomeGetStartedSpinner.SetVisible(false)
 
 				if err := deregisterOIDCClient(); err != nil {
 					panic(err)
 				}
 
 				updateDeregisterClientActionEnabled()
-				updateSelectSenbaraServerContinueButtonSensitive()
+				updateConfigServerURLContinueButtonSensitive()
 			}()
 		})
 		a.AddAction(deregisterClientAction)
 
 		settings.ConnectChanged(func(key string) {
 			if key == resources.SettingServerURLKey {
-				ssscb.SetSensitive(false)
-				ssscs.SetVisible(true)
+				configServerURLContinueButton.SetSensitive(false)
+				configServerURLContinueSpinner.SetVisible(true)
 
 				go func() {
-					defer ssscs.SetVisible(false)
+					defer configServerURLContinueSpinner.SetVisible(false)
 
 					if err := deregisterOIDCClient(); err != nil {
 						panic(err)
 					}
 
 					updateDeregisterClientActionEnabled()
-					updateSelectSenbaraServerContinueButtonSensitive()
+					updateConfigServerURLContinueButtonSensitive()
 				}()
 			}
 		})
@@ -482,7 +482,7 @@ func main() {
 					"Senbara GNOME",
 					redirectURL,
 
-					siati.Text(),
+					configInitialAccessTokenInput.Text(),
 				)
 				if err != nil {
 					return err
@@ -522,28 +522,28 @@ func main() {
 			return nil
 		}
 
-		ssscb.ConnectClicked(func() {
-			ssscb.SetSensitive(false)
-			ssscs.SetVisible(true)
+		configServerURLContinueButton.ConnectClicked(func() {
+			configServerURLContinueButton.SetSensitive(false)
+			configServerURLContinueSpinner.SetVisible(true)
 
 			go func() {
-				defer ssscs.SetVisible(false)
+				defer configServerURLContinueSpinner.SetVisible(false)
 
 				if err := checkSenbaraServerConfiguration(); err != nil {
 					panic(err)
 				}
 
-				nv.PushByTag("preview")
+				nv.PushByTag(resources.PagePreview)
 			}()
 		})
 
-		plb.ConnectClicked(func() {
-			plb.SetSensitive(false)
-			pls.SetVisible(true)
+		previewLoginButton.ConnectClicked(func() {
+			previewLoginButton.SetSensitive(false)
+			previewLoginSpinner.SetVisible(true)
 
 			go func() {
-				defer plb.SetSensitive(true)
-				defer pls.SetVisible(false)
+				defer previewLoginButton.SetSensitive(true)
+				defer previewLoginSpinner.SetVisible(false)
 
 				if err := checkSenbaraServerConfiguration(); err != nil {
 					panic(err)
@@ -558,17 +558,17 @@ func main() {
 					if ok {
 						oidcDcrInitialAccessTokenPortalUrl = vv
 
-						nv.PushByTag("register")
+						nv.PushByTag(resources.PageRegister)
 
 						return
 					}
 				}
 
-				nv.PushByTag("home")
+				nv.PushByTag(resources.PageHome)
 			}()
 		})
 
-		rb.ConnectClicked(func() {
+		registerRegisterButton.ConnectClicked(func() {
 			go func() {
 				var (
 					fl = gtk.NewURILauncher(oidcDcrInitialAccessTokenPortalUrl)
@@ -588,25 +588,25 @@ func main() {
 					panic(err)
 				}
 
-				nv.PushByTag("set-initial-access-token")
+				nv.PushByTag(resources.PageConfigInitialAccessToken)
 			}()
 		})
 
-		siati.ConnectChanged(func() {
-			if siati.TextLength() > 0 {
-				siatlb.SetSensitive(true)
+		configInitialAccessTokenInput.ConnectChanged(func() {
+			if configInitialAccessTokenInput.TextLength() > 0 {
+				configInitialAccessTokenLoginButton.SetSensitive(true)
 			} else {
-				siatlb.SetSensitive(false)
+				configInitialAccessTokenLoginButton.SetSensitive(false)
 			}
 		})
 
-		siatlb.ConnectClicked(func() {
-			siatlb.SetSensitive(false)
-			siatls.SetVisible(true)
+		configInitialAccessTokenLoginButton.ConnectClicked(func() {
+			configInitialAccessTokenLoginButton.SetSensitive(false)
+			configInitialAccessTokenLoginSpinner.SetVisible(true)
 
 			go func() {
-				defer siatlb.SetSensitive(true)
-				defer siatls.SetVisible(false)
+				defer configInitialAccessTokenLoginButton.SetSensitive(true)
+				defer configInitialAccessTokenLoginSpinner.SetVisible(false)
 
 				if err := checkSenbaraServerConfiguration(); err != nil {
 					panic(err)
@@ -616,27 +616,27 @@ func main() {
 					panic(err)
 				}
 
-				nv.PushByTag("home")
+				nv.PushByTag(resources.PageHome)
 			}()
 		})
 
 		selectDifferentServerAction := gio.NewSimpleAction("selectDifferentServer", nil)
 		selectDifferentServerAction.ConnectActivate(func(parameter *glib.Variant) {
-			nv.ReplaceWithTags([]string{"welcome"})
+			nv.ReplaceWithTags([]string{resources.PageWelcome})
 		})
 		a.AddAction(selectDifferentServerAction)
 
-		ecb.ConnectClicked(func() {
-			nv.ReplaceWithTags([]string{"welcome"})
+		exchangeLoginCancelButton.ConnectClicked(func() {
+			nv.ReplaceWithTags([]string{resources.PageWelcome})
 		})
 
-		elcb.ConnectClicked(func() {
-			nv.ReplaceWithTags([]string{"home"})
+		exchangeLogoutCancelButton.ConnectClicked(func() {
+			nv.ReplaceWithTags([]string{resources.PageHome})
 		})
 
 		logoutAction := gio.NewSimpleAction("logout", nil)
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
-			nv.ReplaceWithTags([]string{"exchange-logout"})
+			nv.ReplaceWithTags([]string{resources.PageExchangeLogout})
 
 			go func() {
 				var (
@@ -838,16 +838,21 @@ func main() {
 		a.AddAction(aboutAction)
 
 		handleNavigation := func() {
-			switch nv.VisiblePage().Tag() {
-			case "/":
-				log.Info("Handling loading-config")
+			var (
+				tag = nv.VisiblePage().Tag()
+				log = log.With("tag", tag)
+			)
+
+			switch tag {
+			case resources.PageIndex:
+				log.Info("Handling")
 
 				if err := checkSenbaraServerConfiguration(); err != nil {
 					log.Info("Could not check Senbara server configuration, redirecting to login", "err", err)
 
 					updateDeregisterClientActionEnabled()
 
-					nv.PushByTag("welcome")
+					nv.PushByTag(resources.PageWelcome)
 
 					return
 				}
@@ -855,7 +860,7 @@ func main() {
 				if err := setupAuthn(false); err != nil {
 					log.Info("Could not setup authn, redirecting to login", "err", err)
 
-					nv.PushByTag("welcome")
+					nv.PushByTag(resources.PageWelcome)
 
 					return
 				}
@@ -874,38 +879,38 @@ func main() {
 				}
 
 				if settings.Boolean(resources.SettingAnonymousMode) {
-					nv.PushByTag("preview")
+					nv.PushByTag(resources.PagePreview)
 
 					return
 				}
 
 				if strings.TrimSpace(u.Email) != "" {
-					nv.PushByTag("home")
+					nv.PushByTag(resources.PageHome)
 
 					return
 				}
 
-				nv.PushByTag("welcome")
+				nv.PushByTag(resources.PageWelcome)
 
-			case "select-senbara-server":
-				log.Info("Handling select-senbara-server")
+			case resources.PageConfigServerURL:
+				log.Info("Handling")
 
-				ssscb.SetSensitive(false)
-				ssscs.SetVisible(true)
+				configServerURLContinueButton.SetSensitive(false)
+				configServerURLContinueSpinner.SetVisible(true)
 
 				go func() {
-					defer ssscs.SetVisible(false)
+					defer configServerURLContinueSpinner.SetVisible(false)
 
 					if err := deregisterOIDCClient(); err != nil {
 						panic(err)
 					}
 
 					updateDeregisterClientActionEnabled()
-					updateSelectSenbaraServerContinueButtonSensitive()
+					updateConfigServerURLContinueButtonSensitive()
 				}()
 
-			case "preview":
-				log.Info("Handling preview")
+			case resources.PagePreview:
+				log.Info("Handling")
 
 				redirected, c, _, err := authorize(
 					ctx,
@@ -942,13 +947,13 @@ func main() {
 					panic(err)
 				}
 
-			case "register":
-				log.Info("Handling register")
+			case resources.PageRegister:
+				log.Info("Handling")
 
-				siati.SetText("")
+				configInitialAccessTokenInput.SetText("")
 
-			case "home":
-				log.Info("Handling home")
+			case resources.PageHome:
+				log.Info("Handling")
 
 				redirected, c, _, err := authorize(
 					ctx,
@@ -1122,8 +1127,8 @@ func main() {
 			// authn. In the GNOME version, that is not the case since the unauthenticated
 			// page is a separate page from home, so we need to rewrite the path to distinguish
 			// between the two manually
-			if signedOut && nextURL == "home" {
-				nextURL = "/"
+			if signedOut && nextURL == resources.PageHome {
+				nextURL = resources.PageIndex
 			}
 
 			nv.ReplaceWithTags([]string{nextURL})

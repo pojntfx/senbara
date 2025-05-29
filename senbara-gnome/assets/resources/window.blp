@@ -39,7 +39,7 @@ Adw.Window main-window {
 
         Adw.NavigationPage {
             title: _("Senbara Forms");
-            tag: "welcome";
+            tag: "/welcome";
             can-pop: false;
 
             Adw.ToolbarView {
@@ -60,13 +60,13 @@ Adw.Window main-window {
                     description: _("GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
                     icon-name: "open-book-symbolic";
 
-                    Button setup-button {
+                    Button welcome-get-started-button {
                         halign: center;
 
                         Box {
                             spacing: 10;
 
-                            Adw.Spinner setup-spinner {
+                            Adw.Spinner welcome-get-started-spinner {
                                 visible: false;
                             }
 
@@ -85,7 +85,7 @@ Adw.Window main-window {
 
         Adw.NavigationPage {
             title: _("Select Senbara server");
-            tag: "select-senbara-server";
+            tag: "/config/server-url";
 
             Adw.ToolbarView {
                 [top]
@@ -100,13 +100,13 @@ Adw.Window main-window {
                     }
 
                     [end]
-                    Button select-senbara-server-continue-button {
+                    Button config-server-url-continue-button {
                         sensitive: false;
 
                         Box {
                             spacing: 10;
 
-                            Adw.Spinner select-senbara-server-continue-spinner {
+                            Adw.Spinner config-server-url-continue-spinner {
                                 visible: false;
                             }
 
@@ -130,7 +130,7 @@ Adw.Window main-window {
                         maximum-size: 400;
 
                         Adw.PreferencesGroup {
-                            Adw.EntryRow select-senbara-server-url-input {
+                            Adw.EntryRow config-server-url-input {
                                 title: _("Senbara Server URL (e.g. https://rest.senbara.p8.lu/)");
                             }
                         }
@@ -141,7 +141,7 @@ Adw.Window main-window {
 
         Adw.NavigationPage {
             title: _("Senbara Forms");
-            tag: "preview";
+            tag: "/preview";
             can-pop: false;
 
             Adw.ToolbarView {
@@ -186,7 +186,7 @@ Adw.Window main-window {
 
         Adw.NavigationPage {
             title: _("Register Senbara Forms");
-            tag: "register";
+            tag: "/register";
 
             Adw.ToolbarView {
                 [top]
@@ -203,12 +203,12 @@ Adw.Window main-window {
 
                 Adw.StatusPage {
                     title: _("Registration required");
-                    description: _("This Senbara server requires that you register Senbara Forms manually before signing in.");
+                    description: _("You need to manually register Senbara Forms before you can sign in to this server.");
                     icon-name: "configure-symbolic";
 
-                    Button register-button {
+                    Button register-register-button {
                         halign: center;
-                        label: _("Register Senbara Forms");
+                        label: _("Register");
 
                         styles [
                             "suggested-action",
@@ -219,8 +219,8 @@ Adw.Window main-window {
         }
 
         Adw.NavigationPage {
-            title: _("Set initial access token");
-            tag: "set-initial-access-token";
+            title: _("What's your initial access token?");
+            tag: "/config/initial-access-token";
 
             Adw.ToolbarView {
                 [top]
@@ -235,13 +235,13 @@ Adw.Window main-window {
                     }
 
                     [end]
-                    Button set-initial-access-token-login-button {
+                    Button config-initial-access-token-login-button {
                         sensitive: false;
 
                         Box {
                             spacing: 10;
 
-                            Adw.Spinner set-initial-access-token-login-spinner {
+                            Adw.Spinner config-initial-access-token-login-spinner {
                                 visible: false;
                             }
 
@@ -265,8 +265,8 @@ Adw.Window main-window {
                         maximum-size: 400;
 
                         Adw.PreferencesGroup {
-                            Adw.PasswordEntryRow set-initial-access-token-input {
-                                title: _("Senbara Server initial access token (e.g. myinitialaccesstoken)");
+                            Adw.PasswordEntryRow config-initial-access-token-input {
+                                title: _("Initial access token");
                             }
                         }
                     }
@@ -276,7 +276,7 @@ Adw.Window main-window {
 
         Adw.NavigationPage {
             title: _("Signing you in");
-            tag: "exchange";
+            tag: "/exchange/login";
 
             Adw.ToolbarView {
                 [top]
@@ -284,7 +284,7 @@ Adw.Window main-window {
                     show-title: false;
 
                     [start]
-                    Button exchange-cancel-button {
+                    Button exchange-login-cancel-button {
                         label: _("Cancel");
                     }
 
@@ -310,7 +310,7 @@ Adw.Window main-window {
 
         Adw.NavigationPage {
             title: _("Senbara Forms");
-            tag: "home";
+            tag: "/home";
             can-pop: false;
 
             Adw.ToolbarView {
@@ -336,7 +336,7 @@ Adw.Window main-window {
 
         Adw.NavigationPage {
             title: _("Signing you out");
-            tag: "exchange-logout";
+            tag: "/exchange/logout";
 
             Adw.ToolbarView {
                 [top]

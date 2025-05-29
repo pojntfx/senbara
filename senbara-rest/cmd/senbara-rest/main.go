@@ -189,7 +189,7 @@ For more information, please visit https://github.com/pojntfx/senbara.`,
 	cmd.PersistentFlags().StringP(configKey, "c", "", "Config file to use (by default "+cmd.Use+".yaml in the XDG config directory is read if it exists)")
 	cmd.PersistentFlags().StringP(laddrKey, "l", ":1337", "Listen address (port can also be set with `PORT` env variable)")
 	cmd.PersistentFlags().StringP(pgaddrKey, "p", "postgresql://postgres@localhost:5432/senbara?sslmode=disable", "Database address")
-	cmd.PersistentFlags().String(oidcIssuerKey, "", "OIDC Issuer (e.g. https://pojntfx.eu.auth0.com/)")
+	cmd.PersistentFlags().String(oidcIssuerKey, "", "OIDC Issuer (e.g. https://heuristic-rhodes-wqkaaxzmwj.projects.oryapis.com)")
 	cmd.PersistentFlags().String(oidcDcrInitialAccessTokenPortalUrlKey, "", "OIDC DCR initial access token portal URL")
 	cmd.PersistentFlags().StringArray(corsOriginsKey, []string{}, "CORS origins to allow")
 	cmd.PersistentFlags().String(privacyURLKey, "", "Privacy policy URL")

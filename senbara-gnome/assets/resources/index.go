@@ -23,6 +23,19 @@ const (
 	SecretStateNonceKey       = "state-nonce"
 	SecretPKCECodeVerifierKey = "pkce-code_verifier"
 	SecretOIDCNonceKey        = "oidc-nonce"
+
+	PageIndex = "/"
+
+	PageWelcome  = "/welcome"
+	PagePreview  = "/preview"
+	PageRegister = "/register"
+	PageHome     = "/home"
+
+	PageConfigServerURL          = "/config/server-url"
+	PageConfigInitialAccessToken = "/config/initial-access-token"
+
+	PageExchangeLogin  = "/exchange/login"
+	PageExchangeLogout = "/exchange/logout"
 )
 
 //go:generate sh -c "blueprint-compiler batch-compile . . *.blp && sass .:. && glib-compile-schemas . && glib-compile-resources *.gresource.xml"
