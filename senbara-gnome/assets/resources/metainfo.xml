@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>com.pojtinger.felicitas.Senbara</id>
+    <name>Senbara Forms</name>
+    <summary>GNOME app to interact with the Senbara REST API</summary>
+
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>AGPL-3.0-or-later</project_license>
+
+    <developer id="com.pojtinger.felicitas">
+        <name translatable="no">Felicitas Pojtinger</name>
+    </developer>
+
+    <content_rating type="oars-1.1">
+        <content_attribute id="social-chat">mild</content_attribute>
+    </content_rating>
+
+    <url type="bugtracker">https://github.com/pojntfx/senbara/issues</url>
+    <url type="homepage">https://github.com/pojntfx/senbara/</url>
+    <url type="donation">https://github.com/sponsors/pojntfx</url>
+    <url type="help">https://matrix.to/#/#senbara:matrix.org?via=matrix.org</url>
+    <url type="contact">https://felicitas.pojtinger.com/imprint</url>
+    <url type="faq">https://github.com/pojntfx/senbara?tab=readme-ov-file#tutorial</url>
+    <url type="vcs-browser">https://github.com/pojntfx/senbara/</url>
+
+    <launchable type="desktop-id">com.pojtinger.felicitas.Senbara.desktop</launchable>
+
+    <provides>
+        <binary>senbara</binary>
+    </provides>
+
+    <branding>
+        <color type="primary" scheme_preference="light">#6fb0ff</color>
+        <color type="primary" scheme_preference="dark">#0087ff</color>
+    </branding>
+
+    <description>
+        <p>GNOME app to interact with the Senbara REST API. Designed as a reference for modern
+            GNOME/GTK development with Go.</p>
+    </description>
+
+    <screenshots>
+        <screenshot type="default">
+            <image>
+                https://raw.githubusercontent.com/pojntfx/senbara/main/docs/screenshot-initial.png</image>
+            <caption>Entering a magnet link or stream code</caption>
+        </screenshot>
+    </screenshots>
+
+    <releases>
+        <release version="0.1.0" date='2025-06-02T00:00:00Z00:00'>
+            <url type="details">https://github.com/pojntfx/senbara/releases/tag/v0.1.0</url>
+
+            <description>
+                <p>Initial release</p>
+            </description>
+        </release>
+    </releases>
+</component>
