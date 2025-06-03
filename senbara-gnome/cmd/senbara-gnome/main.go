@@ -291,8 +291,9 @@ func main() {
 		return redirected, client, http.StatusOK, nil
 	}
 
+	var rawError string
 	handlePanic := func(err error) {
-		rawError := err.Error()
+		rawError = err.Error()
 		i18nErr := gcore.Local(rawError)
 
 		log.Error(
@@ -301,8 +302,11 @@ func main() {
 			"i18nErr", i18nErr,
 		)
 
-		// TODO: Add option to copy error message
-		mto.AddToast(adw.NewToast(i18nErr))
+		toast := adw.NewToast(i18nErr)
+		toast.SetButtonLabel(gcore.Local("Copy details"))
+		toast.SetActionName("app.copyErrorToClipboard")
+
+		mto.AddToast(toast)
 	}
 
 	a.ConnectActivate(func() {
@@ -889,6 +893,12 @@ func main() {
 			log.Info("Opening about menu")
 		})
 		a.AddAction(aboutAction)
+
+		copyErrorToClipboardAction := gio.NewSimpleAction("copyErrorToClipboard", nil)
+		copyErrorToClipboardAction.ConnectActivate(func(parameter *glib.Variant) {
+			w.Clipboard().SetText(rawError)
+		})
+		a.AddAction(copyErrorToClipboardAction)
 
 		handleNavigation := func() {
 			var (
