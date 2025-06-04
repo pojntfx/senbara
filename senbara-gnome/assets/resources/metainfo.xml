@@ -26,7 +26,7 @@
     <launchable type="desktop-id">com.pojtinger.felicitas.Senbara.desktop</launchable>
 
     <provides>
-        <binary>senbara</binary>
+        <binary>senbara-gnome</binary>
     </provides>
 
     <branding>
@@ -42,8 +42,8 @@
     <screenshots>
         <screenshot type="default">
             <image>
-                https://raw.githubusercontent.com/pojntfx/senbara/main/docs/screenshot-initial.png</image>
-            <caption>Entering a magnet link or stream code</caption>
+                https://raw.githubusercontent.com/pojntfx/senbara/main/senbara-gnome/docs/screenshot-initial.png</image>
+            <caption>Starting the setup</caption>
         </screenshot>
     </screenshots>
 

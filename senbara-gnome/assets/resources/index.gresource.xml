@@ -4,5 +4,6 @@
         <file>window.ui</file>
         <file>index.css</file>
         <file>gschemas.compiled</file>
+        <file>metainfo.xml</file>
     </gresource>
 </gresources>

@@ -316,6 +316,11 @@ func main() {
 			gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
 		)
 
+		aboutDialog := adw.NewAboutDialogFromAppdata(resources.ResourceMetainfoPath, resources.AppVersion)
+		aboutDialog.SetDevelopers([]string{"Felicitas Pojtinger"})
+		aboutDialog.SetArtists([]string{"Felicitas Pojtinger"})
+		aboutDialog.SetCopyright("© 2025 Felicitas Pojtinger")
+
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
 
 		w = b.GetObject("main-window").Cast().(*adw.Window)
@@ -890,7 +895,7 @@ func main() {
 
 		aboutAction := gio.NewSimpleAction("about", nil)
 		aboutAction.ConnectActivate(func(parameter *glib.Variant) {
-			log.Info("Opening about menu")
+			aboutDialog.Present(&w.Window)
 		})
 		a.AddAction(aboutAction)
 
