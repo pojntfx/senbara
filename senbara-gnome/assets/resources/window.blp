@@ -7,6 +7,14 @@ Adw.Window main-window {
     title: _("Senbara Forms");
     visible: true;
 
+    Adw.Breakpoint {
+        condition ("max-width: 500sp")
+
+        setters {
+            home-split-view.collapsed: true;
+        }
+    }
+
     Adw.ToastOverlay main-toasts-overlay {
         Adw.NavigationView main-navigation {
             Adw.NavigationPage {
@@ -314,24 +322,68 @@ Adw.Window main-window {
                 tag: "/home";
                 can-pop: false;
 
-                Adw.ToolbarView {
-                    [top]
-                    Adw.HeaderBar {
-                        show-title: false;
+                Adw.NavigationSplitView home-split-view {
+                    min-sidebar-width: 200;
 
-                        [end]
-                        MenuButton {
-                            icon-name: "open-menu-symbolic";
-                            primary: true;
-                            menu-model: home-menu;
+                    sidebar: Adw.NavigationPage {
+                        title: bind main-window.title;
+
+                        child: Adw.ToolbarView {
+                            [top]
+                            Adw.HeaderBar {
+                                [start]
+                                Button {
+                                    icon-name: "person-symbolic";
+
+                                    styles [
+                                        "circular",
+                                        "flat",
+                                    ]
+                                }
+
+                                [end]
+                                MenuButton {
+                                    icon-name: "open-menu-symbolic";
+                                    primary: true;
+                                    menu-model: home-menu;
+                                }
+                            }
+
+                            content: Gtk.StackSidebar home-stack-sidebar {
+                                stack: home-stack;
+                            };
+                        };
+                    };
+
+                    content: Adw.NavigationPage home-content-page {
+                        Gtk.Stack home-stack {
+                            Gtk.StackPage contacts {
+                                title: _("Contacts");
+
+                                child: Adw.ToolbarView {
+                                    [top]
+                                    Adw.HeaderBar {}
+
+                                    Adw.StatusPage {
+                                        title: _("Contact test 1");
+                                    }
+                                };
+                            }
+
+                            Gtk.StackPage journal {
+                                title: _("Journal");
+
+                                child: Adw.ToolbarView {
+                                    [top]
+                                    Adw.HeaderBar {}
+
+                                    Adw.StatusPage {
+                                        title: _("Journal test 1");
+                                    }
+                                };
+                            }
                         }
-                    }
-
-                    Adw.StatusPage {
-                        title: _("Senbara Forms");
-                        description: _("(Authenticated) GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
-                        icon-name: "open-book-symbolic";
-                    }
+                    };
                 }
             }
 

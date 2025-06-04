@@ -352,6 +352,11 @@ func main() {
 
 			exchangeLoginCancelButton  = b.GetObject("exchange-login-cancel-button").Cast().(*gtk.Button)
 			exchangeLogoutCancelButton = b.GetObject("exchange-logout-cancel-button").Cast().(*gtk.Button)
+
+			homeSplitView    = b.GetObject("home-split-view").Cast().(*adw.NavigationSplitView)
+			homeStack        = b.GetObject("home-stack").Cast().(*gtk.Stack)
+			homeStackSidebar = b.GetObject("home-stack-sidebar").Cast().(*gtk.StackSidebar)
+			homeContentPage  = b.GetObject("home-content-page").Cast().(*adw.NavigationPage)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -905,6 +910,18 @@ func main() {
 		})
 		a.AddAction(copyErrorToClipboardAction)
 
+		handleHomeStackNavigation := func() {
+			homeContentPage.SetTitle(homeStack.Page(homeStack.VisibleChild()).Title())
+
+			homeStackSidebar.RemoveCSSClass("sidebar") // Otherwise we get a small vertical line on the right
+		}
+
+		homeStack.Connect("notify::visible-child", func() {
+			handleHomeStackNavigation()
+
+			homeSplitView.SetShowContent(true)
+		})
+
 		handleNavigation := func() {
 			var (
 				tag = nv.VisiblePage().Tag()
@@ -1049,6 +1066,8 @@ func main() {
 				}
 
 				settings.SetBoolean(resources.SettingAnonymousMode, false)
+
+				handleHomeStackNavigation()
 
 				log.Debug("Getting summary")
 
