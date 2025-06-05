@@ -353,10 +353,10 @@ func main() {
 			exchangeLoginCancelButton  = b.GetObject("exchange-login-cancel-button").Cast().(*gtk.Button)
 			exchangeLogoutCancelButton = b.GetObject("exchange-logout-cancel-button").Cast().(*gtk.Button)
 
-			homeSplitView    = b.GetObject("home-split-view").Cast().(*adw.NavigationSplitView)
-			homeStack        = b.GetObject("home-stack").Cast().(*gtk.Stack)
-			homeStackSidebar = b.GetObject("home-stack-sidebar").Cast().(*gtk.StackSidebar)
-			homeContentPage  = b.GetObject("home-content-page").Cast().(*adw.NavigationPage)
+			homeSplitView      = b.GetObject("home-split-view").Cast().(*adw.NavigationSplitView)
+			homeNavigation     = b.GetObject("home-navigation").Cast().(*adw.NavigationView)
+			homeSidebarListbox = b.GetObject("home-sidebar-listbox").Cast().(*gtk.ListBox)
+			homeContentPage    = b.GetObject("home-content-page").Cast().(*adw.NavigationPage)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -910,16 +910,27 @@ func main() {
 		})
 		a.AddAction(copyErrorToClipboardAction)
 
-		handleHomeStackNavigation := func() {
-			homeContentPage.SetTitle(homeStack.Page(homeStack.VisibleChild()).Title())
+		handleHomeNavigation := func() {
+			var (
+				tag = homeNavigation.VisiblePage().Tag()
+				log = log.With("tag", tag)
+			)
 
-			homeStackSidebar.RemoveCSSClass("sidebar") // Otherwise we get a small vertical line on the right
-		}
+			log.Info("Handling")
 
-		homeStack.Connect("notify::visible-child", func() {
-			handleHomeStackNavigation()
+			homeContentPage.SetTitle(homeNavigation.VisiblePage().Title())
 
 			homeSplitView.SetShowContent(true)
+		}
+
+		homeNavigation.ConnectPopped(func(page *adw.NavigationPage) {
+			handleHomeNavigation()
+		})
+		homeNavigation.ConnectPushed(handleHomeNavigation)
+		homeNavigation.ConnectReplaced(handleHomeNavigation)
+
+		homeSidebarListbox.ConnectRowSelected(func(row *gtk.ListBoxRow) {
+			homeNavigation.ReplaceWithTags([]string{row.Cast().(*adw.ActionRow).Name()})
 		})
 
 		handleNavigation := func() {
@@ -1067,7 +1078,7 @@ func main() {
 
 				settings.SetBoolean(resources.SettingAnonymousMode, false)
 
-				handleHomeStackNavigation()
+				homeSidebarListbox.SelectRow(homeSidebarListbox.RowAtIndex(0))
 
 				log.Debug("Getting summary")
 
