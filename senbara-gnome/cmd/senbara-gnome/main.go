@@ -745,7 +745,9 @@ func main() {
 				if ok {
 					privacyURL = vv
 				} else {
-					panic(errMissingPrivacyURL)
+					handlePanic(errMissingPrivacyURL)
+
+					return
 				}
 			}
 
@@ -863,7 +865,9 @@ func main() {
 			log.Debug("Received code", "status", res.StatusCode)
 
 			if res.StatusCode != http.StatusOK {
-				panic(errors.New(res.Status))
+				handlePanic(errors.New(res.Status))
+
+				return
 			}
 
 			log.Debug("Writing code to file")
@@ -908,7 +912,7 @@ func main() {
 				false,
 			)
 			if err != nil {
-				log.Warn("Could not authorize user for getting code action", "err", err)
+				log.Warn("Could not authorize user for export user data action", "err", err)
 
 				handlePanic(err)
 
@@ -930,7 +934,9 @@ func main() {
 			log.Debug("Exported user data", "status", res.StatusCode)
 
 			if res.StatusCode != http.StatusOK {
-				panic(errors.New(res.Status))
+				handlePanic(errors.New(res.Status))
+
+				return
 			}
 
 			log.Debug("Writing user data to file")
@@ -964,6 +970,44 @@ func main() {
 			})
 		})
 		a.AddAction(exportUserDataAction)
+
+		deleteUserDataAction := gio.NewSimpleAction("deleteUserData", nil)
+		deleteUserDataAction.ConnectActivate(func(parameter *glib.Variant) {
+			log.Info("Handling delete user data action")
+
+			redirected, c, _, err := authorize(
+				ctx,
+
+				false,
+			)
+			if err != nil {
+				log.Warn("Could not authorize user for delete user data action", "err", err)
+
+				handlePanic(err)
+
+				return
+			} else if redirected {
+				return
+			}
+
+			log.Debug("Deleting user data")
+
+			res, err := c.DeleteUserDataWithResponse(ctx)
+			if err != nil {
+				handlePanic(err)
+
+				return
+			}
+
+			log.Debug("Deleted user data", "status", res.StatusCode())
+
+			if res.StatusCode() != http.StatusOK {
+				handlePanic(errors.New(res.Status()))
+
+				return
+			}
+		})
+		a.AddAction(deleteUserDataAction)
 
 		aboutAction := gio.NewSimpleAction("about", nil)
 		aboutAction.ConnectActivate(func(parameter *glib.Variant) {
@@ -1109,7 +1153,9 @@ func main() {
 				log.Debug("Got OpenAPI spec", "status", res.StatusCode)
 
 				if res.StatusCode != http.StatusOK {
-					panic(errors.New(res.Status))
+					handlePanic(errors.New(res.Status))
+
+					return
 				}
 
 				log.Debug("Writing OpenAPI spec to stdout")
@@ -1159,7 +1205,9 @@ func main() {
 				log.Debug("Got summary", "status", res.StatusCode())
 
 				if res.StatusCode() != http.StatusOK {
-					panic(errors.New(res.Status()))
+					handlePanic(errors.New(res.Status()))
+
+					return
 				}
 
 				log.Debug("Writing summary to stdout")
@@ -1218,7 +1266,9 @@ func main() {
 				if !errors.Is(err, keyring.ErrNotFound) {
 					log.Debug("Failed to read state nonce cookie", "error", err)
 
-					panic(errors.Join(errCouldNotLogin, err))
+					handlePanic(errors.Join(errCouldNotLogin, err))
+
+					return
 				}
 			} else {
 				stateNonce = sn
@@ -1229,7 +1279,9 @@ func main() {
 				if !errors.Is(err, keyring.ErrNotFound) {
 					log.Debug("Failed to read PKCE code verifier cookie", "error", err)
 
-					panic(errors.Join(errCouldNotLogin, err))
+					handlePanic(errors.Join(errCouldNotLogin, err))
+
+					return
 				}
 			} else {
 				pkceCodeVerifier = pcv
@@ -1240,7 +1292,9 @@ func main() {
 				if !errors.Is(err, keyring.ErrNotFound) {
 					log.Debug("Failed to read OIDC nonce cookie", "error", err)
 
-					panic(errors.Join(errCouldNotLogin, err))
+					handlePanic(errors.Join(errCouldNotLogin, err))
+
+					return
 				}
 			} else {
 				oidcNonce = on
