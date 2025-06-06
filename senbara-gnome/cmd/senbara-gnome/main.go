@@ -898,6 +898,73 @@ func main() {
 		})
 		a.AddAction(codeAction)
 
+		exportUserDataAction := gio.NewSimpleAction("exportUserData", nil)
+		exportUserDataAction.ConnectActivate(func(parameter *glib.Variant) {
+			log.Info("Handling export user data action")
+
+			redirected, c, _, err := authorize(
+				ctx,
+
+				false,
+			)
+			if err != nil {
+				log.Warn("Could not authorize user for getting code action", "err", err)
+
+				handlePanic(err)
+
+				return
+			} else if redirected {
+				return
+			}
+
+			log.Debug("Exporting user data")
+
+			res, err := c.ExportUserData(ctx)
+			if err != nil {
+				handlePanic(err)
+
+				return
+			}
+			defer res.Body.Close()
+
+			log.Debug("Exported user data", "status", res.StatusCode)
+
+			if res.StatusCode != http.StatusOK {
+				panic(errors.New(res.Status))
+			}
+
+			log.Debug("Writing user data to file")
+
+			fd := gtk.NewFileDialog()
+			fd.SetTitle(gcore.Local("Senbara Forms userdata"))
+			fd.SetInitialName("userdata.jsonl")
+			fd.Save(ctx, &w.Window, func(r gio.AsyncResulter) {
+				fp, err := fd.SaveFinish(r)
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+
+				log.Debug("Writing user data to file", "path", fp.Path())
+
+				f, err := os.OpenFile(fp.Path(), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+				defer f.Close()
+
+				if _, err := io.Copy(f, res.Body); err != nil {
+					handlePanic(err)
+
+					return
+				}
+			})
+		})
+		a.AddAction(exportUserDataAction)
+
 		aboutAction := gio.NewSimpleAction("about", nil)
 		aboutAction.ConnectActivate(func(parameter *glib.Variant) {
 			aboutDialog.Present(&w.Window)

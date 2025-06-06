@@ -333,7 +333,9 @@ Adw.Window main-window {
                             [top]
                             Adw.HeaderBar {
                                 [start]
-                                Button {
+                                MenuButton {
+                                    menu-model: home-user-menu;
+
                                     Adw.Avatar {
                                         size: 26;
                                     }
@@ -560,7 +562,7 @@ menu auth-setup-menu {
     }
 }
 
-menu home-menu {
+menu home-user-menu {
     item {
         label: _("Logout");
         action: "app.logout";
@@ -568,37 +570,58 @@ menu home-menu {
 
     section {
         submenu {
-            label: _("About Senbara REST");
+            label: _("Your data");
 
             item {
-                label: _("License");
-                action: "app.license";
+                label: _("Export");
+                action: "app.exportUserData";
             }
 
             item {
-                label: _("Code");
-                action: "app.code";
+                label: _("Import");
+                action: "app.importUserData";
             }
 
             item {
-                label: _("Privacy");
-                action: "app.privacy";
+                label: _("Delete");
+                action: "app.deleteUserData";
             }
+        }
+    }
+}
 
-            item {
-                label: _("Terms of Service");
-                action: "app.tos";
-            }
+menu home-menu {
+    submenu {
+        label: _("About Senbara REST");
 
-            item {
-                label: _("Imprint");
-                action: "app.imprint";
-            }
+        item {
+            label: _("License");
+            action: "app.license";
         }
 
         item {
-            label: _("About Senbara Forms");
-            action: "app.about";
+            label: _("Code");
+            action: "app.code";
         }
+
+        item {
+            label: _("Privacy");
+            action: "app.privacy";
+        }
+
+        item {
+            label: _("Terms of Service");
+            action: "app.tos";
+        }
+
+        item {
+            label: _("Imprint");
+            action: "app.imprint";
+        }
+    }
+
+    item {
+        label: _("About Senbara Forms");
+        action: "app.about";
     }
 }
