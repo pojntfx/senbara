@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/fs"
 	"log/slog"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
@@ -860,11 +861,12 @@ func main() {
 
 				return
 			}
-			defer res.Body.Close()
 
 			log.Debug("Received code", "status", res.StatusCode)
 
 			if res.StatusCode != http.StatusOK {
+				_ = res.Body.Close()
+
 				handlePanic(errors.New(res.Status))
 
 				return
@@ -876,6 +878,8 @@ func main() {
 			fd.SetTitle(gcore.Local("Senbara REST source code"))
 			fd.SetInitialName("code.tar.gz")
 			fd.Save(ctx, &w.Window, func(r gio.AsyncResulter) {
+				defer res.Body.Close()
+
 				fp, err := fd.SaveFinish(r)
 				if err != nil {
 					handlePanic(err)
@@ -898,6 +902,10 @@ func main() {
 
 					return
 				}
+
+				log.Debug("Downloaded code", "status", res.StatusCode)
+
+				mto.AddToast(adw.NewToast(gcore.Local("Downloaded code")))
 			})
 		})
 		a.AddAction(codeAction)
@@ -929,11 +937,12 @@ func main() {
 
 				return
 			}
-			defer res.Body.Close()
 
 			log.Debug("Exported user data", "status", res.StatusCode)
 
 			if res.StatusCode != http.StatusOK {
+				_ = res.Body.Close()
+
 				handlePanic(errors.New(res.Status))
 
 				return
@@ -945,6 +954,8 @@ func main() {
 			fd.SetTitle(gcore.Local("Senbara Forms userdata"))
 			fd.SetInitialName("userdata.jsonl")
 			fd.Save(ctx, &w.Window, func(r gio.AsyncResulter) {
+				defer res.Body.Close()
+
 				fp, err := fd.SaveFinish(r)
 				if err != nil {
 					handlePanic(err)
@@ -967,9 +978,124 @@ func main() {
 
 					return
 				}
+
+				log.Debug("Exported user data", "status", res.StatusCode)
+
+				mto.AddToast(adw.NewToast(gcore.Local("Exported user data")))
 			})
 		})
 		a.AddAction(exportUserDataAction)
+
+		importUserDataAction := gio.NewSimpleAction("importUserData", nil)
+		importUserDataAction.ConnectActivate(func(parameter *glib.Variant) {
+			log.Info("Handling import user data action")
+
+			redirected, c, _, err := authorize(
+				ctx,
+
+				false,
+			)
+			if err != nil {
+				log.Warn("Could not authorize user for import user data action", "err", err)
+
+				handlePanic(err)
+
+				return
+			} else if redirected {
+				return
+			}
+
+			log.Debug("Importing user data")
+
+			fd := gtk.NewFileDialog()
+			fd.SetTitle(gcore.Local("Senbara Forms userdata"))
+
+			ls := gio.NewListStore(glib.TypeObject)
+
+			{
+				fi := gtk.NewFileFilter()
+				fi.SetName(gcore.Local("Senbara Forms userdata files"))
+				fi.AddPattern("*.jsonl")
+				ls.Append(fi.Object)
+			}
+
+			{
+				fi := gtk.NewFileFilter()
+				fi.SetName(gcore.Local("All files"))
+				fi.AddPattern("*")
+				ls.Append(fi.Object)
+			}
+
+			fd.SetFilters(ls)
+
+			fd.Open(ctx, &w.Window, func(r gio.AsyncResulter) {
+				fp, err := fd.OpenFinish(r)
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+
+				log.Debug("Reading user data from file", "path", fp.Path())
+
+				f, err := os.OpenFile(fp.Path(), os.O_RDONLY, os.ModePerm)
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+				defer f.Close()
+
+				log.Debug("Importing user data, reading from file and streaming to API")
+
+				reader, writer := io.Pipe()
+				enc := multipart.NewWriter(writer)
+				go func() {
+					defer writer.Close()
+
+					if err := func() error {
+						file, err := enc.CreateFormFile("userData", "")
+						if err != nil {
+							return err
+						}
+
+						if _, err := io.Copy(file, f); err != nil {
+							return err
+						}
+
+						if err := enc.Close(); err != nil {
+							return err
+						}
+
+						return nil
+					}(); err != nil {
+						log.Warn("Could not stream user data to API", "err", err)
+
+						writer.CloseWithError(err)
+
+						return
+					}
+				}()
+
+				res, err := c.ImportUserDataWithBodyWithResponse(ctx, enc.FormDataContentType(), reader)
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+
+				log.Debug("Imported user data", "status", res.StatusCode())
+
+				if res.StatusCode() != http.StatusOK {
+					handlePanic(errors.New(res.Status()))
+
+					return
+				}
+
+				mto.AddToast(adw.NewToast(gcore.Local("Imported user data")))
+			})
+		})
+		a.AddAction(importUserDataAction)
 
 		deleteUserDataAction := gio.NewSimpleAction("deleteUserData", nil)
 		deleteUserDataAction.ConnectActivate(func(parameter *glib.Variant) {
