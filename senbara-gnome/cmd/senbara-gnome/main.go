@@ -358,6 +358,10 @@ func main() {
 			homeNavigation     = b.GetObject("home-navigation").Cast().(*adw.NavigationView)
 			homeSidebarListbox = b.GetObject("home-sidebar-listbox").Cast().(*gtk.ListBox)
 			homeContentPage    = b.GetObject("home-content-page").Cast().(*adw.NavigationPage)
+
+			homeUserMenuButton  = b.GetObject("home-user-menu-button").Cast().(*gtk.MenuButton)
+			homeUserMenuAvatar  = b.GetObject("home-user-menu-avatar").Cast().(*adw.Avatar)
+			homeUserMenuSpinner = b.GetObject("home-user-menu-spinner").Cast().(*gtk.Widget)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -682,6 +686,18 @@ func main() {
 			nv.ReplaceWithTags([]string{resources.PageHome})
 		})
 
+		enableHomeUserMenuLoading := func() {
+			homeUserMenuButton.SetSensitive(false)
+			homeUserMenuAvatar.SetVisible(false)
+			homeUserMenuSpinner.SetVisible(true)
+		}
+
+		disableHomeUserMenuLoading := func() {
+			homeUserMenuSpinner.SetVisible(false)
+			homeUserMenuAvatar.SetVisible(true)
+			homeUserMenuButton.SetSensitive(true)
+		}
+
 		logoutAction := gio.NewSimpleAction("logout", nil)
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
 			nv.ReplaceWithTags([]string{resources.PageExchangeLogout})
@@ -914,18 +930,24 @@ func main() {
 		exportUserDataAction.ConnectActivate(func(parameter *glib.Variant) {
 			log.Info("Handling export user data action")
 
+			enableHomeUserMenuLoading()
+
 			redirected, c, _, err := authorize(
 				ctx,
 
 				false,
 			)
 			if err != nil {
+				disableHomeUserMenuLoading()
+
 				log.Warn("Could not authorize user for export user data action", "err", err)
 
 				handlePanic(err)
 
 				return
 			} else if redirected {
+				disableHomeUserMenuLoading()
+
 				return
 			}
 
@@ -933,6 +955,8 @@ func main() {
 
 			res, err := c.ExportUserData(ctx)
 			if err != nil {
+				disableHomeUserMenuLoading()
+
 				handlePanic(err)
 
 				return
@@ -942,6 +966,8 @@ func main() {
 
 			if res.StatusCode != http.StatusOK {
 				_ = res.Body.Close()
+
+				disableHomeUserMenuLoading()
 
 				handlePanic(errors.New(res.Status))
 
@@ -954,34 +980,39 @@ func main() {
 			fd.SetTitle(gcore.Local("Senbara Forms userdata"))
 			fd.SetInitialName("userdata.jsonl")
 			fd.Save(ctx, &w.Window, func(r gio.AsyncResulter) {
-				defer res.Body.Close()
+				go func() {
+					defer disableHomeUserMenuLoading()
+					defer res.Body.Close()
 
-				fp, err := fd.SaveFinish(r)
-				if err != nil {
-					handlePanic(err)
+					fp, err := fd.SaveFinish(r)
+					if err != nil {
+						handlePanic(err)
 
-					return
-				}
+						return
+					}
 
-				log.Debug("Writing user data to file", "path", fp.Path())
+					log.Debug("Writing user data to file", "path", fp.Path())
 
-				f, err := os.OpenFile(fp.Path(), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
-				if err != nil {
-					handlePanic(err)
+					f, err := os.OpenFile(fp.Path(), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+					if err != nil {
+						handlePanic(err)
 
-					return
-				}
-				defer f.Close()
+						return
+					}
+					defer f.Close()
 
-				if _, err := io.Copy(f, res.Body); err != nil {
-					handlePanic(err)
+					time.Sleep(time.Second * 5)
 
-					return
-				}
+					if _, err := io.Copy(f, res.Body); err != nil {
+						handlePanic(err)
 
-				log.Debug("Exported user data", "status", res.StatusCode)
+						return
+					}
 
-				mto.AddToast(adw.NewToast(gcore.Local("Exported user data")))
+					log.Debug("Exported user data", "status", res.StatusCode)
+
+					mto.AddToast(adw.NewToast(gcore.Local("Exported user data")))
+				}()
 			})
 		})
 		a.AddAction(exportUserDataAction)
@@ -990,18 +1021,24 @@ func main() {
 		importUserDataAction.ConnectActivate(func(parameter *glib.Variant) {
 			log.Info("Handling import user data action")
 
+			enableHomeUserMenuLoading()
+
 			redirected, c, _, err := authorize(
 				ctx,
 
 				false,
 			)
 			if err != nil {
+				disableHomeUserMenuLoading()
+
 				log.Warn("Could not authorize user for import user data action", "err", err)
 
 				handlePanic(err)
 
 				return
 			} else if redirected {
+				disableHomeUserMenuLoading()
+
 				return
 			}
 
@@ -1029,70 +1066,74 @@ func main() {
 			fd.SetFilters(ls)
 
 			fd.Open(ctx, &w.Window, func(r gio.AsyncResulter) {
-				fp, err := fd.OpenFinish(r)
-				if err != nil {
-					handlePanic(err)
-
-					return
-				}
-
-				log.Debug("Reading user data from file", "path", fp.Path())
-
-				f, err := os.OpenFile(fp.Path(), os.O_RDONLY, os.ModePerm)
-				if err != nil {
-					handlePanic(err)
-
-					return
-				}
-				defer f.Close()
-
-				log.Debug("Importing user data, reading from file and streaming to API")
-
-				reader, writer := io.Pipe()
-				enc := multipart.NewWriter(writer)
 				go func() {
-					defer writer.Close()
+					defer disableHomeUserMenuLoading()
 
-					if err := func() error {
-						file, err := enc.CreateFormFile("userData", "")
-						if err != nil {
-							return err
-						}
-
-						if _, err := io.Copy(file, f); err != nil {
-							return err
-						}
-
-						if err := enc.Close(); err != nil {
-							return err
-						}
-
-						return nil
-					}(); err != nil {
-						log.Warn("Could not stream user data to API", "err", err)
-
-						writer.CloseWithError(err)
+					fp, err := fd.OpenFinish(r)
+					if err != nil {
+						handlePanic(err)
 
 						return
 					}
+
+					log.Debug("Reading user data from file", "path", fp.Path())
+
+					f, err := os.OpenFile(fp.Path(), os.O_RDONLY, os.ModePerm)
+					if err != nil {
+						handlePanic(err)
+
+						return
+					}
+					defer f.Close()
+
+					log.Debug("Importing user data, reading from file and streaming to API")
+
+					reader, writer := io.Pipe()
+					enc := multipart.NewWriter(writer)
+					go func() {
+						defer writer.Close()
+
+						if err := func() error {
+							file, err := enc.CreateFormFile("userData", "")
+							if err != nil {
+								return err
+							}
+
+							if _, err := io.Copy(file, f); err != nil {
+								return err
+							}
+
+							if err := enc.Close(); err != nil {
+								return err
+							}
+
+							return nil
+						}(); err != nil {
+							log.Warn("Could not stream user data to API", "err", err)
+
+							writer.CloseWithError(err)
+
+							return
+						}
+					}()
+
+					res, err := c.ImportUserDataWithBodyWithResponse(ctx, enc.FormDataContentType(), reader)
+					if err != nil {
+						handlePanic(err)
+
+						return
+					}
+
+					log.Debug("Imported user data", "status", res.StatusCode())
+
+					if res.StatusCode() != http.StatusOK {
+						handlePanic(errors.New(res.Status()))
+
+						return
+					}
+
+					mto.AddToast(adw.NewToast(gcore.Local("Imported user data")))
 				}()
-
-				res, err := c.ImportUserDataWithBodyWithResponse(ctx, enc.FormDataContentType(), reader)
-				if err != nil {
-					handlePanic(err)
-
-					return
-				}
-
-				log.Debug("Imported user data", "status", res.StatusCode())
-
-				if res.StatusCode() != http.StatusOK {
-					handlePanic(errors.New(res.Status()))
-
-					return
-				}
-
-				mto.AddToast(adw.NewToast(gcore.Local("Imported user data")))
 			})
 		})
 		a.AddAction(importUserDataAction)

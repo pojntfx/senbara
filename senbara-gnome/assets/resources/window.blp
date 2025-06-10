@@ -333,11 +333,20 @@ Adw.Window main-window {
                             [top]
                             Adw.HeaderBar {
                                 [start]
-                                MenuButton {
+                                MenuButton home-user-menu-button {
                                     menu-model: home-user-menu;
 
-                                    Adw.Avatar {
-                                        size: 26;
+                                    Box {
+                                        halign: center;
+
+                                        Adw.Avatar home-user-menu-avatar {
+                                            size: 26;
+                                        }
+
+                                        Adw.Spinner home-user-menu-spinner {
+                                            visible: false;
+                                            halign: center;
+                                        }
                                     }
 
                                     styles [
