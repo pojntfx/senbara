@@ -356,10 +356,23 @@ Adw.Window main-window {
                                 }
 
                                 [end]
-                                MenuButton {
-                                    icon-name: "open-menu-symbolic";
+                                MenuButton home-hamburger-menu-button {
                                     primary: true;
                                     menu-model: home-menu;
+                                    has-frame: false;
+
+                                    Box {
+                                        halign: center;
+
+                                        Gtk.Image home-hamburger-menu-icon {
+                                            icon-name: "open-menu-symbolic";
+                                        }
+
+                                        Adw.Spinner home-hamburger-menu-spinner {
+                                            visible: false;
+                                            halign: center;
+                                        }
+                                    }
                                 }
                             }
 

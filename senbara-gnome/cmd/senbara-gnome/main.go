@@ -362,6 +362,10 @@ func main() {
 			homeUserMenuButton  = b.GetObject("home-user-menu-button").Cast().(*gtk.MenuButton)
 			homeUserMenuAvatar  = b.GetObject("home-user-menu-avatar").Cast().(*adw.Avatar)
 			homeUserMenuSpinner = b.GetObject("home-user-menu-spinner").Cast().(*gtk.Widget)
+
+			homeHamburgerMenuButton  = b.GetObject("home-hamburger-menu-button").Cast().(*gtk.MenuButton)
+			homeHamburgerMenuIcon    = b.GetObject("home-hamburger-menu-icon").Cast().(*gtk.Image)
+			homeHamburgerMenuSpinner = b.GetObject("home-hamburger-menu-spinner").Cast().(*gtk.Widget)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -698,6 +702,18 @@ func main() {
 			homeUserMenuButton.SetSensitive(true)
 		}
 
+		enableHomeHamburgerMenuLoading := func() {
+			homeHamburgerMenuButton.SetSensitive(false)
+			homeHamburgerMenuIcon.SetVisible(false)
+			homeHamburgerMenuSpinner.SetVisible(true)
+		}
+
+		disableHomeHamburgerMenuLoading := func() {
+			homeHamburgerMenuSpinner.SetVisible(false)
+			homeHamburgerMenuIcon.SetVisible(true)
+			homeHamburgerMenuButton.SetSensitive(true)
+		}
+
 		logoutAction := gio.NewSimpleAction("logout", nil)
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
 			nv.ReplaceWithTags([]string{resources.PageExchangeLogout})
@@ -854,18 +870,24 @@ func main() {
 		codeAction.ConnectActivate(func(parameter *glib.Variant) {
 			log.Info("Handling getting code action")
 
+			enableHomeHamburgerMenuLoading()
+
 			redirected, c, _, err := authorize(
 				ctx,
 
 				false,
 			)
 			if err != nil {
+				disableHomeHamburgerMenuLoading()
+
 				log.Warn("Could not authorize user for getting code action", "err", err)
 
 				handlePanic(err)
 
 				return
 			} else if redirected {
+				disableHomeHamburgerMenuLoading()
+
 				return
 			}
 
@@ -873,6 +895,8 @@ func main() {
 
 			res, err := c.GetSourceCode(ctx)
 			if err != nil {
+				disableHomeHamburgerMenuLoading()
+
 				handlePanic(err)
 
 				return
@@ -882,6 +906,8 @@ func main() {
 
 			if res.StatusCode != http.StatusOK {
 				_ = res.Body.Close()
+
+				disableHomeHamburgerMenuLoading()
 
 				handlePanic(errors.New(res.Status))
 
@@ -894,34 +920,37 @@ func main() {
 			fd.SetTitle(gcore.Local("Senbara REST source code"))
 			fd.SetInitialName("code.tar.gz")
 			fd.Save(ctx, &w.Window, func(r gio.AsyncResulter) {
-				defer res.Body.Close()
+				go func() {
+					defer disableHomeHamburgerMenuLoading()
+					defer res.Body.Close()
 
-				fp, err := fd.SaveFinish(r)
-				if err != nil {
-					handlePanic(err)
+					fp, err := fd.SaveFinish(r)
+					if err != nil {
+						handlePanic(err)
 
-					return
-				}
+						return
+					}
 
-				log.Debug("Writing code to file", "path", fp.Path())
+					log.Debug("Writing code to file", "path", fp.Path())
 
-				f, err := os.OpenFile(fp.Path(), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
-				if err != nil {
-					handlePanic(err)
+					f, err := os.OpenFile(fp.Path(), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+					if err != nil {
+						handlePanic(err)
 
-					return
-				}
-				defer f.Close()
+						return
+					}
+					defer f.Close()
 
-				if _, err := io.Copy(f, res.Body); err != nil {
-					handlePanic(err)
+					if _, err := io.Copy(f, res.Body); err != nil {
+						handlePanic(err)
 
-					return
-				}
+						return
+					}
 
-				log.Debug("Downloaded code", "status", res.StatusCode)
+					log.Debug("Downloaded code", "status", res.StatusCode)
 
-				mto.AddToast(adw.NewToast(gcore.Local("Downloaded code")))
+					mto.AddToast(adw.NewToast(gcore.Local("Downloaded code")))
+				}()
 			})
 		})
 		a.AddAction(codeAction)
