@@ -1050,29 +1050,6 @@ func main() {
 		importUserDataAction.ConnectActivate(func(parameter *glib.Variant) {
 			log.Info("Handling import user data action")
 
-			enableHomeUserMenuLoading()
-
-			redirected, c, _, err := authorize(
-				ctx,
-
-				false,
-			)
-			if err != nil {
-				disableHomeUserMenuLoading()
-
-				log.Warn("Could not authorize user for import user data action", "err", err)
-
-				handlePanic(err)
-
-				return
-			} else if redirected {
-				disableHomeUserMenuLoading()
-
-				return
-			}
-
-			log.Debug("Importing user data")
-
 			fd := gtk.NewFileDialog()
 			fd.SetTitle(gcore.Local("Senbara Forms userdata"))
 
@@ -1095,74 +1072,107 @@ func main() {
 			fd.SetFilters(ls)
 
 			fd.Open(ctx, &w.Window, func(r gio.AsyncResulter) {
-				go func() {
-					defer disableHomeUserMenuLoading()
+				fp, err := fd.OpenFinish(r)
+				if err != nil {
+					handlePanic(err)
 
-					fp, err := fd.OpenFinish(r)
-					if err != nil {
-						handlePanic(err)
+					return
+				}
 
-						return
-					}
+				confirm := adw.NewAlertDialog(
+					gcore.Local("Importing user data"),
+					gcore.Local("Are you sure you want to import this user data into your account?"),
+				)
+				confirm.AddResponse("cancel", gcore.Local("Cancel"))
+				confirm.AddResponse("import", gcore.Local("Import"))
+				confirm.SetResponseAppearance("import", adw.ResponseSuggested)
+				confirm.ConnectResponse(func(response string) {
+					if response == "import" {
+						go func() {
+							enableHomeUserMenuLoading()
+							defer disableHomeUserMenuLoading()
 
-					log.Debug("Reading user data from file", "path", fp.Path())
+							redirected, c, _, err := authorize(
+								ctx,
 
-					f, err := os.OpenFile(fp.Path(), os.O_RDONLY, os.ModePerm)
-					if err != nil {
-						handlePanic(err)
-
-						return
-					}
-					defer f.Close()
-
-					log.Debug("Importing user data, reading from file and streaming to API")
-
-					reader, writer := io.Pipe()
-					enc := multipart.NewWriter(writer)
-					go func() {
-						defer writer.Close()
-
-						if err := func() error {
-							file, err := enc.CreateFormFile("userData", "")
+								false,
+							)
 							if err != nil {
-								return err
+								disableHomeUserMenuLoading()
+
+								log.Warn("Could not authorize user for import user data action", "err", err)
+
+								handlePanic(err)
+
+								return
+							} else if redirected {
+								disableHomeUserMenuLoading()
+
+								return
 							}
 
-							if _, err := io.Copy(file, f); err != nil {
-								return err
+							log.Debug("Reading user data from file", "path", fp.Path())
+
+							f, err := os.OpenFile(fp.Path(), os.O_RDONLY, os.ModePerm)
+							if err != nil {
+								handlePanic(err)
+
+								return
+							}
+							defer f.Close()
+
+							log.Debug("Importing user data, reading from file and streaming to API")
+
+							reader, writer := io.Pipe()
+							enc := multipart.NewWriter(writer)
+							go func() {
+								defer writer.Close()
+
+								if err := func() error {
+									file, err := enc.CreateFormFile("userData", "")
+									if err != nil {
+										return err
+									}
+
+									if _, err := io.Copy(file, f); err != nil {
+										return err
+									}
+
+									if err := enc.Close(); err != nil {
+										return err
+									}
+
+									return nil
+								}(); err != nil {
+									log.Warn("Could not stream user data to API", "err", err)
+
+									writer.CloseWithError(err)
+
+									return
+								}
+							}()
+
+							res, err := c.ImportUserDataWithBodyWithResponse(ctx, enc.FormDataContentType(), reader)
+							if err != nil {
+								handlePanic(err)
+
+								return
 							}
 
-							if err := enc.Close(); err != nil {
-								return err
+							log.Debug("Imported user data", "status", res.StatusCode())
+
+							if res.StatusCode() != http.StatusOK {
+								handlePanic(errors.New(res.Status()))
+
+								return
 							}
 
-							return nil
-						}(); err != nil {
-							log.Warn("Could not stream user data to API", "err", err)
-
-							writer.CloseWithError(err)
-
-							return
-						}
-					}()
-
-					res, err := c.ImportUserDataWithBodyWithResponse(ctx, enc.FormDataContentType(), reader)
-					if err != nil {
-						handlePanic(err)
-
-						return
+							mto.AddToast(adw.NewToast(gcore.Local("Imported user data")))
+						}()
 					}
+				})
 
-					log.Debug("Imported user data", "status", res.StatusCode())
-
-					if res.StatusCode() != http.StatusOK {
-						handlePanic(errors.New(res.Status()))
-
-						return
-					}
-
-					mto.AddToast(adw.NewToast(gcore.Local("Imported user data")))
-				}()
+				confirm.Present(w)
 			})
 		})
 		a.AddAction(importUserDataAction)
@@ -1171,37 +1181,52 @@ func main() {
 		deleteUserDataAction.ConnectActivate(func(parameter *glib.Variant) {
 			log.Info("Handling delete user data action")
 
-			redirected, c, _, err := authorize(
-				ctx,
-
-				false,
+			confirm := adw.NewAlertDialog(
+				gcore.Local("Deleting your data"),
+				gcore.Local("Are you sure you want to delete your data and your account?"),
 			)
-			if err != nil {
-				log.Warn("Could not authorize user for delete user data action", "err", err)
+			confirm.AddResponse("cancel", gcore.Local("Cancel"))
+			confirm.AddResponse("delete", gcore.Local("Delete"))
+			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
+			confirm.ConnectResponse(func(response string) {
+				if response == "delete" {
+					redirected, c, _, err := authorize(
+						ctx,
 
-				handlePanic(err)
+						false,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for delete user data action", "err", err)
 
-				return
-			} else if redirected {
-				return
-			}
+						handlePanic(err)
 
-			log.Debug("Deleting user data")
+						return
+					} else if redirected {
+						return
+					}
 
-			res, err := c.DeleteUserDataWithResponse(ctx)
-			if err != nil {
-				handlePanic(err)
+					log.Debug("Deleting user data")
 
-				return
-			}
+					res, err := c.DeleteUserDataWithResponse(ctx)
+					if err != nil {
+						handlePanic(err)
 
-			log.Debug("Deleted user data", "status", res.StatusCode())
+						return
+					}
 
-			if res.StatusCode() != http.StatusOK {
-				handlePanic(errors.New(res.Status()))
+					log.Debug("Deleted user data", "status", res.StatusCode())
 
-				return
-			}
+					if res.StatusCode() != http.StatusOK {
+						handlePanic(errors.New(res.Status()))
+
+						return
+					}
+
+					mto.AddToast(adw.NewToast(gcore.Local("Deleted user data")))
+				}
+			})
+
+			confirm.Present(w)
 		})
 		a.AddAction(deleteUserDataAction)
 
