@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"log/slog"
@@ -30,7 +31,6 @@ import (
 	"github.com/pojntfx/senbara/senbara-gnome/config/locales"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 	"github.com/zalando/go-keyring"
-	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -366,6 +366,12 @@ func main() {
 			homeHamburgerMenuButton  = b.GetObject("home-hamburger-menu-button").Cast().(*gtk.MenuButton)
 			homeHamburgerMenuIcon    = b.GetObject("home-hamburger-menu-icon").Cast().(*gtk.Image)
 			homeHamburgerMenuSpinner = b.GetObject("home-hamburger-menu-spinner").Cast().(*gtk.Widget)
+
+			homeSidebarContactsCountLabel   = b.GetObject("home-sidebar-contacts-count-label").Cast().(*gtk.Label)
+			homeSidebarContactsCountSpinner = b.GetObject("home-sidebar-contacts-count-spinner").Cast().(*gtk.Widget)
+
+			homeSidebarJournalEntriesCountLabel   = b.GetObject("home-sidebar-journal-entries-count-label").Cast().(*gtk.Label)
+			homeSidebarJournalEntriesCountSpinner = b.GetObject("home-sidebar-journal-entries-count-spinner").Cast().(*gtk.Widget)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -714,6 +720,22 @@ func main() {
 			homeHamburgerMenuButton.SetSensitive(true)
 		}
 
+		enableHomeSidebarLoading := func() {
+			homeSidebarContactsCountLabel.SetVisible(false)
+			homeSidebarContactsCountSpinner.SetVisible(true)
+
+			homeSidebarJournalEntriesCountLabel.SetVisible(false)
+			homeSidebarJournalEntriesCountSpinner.SetVisible(true)
+		}
+
+		disableHomeSidebarLoading := func() {
+			homeSidebarJournalEntriesCountSpinner.SetVisible(false)
+			homeSidebarJournalEntriesCountLabel.SetVisible(true)
+
+			homeSidebarContactsCountSpinner.SetVisible(false)
+			homeSidebarContactsCountLabel.SetVisible(true)
+		}
+
 		logoutAction := gio.NewSimpleAction("logout", nil)
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
 			nv.ReplaceWithTags([]string{resources.PageExchangeLogout})
@@ -1030,8 +1052,6 @@ func main() {
 					}
 					defer f.Close()
 
-					time.Sleep(time.Second * 5)
-
 					if _, err := io.Copy(f, res.Body); err != nil {
 						handlePanic(err)
 
@@ -1275,52 +1295,54 @@ func main() {
 			case resources.PageIndex:
 				log.Info("Handling")
 
-				if err := checkSenbaraServerConfiguration(); err != nil {
-					log.Info("Could not check Senbara server configuration, redirecting to login", "err", err)
+				go func() {
+					if err := checkSenbaraServerConfiguration(); err != nil {
+						log.Info("Could not check Senbara server configuration, redirecting to login", "err", err)
 
-					updateDeregisterClientActionEnabled()
+						updateDeregisterClientActionEnabled()
+
+						nv.PushByTag(resources.PageWelcome)
+
+						return
+					}
+
+					if err := setupAuthn(false); err != nil {
+						log.Info("Could not setup authn, redirecting to login", "err", err)
+
+						nv.PushByTag(resources.PageWelcome)
+
+						return
+					}
+
+					redirected, _, _, err := authorize(
+						ctx,
+
+						false,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for index page", "err", err)
+
+						handlePanic(err)
+
+						return
+					} else if redirected {
+						return
+					}
+
+					if settings.Boolean(resources.SettingAnonymousMode) {
+						nv.PushByTag(resources.PagePreview)
+
+						return
+					}
+
+					if strings.TrimSpace(u.Email) != "" {
+						nv.PushByTag(resources.PageHome)
+
+						return
+					}
 
 					nv.PushByTag(resources.PageWelcome)
-
-					return
-				}
-
-				if err := setupAuthn(false); err != nil {
-					log.Info("Could not setup authn, redirecting to login", "err", err)
-
-					nv.PushByTag(resources.PageWelcome)
-
-					return
-				}
-
-				redirected, _, _, err := authorize(
-					ctx,
-
-					false,
-				)
-				if err != nil {
-					log.Warn("Could not authorize user for index page", "err", err)
-
-					handlePanic(err)
-
-					return
-				} else if redirected {
-					return
-				}
-
-				if settings.Boolean(resources.SettingAnonymousMode) {
-					nv.PushByTag(resources.PagePreview)
-
-					return
-				}
-
-				if strings.TrimSpace(u.Email) != "" {
-					nv.PushByTag(resources.PageHome)
-
-					return
-				}
-
-				nv.PushByTag(resources.PageWelcome)
+				}()
 
 			case resources.PageConfigServerURL:
 				log.Info("Handling")
@@ -1344,48 +1366,50 @@ func main() {
 			case resources.PagePreview:
 				log.Info("Handling")
 
-				redirected, c, _, err := authorize(
-					ctx,
+				go func() {
+					redirected, c, _, err := authorize(
+						ctx,
 
-					false,
-				)
-				if err != nil {
-					log.Warn("Could not authorize user for home page", "err", err)
+						false,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for home page", "err", err)
 
-					handlePanic(err)
+						handlePanic(err)
 
-					return
-				} else if redirected {
-					return
-				}
+						return
+					} else if redirected {
+						return
+					}
 
-				settings.SetBoolean(resources.SettingAnonymousMode, true)
+					settings.SetBoolean(resources.SettingAnonymousMode, true)
 
-				log.Debug("Getting OpenAPI spec")
+					log.Debug("Getting OpenAPI spec")
 
-				res, err := c.GetOpenAPISpec(ctx)
-				if err != nil {
-					handlePanic(err)
+					res, err := c.GetOpenAPISpec(ctx)
+					if err != nil {
+						handlePanic(err)
 
-					return
-				}
-				defer res.Body.Close()
+						return
+					}
+					defer res.Body.Close()
 
-				log.Debug("Got OpenAPI spec", "status", res.StatusCode)
+					log.Debug("Got OpenAPI spec", "status", res.StatusCode)
 
-				if res.StatusCode != http.StatusOK {
-					handlePanic(errors.New(res.Status))
+					if res.StatusCode != http.StatusOK {
+						handlePanic(errors.New(res.Status))
 
-					return
-				}
+						return
+					}
 
-				log.Debug("Writing OpenAPI spec to stdout")
+					log.Debug("Writing OpenAPI spec to stdout")
 
-				if _, err := io.Copy(os.Stdout, res.Body); err != nil {
-					handlePanic(err)
+					if _, err := io.Copy(os.Stdout, res.Body); err != nil {
+						handlePanic(err)
 
-					return
-				}
+						return
+					}
+				}()
 
 			case resources.PageRegister:
 				log.Info("Handling")
@@ -1395,49 +1419,49 @@ func main() {
 			case resources.PageHome:
 				log.Info("Handling")
 
-				redirected, c, _, err := authorize(
-					ctx,
+				go func() {
+					enableHomeSidebarLoading()
+					defer disableHomeSidebarLoading()
 
-					true,
-				)
-				if err != nil {
-					log.Warn("Could not authorize user for home page", "err", err)
+					redirected, c, _, err := authorize(
+						ctx,
 
-					handlePanic(err)
+						true,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for home page", "err", err)
 
-					return
-				} else if redirected {
-					return
-				}
+						handlePanic(err)
 
-				settings.SetBoolean(resources.SettingAnonymousMode, false)
+						return
+					} else if redirected {
+						return
+					}
 
-				homeSidebarListbox.SelectRow(homeSidebarListbox.RowAtIndex(0))
+					settings.SetBoolean(resources.SettingAnonymousMode, false)
 
-				log.Debug("Getting summary")
+					homeSidebarListbox.SelectRow(homeSidebarListbox.RowAtIndex(0))
 
-				res, err := c.GetIndexWithResponse(ctx)
-				if err != nil {
-					handlePanic(err)
+					log.Debug("Getting summary")
 
-					return
-				}
+					res, err := c.GetIndexWithResponse(ctx)
+					if err != nil {
+						handlePanic(err)
 
-				log.Debug("Got summary", "status", res.StatusCode())
+						return
+					}
 
-				if res.StatusCode() != http.StatusOK {
-					handlePanic(errors.New(res.Status()))
+					log.Debug("Got summary", "status", res.StatusCode())
 
-					return
-				}
+					if res.StatusCode() != http.StatusOK {
+						handlePanic(errors.New(res.Status()))
 
-				log.Debug("Writing summary to stdout")
+						return
+					}
 
-				if err := yaml.NewEncoder(os.Stdout).Encode(res.JSON200); err != nil {
-					handlePanic(err)
-
-					return
-				}
+					homeSidebarContactsCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.ContactsCount))
+					homeSidebarJournalEntriesCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.JournalEntriesCount))
+				}()
 			}
 		}
 

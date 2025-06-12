@@ -386,13 +386,18 @@ Adw.Window main-window {
                                         name: "/contacts";
 
                                         [suffix]
-                                        Gtk.Label {
-                                            label: _("5");
-                                            valign: center;
+                                        Box {
+                                            Gtk.Label home-sidebar-contacts-count-label {
+                                                label: _("0");
+                                                valign: center;
+                                                visible: false;
 
-                                            styles [
-                                                "status-badge",
-                                            ]
+                                                styles [
+                                                    "status-badge",
+                                                ]
+                                            }
+
+                                            Adw.Spinner home-sidebar-contacts-count-spinner {}
                                         }
 
                                         styles [
@@ -406,13 +411,18 @@ Adw.Window main-window {
                                         name: "/journal";
 
                                         [suffix]
-                                        Gtk.Label {
-                                            label: _("7");
-                                            valign: center;
+                                        Box {
+                                            Gtk.Label home-sidebar-journal-entries-count-label {
+                                                label: _("0");
+                                                valign: center;
+                                                visible: false;
 
-                                            styles [
-                                                "status-badge",
-                                            ]
+                                                styles [
+                                                    "status-badge",
+                                                ]
+                                            }
+
+                                            Adw.Spinner home-sidebar-journal-entries-count-spinner {}
                                         }
 
                                         styles [
