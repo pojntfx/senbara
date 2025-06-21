@@ -1273,6 +1273,11 @@ func main() {
 			homeContentPage.SetTitle(homeNavigation.VisiblePage().Title())
 
 			homeSplitView.SetShowContent(true)
+
+			switch tag {
+			case resources.PageContacts:
+				// TODO: Load the contacts and then disable the loading state
+			}
 		}
 
 		homeNavigation.ConnectPopped(func(page *adw.NavigationPage) {
@@ -1291,10 +1296,10 @@ func main() {
 				log = log.With("tag", tag)
 			)
 
+			log.Info("Handling")
+
 			switch tag {
 			case resources.PageIndex:
-				log.Info("Handling")
-
 				go func() {
 					if err := checkSenbaraServerConfiguration(); err != nil {
 						log.Info("Could not check Senbara server configuration, redirecting to login", "err", err)
@@ -1345,8 +1350,6 @@ func main() {
 				}()
 
 			case resources.PageConfigServerURL:
-				log.Info("Handling")
-
 				configServerURLContinueButton.SetSensitive(false)
 				configServerURLContinueSpinner.SetVisible(true)
 
@@ -1364,8 +1367,6 @@ func main() {
 				}()
 
 			case resources.PagePreview:
-				log.Info("Handling")
-
 				go func() {
 					redirected, c, _, err := authorize(
 						ctx,
@@ -1412,13 +1413,9 @@ func main() {
 				}()
 
 			case resources.PageRegister:
-				log.Info("Handling")
-
 				configInitialAccessTokenInput.SetText("")
 
 			case resources.PageHome:
-				log.Info("Handling")
-
 				go func() {
 					enableHomeSidebarLoading()
 					defer disableHomeSidebarLoading()

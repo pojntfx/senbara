@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	AppID = "com.pojtinger.felicitas.Senbara"
+	AppID      = "com.pojtinger.felicitas.Senbara"
 	AppVersion = "0.1.0"
 
 	appPath = "/com/pojtinger/felicitas/Senbara/"
@@ -37,6 +37,9 @@ const (
 
 	PageExchangeLogin  = "/exchange/login"
 	PageExchangeLogout = "/exchange/logout"
+
+	PageContacts = "/contacts"
+	PageJournal  = "/journal"
 )
 
 //go:generate sh -c "blueprint-compiler batch-compile . . *.blp && sass .:. && glib-compile-schemas . && glib-compile-resources *.gresource.xml"

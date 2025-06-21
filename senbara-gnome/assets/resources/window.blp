@@ -446,10 +446,84 @@ Adw.Window main-window {
 
                                 Adw.ToolbarView {
                                     [top]
-                                    Adw.HeaderBar {}
+                                    Adw.HeaderBar {
+                                        [start]
+                                        Button contacts-add-button {
+                                            icon-name: "list-add-symbolic";
+                                            tooltip-text: _("Add a contact");
+                                        }
+                                    }
 
-                                    Adw.StatusPage {
-                                        title: _("Contact test 1");
+                                    Adw.Clamp {
+                                        maximum-size: 600;
+
+                                        Box {
+                                            halign: center;
+                                            visible: false;
+
+                                            Adw.Spinner {
+                                                width-request: 32;
+                                                height-request: 32;
+                                            }
+                                        }
+
+                                        Gtk.ListBox contacts-list {
+                                            selection-mode: browse;
+                                            valign: start;
+                                            margin-top: 24;
+                                            margin-end: 12;
+                                            margin-bottom: 24;
+                                            margin-start: 12;
+
+                                            Adw.ActionRow {
+                                                title: "Jean Doe (jdoe)";
+                                                subtitle: "jean@doe.com | they/them";
+                                                name: "/contacts/view?id=11";
+
+                                                [suffix]
+                                                MenuButton {
+                                                    icon-name: "view-more-symbolic";
+
+                                                    styles [
+                                                        "flat",
+                                                    ]
+                                                }
+                                            }
+
+                                            Adw.ActionRow {
+                                                title: "Jane Doe (jadoe)";
+                                                subtitle: "jadoe@doe.com | she/her";
+                                                name: "/contacts/view?id=12";
+
+                                                [suffix]
+                                                MenuButton {
+                                                    icon-name: "view-more-symbolic";
+
+                                                    styles [
+                                                        "flat",
+                                                    ]
+                                                }
+                                            }
+
+                                            Adw.ActionRow {
+                                                title: "John Doe (jodoe)";
+                                                subtitle: "john@doe.com | he/him";
+                                                name: "/contacts/view?id=13";
+
+                                                [suffix]
+                                                MenuButton {
+                                                    icon-name: "view-more-symbolic";
+
+                                                    styles [
+                                                        "flat",
+                                                    ]
+                                                }
+                                            }
+
+                                            styles [
+                                                "boxed-list",
+                                            ]
+                                        }
                                     }
                                 }
                             }
