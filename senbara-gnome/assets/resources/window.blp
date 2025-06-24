@@ -444,7 +444,7 @@ Adw.Window main-window {
                                 title: _("Contacts");
                                 tag: "/contacts";
 
-                                Adw.ToolbarView {
+                                Adw.ToolbarView contacts-toolbarview {
                                     [top]
                                     Adw.HeaderBar {
                                         [start]
@@ -452,77 +452,114 @@ Adw.Window main-window {
                                             icon-name: "list-add-symbolic";
                                             tooltip-text: _("Add a contact");
                                         }
+
+                                        [start]
+                                        ToggleButton contacts-search-button {
+                                            active: bind contacts-searchbar.search-mode-enabled bidirectional;
+                                            icon-name: "system-search-symbolic";
+                                            tooltip-text: _("Search");
+                                        }
+                                    }
+
+                                    [top]
+                                    SearchBar contacts-searchbar {
+                                        key-capture-widget: contacts-toolbarview;
+
+                                        SearchEntry contacts-searchentry {
+                                            placeholder-text: _("Search contacts");
+                                            max-width-chars: 28;
+                                            search-delay: 100;
+                                        }
                                     }
 
                                     Adw.Clamp {
                                         maximum-size: 600;
 
-                                        Box {
-                                            halign: center;
-                                            visible: false;
+                                        Stack contacts-stack {
+                                            StackPage {
+                                                name: "/contacts/loading";
 
-                                            Adw.Spinner {
-                                                width-request: 32;
-                                                height-request: 32;
+                                                child: Box {
+                                                    halign: center;
+
+                                                    Adw.Spinner {
+                                                        width-request: 32;
+                                                        height-request: 32;
+                                                    }
+                                                };
                                             }
-                                        }
 
-                                        Gtk.ListBox contacts-list {
-                                            selection-mode: browse;
-                                            valign: start;
-                                            margin-top: 24;
-                                            margin-end: 12;
-                                            margin-bottom: 24;
-                                            margin-start: 12;
+                                            StackPage {
+                                                name: "/contacts/list";
 
-                                            Adw.ActionRow {
-                                                title: "Jean Doe (jdoe)";
-                                                subtitle: "jean@doe.com | they/them";
-                                                name: "/contacts/view?id=11";
+                                                child: Gtk.ListBox contacts-list {
+                                                    selection-mode: browse;
+                                                    valign: start;
+                                                    margin-top: 24;
+                                                    margin-end: 12;
+                                                    margin-bottom: 24;
+                                                    margin-start: 12;
 
-                                                [suffix]
-                                                MenuButton {
-                                                    icon-name: "view-more-symbolic";
+                                                    Adw.ActionRow {
+                                                        title: "Jean Doe (jdoe)";
+                                                        subtitle: "jean@doe.com | they/them";
+                                                        name: "/contacts/view?id=11";
+
+                                                        [suffix]
+                                                        MenuButton {
+                                                            icon-name: "view-more-symbolic";
+
+                                                            styles [
+                                                                "flat",
+                                                            ]
+                                                        }
+                                                    }
+
+                                                    Adw.ActionRow {
+                                                        title: "Jane Doe (jadoe)";
+                                                        subtitle: "jadoe@doe.com | she/her";
+                                                        name: "/contacts/view?id=12";
+
+                                                        [suffix]
+                                                        MenuButton {
+                                                            icon-name: "view-more-symbolic";
+
+                                                            styles [
+                                                                "flat",
+                                                            ]
+                                                        }
+                                                    }
+
+                                                    Adw.ActionRow {
+                                                        title: "John Doe (jodoe)";
+                                                        subtitle: "john@doe.com | he/him";
+                                                        name: "/contacts/view?id=13";
+
+                                                        [suffix]
+                                                        MenuButton {
+                                                            icon-name: "view-more-symbolic";
+
+                                                            styles [
+                                                                "flat",
+                                                            ]
+                                                        }
+                                                    }
 
                                                     styles [
-                                                        "flat",
+                                                        "boxed-list",
                                                     ]
-                                                }
+                                                };
                                             }
 
-                                            Adw.ActionRow {
-                                                title: "Jane Doe (jadoe)";
-                                                subtitle: "jadoe@doe.com | she/her";
-                                                name: "/contacts/view?id=12";
+                                            StackPage {
+                                                name: "/contacts/empty";
 
-                                                [suffix]
-                                                MenuButton {
-                                                    icon-name: "view-more-symbolic";
-
-                                                    styles [
-                                                        "flat",
-                                                    ]
-                                                }
+                                                child: Adw.StatusPage status_page {
+                                                    title: _("No contacts found");
+                                                    description: _("Try a different search");
+                                                    icon-name: "edit-find-symbolic";
+                                                };
                                             }
-
-                                            Adw.ActionRow {
-                                                title: "John Doe (jodoe)";
-                                                subtitle: "john@doe.com | he/him";
-                                                name: "/contacts/view?id=13";
-
-                                                [suffix]
-                                                MenuButton {
-                                                    icon-name: "view-more-symbolic";
-
-                                                    styles [
-                                                        "flat",
-                                                    ]
-                                                }
-                                            }
-
-                                            styles [
-                                                "boxed-list",
-                                            ]
                                         }
                                     }
                                 }

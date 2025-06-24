@@ -372,6 +372,10 @@ func main() {
 
 			homeSidebarJournalEntriesCountLabel   = b.GetObject("home-sidebar-journal-entries-count-label").Cast().(*gtk.Label)
 			homeSidebarJournalEntriesCountSpinner = b.GetObject("home-sidebar-journal-entries-count-spinner").Cast().(*gtk.Widget)
+
+			contactsStack       = b.GetObject("contacts-stack").Cast().(*gtk.Stack)
+			contactsList        = b.GetObject("contacts-list").Cast().(*gtk.ListBox)
+			contactsSearchEntry = b.GetObject("contacts-searchentry").Cast().(*gtk.SearchEntry)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -735,6 +739,49 @@ func main() {
 			homeSidebarContactsCountSpinner.SetVisible(false)
 			homeSidebarContactsCountLabel.SetVisible(true)
 		}
+
+		visibleContactsCount := 0
+
+		contactsSearchEntry.ConnectSearchChanged(func() {
+			go func() {
+				contactsStack.SetVisibleChildName("/contacts/loading")
+
+				visibleContactsCount = 0
+
+				contactsList.InvalidateFilter()
+
+				if visibleContactsCount > 0 {
+					contactsStack.SetVisibleChildName("/contacts/list")
+				} else {
+					contactsStack.SetVisibleChildName("/contacts/empty")
+				}
+			}()
+		})
+
+		contactsList.SetFilterFunc(func(row *gtk.ListBoxRow) (ok bool) {
+			var (
+				r = row.Cast().(*adw.ActionRow)
+				f = strings.ToLower(contactsSearchEntry.Text())
+
+				rt = strings.ToLower(r.Title())
+				rs = strings.ToLower(r.Subtitle())
+			)
+
+			log.Debug(
+				"Filtering contact",
+				"filter", f,
+				"title", rt,
+				"subtitle", rs,
+			)
+
+			if strings.Contains(rt, f) || strings.Contains(rs, f) {
+				visibleContactsCount++
+
+				return true
+			}
+
+			return false
+		})
 
 		logoutAction := gio.NewSimpleAction("logout", nil)
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
