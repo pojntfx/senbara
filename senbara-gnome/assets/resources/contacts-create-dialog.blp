@@ -1,0 +1,33 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.Dialog contacts-create-dialog {
+    title: _("Create a contact");
+
+    Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+            show-start-title-buttons: false;
+            show-end-title-buttons: false;
+
+            [start]
+            Button {
+                label: _("Cancel");
+                action-name: 'window.close';
+            }
+
+            [end]
+            Button contacts-create-dialog-add-button {
+                label: _("Add");
+
+                styles [
+                    "suggested-action",
+                ]
+            }
+        }
+
+        Adw.StatusPage {
+            title: _("Create dialog content");
+        }
+    }
+}

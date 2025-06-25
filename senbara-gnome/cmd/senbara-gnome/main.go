@@ -324,6 +324,8 @@ func main() {
 
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
 
+		contactsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceContactsCreateDialogUIPath)
+
 		w = b.GetObject("main-window").Cast().(*adw.Window)
 
 		nv = b.GetObject("main-navigation").Cast().(*adw.NavigationView)
@@ -376,6 +378,10 @@ func main() {
 			contactsStack       = b.GetObject("contacts-stack").Cast().(*gtk.Stack)
 			contactsList        = b.GetObject("contacts-list").Cast().(*gtk.ListBox)
 			contactsSearchEntry = b.GetObject("contacts-searchentry").Cast().(*gtk.SearchEntry)
+
+			contactsAddButton = b.GetObject("contacts-add-button").Cast().(*gtk.Button)
+
+			contactsCreateDialog = contactsCreateDialogBuilder.GetObject("contacts-create-dialog").Cast().(*adw.Dialog)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -781,6 +787,10 @@ func main() {
 			}
 
 			return false
+		})
+
+		contactsAddButton.ConnectClicked(func() {
+			contactsCreateDialog.Present(w)
 		})
 
 		logoutAction := gio.NewSimpleAction("logout", nil)

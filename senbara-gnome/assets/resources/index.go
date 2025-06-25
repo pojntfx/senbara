@@ -47,8 +47,9 @@ const (
 var ResourceContents []byte
 
 var (
-	ResourceWindowUIPath         = path.Join(appPath, "window.ui")
-	ResourceIndexCSSPath         = path.Join(appPath, "index.css")
-	ResourceGSchemasCompiledPath = path.Join(appPath, "gschemas.compiled")
-	ResourceMetainfoPath         = path.Join(appPath, "metainfo.xml")
+	ResourceWindowUIPath               = path.Join(appPath, "window.ui")
+	ResourceContactsCreateDialogUIPath = path.Join(appPath, "contacts-create-dialog.ui")
+	ResourceIndexCSSPath               = path.Join(appPath, "index.css")
+	ResourceGSchemasCompiledPath       = path.Join(appPath, "gschemas.compiled")
+	ResourceMetainfoPath               = path.Join(appPath, "metainfo.xml")
 )
