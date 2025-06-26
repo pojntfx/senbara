@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"mime/multipart"
 	"net/http"
+	"net/mail"
 	"net/url"
 	"os"
 	"path"
@@ -26,6 +27,7 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oapi-codegen/oapi-codegen/v2/pkg/securityprovider"
+	"github.com/oapi-codegen/runtime/types"
 	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
 	"github.com/pojntfx/senbara/senbara-gnome/config/locales"
@@ -382,6 +384,17 @@ func main() {
 			contactsAddButton = b.GetObject("contacts-add-button").Cast().(*gtk.Button)
 
 			contactsCreateDialog = contactsCreateDialogBuilder.GetObject("contacts-create-dialog").Cast().(*adw.Dialog)
+
+			contactsCreateDialogAddButton  = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-add-button").Cast().(*gtk.Button)
+			contactsCreateDialogAddSpinner = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-add-spinner").Cast().(*gtk.Widget)
+
+			contactsCreateDialogFirstNameInput = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-first-name-input").Cast().(*adw.EntryRow)
+			contactsCreateDialogLastNameInput  = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-last-name-input").Cast().(*adw.EntryRow)
+			contactsCreateDialogNicknameInput  = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-nickname-input").Cast().(*adw.EntryRow)
+			contactsCreateDialogEmailInput     = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-email-input").Cast().(*adw.EntryRow)
+			contactsCreateDialogPronounsInput  = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-pronouns-input").Cast().(*adw.EntryRow)
+
+			contactsCreateDialogEmailWarningButton = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-email-warning-button").Cast().(*gtk.MenuButton)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -791,6 +804,110 @@ func main() {
 
 		contactsAddButton.ConnectClicked(func() {
 			contactsCreateDialog.Present(w)
+		})
+
+		validateContactsCreateDialogForm := func() {
+			if email := contactsCreateDialogEmailInput.Text(); email != "" {
+				if _, err := mail.ParseAddress(email); err != nil {
+					contactsCreateDialogEmailInput.AddCSSClass("error")
+					contactsCreateDialogEmailWarningButton.SetVisible(true)
+
+					contactsCreateDialogAddButton.SetSensitive(false)
+
+					return
+				}
+			}
+
+			contactsCreateDialogEmailInput.RemoveCSSClass("error")
+			contactsCreateDialogEmailWarningButton.SetVisible(false)
+
+			if contactsCreateDialogFirstNameInput.Text() != "" &&
+				contactsCreateDialogLastNameInput.Text() != "" &&
+				contactsCreateDialogEmailInput.Text() != "" &&
+				contactsCreateDialogPronounsInput.Text() != "" {
+				contactsCreateDialogAddButton.SetSensitive(true)
+			} else {
+				contactsCreateDialogAddButton.SetSensitive(false)
+			}
+		}
+
+		contactsCreateDialogFirstNameInput.ConnectChanged(validateContactsCreateDialogForm)
+		contactsCreateDialogLastNameInput.ConnectChanged(validateContactsCreateDialogForm)
+		contactsCreateDialogNicknameInput.ConnectChanged(validateContactsCreateDialogForm)
+		contactsCreateDialogEmailInput.ConnectChanged(validateContactsCreateDialogForm)
+		contactsCreateDialogPronounsInput.ConnectChanged(validateContactsCreateDialogForm)
+
+		contactsCreateDialog.ConnectClosed(func() {
+			contactsCreateDialogFirstNameInput.SetText("")
+			contactsCreateDialogLastNameInput.SetText("")
+			contactsCreateDialogNicknameInput.SetText("")
+			contactsCreateDialogEmailInput.SetText("")
+			contactsCreateDialogPronounsInput.SetText("")
+
+			contactsCreateDialogEmailWarningButton.SetVisible(false)
+			contactsCreateDialogEmailInput.RemoveCSSClass("error")
+		})
+
+		contactsCreateDialogAddButton.ConnectClicked(func() {
+			log.Info("Handling contact creation")
+
+			contactsCreateDialogAddButton.SetSensitive(false)
+			contactsCreateDialogAddSpinner.SetVisible(true)
+
+			go func() {
+				defer contactsCreateDialogAddSpinner.SetVisible(false)
+				defer contactsCreateDialogAddButton.SetSensitive(true)
+
+				redirected, c, _, err := authorize(
+					ctx,
+
+					false,
+				)
+				if err != nil {
+					log.Warn("Could not authorize user for create contact action", "err", err)
+
+					handlePanic(err)
+
+					return
+				} else if redirected {
+					return
+				}
+
+				var nickname *string
+				if contactsCreateDialogNicknameInput.Text() != "" {
+					v := contactsCreateDialogNicknameInput.Text()
+					nickname = &v
+				}
+
+				req := api.CreateContactJSONRequestBody{
+					Email:     (types.Email)(contactsCreateDialogEmailInput.Text()),
+					FirstName: contactsCreateDialogFirstNameInput.Text(),
+					LastName:  contactsCreateDialogLastNameInput.Text(),
+					Nickname:  nickname,
+					Pronouns:  contactsCreateDialogPronounsInput.Text(),
+				}
+
+				log.Debug("Creating contact", "request", req)
+
+				res, err := c.CreateContactWithResponse(ctx, req)
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+
+				log.Debug("Created contact", "status", res.StatusCode())
+
+				if res.StatusCode() != http.StatusOK {
+					handlePanic(errors.New(res.Status()))
+
+					return
+				}
+
+				mto.AddToast(adw.NewToast(gcore.Local("Created contact")))
+
+				contactsCreateDialog.Close()
+			}()
 		})
 
 		logoutAction := gio.NewSimpleAction("logout", nil)

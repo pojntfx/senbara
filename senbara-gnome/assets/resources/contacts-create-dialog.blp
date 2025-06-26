@@ -18,7 +18,19 @@ Adw.Dialog contacts-create-dialog {
 
             [end]
             Button contacts-create-dialog-add-button {
-                label: _("Add");
+                sensitive: false;
+
+                Box {
+                    spacing: 10;
+
+                    Adw.Spinner contacts-create-dialog-add-spinner {
+                        visible: false;
+                    }
+
+                    Label {
+                        label: _("Add");
+                    }
+                }
 
                 styles [
                     "suggested-action",
@@ -26,8 +38,53 @@ Adw.Dialog contacts-create-dialog {
             }
         }
 
-        Adw.StatusPage {
-            title: _("Create dialog content");
+        Adw.PreferencesPage {
+            Adw.PreferencesGroup {
+                Adw.EntryRow contacts-create-dialog-first-name-input {
+                    title: _("First name");
+                    input-purpose: name;
+                }
+
+                Adw.EntryRow contacts-create-dialog-last-name-input {
+                    title: _("Last name");
+                    input-purpose: name;
+                }
+
+                Adw.EntryRow contacts-create-dialog-nickname-input {
+                    title: _("Nickname (optional)");
+                }
+
+                Adw.EntryRow contacts-create-dialog-email-input {
+                    title: _("Email");
+                    input-purpose: email;
+
+                    [suffix]
+                    MenuButton contacts-create-dialog-email-warning-button {
+                        icon-name: "dialog-warning-symbolic";
+                        tooltip-text: _("Show error");
+                        valign: center;
+                        popover: contacts-create-dialog-email-popover;
+                        visible: false;
+
+                        styles [
+                            "flat",
+                            "circular",
+                        ]
+                    }
+                }
+
+                Adw.EntryRow contacts-create-dialog-pronouns-input {
+                    title: _("Pronouns");
+                }
+            }
         }
+    }
+}
+
+Popover contacts-create-dialog-email-popover {
+    Label {
+        label: _("Not a valid email");
+        accessible-role: alert;
+        selectable: true;
     }
 }
