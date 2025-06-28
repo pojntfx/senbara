@@ -15,6 +15,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -381,7 +382,10 @@ func main() {
 			contactsList        = b.GetObject("contacts-list").Cast().(*gtk.ListBox)
 			contactsSearchEntry = b.GetObject("contacts-searchentry").Cast().(*gtk.SearchEntry)
 
-			contactsAddButton = b.GetObject("contacts-add-button").Cast().(*gtk.Button)
+			contactsAddButton    = b.GetObject("contacts-add-button").Cast().(*gtk.Button)
+			contactsSearchButton = b.GetObject("contacts-search-button").Cast().(*gtk.ToggleButton)
+
+			contactsEmptyAddButton = b.GetObject("contacts-empty-add-button").Cast().(*gtk.Button)
 
 			contactsCreateDialog = contactsCreateDialogBuilder.GetObject("contacts-create-dialog").Cast().(*adw.Dialog)
 
@@ -772,7 +776,7 @@ func main() {
 				if visibleContactsCount > 0 {
 					contactsStack.SetVisibleChildName("/contacts/list")
 				} else {
-					contactsStack.SetVisibleChildName("/contacts/empty")
+					contactsStack.SetVisibleChildName("/contacts/no-results")
 				}
 			}()
 		})
@@ -803,6 +807,10 @@ func main() {
 		})
 
 		contactsAddButton.ConnectClicked(func() {
+			contactsCreateDialog.Present(w)
+		})
+
+		contactsEmptyAddButton.ConnectClicked(func() {
 			contactsCreateDialog.Present(w)
 		})
 
@@ -907,6 +915,10 @@ func main() {
 				mto.AddToast(adw.NewToast(gcore.Local("Created contact")))
 
 				contactsCreateDialog.Close()
+
+				homeNavigation.ReplaceWithTags([]string{"/contacts"})
+
+				// TODO: Also update homeSidebarContactsCountLabel
 			}()
 		})
 
@@ -1450,7 +1462,94 @@ func main() {
 
 			switch tag {
 			case resources.PageContacts:
-				// TODO: Load the contacts and then disable the loading state
+				go func() {
+					contactsStack.SetVisibleChildName("/contacts/loading")
+
+					redirected, c, _, err := authorize(
+						ctx,
+
+						true,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for contacts page", "err", err)
+
+						contactsStack.SetVisibleChildName("/contacts/error")
+
+						handlePanic(err)
+
+						return
+					} else if redirected {
+						return
+					}
+
+					log.Debug("Listing contacts")
+
+					res, err := c.GetContactsWithResponse(ctx)
+					if err != nil {
+						contactsStack.SetVisibleChildName("/contacts/error")
+
+						handlePanic(err)
+
+						return
+					}
+
+					log.Debug("Got contacts", "status", res.StatusCode())
+
+					if res.StatusCode() != http.StatusOK {
+						contactsStack.SetVisibleChildName("/contacts/error")
+
+						handlePanic(errors.New(res.Status()))
+
+						return
+					}
+
+					contactsList.RemoveAll()
+
+					if len(*res.JSON200) > 0 {
+						contactsAddButton.SetVisible(true)
+						contactsSearchButton.SetVisible(true)
+
+						for _, contact := range *res.JSON200 {
+							r := adw.NewActionRow()
+
+							title := *contact.FirstName + " " + *contact.LastName
+							if *contact.Nickname != "" {
+								title += " (" + *contact.Nickname + ")"
+							}
+							r.SetTitle(title)
+
+							subtitle := ""
+							if *contact.Email != "" {
+								subtitle = string(*contact.Email)
+							}
+							if string(*contact.Email) != "" && string(*contact.Pronouns) != "" {
+								subtitle += " | " + *contact.Pronouns
+							} else if string(*contact.Pronouns) != "" {
+								subtitle = *contact.Pronouns
+							}
+							if subtitle != "" {
+								r.SetSubtitle(subtitle)
+							}
+
+							r.SetName("/contacts/view?id=" + strconv.Itoa(int(*contact.Id)))
+
+							menuButton := gtk.NewMenuButton()
+							menuButton.SetIconName("view-more-symbolic")
+							menuButton.AddCSSClass("flat")
+
+							r.AddSuffix(menuButton)
+
+							contactsList.Append(r)
+						}
+
+						contactsStack.SetVisibleChildName("/contacts/list")
+					} else {
+						contactsAddButton.SetVisible(false)
+						contactsSearchButton.SetVisible(false)
+
+						contactsStack.SetVisibleChildName("/contacts/empty")
+					}
+				}()
 			}
 		}
 
