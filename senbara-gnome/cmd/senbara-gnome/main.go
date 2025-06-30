@@ -399,6 +399,10 @@ func main() {
 			contactsCreateDialogPronounsInput  = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-pronouns-input").Cast().(*adw.EntryRow)
 
 			contactsCreateDialogEmailWarningButton = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-email-warning-button").Cast().(*gtk.MenuButton)
+
+			contactsErrorStatusPage        = b.GetObject("contacts-error-status-page").Cast().(*adw.StatusPage)
+			contactsErrorRefreshButton     = b.GetObject("contacts-error-refresh-button").Cast().(*gtk.Button)
+			contactsErrorCopyDetailsButton = b.GetObject("contacts-error-copy-details").Cast().(*gtk.Button)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -763,7 +767,10 @@ func main() {
 			homeSidebarContactsCountLabel.SetVisible(true)
 		}
 
-		visibleContactsCount := 0
+		var (
+			contactsCount        = 0
+			visibleContactsCount = 0
+		)
 
 		contactsSearchEntry.ConnectSearchChanged(func() {
 			go func() {
@@ -856,6 +863,52 @@ func main() {
 			contactsCreateDialogEmailInput.RemoveCSSClass("error")
 		})
 
+		var rawContactsErr string
+		handleContactsError := func(err error) {
+			rawContactsErr = err.Error()
+			i18nErr := gcore.Local(rawContactsErr)
+
+			log.Error(
+				"An unexpected error occured for contacts, showing error message to user",
+				"rawError", rawContactsErr,
+				"i18nErr", i18nErr,
+			)
+
+			contactsErrorStatusPage.SetDescription(i18nErr)
+		}
+
+		contactsErrorRefreshButton.ConnectClicked(func() {
+			homeNavigation.ReplaceWithTags([]string{"/contacts"})
+		})
+
+		contactsErrorCopyDetailsButton.ConnectClicked(func() {
+			w.Clipboard().SetText(rawContactsErr)
+		})
+
+		enableContactsLoading := func() {
+			homeSidebarContactsCountLabel.SetVisible(false)
+			homeSidebarContactsCountSpinner.SetVisible(true)
+
+			contactsStack.SetVisibleChildName("/contacts/loading")
+		}
+
+		disableContactsLoading := func() {
+			homeSidebarContactsCountSpinner.SetVisible(false)
+			homeSidebarContactsCountLabel.SetVisible(true)
+
+			homeSidebarContactsCountLabel.SetText(fmt.Sprintf("%v", contactsCount))
+
+			if rawContactsErr == "" {
+				if contactsCount > 0 {
+					contactsStack.SetVisibleChildName("/contacts/list")
+				} else {
+					contactsStack.SetVisibleChildName("/contacts/empty")
+				}
+			} else {
+				contactsStack.SetVisibleChildName("/contacts/error")
+			}
+		}
+
 		contactsCreateDialogAddButton.ConnectClicked(func() {
 			log.Info("Handling contact creation")
 
@@ -917,8 +970,6 @@ func main() {
 				contactsCreateDialog.Close()
 
 				homeNavigation.ReplaceWithTags([]string{"/contacts"})
-
-				// TODO: Also update homeSidebarContactsCountLabel
 			}()
 		})
 
@@ -1444,7 +1495,7 @@ func main() {
 
 		copyErrorToClipboardAction := gio.NewSimpleAction("copyErrorToClipboard", nil)
 		copyErrorToClipboardAction.ConnectActivate(func(parameter *glib.Variant) {
-			w.Clipboard().SetText(rawError)
+			w.Clipboard().SetText(rawContactsErr)
 		})
 		a.AddAction(copyErrorToClipboardAction)
 
@@ -1463,7 +1514,8 @@ func main() {
 			switch tag {
 			case resources.PageContacts:
 				go func() {
-					contactsStack.SetVisibleChildName("/contacts/loading")
+					enableContactsLoading()
+					defer disableContactsLoading()
 
 					redirected, c, _, err := authorize(
 						ctx,
@@ -1473,9 +1525,7 @@ func main() {
 					if err != nil {
 						log.Warn("Could not authorize user for contacts page", "err", err)
 
-						contactsStack.SetVisibleChildName("/contacts/error")
-
-						handlePanic(err)
+						handleContactsError(err)
 
 						return
 					} else if redirected {
@@ -1486,9 +1536,7 @@ func main() {
 
 					res, err := c.GetContactsWithResponse(ctx)
 					if err != nil {
-						contactsStack.SetVisibleChildName("/contacts/error")
-
-						handlePanic(err)
+						handleContactsError(err)
 
 						return
 					}
@@ -1496,16 +1544,19 @@ func main() {
 					log.Debug("Got contacts", "status", res.StatusCode())
 
 					if res.StatusCode() != http.StatusOK {
-						contactsStack.SetVisibleChildName("/contacts/error")
-
-						handlePanic(errors.New(res.Status()))
+						handleContactsError(errors.New(res.Status()))
 
 						return
 					}
 
+					defer func() {
+						rawContactsErr = ""
+					}()
+
 					contactsList.RemoveAll()
 
-					if len(*res.JSON200) > 0 {
+					contactsCount = len(*res.JSON200)
+					if contactsCount > 0 {
 						contactsAddButton.SetVisible(true)
 						contactsSearchButton.SetVisible(true)
 
@@ -1541,13 +1592,9 @@ func main() {
 
 							contactsList.Append(r)
 						}
-
-						contactsStack.SetVisibleChildName("/contacts/list")
 					} else {
 						contactsAddButton.SetVisible(false)
 						contactsSearchButton.SetVisible(false)
-
-						contactsStack.SetVisibleChildName("/contacts/empty")
 					}
 				}()
 			}

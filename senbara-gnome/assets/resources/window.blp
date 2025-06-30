@@ -537,9 +537,28 @@ Adw.Window main-window {
                                             StackPage {
                                                 name: "/contacts/error";
 
-                                                child: Adw.StatusPage {
+                                                child: Adw.StatusPage contacts-error-status-page {
                                                     title: _("Contacts could not be loaded");
                                                     icon-name: "dialog-warning-symbolic";
+
+                                                    Box {
+                                                        spacing: 10;
+                                                        halign: center;
+
+                                                        Button contacts-error-refresh-button {
+                                                            halign: center;
+                                                            label: _("Refresh");
+
+                                                            styles [
+                                                                "suggested-action",
+                                                            ]
+                                                        }
+
+                                                        Button contacts-error-copy-details {
+                                                            halign: center;
+                                                            label: _("Copy details");
+                                                        }
+                                                    }
                                                 };
                                             }
                                         }
