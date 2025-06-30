@@ -40,6 +40,8 @@ var (
 	errCouldNotLogin            = errors.New("could not login")
 	errCouldNotWriteSettingsKey = errors.New("could not write settings key")
 	errMissingPrivacyURL        = errors.New("missing privacy policy URL")
+	errMissingContactID         = errors.New("missing contact ID")
+	errInvalidContactID         = errors.New("invalid contact ID")
 )
 
 const (
@@ -403,6 +405,8 @@ func main() {
 			contactsErrorStatusPage        = b.GetObject("contacts-error-status-page").Cast().(*adw.StatusPage)
 			contactsErrorRefreshButton     = b.GetObject("contacts-error-refresh-button").Cast().(*gtk.Button)
 			contactsErrorCopyDetailsButton = b.GetObject("contacts-error-copy-details").Cast().(*gtk.Button)
+
+			contactsViewStatusPage = b.GetObject("contacts-view-statuspage").Cast().(*adw.StatusPage)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -774,16 +778,16 @@ func main() {
 
 		contactsSearchEntry.ConnectSearchChanged(func() {
 			go func() {
-				contactsStack.SetVisibleChildName("/contacts/loading")
+				contactsStack.SetVisibleChildName(resources.PageContactsLoading)
 
 				visibleContactsCount = 0
 
 				contactsList.InvalidateFilter()
 
 				if visibleContactsCount > 0 {
-					contactsStack.SetVisibleChildName("/contacts/list")
+					contactsStack.SetVisibleChildName(resources.PageContactsList)
 				} else {
-					contactsStack.SetVisibleChildName("/contacts/no-results")
+					contactsStack.SetVisibleChildName(resources.PageContactsNoResults)
 				}
 			}()
 		})
@@ -889,7 +893,7 @@ func main() {
 			homeSidebarContactsCountLabel.SetVisible(false)
 			homeSidebarContactsCountSpinner.SetVisible(true)
 
-			contactsStack.SetVisibleChildName("/contacts/loading")
+			contactsStack.SetVisibleChildName(resources.PageContactsLoading)
 		}
 
 		disableContactsLoading := func() {
@@ -900,12 +904,12 @@ func main() {
 
 			if rawContactsErr == "" {
 				if contactsCount > 0 {
-					contactsStack.SetVisibleChildName("/contacts/list")
+					contactsStack.SetVisibleChildName(resources.PageContactsList)
 				} else {
-					contactsStack.SetVisibleChildName("/contacts/empty")
+					contactsStack.SetVisibleChildName(resources.PageContactsEmpty)
 				}
 			} else {
-				contactsStack.SetVisibleChildName("/contacts/error")
+				contactsStack.SetVisibleChildName(resources.PageContactsError)
 			}
 		}
 
@@ -1499,6 +1503,8 @@ func main() {
 		})
 		a.AddAction(copyErrorToClipboardAction)
 
+		selectedContactID := -1
+
 		handleHomeNavigation := func() {
 			var (
 				tag = homeNavigation.VisiblePage().Tag()
@@ -1597,8 +1603,82 @@ func main() {
 						contactsSearchButton.SetVisible(false)
 					}
 				}()
+
+			case resources.PageContactsView:
+				go func() {
+					// TODO: Enable/defer disable contact view loading stack page
+
+					redirected, c, _, err := authorize(
+						ctx,
+
+						true,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for contacts view page", "err", err)
+
+						handleContactsError(err)
+
+						return
+					} else if redirected {
+						return
+					}
+
+					log.Debug("Getting contact", "id", selectedContactID)
+
+					res, err := c.GetContactWithResponse(ctx, int64(selectedContactID))
+					if err != nil {
+						handleContactsError(err)
+
+						return
+					}
+
+					log.Debug("Got contact", "status", res.StatusCode())
+
+					if res.StatusCode() != http.StatusOK {
+						handleContactsError(errors.New(res.Status()))
+
+						return
+					}
+
+					contactsViewStatusPage.SetTitle(*res.JSON200.Entry.FirstName)
+				}()
 			}
 		}
+
+		contactsList.ConnectRowSelected(func(row *gtk.ListBoxRow) {
+			if row != nil {
+				u, err := url.Parse(row.Cast().(*adw.ActionRow).Name())
+				if err != nil {
+					log.Warn("Could not parse contact row URL", "err", err)
+
+					handlePanic(err)
+
+					return
+				}
+
+				rid := u.Query().Get("id")
+				if strings.TrimSpace(rid) == "" {
+					log.Warn("Could not get ID from contact row URL", "err", errMissingContactID)
+
+					handlePanic(errMissingContactID)
+
+					return
+				}
+
+				id, err := strconv.Atoi(rid)
+				if err != nil {
+					log.Warn("Could not parse ID from contact row URL", "err", errInvalidContactID)
+
+					handlePanic(errInvalidContactID)
+
+					return
+				}
+
+				selectedContactID = id
+
+				homeNavigation.PushByTag(resources.PageContactsView)
+			}
+		})
 
 		homeNavigation.ConnectPopped(func(page *adw.NavigationPage) {
 			handleHomeNavigation()

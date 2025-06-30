@@ -378,7 +378,7 @@ Adw.Window main-window {
 
                             content: Gtk.ScrolledWindow {
                                 Gtk.ListBox home-sidebar-listbox {
-                                    selection-mode: browse;
+                                    selection-mode: single;
 
                                     Adw.ActionRow {
                                         title: _("Contacts");
@@ -563,6 +563,20 @@ Adw.Window main-window {
                                             }
                                         }
                                     }
+                                }
+                            }
+
+                            Adw.NavigationPage {
+                                title: _("Contact");
+                                tag: "/contacts/view";
+
+                                Adw.ToolbarView {
+                                    [top]
+                                    Adw.HeaderBar {
+                                        // TODO: Add a subtitle with the contact name in the center (see Pods app)
+                                    }
+
+                                    Adw.StatusPage contacts-view-statuspage {}
                                 }
                             }
 
