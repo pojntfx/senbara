@@ -406,7 +406,11 @@ func main() {
 			contactsErrorRefreshButton     = b.GetObject("contacts-error-refresh-button").Cast().(*gtk.Button)
 			contactsErrorCopyDetailsButton = b.GetObject("contacts-error-copy-details").Cast().(*gtk.Button)
 
-			contactsViewStatusPage = b.GetObject("contacts-view-statuspage").Cast().(*adw.StatusPage)
+			contactsViewStack                  = b.GetObject("contacts-view-stack").Cast().(*gtk.Stack)
+			contactsViewStatusPage             = b.GetObject("contacts-view-statuspage").Cast().(*adw.StatusPage)
+			contactsViewErrorStatusPage        = b.GetObject("contacts-view-error-status-page").Cast().(*adw.StatusPage)
+			contactsViewErrorRefreshButton     = b.GetObject("contacts-view-error-refresh-button").Cast().(*gtk.Button)
+			contactsViewErrorCopyDetailsButton = b.GetObject("contacts-view-error-copy-details").Cast().(*gtk.Button)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -867,51 +871,114 @@ func main() {
 			contactsCreateDialogEmailInput.RemoveCSSClass("error")
 		})
 
-		var rawContactsErr string
-		handleContactsError := func(err error) {
-			rawContactsErr = err.Error()
-			i18nErr := gcore.Local(rawContactsErr)
+		createErrAndLoadingHandlers := func(
+			errorStatusPage *adw.StatusPage,
+			errorRefreshButton *gtk.Button,
+			errorCopyDetailsButton *gtk.Button,
 
-			log.Error(
-				"An unexpected error occured for contacts, showing error message to user",
-				"rawError", rawContactsErr,
-				"i18nErr", i18nErr,
-			)
+			handleRefresh func(),
 
-			contactsErrorStatusPage.SetDescription(i18nErr)
-		}
+			handleEnableLoading func(),
+			handleDisableLoading func(err string),
+		) (
+			handleError func(error),
+			enableLoading func(),
+			disableLoading func(),
+			clearError func(),
+		) {
+			var rawErr string
+			handleError = func(err error) {
+				rawErr = err.Error()
+				i18nErr := gcore.Local(rawErr)
 
-		contactsErrorRefreshButton.ConnectClicked(func() {
-			homeNavigation.ReplaceWithTags([]string{"/contacts"})
-		})
+				log.Error(
+					"An unexpected error occured, showing error message to user",
+					"rawError", rawErr,
+					"i18nErr", i18nErr,
+				)
 
-		contactsErrorCopyDetailsButton.ConnectClicked(func() {
-			w.Clipboard().SetText(rawContactsErr)
-		})
-
-		enableContactsLoading := func() {
-			homeSidebarContactsCountLabel.SetVisible(false)
-			homeSidebarContactsCountSpinner.SetVisible(true)
-
-			contactsStack.SetVisibleChildName(resources.PageContactsLoading)
-		}
-
-		disableContactsLoading := func() {
-			homeSidebarContactsCountSpinner.SetVisible(false)
-			homeSidebarContactsCountLabel.SetVisible(true)
-
-			homeSidebarContactsCountLabel.SetText(fmt.Sprintf("%v", contactsCount))
-
-			if rawContactsErr == "" {
-				if contactsCount > 0 {
-					contactsStack.SetVisibleChildName(resources.PageContactsList)
-				} else {
-					contactsStack.SetVisibleChildName(resources.PageContactsEmpty)
-				}
-			} else {
-				contactsStack.SetVisibleChildName(resources.PageContactsError)
+				errorStatusPage.SetDescription(i18nErr)
 			}
+
+			errorRefreshButton.ConnectClicked(handleRefresh)
+
+			errorCopyDetailsButton.ConnectClicked(func() {
+				w.Clipboard().SetText(rawErr)
+			})
+
+			enableLoading = handleEnableLoading
+
+			disableLoading = func() {
+				handleDisableLoading(rawErr)
+			}
+
+			return handleError,
+				enableLoading,
+				disableLoading,
+				func() {
+					rawErr = ""
+				}
 		}
+
+		handleContactsError,
+			enableContactsLoading,
+			disableContactsLoading,
+			clearContactsError := createErrAndLoadingHandlers(
+			contactsErrorStatusPage,
+			contactsErrorRefreshButton,
+			contactsErrorCopyDetailsButton,
+
+			func() {
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts})
+			},
+
+			func() {
+				homeSidebarContactsCountLabel.SetVisible(false)
+				homeSidebarContactsCountSpinner.SetVisible(true)
+
+				contactsStack.SetVisibleChildName(resources.PageContactsLoading)
+			},
+			func(err string) {
+				homeSidebarContactsCountSpinner.SetVisible(false)
+				homeSidebarContactsCountLabel.SetVisible(true)
+
+				homeSidebarContactsCountLabel.SetText(fmt.Sprintf("%v", contactsCount))
+
+				if err == "" {
+					if contactsCount > 0 {
+						contactsStack.SetVisibleChildName(resources.PageContactsList)
+					} else {
+						contactsStack.SetVisibleChildName(resources.PageContactsEmpty)
+					}
+				} else {
+					contactsStack.SetVisibleChildName(resources.PageContactsError)
+				}
+			},
+		)
+
+		handleContactsViewError,
+			enableContactsViewLoading,
+			disableContactsViewLoading,
+			clearContactsViewError := createErrAndLoadingHandlers(
+			contactsViewErrorStatusPage,
+			contactsViewErrorRefreshButton,
+			contactsViewErrorCopyDetailsButton,
+
+			func() {
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
+			},
+
+			func() {
+				contactsViewStack.SetVisibleChildName(resources.PageContactsViewLoading)
+			},
+			func(err string) {
+				if err == "" {
+					contactsViewStack.SetVisibleChildName(resources.PageContactsViewData)
+				} else {
+					contactsViewStack.SetVisibleChildName(resources.PageContactsViewError)
+				}
+			},
+		)
 
 		contactsCreateDialogAddButton.ConnectClicked(func() {
 			log.Info("Handling contact creation")
@@ -973,7 +1040,7 @@ func main() {
 
 				contactsCreateDialog.Close()
 
-				homeNavigation.ReplaceWithTags([]string{"/contacts"})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts})
 			}()
 		})
 
@@ -1499,7 +1566,7 @@ func main() {
 
 		copyErrorToClipboardAction := gio.NewSimpleAction("copyErrorToClipboard", nil)
 		copyErrorToClipboardAction.ConnectActivate(func(parameter *glib.Variant) {
-			w.Clipboard().SetText(rawContactsErr)
+			w.Clipboard().SetText(rawError)
 		})
 		a.AddAction(copyErrorToClipboardAction)
 
@@ -1555,9 +1622,7 @@ func main() {
 						return
 					}
 
-					defer func() {
-						rawContactsErr = ""
-					}()
+					defer clearContactsError()
 
 					contactsList.RemoveAll()
 
@@ -1606,7 +1671,8 @@ func main() {
 
 			case resources.PageContactsView:
 				go func() {
-					// TODO: Enable/defer disable contact view loading stack page
+					enableContactsViewLoading()
+					defer disableContactsViewLoading()
 
 					redirected, c, _, err := authorize(
 						ctx,
@@ -1616,7 +1682,7 @@ func main() {
 					if err != nil {
 						log.Warn("Could not authorize user for contacts view page", "err", err)
 
-						handleContactsError(err)
+						handleContactsViewError(err)
 
 						return
 					} else if redirected {
@@ -1627,7 +1693,7 @@ func main() {
 
 					res, err := c.GetContactWithResponse(ctx, int64(selectedContactID))
 					if err != nil {
-						handleContactsError(err)
+						handleContactsViewError(err)
 
 						return
 					}
@@ -1635,10 +1701,12 @@ func main() {
 					log.Debug("Got contact", "status", res.StatusCode())
 
 					if res.StatusCode() != http.StatusOK {
-						handleContactsError(errors.New(res.Status()))
+						handleContactsViewError(errors.New(res.Status()))
 
 						return
 					}
+
+					defer clearContactsViewError()
 
 					contactsViewStatusPage.SetTitle(*res.JSON200.Entry.FirstName)
 				}()

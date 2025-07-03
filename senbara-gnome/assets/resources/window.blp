@@ -576,7 +576,54 @@ Adw.Window main-window {
                                         // TODO: Add a subtitle with the contact name in the center (see Pods app)
                                     }
 
-                                    Adw.StatusPage contacts-view-statuspage {}
+                                    Stack contacts-view-stack {
+                                        StackPage {
+                                            name: "/contacts/view/loading";
+
+                                            child: Box {
+                                                halign: center;
+
+                                                Adw.Spinner {
+                                                    width-request: 32;
+                                                    height-request: 32;
+                                                }
+                                            };
+                                        }
+
+                                        StackPage {
+                                            name: "/contacts/view/data";
+
+                                            child: Adw.StatusPage contacts-view-statuspage {};
+                                        }
+
+                                        StackPage {
+                                            name: "/contacts/view/error";
+
+                                            child: Adw.StatusPage contacts-view-error-status-page {
+                                                title: _("Contact could not be loaded");
+                                                icon-name: "dialog-warning-symbolic";
+
+                                                Box {
+                                                    spacing: 10;
+                                                    halign: center;
+
+                                                    Button contacts-view-error-refresh-button {
+                                                        halign: center;
+                                                        label: _("Refresh");
+
+                                                        styles [
+                                                            "suggested-action",
+                                                        ]
+                                                    }
+
+                                                    Button contacts-view-error-copy-details {
+                                                        halign: center;
+                                                        label: _("Copy details");
+                                                    }
+                                                }
+                                            };
+                                        }
+                                    }
                                 }
                             }
 
