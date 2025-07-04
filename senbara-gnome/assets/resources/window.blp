@@ -566,14 +566,16 @@ Adw.Window main-window {
                                 }
                             }
 
-                            Adw.NavigationPage {
+                            Adw.NavigationPage contacts-view-page {
                                 title: _("Contact");
                                 tag: "/contacts/view";
 
                                 Adw.ToolbarView {
                                     [top]
                                     Adw.HeaderBar {
-                                        // TODO: Add a subtitle with the contact name in the center (see Pods app)
+                                        title-widget: Adw.WindowTitle contacts-view-page-title {
+                                            title: bind contacts-view-page.title;
+                                        };
                                     }
 
                                     Stack contacts-view-stack {

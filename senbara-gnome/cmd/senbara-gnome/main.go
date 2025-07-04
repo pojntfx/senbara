@@ -406,6 +406,7 @@ func main() {
 			contactsErrorRefreshButton     = b.GetObject("contacts-error-refresh-button").Cast().(*gtk.Button)
 			contactsErrorCopyDetailsButton = b.GetObject("contacts-error-copy-details").Cast().(*gtk.Button)
 
+			contactsViewPageTitle              = b.GetObject("contacts-view-page-title").Cast().(*adw.WindowTitle)
 			contactsViewStack                  = b.GetObject("contacts-view-stack").Cast().(*gtk.Stack)
 			contactsViewStatusPage             = b.GetObject("contacts-view-statuspage").Cast().(*adw.StatusPage)
 			contactsViewErrorStatusPage        = b.GetObject("contacts-view-error-status-page").Cast().(*adw.StatusPage)
@@ -1578,7 +1579,7 @@ func main() {
 				log = log.With("tag", tag)
 			)
 
-			log.Info("Handling")
+			log.Info("Handling page")
 
 			homeContentPage.SetTitle(homeNavigation.VisiblePage().Title())
 
@@ -1708,6 +1709,7 @@ func main() {
 
 					defer clearContactsViewError()
 
+					contactsViewPageTitle.SetSubtitle(*res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName)
 					contactsViewStatusPage.SetTitle(*res.JSON200.Entry.FirstName)
 				}()
 			}
@@ -1750,6 +1752,18 @@ func main() {
 
 		homeNavigation.ConnectPopped(func(page *adw.NavigationPage) {
 			handleHomeNavigation()
+
+			var (
+				tag = page.Tag()
+				log = log.With("tag", tag)
+			)
+
+			log.Info("Handling popped page")
+
+			switch tag {
+			case resources.PageContactsView:
+				contactsViewPageTitle.SetSubtitle("")
+			}
 		})
 		homeNavigation.ConnectPushed(handleHomeNavigation)
 		homeNavigation.ConnectReplaced(handleHomeNavigation)
@@ -1764,7 +1778,7 @@ func main() {
 				log = log.With("tag", tag)
 			)
 
-			log.Info("Handling")
+			log.Info("Handling page")
 
 			switch tag {
 			case resources.PageIndex:
