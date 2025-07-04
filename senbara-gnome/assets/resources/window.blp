@@ -590,52 +590,174 @@ Adw.Window main-window {
                                         }
                                     }
 
-                                    Stack contacts-view-stack {
-                                        StackPage {
-                                            name: "/contacts/view/loading";
+                                    ScrolledWindow {
+                                        Adw.Clamp {
+                                            maximum-size: 600;
 
-                                            child: Box {
-                                                halign: center;
+                                            Stack contacts-view-stack {
+                                                StackPage {
+                                                    name: "/contacts/view/loading";
 
-                                                Adw.Spinner {
-                                                    width-request: 32;
-                                                    height-request: 32;
-                                                }
-                                            };
-                                        }
-
-                                        StackPage {
-                                            name: "/contacts/view/data";
-
-                                            child: Adw.StatusPage contacts-view-statuspage {};
-                                        }
-
-                                        StackPage {
-                                            name: "/contacts/view/error";
-
-                                            child: Adw.StatusPage contacts-view-error-status-page {
-                                                title: _("Contact could not be loaded");
-                                                icon-name: "dialog-warning-symbolic";
-
-                                                Box {
-                                                    spacing: 10;
-                                                    halign: center;
-
-                                                    Button contacts-view-error-refresh-button {
+                                                    child: Box {
                                                         halign: center;
-                                                        label: _("Refresh");
 
-                                                        styles [
-                                                            "suggested-action",
-                                                        ]
-                                                    }
-
-                                                    Button contacts-view-error-copy-details {
-                                                        halign: center;
-                                                        label: _("Copy details");
-                                                    }
+                                                        Adw.Spinner {
+                                                            width-request: 32;
+                                                            height-request: 32;
+                                                        }
+                                                    };
                                                 }
-                                            };
+
+                                                StackPage {
+                                                    name: "/contacts/view/data";
+
+                                                    child: Box {
+                                                        spacing: 10;
+                                                        orientation: vertical;
+                                                        margin-top: 24;
+                                                        margin-end: 12;
+                                                        margin-bottom: 24;
+                                                        margin-start: 12;
+
+                                                        Adw.PreferencesGroup {
+                                                            Adw.ActionRow {
+                                                                icon-name: "birthday-symbolic";
+                                                                tooltip-text: _("Birthday");
+                                                                subtitle: _("1970-01-01");
+
+                                                                styles [
+                                                                    "property",
+                                                                ]
+                                                            }
+
+                                                            Adw.ActionRow {
+                                                                icon-name: "mark-location-symbolic";
+                                                                tooltip-text: _("Address");
+                                                                subtitle: _("1337 Hacker Way");
+
+                                                                styles [
+                                                                    "property",
+                                                                ]
+                                                            }
+
+                                                            Adw.ActionRow {
+                                                                icon-name: "accessories-text-editor-symbolic";
+                                                                tooltip-text: _("Notes");
+                                                                subtitle: _("Super solid dev who loves doing OSS. Nerd in the best way - loves talking out about architecture and always down to help others. Pretty well-known in the community, speaks at conferences sometimes.");
+
+                                                                styles [
+                                                                    "property",
+                                                                ]
+                                                            }
+
+                                                            styles [
+                                                                "boxed-list",
+                                                            ]
+                                                        }
+
+                                                        Adw.PreferencesGroup {
+                                                            title: _("Debts");
+
+                                                            Adw.ActionRow {
+                                                                subtitle: _("You owe Jean 50 CAD: Lunch the other day");
+
+                                                                [suffix]
+                                                                MenuButton {
+                                                                    icon-name: "view-more-symbolic";
+                                                                    primary: true;
+                                                                    valign: center;
+
+                                                                    styles [
+                                                                        "flat",
+                                                                    ]
+                                                                }
+
+                                                                styles [
+                                                                    "property",
+                                                                ]
+                                                            }
+
+                                                            Adw.ButtonRow {
+                                                                start-icon-name: "list-add-symbolic";
+                                                                title: _("Add a debt");
+                                                                action-name: "app.createDebt";
+                                                            }
+
+                                                            styles [
+                                                                "boxed-list",
+                                                            ]
+                                                        }
+
+                                                        Adw.PreferencesGroup {
+                                                            title: _("Activites");
+
+                                                            Adw.ActionRow {
+                                                                title: _("Lunch");
+                                                                subtitle: _("The business lunch meeting took place at The Capital Grille downtown, where I met with potential client Jennifer Martinez from TechSolutions Inc. to discuss our upcoming software implementation project. We reviewed the project timeline, budget requirements, and key deliverables while enjoying our meals - she ordered the lobster bisque and grilled chicken, while I had the Caesar salad and ribeye steak. By the conclusion of our 90-minute meeting, we had successfully negotiated the contract terms and scheduled a follow-up meeting for next week to finalize the partnership agreement.");
+                                                                action-name: "app.openActivity";
+
+                                                                [suffix]
+                                                                MenuButton {
+                                                                    icon-name: "view-more-symbolic";
+                                                                    primary: true;
+                                                                    valign: center;
+
+                                                                    styles [
+                                                                        "flat",
+                                                                    ]
+                                                                }
+
+                                                                [suffix]
+                                                                Gtk.Image {
+                                                                    icon-name: "go-next-symbolic";
+                                                                }
+
+                                                                styles [
+                                                                    "property",
+                                                                ]
+                                                            }
+
+                                                            Adw.ButtonRow {
+                                                                start-icon-name: "list-add-symbolic";
+                                                                title: _("Add an activity");
+                                                                action-name: "app.createActivity";
+                                                            }
+
+                                                            styles [
+                                                                "boxed-list",
+                                                            ]
+                                                        }
+                                                    };
+                                                }
+
+                                                StackPage {
+                                                    name: "/contacts/view/error";
+
+                                                    child: Adw.StatusPage contacts-view-error-status-page {
+                                                        title: _("Contact could not be loaded");
+                                                        icon-name: "dialog-warning-symbolic";
+
+                                                        Box {
+                                                            spacing: 10;
+                                                            halign: center;
+
+                                                            Button contacts-view-error-refresh-button {
+                                                                halign: center;
+                                                                label: _("Refresh");
+
+                                                                styles [
+                                                                    "suggested-action",
+                                                                ]
+                                                            }
+
+                                                            Button contacts-view-error-copy-details {
+                                                                halign: center;
+                                                                label: _("Copy details");
+                                                            }
+                                                        }
+                                                    };
+                                                }
+                                            }
                                         }
                                     }
                                 }

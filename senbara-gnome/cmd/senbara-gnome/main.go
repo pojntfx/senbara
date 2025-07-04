@@ -408,7 +408,6 @@ func main() {
 
 			contactsViewPageTitle              = b.GetObject("contacts-view-page-title").Cast().(*adw.WindowTitle)
 			contactsViewStack                  = b.GetObject("contacts-view-stack").Cast().(*gtk.Stack)
-			contactsViewStatusPage             = b.GetObject("contacts-view-statuspage").Cast().(*adw.StatusPage)
 			contactsViewErrorStatusPage        = b.GetObject("contacts-view-error-status-page").Cast().(*adw.StatusPage)
 			contactsViewErrorRefreshButton     = b.GetObject("contacts-view-error-refresh-button").Cast().(*gtk.Button)
 			contactsViewErrorCopyDetailsButton = b.GetObject("contacts-view-error-copy-details").Cast().(*gtk.Button)
@@ -1670,6 +1669,8 @@ func main() {
 
 							r.AddSuffix(menuButton)
 
+							r.AddSuffix(gtk.NewImageFromIconName("go-next-symbolic"))
+
 							contactsList.Append(r)
 						}
 					} else {
@@ -1735,8 +1736,6 @@ func main() {
 					if subtitle != "" {
 						contactsViewPageTitle.SetSubtitle(subtitle)
 					}
-
-					contactsViewStatusPage.SetTitle(title)
 				}()
 			}
 		}
