@@ -1657,8 +1657,16 @@ func main() {
 							r.SetName("/contacts/view?id=" + strconv.Itoa(int(*contact.Id)))
 
 							menuButton := gtk.NewMenuButton()
+							menuButton.SetVAlign(gtk.AlignCenter)
 							menuButton.SetIconName("view-more-symbolic")
 							menuButton.AddCSSClass("flat")
+
+							menu := gio.NewMenu()
+
+							menu.Append(gcore.Local("Delete contact"), "app.deleteContact")
+							menu.Append(gcore.Local("Edit contact"), "app.editContact")
+
+							menuButton.SetMenuModel(menu)
 
 							r.AddSuffix(menuButton)
 
