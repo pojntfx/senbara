@@ -1709,8 +1709,26 @@ func main() {
 
 					defer clearContactsViewError()
 
-					contactsViewPageTitle.SetSubtitle(*res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName)
-					contactsViewStatusPage.SetTitle(*res.JSON200.Entry.FirstName)
+					title := *res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName
+					if *res.JSON200.Entry.Nickname != "" {
+						title += " (" + *res.JSON200.Entry.Nickname + ")"
+					}
+					contactsViewPageTitle.SetTitle(*res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName)
+
+					subtitle := ""
+					if *res.JSON200.Entry.Email != "" {
+						subtitle = string(*res.JSON200.Entry.Email)
+					}
+					if string(*res.JSON200.Entry.Email) != "" && string(*res.JSON200.Entry.Pronouns) != "" {
+						subtitle += " | " + *res.JSON200.Entry.Pronouns
+					} else if string(*res.JSON200.Entry.Pronouns) != "" {
+						subtitle = *res.JSON200.Entry.Pronouns
+					}
+					if subtitle != "" {
+						contactsViewPageTitle.SetSubtitle(subtitle)
+					}
+
+					contactsViewStatusPage.SetTitle(title)
 				}()
 			}
 		}
@@ -1762,6 +1780,7 @@ func main() {
 
 			switch tag {
 			case resources.PageContactsView:
+				contactsViewPageTitle.SetTitle("")
 				contactsViewPageTitle.SetSubtitle("")
 			}
 		})

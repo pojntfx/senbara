@@ -573,9 +573,19 @@ Adw.Window main-window {
                                 Adw.ToolbarView {
                                     [top]
                                     Adw.HeaderBar {
-                                        title-widget: Adw.WindowTitle contacts-view-page-title {
-                                            title: bind contacts-view-page.title;
-                                        };
+                                        title-widget: Adw.WindowTitle contacts-view-page-title {};
+
+                                        [end]
+                                        Button contacts-view-delete-button {
+                                            icon-name: "user-trash-symbolic";
+                                            tooltip-text: _("Delete contact");
+                                        }
+
+                                        [end]
+                                        Button contacts-view-edit-button {
+                                            icon-name: "document-edit-symbolic";
+                                            tooltip-text: _("Edit contact");
+                                        }
                                     }
 
                                     Stack contacts-view-stack {
