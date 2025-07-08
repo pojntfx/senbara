@@ -389,7 +389,7 @@ func (c *Controller) HandleUpdateJournal(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	http.Redirect(w, r, "/journal/view?id="+string(updatedJournalEntry.ID), http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("/journal/view?id=%v", updatedJournalEntry.ID), http.StatusFound)
 }
 
 func (c *Controller) HandleViewJournal(w http.ResponseWriter, r *http.Request) {

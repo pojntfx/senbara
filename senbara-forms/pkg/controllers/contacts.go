@@ -474,7 +474,7 @@ func (c *Controller) HandleUpdateContact(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	http.Redirect(w, r, "/contacts/view?id="+string(updatedContact.ID), http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("/contacts/view?id=%v", updatedContact.ID), http.StatusFound)
 }
 
 func (c *Controller) HandleEditContact(w http.ResponseWriter, r *http.Request) {
