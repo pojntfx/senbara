@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/fs"
 	"log/slog"
+	"math"
 	"mime/multipart"
 	"net/http"
 	"net/mail"
@@ -339,16 +340,16 @@ func main() {
 
 		var (
 			welcomeGetStartedButton  = b.GetObject("welcome-get-started-button").Cast().(*gtk.Button)
-			welcomeGetStartedSpinner = b.GetObject("welcome-get-started-spinner").Cast().(*gtk.Widget)
+			welcomeGetStartedSpinner = b.GetObject("welcome-get-started-spinner").Cast().(*adw.Spinner)
 
 			configServerURLInput           = b.GetObject("config-server-url-input").Cast().(*adw.EntryRow)
 			configServerURLContinueButton  = b.GetObject("config-server-url-continue-button").Cast().(*gtk.Button)
-			configServerURLContinueSpinner = b.GetObject("config-server-url-continue-spinner").Cast().(*gtk.Widget)
+			configServerURLContinueSpinner = b.GetObject("config-server-url-continue-spinner").Cast().(*adw.Spinner)
 
 			spec openapi3.T
 
 			previewLoginButton  = b.GetObject("preview-login-button").Cast().(*gtk.Button)
-			previewLoginSpinner = b.GetObject("preview-login-spinner").Cast().(*gtk.Widget)
+			previewLoginSpinner = b.GetObject("preview-login-spinner").Cast().(*adw.Spinner)
 
 			oidcDcrInitialAccessTokenPortalUrl string
 
@@ -356,7 +357,7 @@ func main() {
 
 			configInitialAccessTokenInput        = b.GetObject("config-initial-access-token-input").Cast().(*adw.PasswordEntryRow)
 			configInitialAccessTokenLoginButton  = b.GetObject("config-initial-access-token-login-button").Cast().(*gtk.Button)
-			configInitialAccessTokenLoginSpinner = b.GetObject("config-initial-access-token-login-spinner").Cast().(*gtk.Widget)
+			configInitialAccessTokenLoginSpinner = b.GetObject("config-initial-access-token-login-spinner").Cast().(*adw.Spinner)
 
 			exchangeLoginCancelButton  = b.GetObject("exchange-login-cancel-button").Cast().(*gtk.Button)
 			exchangeLogoutCancelButton = b.GetObject("exchange-logout-cancel-button").Cast().(*gtk.Button)
@@ -368,17 +369,17 @@ func main() {
 
 			homeUserMenuButton  = b.GetObject("home-user-menu-button").Cast().(*gtk.MenuButton)
 			homeUserMenuAvatar  = b.GetObject("home-user-menu-avatar").Cast().(*adw.Avatar)
-			homeUserMenuSpinner = b.GetObject("home-user-menu-spinner").Cast().(*gtk.Widget)
+			homeUserMenuSpinner = b.GetObject("home-user-menu-spinner").Cast().(*adw.Spinner)
 
 			homeHamburgerMenuButton  = b.GetObject("home-hamburger-menu-button").Cast().(*gtk.MenuButton)
 			homeHamburgerMenuIcon    = b.GetObject("home-hamburger-menu-icon").Cast().(*gtk.Image)
-			homeHamburgerMenuSpinner = b.GetObject("home-hamburger-menu-spinner").Cast().(*gtk.Widget)
+			homeHamburgerMenuSpinner = b.GetObject("home-hamburger-menu-spinner").Cast().(*adw.Spinner)
 
 			homeSidebarContactsCountLabel   = b.GetObject("home-sidebar-contacts-count-label").Cast().(*gtk.Label)
-			homeSidebarContactsCountSpinner = b.GetObject("home-sidebar-contacts-count-spinner").Cast().(*gtk.Widget)
+			homeSidebarContactsCountSpinner = b.GetObject("home-sidebar-contacts-count-spinner").Cast().(*adw.Spinner)
 
 			homeSidebarJournalEntriesCountLabel   = b.GetObject("home-sidebar-journal-entries-count-label").Cast().(*gtk.Label)
-			homeSidebarJournalEntriesCountSpinner = b.GetObject("home-sidebar-journal-entries-count-spinner").Cast().(*gtk.Widget)
+			homeSidebarJournalEntriesCountSpinner = b.GetObject("home-sidebar-journal-entries-count-spinner").Cast().(*adw.Spinner)
 
 			contactsStack       = b.GetObject("contacts-stack").Cast().(*gtk.Stack)
 			contactsList        = b.GetObject("contacts-list").Cast().(*gtk.ListBox)
@@ -392,7 +393,7 @@ func main() {
 			contactsCreateDialog = contactsCreateDialogBuilder.GetObject("contacts-create-dialog").Cast().(*adw.Dialog)
 
 			contactsCreateDialogAddButton  = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-add-button").Cast().(*gtk.Button)
-			contactsCreateDialogAddSpinner = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-add-spinner").Cast().(*gtk.Widget)
+			contactsCreateDialogAddSpinner = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-add-spinner").Cast().(*adw.Spinner)
 
 			contactsCreateDialogFirstNameInput = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-first-name-input").Cast().(*adw.EntryRow)
 			contactsCreateDialogLastNameInput  = contactsCreateDialogBuilder.GetObject("contacts-create-dialog-last-name-input").Cast().(*adw.EntryRow)
@@ -417,6 +418,9 @@ func main() {
 			contactsViewBirthdayRow = b.GetObject("contacts-view-birthday").Cast().(*adw.ActionRow)
 			contactsViewAddressRow  = b.GetObject("contacts-view-address").Cast().(*adw.ActionRow)
 			contactsViewNotesRow    = b.GetObject("contacts-view-notes").Cast().(*adw.ActionRow)
+
+			contactsViewDebtsListBox      = b.GetObject("contacts-view-debts").Cast().(*gtk.ListBox)
+			contactsViewActivitiesListBox = b.GetObject("contacts-view-activities").Cast().(*gtk.ListBox)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -1774,6 +1778,89 @@ func main() {
 					} else {
 						contactsViewOptionalFieldsPreferencesGroup.SetVisible(false)
 					}
+
+					contactsViewDebtsListBox.RemoveAll()
+
+					for _, debt := range *res.JSON200.Debts {
+						r := adw.NewActionRow()
+
+						subtitle := ""
+						if *debt.Amount <= 0.0 {
+							subtitle = gcore.Local(fmt.Sprintf("You owe %v %v %v", *res.JSON200.Entry.FirstName, math.Abs(float64(*debt.Amount)), *debt.Currency))
+						} else {
+							subtitle = gcore.Local(fmt.Sprintf("%v owes you %v %v", *res.JSON200.Entry.FirstName, math.Abs(float64(*debt.Amount)), *debt.Currency))
+						}
+
+						if *debt.Description != "" {
+							subtitle += ": " + *debt.Description
+						} else {
+							subtitle += "."
+						}
+
+						r.SetTitle(subtitle)
+
+						menuButton := gtk.NewMenuButton()
+						menuButton.SetVAlign(gtk.AlignCenter)
+						menuButton.SetIconName("view-more-symbolic")
+						menuButton.AddCSSClass("flat")
+
+						menu := gio.NewMenu()
+
+						menu.Append(gcore.Local("Settle debt"), "app.settleDebt")
+						menu.Append(gcore.Local("Edit debt"), "app.editDebt")
+
+						menuButton.SetMenuModel(menu)
+
+						r.AddSuffix(menuButton)
+
+						contactsViewDebtsListBox.Append(r)
+					}
+
+					addDebtButton := adw.NewButtonRow()
+					addDebtButton.SetStartIconName("list-add-symbolic")
+					addDebtButton.SetTitle(gcore.Local("Add a debt"))
+					addDebtButton.SetSensitive(false)
+
+					contactsViewDebtsListBox.Append(addDebtButton)
+
+					contactsViewActivitiesListBox.RemoveAll()
+
+					for _, activity := range *res.JSON200.Activities {
+						r := adw.NewActionRow()
+
+						r.SetTitle(fmt.Sprintf("%v (%v)", *activity.Name, glib.NewDateTimeFromGo(activity.Date.Time).Format("%x")))
+
+						if activity.Description != nil && *activity.Description != "" {
+							r.SetSubtitle(*activity.Description)
+						}
+
+						r.SetActionName("app.openActivity")
+
+						menuButton := gtk.NewMenuButton()
+						menuButton.SetVAlign(gtk.AlignCenter)
+						menuButton.SetIconName("view-more-symbolic")
+						menuButton.AddCSSClass("flat")
+
+						menu := gio.NewMenu()
+
+						menu.Append(gcore.Local("Edit activity"), "app.editActivity")
+						menu.Append(gcore.Local("Delete activity"), "app.deleteActivity")
+
+						menuButton.SetMenuModel(menu)
+
+						r.AddSuffix(menuButton)
+
+						r.AddSuffix(gtk.NewImageFromIconName("go-next-symbolic"))
+
+						contactsViewActivitiesListBox.Append(r)
+					}
+
+					addActivityButton := adw.NewButtonRow()
+					addActivityButton.SetStartIconName("list-add-symbolic")
+					addActivityButton.SetTitle(gcore.Local("Add an activity"))
+					addActivityButton.SetSensitive(false)
+
+					contactsViewActivitiesListBox.Append(addActivityButton)
 				}()
 			}
 		}

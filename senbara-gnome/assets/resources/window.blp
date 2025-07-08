@@ -660,29 +660,12 @@ Adw.Window main-window {
                                                         Adw.PreferencesGroup {
                                                             title: _("Debts");
 
-                                                            Adw.ActionRow {
-                                                                subtitle: _("You owe Jean 50 CAD: Lunch the other day");
-
-                                                                [suffix]
-                                                                MenuButton {
-                                                                    icon-name: "view-more-symbolic";
-                                                                    primary: true;
-                                                                    valign: center;
-
-                                                                    styles [
-                                                                        "flat",
-                                                                    ]
-                                                                }
+                                                            Gtk.ListBox contacts-view-debts {
+                                                                selection-mode: none;
 
                                                                 styles [
-                                                                    "property",
+                                                                    "boxed-list",
                                                                 ]
-                                                            }
-
-                                                            Adw.ButtonRow {
-                                                                start-icon-name: "list-add-symbolic";
-                                                                title: _("Add a debt");
-                                                                action-name: "app.createDebt";
                                                             }
 
                                                             styles [
@@ -693,36 +676,12 @@ Adw.Window main-window {
                                                         Adw.PreferencesGroup {
                                                             title: _("Activites");
 
-                                                            Adw.ActionRow {
-                                                                title: _("Lunch");
-                                                                subtitle: _("The business lunch meeting took place at The Capital Grille downtown, where I met with potential client Jennifer Martinez from TechSolutions Inc. to discuss our upcoming software implementation project. We reviewed the project timeline, budget requirements, and key deliverables while enjoying our meals - she ordered the lobster bisque and grilled chicken, while I had the Caesar salad and ribeye steak. By the conclusion of our 90-minute meeting, we had successfully negotiated the contract terms and scheduled a follow-up meeting for next week to finalize the partnership agreement.");
-                                                                action-name: "app.openActivity";
-
-                                                                [suffix]
-                                                                MenuButton {
-                                                                    icon-name: "view-more-symbolic";
-                                                                    primary: true;
-                                                                    valign: center;
-
-                                                                    styles [
-                                                                        "flat",
-                                                                    ]
-                                                                }
-
-                                                                [suffix]
-                                                                Gtk.Image {
-                                                                    icon-name: "go-next-symbolic";
-                                                                }
+                                                            Gtk.ListBox contacts-view-activities {
+                                                                selection-mode: none;
 
                                                                 styles [
-                                                                    "property",
+                                                                    "boxed-list",
                                                                 ]
-                                                            }
-
-                                                            Adw.ButtonRow {
-                                                                start-icon-name: "list-add-symbolic";
-                                                                title: _("Add an activity");
-                                                                action-name: "app.createActivity";
                                                             }
 
                                                             styles [
