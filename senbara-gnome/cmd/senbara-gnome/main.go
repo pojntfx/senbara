@@ -411,6 +411,12 @@ func main() {
 			contactsViewErrorStatusPage        = b.GetObject("contacts-view-error-status-page").Cast().(*adw.StatusPage)
 			contactsViewErrorRefreshButton     = b.GetObject("contacts-view-error-refresh-button").Cast().(*gtk.Button)
 			contactsViewErrorCopyDetailsButton = b.GetObject("contacts-view-error-copy-details").Cast().(*gtk.Button)
+
+			contactsViewOptionalFieldsPreferencesGroup = b.GetObject("contacts-view-optional-fields").Cast().(*adw.PreferencesGroup)
+
+			contactsViewBirthdayRow = b.GetObject("contacts-view-birthday").Cast().(*adw.ActionRow)
+			contactsViewAddressRow  = b.GetObject("contacts-view-address").Cast().(*adw.ActionRow)
+			contactsViewNotesRow    = b.GetObject("contacts-view-notes").Cast().(*adw.ActionRow)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -1735,6 +1741,38 @@ func main() {
 					}
 					if subtitle != "" {
 						contactsViewPageTitle.SetSubtitle(subtitle)
+					}
+
+					var (
+						birthday = res.JSON200.Entry.Birthday
+						address  = res.JSON200.Entry.Address
+						notes    = res.JSON200.Entry.Notes
+					)
+					if (birthday != nil) || (*address != "") || (*notes != "") {
+						if birthday != nil {
+							contactsViewBirthdayRow.SetVisible(true)
+							contactsViewBirthdayRow.SetSubtitle(glib.NewDateTimeFromGo(birthday.Time).Format("%x"))
+						} else {
+							contactsViewBirthdayRow.SetVisible(false)
+						}
+
+						if *address != "" {
+							contactsViewAddressRow.SetVisible(true)
+							contactsViewAddressRow.SetSubtitle(*address)
+						} else {
+							contactsViewAddressRow.SetVisible(false)
+						}
+
+						if *notes != "" {
+							contactsViewNotesRow.SetVisible(true)
+							contactsViewNotesRow.SetSubtitle(*notes)
+						} else {
+							contactsViewNotesRow.SetVisible(false)
+						}
+
+						contactsViewOptionalFieldsPreferencesGroup.SetVisible(true)
+					} else {
+						contactsViewOptionalFieldsPreferencesGroup.SetVisible(false)
 					}
 				}()
 			}

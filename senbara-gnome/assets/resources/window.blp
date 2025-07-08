@@ -619,31 +619,33 @@ Adw.Window main-window {
                                                         margin-bottom: 24;
                                                         margin-start: 12;
 
-                                                        Adw.PreferencesGroup {
-                                                            Adw.ActionRow {
+                                                        Adw.PreferencesGroup contacts-view-optional-fields {
+                                                            visible: false;
+
+                                                            Adw.ActionRow contacts-view-birthday {
                                                                 icon-name: "birthday-symbolic";
                                                                 tooltip-text: _("Birthday");
-                                                                subtitle: _("1970-01-01");
+                                                                visible: false;
 
                                                                 styles [
                                                                     "property",
                                                                 ]
                                                             }
 
-                                                            Adw.ActionRow {
+                                                            Adw.ActionRow contacts-view-address {
                                                                 icon-name: "mark-location-symbolic";
                                                                 tooltip-text: _("Address");
-                                                                subtitle: _("1337 Hacker Way");
+                                                                visible: false;
 
                                                                 styles [
                                                                     "property",
                                                                 ]
                                                             }
 
-                                                            Adw.ActionRow {
+                                                            Adw.ActionRow contacts-view-notes {
                                                                 icon-name: "accessories-text-editor-symbolic";
                                                                 tooltip-text: _("Notes");
-                                                                subtitle: _("Super solid dev who loves doing OSS. Nerd in the best way - loves talking out about architecture and always down to help others. Pretty well-known in the community, speaks at conferences sometimes.");
+                                                                visible: false;
 
                                                                 styles [
                                                                     "property",
