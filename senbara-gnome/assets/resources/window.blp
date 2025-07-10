@@ -677,7 +677,7 @@ Adw.Window main-window {
                                                             title: _("Activites");
 
                                                             Gtk.ListBox contacts-view-activities {
-                                                                selection-mode: none;
+                                                                selection-mode: browse;
 
                                                                 styles [
                                                                     "boxed-list",
@@ -712,6 +712,95 @@ Adw.Window main-window {
                                                             }
 
                                                             Button contacts-view-error-copy-details {
+                                                                halign: center;
+                                                                label: _("Copy details");
+                                                            }
+                                                        }
+                                                    };
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            Adw.NavigationPage activities-view-page {
+                                title: _("Activity");
+                                tag: "/activities/view";
+
+                                Adw.ToolbarView {
+                                    [top]
+                                    Adw.HeaderBar {
+                                        title-widget: Adw.WindowTitle activities-view-page-title {};
+
+                                        [end]
+                                        Button activities-view-delete-button {
+                                            icon-name: "user-trash-symbolic";
+                                            tooltip-text: _("Delete activity");
+                                            action-name: "app.deleteActivity";
+                                        }
+
+                                        [end]
+                                        Button activities-view-edit-button {
+                                            icon-name: "document-edit-symbolic";
+                                            tooltip-text: _("Edit activity");
+                                            action-name: "app.editActivity";
+                                        }
+                                    }
+
+                                    ScrolledWindow {
+                                        Adw.Clamp {
+                                            maximum-size: 600;
+
+                                            Stack activities-view-stack {
+                                                StackPage {
+                                                    name: "/activities/view/loading";
+
+                                                    child: Box {
+                                                        halign: center;
+
+                                                        Adw.Spinner {
+                                                            width-request: 32;
+                                                            height-request: 32;
+                                                        }
+                                                    };
+                                                }
+
+                                                StackPage {
+                                                    name: "/activities/view/data";
+
+                                                    child: Label activities-view-body {
+                                                        margin-top: 24;
+                                                        margin-end: 12;
+                                                        margin-bottom: 24;
+                                                        margin-start: 12;
+                                                        selectable: true;
+                                                        halign: start;
+                                                        valign: start;
+                                                    };
+                                                }
+
+                                                StackPage {
+                                                    name: "/activities/view/error";
+
+                                                    child: Adw.StatusPage activities-view-error-status-page {
+                                                        title: _("Activity could not be loaded");
+                                                        icon-name: "dialog-warning-symbolic";
+
+                                                        Box {
+                                                            spacing: 10;
+                                                            halign: center;
+
+                                                            Button activities-view-error-refresh-button {
+                                                                halign: center;
+                                                                label: _("Refresh");
+
+                                                                styles [
+                                                                    "suggested-action",
+                                                                ]
+                                                            }
+
+                                                            Button activities-view-error-copy-details {
                                                                 halign: center;
                                                                 label: _("Copy details");
                                                             }

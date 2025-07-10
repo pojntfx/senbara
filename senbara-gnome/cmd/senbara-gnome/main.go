@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"io"
 	"io/fs"
 	"log/slog"
@@ -34,6 +36,8 @@ import (
 	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
 	"github.com/pojntfx/senbara/senbara-gnome/config/locales"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
 	"github.com/zalando/go-keyring"
 )
 
@@ -43,6 +47,8 @@ var (
 	errMissingPrivacyURL        = errors.New("missing privacy policy URL")
 	errMissingContactID         = errors.New("missing contact ID")
 	errInvalidContactID         = errors.New("invalid contact ID")
+	errMissingActivityID        = errors.New("missing activity ID")
+	errInvalidActivityID        = errors.New("invalid activity ID")
 )
 
 const (
@@ -382,7 +388,7 @@ func main() {
 			homeSidebarJournalEntriesCountSpinner = b.GetObject("home-sidebar-journal-entries-count-spinner").Cast().(*adw.Spinner)
 
 			contactsStack       = b.GetObject("contacts-stack").Cast().(*gtk.Stack)
-			contactsList        = b.GetObject("contacts-list").Cast().(*gtk.ListBox)
+			contactsListBox     = b.GetObject("contacts-list").Cast().(*gtk.ListBox)
 			contactsSearchEntry = b.GetObject("contacts-searchentry").Cast().(*gtk.SearchEntry)
 
 			contactsAddButton    = b.GetObject("contacts-add-button").Cast().(*gtk.Button)
@@ -421,6 +427,14 @@ func main() {
 
 			contactsViewDebtsListBox      = b.GetObject("contacts-view-debts").Cast().(*gtk.ListBox)
 			contactsViewActivitiesListBox = b.GetObject("contacts-view-activities").Cast().(*gtk.ListBox)
+
+			activitiesViewPageTitle              = b.GetObject("activities-view-page-title").Cast().(*adw.WindowTitle)
+			activitiesViewStack                  = b.GetObject("activities-view-stack").Cast().(*gtk.Stack)
+			activitiesViewErrorStatusPage        = b.GetObject("activities-view-error-status-page").Cast().(*adw.StatusPage)
+			activitiesViewErrorRefreshButton     = b.GetObject("activities-view-error-refresh-button").Cast().(*gtk.Button)
+			activitiesViewErrorCopyDetailsButton = b.GetObject("activities-view-error-copy-details").Cast().(*gtk.Button)
+
+			activitiesViewPageBodyLabel = b.GetObject("activities-view-body").Cast().(*gtk.Label)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -796,7 +810,7 @@ func main() {
 
 				visibleContactsCount = 0
 
-				contactsList.InvalidateFilter()
+				contactsListBox.InvalidateFilter()
 
 				if visibleContactsCount > 0 {
 					contactsStack.SetVisibleChildName(resources.PageContactsList)
@@ -806,7 +820,7 @@ func main() {
 			}()
 		})
 
-		contactsList.SetFilterFunc(func(row *gtk.ListBoxRow) (ok bool) {
+		contactsListBox.SetFilterFunc(func(row *gtk.ListBoxRow) (ok bool) {
 			var (
 				r = row.Cast().(*adw.ActionRow)
 				f = strings.ToLower(contactsSearchEntry.Text())
@@ -986,6 +1000,30 @@ func main() {
 					contactsViewStack.SetVisibleChildName(resources.PageContactsViewData)
 				} else {
 					contactsViewStack.SetVisibleChildName(resources.PageContactsViewError)
+				}
+			},
+		)
+
+		handleActivitiesViewError,
+			enableActivitiesViewLoading,
+			disableActivitiesViewLoading,
+			clearActivitiesViewError := createErrAndLoadingHandlers(
+			activitiesViewErrorStatusPage,
+			activitiesViewErrorRefreshButton,
+			activitiesViewErrorCopyDetailsButton,
+
+			func() {
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageActivitiesView})
+			},
+
+			func() {
+				activitiesViewStack.SetVisibleChildName(resources.PageActivitiesViewLoading)
+			},
+			func(err string) {
+				if err == "" {
+					activitiesViewStack.SetVisibleChildName(resources.PageActivitiesViewData)
+				} else {
+					activitiesViewStack.SetVisibleChildName(resources.PageActivitiesViewError)
 				}
 			},
 		)
@@ -1580,7 +1618,14 @@ func main() {
 		})
 		a.AddAction(copyErrorToClipboardAction)
 
-		selectedContactID := -1
+		md := goldmark.New(
+			goldmark.WithExtensions(extension.GFM),
+		)
+
+		var (
+			selectedContactID  = -1
+			selectedActivityID = -1
+		)
 
 		handleHomeNavigation := func() {
 			var (
@@ -1634,7 +1679,7 @@ func main() {
 
 					defer clearContactsError()
 
-					contactsList.RemoveAll()
+					contactsListBox.RemoveAll()
 
 					contactsCount = len(*res.JSON200)
 					if contactsCount > 0 {
@@ -1681,7 +1726,7 @@ func main() {
 
 							r.AddSuffix(gtk.NewImageFromIconName("go-next-symbolic"))
 
-							contactsList.Append(r)
+							contactsListBox.Append(r)
 						}
 					} else {
 						contactsAddButton.SetVisible(false)
@@ -1834,7 +1879,7 @@ func main() {
 							r.SetSubtitle(*activity.Description)
 						}
 
-						r.SetActionName("app.openActivity")
+						r.SetName("/activities/view?id=" + strconv.Itoa(int(*activity.Id)))
 
 						menuButton := gtk.NewMenuButton()
 						menuButton.SetVAlign(gtk.AlignCenter)
@@ -1862,10 +1907,65 @@ func main() {
 
 					contactsViewActivitiesListBox.Append(addActivityButton)
 				}()
+
+			case resources.PageActivitiesView:
+				go func() {
+					enableActivitiesViewLoading()
+					defer disableActivitiesViewLoading()
+
+					redirected, c, _, err := authorize(
+						ctx,
+
+						true,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for activities view page", "err", err)
+
+						handleActivitiesViewError(err)
+
+						return
+					} else if redirected {
+						return
+					}
+
+					log.Debug("Getting activity", "id", selectedActivityID)
+
+					res, err := c.GetActivityWithResponse(ctx, int64(selectedActivityID))
+					if err != nil {
+						handleActivitiesViewError(err)
+
+						return
+					}
+
+					log.Debug("Got activity", "status", res.StatusCode())
+
+					if res.StatusCode() != http.StatusOK {
+						handleActivitiesViewError(errors.New(res.Status()))
+
+						return
+					}
+
+					activitiesViewPageTitle.SetTitle(*res.JSON200.Name)
+					activitiesViewPageTitle.SetSubtitle(glib.NewDateTimeFromGo(res.JSON200.Date.Time).Format("%x"))
+
+					var buf bytes.Buffer
+					if err := md.Convert([]byte(*res.JSON200.Description), &buf); err != nil {
+						log.Warn("Could not render Markdown for activities view page", "err", err)
+
+						handleActivitiesViewError(err)
+
+						return
+					}
+
+					// TODO: Render this HTML with a transparent WebView
+					activitiesViewPageBodyLabel.SetText(string(template.HTML(buf.String())))
+
+					defer clearActivitiesViewError()
+				}()
 			}
 		}
 
-		contactsList.ConnectRowSelected(func(row *gtk.ListBoxRow) {
+		contactsListBox.ConnectRowSelected(func(row *gtk.ListBoxRow) {
 			if row != nil {
 				u, err := url.Parse(row.Cast().(*adw.ActionRow).Name())
 				if err != nil {
@@ -1900,6 +2000,41 @@ func main() {
 			}
 		})
 
+		contactsViewActivitiesListBox.ConnectRowSelected(func(row *gtk.ListBoxRow) {
+			if row != nil {
+				u, err := url.Parse(row.Cast().(*adw.ActionRow).Name())
+				if err != nil {
+					log.Warn("Could not parse activity row URL", "err", err)
+
+					handlePanic(err)
+
+					return
+				}
+
+				rid := u.Query().Get("id")
+				if strings.TrimSpace(rid) == "" {
+					log.Warn("Could not get ID from activity row URL", "err", errMissingActivityID)
+
+					handlePanic(errMissingActivityID)
+
+					return
+				}
+
+				id, err := strconv.Atoi(rid)
+				if err != nil {
+					log.Warn("Could not parse ID from activity row URL", "err", errInvalidActivityID)
+
+					handlePanic(errInvalidActivityID)
+
+					return
+				}
+
+				selectedActivityID = id
+
+				homeNavigation.PushByTag(resources.PageActivitiesView)
+			}
+		})
+
 		homeNavigation.ConnectPopped(func(page *adw.NavigationPage) {
 			handleHomeNavigation()
 
@@ -1914,6 +2049,10 @@ func main() {
 			case resources.PageContactsView:
 				contactsViewPageTitle.SetTitle("")
 				contactsViewPageTitle.SetSubtitle("")
+
+			case resources.PageActivitiesView:
+				activitiesViewPageTitle.SetTitle("")
+				activitiesViewPageTitle.SetSubtitle("")
 			}
 		})
 		homeNavigation.ConnectPushed(handleHomeNavigation)

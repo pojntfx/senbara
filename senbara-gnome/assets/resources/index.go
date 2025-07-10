@@ -51,6 +51,11 @@ const (
 	PageContactsViewLoading = "/contacts/view/loading"
 	PageContactsViewData    = "/contacts/view/data"
 	PageContactsViewError   = "/contacts/view/error"
+
+	PageActivitiesView        = "/activities/view"
+	PageActivitiesViewLoading = "/activities/view/loading"
+	PageActivitiesViewData    = "/activities/view/data"
+	PageActivitiesViewError   = "/activities/view/error"
 )
 
 //go:generate sh -c "blueprint-compiler batch-compile . . *.blp && sass .:. && glib-compile-schemas . && glib-compile-resources *.gresource.xml"
