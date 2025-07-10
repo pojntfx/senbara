@@ -13,12 +13,10 @@ github.com/danieljoos/wincred v1.2.2/go.mod h1:w7w4Utbrz8lqeMbDAK0lkNJUv5sAOkFi7
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/diamondburned/gotk4-adwaita/pkg v0.0.0-20250223021911-503726bcfce6 h1:QWtk8CfdqVuOh5ugq2SYalT1moDt6TkeYdU0xeSauis=
-github.com/diamondburned/gotk4-adwaita/pkg v0.0.0-20250223021911-503726bcfce6/go.mod h1:fkvdR7MYO1sI0ex07VYLTc+YK87v24aRFYyMJQ/xAeA=
 github.com/diamondburned/gotk4-adwaita/pkg v0.0.0-20250703085337-e94555b846b6 h1:WzOC3KtvrC1hJMz3fbJBg0Ye50nt4Tafor+a/bBHNEA=
 github.com/diamondburned/gotk4-adwaita/pkg v0.0.0-20250703085337-e94555b846b6/go.mod h1:ZzYiyPe0TqsukfPHi0sK/WwKzm0wIJdSRylLnuvAZNw=
-github.com/diamondburned/gotk4/pkg v0.3.1 h1:uhkXSUPUsCyz3yujdvl7DSN8jiLS2BgNTQE95hk6ygg=
-github.com/diamondburned/gotk4/pkg v0.3.1/go.mod h1:DqeOW+MxSZFg9OO+esk4JgQk0TiUJJUBfMltKhG+ub4=
+github.com/diamondburned/gotk4-webkitgtk/pkg v0.0.0-20240108031600-dee1973cf440 h1:b01w0D7EZd8t9P3Yu0FcU0rO6opQNpUNCiRN5iHA6oY=
+github.com/diamondburned/gotk4-webkitgtk/pkg v0.0.0-20240108031600-dee1973cf440/go.mod h1:OhRc0/WmTlhfqotY57+oySYNtG2LBvl6KIkf2kzEcn4=
 github.com/diamondburned/gotk4/pkg v0.3.2-0.20250703063411-16654385f59a h1:dN2jYYZ71hFhoKFSn24pQdKWLZb/XDydBt8pEIkFjJo=
 github.com/diamondburned/gotk4/pkg v0.3.2-0.20250703063411-16654385f59a/go.mod h1:O9K8+PGNFGJpAu8+u5D2Sn5Wae4hxWzHB+AeZNbV/2Q=
 github.com/getkin/kin-openapi v0.132.0 h1:3ISeLMsQzcb5v26yeJrBcdTCEQTag36ZjaGk7MIRUwk=
@@ -78,6 +76,8 @@ github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOf
 github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/ugorji/go/codec v1.2.11 h1:BMaWp1Bb6fHwEtbplGBGJ498wD+LKlNSl25MjdZY4dU=
 github.com/ugorji/go/codec v1.2.11/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
+github.com/yuin/goldmark v1.7.12 h1:YwGP/rrea2/CnCtUHgjuolG/PnMxdQtPMO5PvaE2/nY=
+github.com/yuin/goldmark v1.7.12/go.mod h1:ip/1k0VRfGynBgxOz0yCqHrbZXhcjxyuS66Brc7iBKg=
 github.com/zalando/go-keyring v0.2.6 h1:r7Yc3+H+Ux0+M72zacZoItR3UDxeWfKTcabvkI8ua9s=
 github.com/zalando/go-keyring v0.2.6/go.mod h1:2TCrxYrbUNYfNS/Kgy/LSrkSQzZ5UPVH85RwfczwvcI=
 go4.org/unsafe/assume-no-moving-gc v0.0.0-20231121144256-b99613f794b6 h1:lGdhQUN/cnWdSH3291CUuxSEqc+AsGTiDxPP3r2J0l4=

@@ -1,5 +1,6 @@
 using Gtk 4.0;
 using Adw 1;
+using WebKit 6.0;
 
 Adw.Window main-window {
     default-width: 960;
@@ -769,15 +770,7 @@ Adw.Window main-window {
                                                 StackPage {
                                                     name: "/activities/view/data";
 
-                                                    child: Label activities-view-body {
-                                                        margin-top: 24;
-                                                        margin-end: 12;
-                                                        margin-bottom: 24;
-                                                        margin-start: 12;
-                                                        selectable: true;
-                                                        halign: start;
-                                                        valign: start;
-                                                    };
+                                                    child: WebKit.WebView activities-view-body {};
                                                 }
 
                                                 StackPage {

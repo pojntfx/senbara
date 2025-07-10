@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"html/template"
 	"io"
 	"io/fs"
 	"log/slog"
@@ -24,6 +23,7 @@ import (
 	"time"
 
 	"github.com/diamondburned/gotk4-adwaita/pkg/adw"
+	"github.com/diamondburned/gotk4-webkitgtk/pkg/webkit/v6"
 	gcore "github.com/diamondburned/gotk4/pkg/core/glib"
 	"github.com/diamondburned/gotk4/pkg/gdk/v4"
 	"github.com/diamondburned/gotk4/pkg/gio/v2"
@@ -434,7 +434,7 @@ func main() {
 			activitiesViewErrorRefreshButton     = b.GetObject("activities-view-error-refresh-button").Cast().(*gtk.Button)
 			activitiesViewErrorCopyDetailsButton = b.GetObject("activities-view-error-copy-details").Cast().(*gtk.Button)
 
-			activitiesViewPageBodyLabel = b.GetObject("activities-view-body").Cast().(*gtk.Label)
+			activitiesViewPageBodyWebView = b.GetObject("activities-view-body").Cast().(*webkit.WebView)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -1873,11 +1873,8 @@ func main() {
 					for _, activity := range *res.JSON200.Activities {
 						r := adw.NewActionRow()
 
-						r.SetTitle(fmt.Sprintf("%v (%v)", *activity.Name, glib.NewDateTimeFromGo(activity.Date.Time).Format("%x")))
-
-						if activity.Description != nil && *activity.Description != "" {
-							r.SetSubtitle(*activity.Description)
-						}
+						r.SetTitle(*activity.Name)
+						r.SetSubtitle(glib.NewDateTimeFromGo(activity.Date.Time).Format("%x"))
 
 						r.SetName("/activities/view?id=" + strconv.Itoa(int(*activity.Id)))
 
@@ -1957,8 +1954,59 @@ func main() {
 						return
 					}
 
-					// TODO: Render this HTML with a transparent WebView
-					activitiesViewPageBodyLabel.SetText(string(template.HTML(buf.String())))
+					bg := gdk.NewRGBA(0, 0, 0, 0)
+					activitiesViewPageBodyWebView.SetBackgroundColor(&bg)
+
+					activitiesViewPageBodyWebView.ConnectDecidePolicy(func(decision webkit.PolicyDecisioner, decisionType webkit.PolicyDecisionType) (ok bool) {
+						if decisionType == webkit.PolicyDecisionTypeNavigationAction {
+							u, err := url.Parse(decision.(*webkit.NavigationPolicyDecision).NavigationAction().Request().URI())
+							if err != nil {
+								log.Warn("Could not parse activity view WebView", "err", err)
+
+								handleActivitiesViewError(err)
+
+								return true
+							}
+
+							openExternally := u.Scheme != "about"
+
+							log.Debug("Handling navigation in activity view WebView", "openExternally", openExternally, "url", u.String())
+
+							if openExternally {
+								go func() {
+									var (
+										fl = gtk.NewURILauncher(u.String())
+										cc = make(chan error)
+									)
+									fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
+										if err := fl.LaunchFinish(res); err != nil {
+											cc <- err
+
+											return
+										}
+
+										cc <- nil
+									})
+
+									if err := <-cc; err != nil {
+										handlePanic(err)
+
+										return
+									}
+								}()
+
+								return true
+							}
+
+							return false
+						}
+
+						return false
+					})
+
+					glib.IdleAdd(func() {
+						activitiesViewPageBodyWebView.LoadHtml(`<meta name="color-scheme" content="light dark" />`+buf.String(), "about:blank")
+					})
 
 					defer clearActivitiesViewError()
 				}()
