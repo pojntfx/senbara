@@ -1618,6 +1618,189 @@ func main() {
 		})
 		a.AddAction(copyErrorToClipboardAction)
 
+		deleteContactAction := gio.NewSimpleAction("deleteContact", glib.NewVariantType("x"))
+		deleteContactAction.ConnectActivate(func(parameter *glib.Variant) {
+			id := parameter.Int64()
+
+			log := log.With(
+				"id", id,
+			)
+
+			log.Info("Handling delete contact action", "id", id)
+
+			confirm := adw.NewAlertDialog(
+				gcore.Local("Deleting a contact"),
+				gcore.Local("Are you sure you want to delete this contact?"),
+			)
+			confirm.AddResponse("cancel", gcore.Local("Cancel"))
+			confirm.AddResponse("delete", gcore.Local("Delete"))
+			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
+			confirm.ConnectResponse(func(response string) {
+				if response == "delete" {
+					redirected, c, _, err := authorize(
+						ctx,
+
+						false,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for delete contact action", "err", err)
+
+						handlePanic(err)
+
+						return
+					} else if redirected {
+						return
+					}
+
+					log.Debug("Deleting contact")
+
+					res, err := c.DeleteContactWithResponse(ctx, int64(id))
+					if err != nil {
+						handlePanic(err)
+
+						return
+					}
+
+					log.Debug("Deleted contact", "status", res.StatusCode())
+
+					if res.StatusCode() != http.StatusOK {
+						handlePanic(errors.New(res.Status()))
+
+						return
+					}
+
+					mto.AddToast(adw.NewToast(gcore.Local("Contact deleted")))
+
+					homeNavigation.ReplaceWithTags([]string{resources.PageContacts})
+				}
+			})
+
+			confirm.Present(w)
+		})
+		a.AddAction(deleteContactAction)
+
+		settleDebtAction := gio.NewSimpleAction("settleDebt", glib.NewVariantType("x"))
+		settleDebtAction.ConnectActivate(func(parameter *glib.Variant) {
+			id := parameter.Int64()
+
+			log := log.With(
+				"id", id,
+			)
+
+			log.Info("Handling settle debt action", "id", id)
+
+			confirm := adw.NewAlertDialog(
+				gcore.Local("Settling a debt"),
+				gcore.Local("Are you sure you want to settle this debt?"),
+			)
+			confirm.AddResponse("cancel", gcore.Local("Cancel"))
+			confirm.AddResponse("delete", gcore.Local("Delete"))
+			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
+			confirm.ConnectResponse(func(response string) {
+				if response == "delete" {
+					redirected, c, _, err := authorize(
+						ctx,
+
+						false,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for settle debt action", "err", err)
+
+						handlePanic(err)
+
+						return
+					} else if redirected {
+						return
+					}
+
+					log.Debug("Settling debt")
+
+					res, err := c.SettleDebtWithResponse(ctx, int64(id))
+					if err != nil {
+						handlePanic(err)
+
+						return
+					}
+
+					log.Debug("Settled debt", "status", res.StatusCode())
+
+					if res.StatusCode() != http.StatusOK {
+						handlePanic(errors.New(res.Status()))
+
+						return
+					}
+
+					mto.AddToast(adw.NewToast(gcore.Local("Settled debt")))
+
+					homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
+				}
+			})
+
+			confirm.Present(w)
+		})
+		a.AddAction(settleDebtAction)
+
+		deleteActivityAction := gio.NewSimpleAction("deleteActivity", glib.NewVariantType("x"))
+		deleteActivityAction.ConnectActivate(func(parameter *glib.Variant) {
+			id := parameter.Int64()
+
+			log := log.With(
+				"id", id,
+			)
+
+			log.Info("Handling delete activity action", "id", id)
+
+			confirm := adw.NewAlertDialog(
+				gcore.Local("Deleting an activity"),
+				gcore.Local("Are you sure you want to delete this activity?"),
+			)
+			confirm.AddResponse("cancel", gcore.Local("Cancel"))
+			confirm.AddResponse("delete", gcore.Local("Delete"))
+			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
+			confirm.ConnectResponse(func(response string) {
+				if response == "delete" {
+					redirected, c, _, err := authorize(
+						ctx,
+
+						false,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for delete activity action", "err", err)
+
+						handlePanic(err)
+
+						return
+					} else if redirected {
+						return
+					}
+
+					log.Debug("Deleting activity")
+
+					res, err := c.DeleteActivityWithResponse(ctx, int64(id))
+					if err != nil {
+						handlePanic(err)
+
+						return
+					}
+
+					log.Debug("Deleted activity", "status", res.StatusCode())
+
+					if res.StatusCode() != http.StatusOK {
+						handlePanic(errors.New(res.Status()))
+
+						return
+					}
+
+					mto.AddToast(adw.NewToast(gcore.Local("Activity deleted")))
+
+					homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
+				}
+			})
+
+			confirm.Present(w)
+		})
+		a.AddAction(deleteActivityAction)
+
 		md := goldmark.New(
 			goldmark.WithExtensions(extension.GFM),
 		)
@@ -1717,8 +1900,13 @@ func main() {
 
 							menu := gio.NewMenu()
 
-							menu.Append(gcore.Local("Delete contact"), "app.deleteContact")
-							menu.Append(gcore.Local("Edit contact"), "app.editContact")
+							deleteContactMenuItem := gio.NewMenuItem(gcore.Local("Delete contact"), "app.deleteContact")
+							deleteContactMenuItem.SetActionAndTargetValue("app.deleteContact", glib.NewVariantInt64(*contact.Id))
+							menu.AppendItem(deleteContactMenuItem)
+
+							editContactMenuItem := gio.NewMenuItem(gcore.Local("Edit contact"), "app.editContact")
+							editContactMenuItem.SetActionAndTargetValue("app.editContact", glib.NewVariantInt64(*contact.Id))
+							menu.AppendItem(editContactMenuItem)
 
 							menuButton.SetMenuModel(menu)
 
@@ -1851,8 +2039,15 @@ func main() {
 
 						menu := gio.NewMenu()
 
-						menu.Append(gcore.Local("Settle debt"), "app.settleDebt")
-						menu.Append(gcore.Local("Edit debt"), "app.editDebt")
+						settleDebtMenuItem := gio.NewMenuItem(gcore.Local("Settle debt"), "app.settleDebt")
+						settleDebtMenuItem.SetActionAndTargetValue("app.settleDebt", glib.NewVariantInt64(*debt.Id))
+
+						menu.AppendItem(settleDebtMenuItem)
+
+						editDebtMenuItem := gio.NewMenuItem(gcore.Local("Edit debt"), "app.editDebt")
+						editDebtMenuItem.SetActionAndTargetValue("app.editDebt", glib.NewVariantInt64(*debt.Id))
+
+						menu.AppendItem(editDebtMenuItem)
 
 						menuButton.SetMenuModel(menu)
 
@@ -1885,8 +2080,13 @@ func main() {
 
 						menu := gio.NewMenu()
 
-						menu.Append(gcore.Local("Edit activity"), "app.editActivity")
-						menu.Append(gcore.Local("Delete activity"), "app.deleteActivity")
+						deleteActivityMenuItem := gio.NewMenuItem(gcore.Local("Delete activity"), "app.deleteActivity")
+						deleteActivityMenuItem.SetActionAndTargetValue("app.deleteActivity", glib.NewVariantInt64(*activity.Id))
+						menu.AppendItem(deleteActivityMenuItem)
+
+						editActivityMenuItem := gio.NewMenuItem(gcore.Local("Edit activity"), "app.editActivity")
+						editActivityMenuItem.SetActionAndTargetValue("app.editActivity", glib.NewVariantInt64(*activity.Id))
+						menu.AppendItem(editActivityMenuItem)
 
 						menuButton.SetMenuModel(menu)
 
