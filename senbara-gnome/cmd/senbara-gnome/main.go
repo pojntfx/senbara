@@ -337,6 +337,7 @@ func main() {
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
 
 		contactsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceContactsCreateDialogUIPath)
+		debtsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceDebtsCreateDialogUIPath)
 
 		w = b.GetObject("main-window").Cast().(*adw.Window)
 
@@ -435,6 +436,11 @@ func main() {
 			activitiesViewErrorCopyDetailsButton = b.GetObject("activities-view-error-copy-details").Cast().(*gtk.Button)
 
 			activitiesViewPageBodyWebView = b.GetObject("activities-view-body").Cast().(*webkit.WebView)
+
+			debtsCreateDialog = debtsCreateDialogBuilder.GetObject("debts-create-dialog").Cast().(*adw.Dialog)
+
+			debtsCreateDialogAddButton  = debtsCreateDialogBuilder.GetObject("debts-create-dialog-add-button").Cast().(*gtk.Button)
+			debtsCreateDialogAddSpinner = debtsCreateDialogBuilder.GetObject("debts-create-dialog-add-spinner").Cast().(*adw.Spinner)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -895,6 +901,10 @@ func main() {
 			contactsCreateDialogEmailInput.RemoveCSSClass("error")
 		})
 
+		debtsCreateDialog.ConnectClosed(func() {
+			// TODO: Reset debts create dialog input field state
+		})
+
 		createErrAndLoadingHandlers := func(
 			errorStatusPage *adw.StatusPage,
 			errorRefreshButton *gtk.Button,
@@ -1089,6 +1099,26 @@ func main() {
 				contactsCreateDialog.Close()
 
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts})
+			}()
+		})
+
+		debtsCreateDialogAddButton.ConnectClicked(func() {
+			log.Info("Handling debt creation")
+
+			debtsCreateDialogAddButton.SetSensitive(false)
+			debtsCreateDialogAddSpinner.SetVisible(true)
+
+			go func() {
+				defer debtsCreateDialogAddSpinner.SetVisible(false)
+				defer debtsCreateDialogAddButton.SetSensitive(true)
+
+				// TODO: Create debt via API
+
+				mto.AddToast(adw.NewToast(gcore.Local("Created debt")))
+
+				debtsCreateDialog.Close()
+
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
 			}()
 		})
 
@@ -2059,7 +2089,10 @@ func main() {
 					addDebtButton := adw.NewButtonRow()
 					addDebtButton.SetStartIconName("list-add-symbolic")
 					addDebtButton.SetTitle(gcore.Local("Add a debt"))
-					addDebtButton.SetSensitive(false)
+
+					addDebtButton.ConnectActivated(func() {
+						debtsCreateDialog.Present(w)
+					})
 
 					contactsViewDebtsListBox.Append(addDebtButton)
 
