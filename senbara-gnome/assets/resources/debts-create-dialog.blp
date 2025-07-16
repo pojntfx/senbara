@@ -44,25 +44,21 @@ Adw.Dialog debts-create-dialog {
 
         Adw.PreferencesPage {
             Adw.PreferencesGroup {
-                Adw.ActionRow debts-create-dialog-debt-type-you-owe {
+                Adw.ActionRow debts-create-dialog-debt-type-you-owe-row {
                     activatable-widget: debts-create-dialog-you-owe-radio;
 
-                    [suffix]
+                    [prefix]
                     CheckButton debts-create-dialog-you-owe-radio {
                         active: true;
-                        action-name: 'app.setDebtOwing';
-                        action-target: 'true';
                     }
                 }
 
-                Adw.ActionRow debts-create-dialog-debt-type-they-owe {
+                Adw.ActionRow debts-create-dialog-debt-type-they-owe-row {
                     activatable-widget: debts-create-dialog-they-owe-radio;
 
-                    [suffix]
+                    [prefix]
                     CheckButton debts-create-dialog-they-owe-radio {
                         group: debts-create-dialog-you-owe-radio;
-                        action-name: 'app.setDebtOwing';
-                        action-target: 'false';
                     }
                 }
             }
@@ -87,21 +83,25 @@ Adw.Dialog debts-create-dialog {
                 Adw.ExpanderRow debts-create-dialog-description-expander {
                     title: _("Description (optional)");
 
-                    TextView debts-create-dialog-description-text {
-                        wrap-mode: word;
+                    ScrolledWindow {
                         height-request: 100;
                         margin-top: 6;
                         margin-bottom: 6;
                         margin-start: 6;
                         margin-end: 6;
-                        left-margin: 12;
-                        right-margin: 12;
-                        top-margin: 12;
-                        bottom-margin: 12;
 
-                        styles [
-                            "card",
-                        ]
+                        TextView debts-create-dialog-description-input {
+                            wrap-mode: word;
+                            left-margin: 12;
+                            right-margin: 12;
+                            top-margin: 12;
+                            bottom-margin: 12;
+                            accepts-tab: false;
+
+                            styles [
+                                "card",
+                            ]
+                        }
                     }
                 }
             }

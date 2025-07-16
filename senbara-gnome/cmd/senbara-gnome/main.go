@@ -441,6 +441,17 @@ func main() {
 
 			debtsCreateDialogAddButton  = debtsCreateDialogBuilder.GetObject("debts-create-dialog-add-button").Cast().(*gtk.Button)
 			debtsCreateDialogAddSpinner = debtsCreateDialogBuilder.GetObject("debts-create-dialog-add-spinner").Cast().(*adw.Spinner)
+
+			debtsCreateDialogTitle = debtsCreateDialogBuilder.GetObject("debts-create-dialog-title").Cast().(*adw.WindowTitle)
+
+			debtsCreateDialogYouOweRadio         = debtsCreateDialogBuilder.GetObject("debts-create-dialog-you-owe-radio").Cast().(*gtk.CheckButton)
+			debtsCreateDialogAmountInput         = debtsCreateDialogBuilder.GetObject("debts-create-dialog-amount-input").Cast().(*adw.SpinRow)
+			debtsCreateDialogCurrencyInput       = debtsCreateDialogBuilder.GetObject("debts-create-dialog-currency-input").Cast().(*adw.EntryRow)
+			debtsCreateDialogDescriptionExpander = debtsCreateDialogBuilder.GetObject("debts-create-dialog-description-expander").Cast().(*adw.ExpanderRow)
+			debtsCreateDialogDescriptionInput    = debtsCreateDialogBuilder.GetObject("debts-create-dialog-description-input").Cast().(*gtk.TextView)
+
+			debtsCreateDialogYouOweActionRow  = debtsCreateDialogBuilder.GetObject("debts-create-dialog-debt-type-you-owe-row").Cast().(*adw.ActionRow)
+			debtsCreateDialogTheyOweActionRow = debtsCreateDialogBuilder.GetObject("debts-create-dialog-debt-type-they-owe-row").Cast().(*adw.ActionRow)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -901,8 +912,22 @@ func main() {
 			contactsCreateDialogEmailInput.RemoveCSSClass("error")
 		})
 
+		validateDebtsCreateDialogForm := func() {
+			if debtsCreateDialogCurrencyInput.Text() != "" {
+				debtsCreateDialogAddButton.SetSensitive(true)
+			} else {
+				debtsCreateDialogAddButton.SetSensitive(false)
+			}
+		}
+
+		debtsCreateDialogCurrencyInput.ConnectChanged(validateDebtsCreateDialogForm)
+
 		debtsCreateDialog.ConnectClosed(func() {
-			// TODO: Reset debts create dialog input field state
+			debtsCreateDialogYouOweRadio.SetActive(true)
+			debtsCreateDialogAmountInput.SetValue(0)
+			debtsCreateDialogCurrencyInput.SetText("")
+			debtsCreateDialogDescriptionExpander.SetExpanded(false)
+			debtsCreateDialogDescriptionInput.Buffer().SetText("")
 		})
 
 		createErrAndLoadingHandlers := func(
@@ -1064,8 +1089,7 @@ func main() {
 				}
 
 				var nickname *string
-				if contactsCreateDialogNicknameInput.Text() != "" {
-					v := contactsCreateDialogNicknameInput.Text()
+				if v := contactsCreateDialogNicknameInput.Text(); v != "" {
 					nickname = &v
 				}
 
@@ -1103,6 +1127,12 @@ func main() {
 		})
 
 		debtsCreateDialogAddButton.ConnectClicked(func() {
+			id := debtsCreateDialogAddButton.ActionTargetValue().Int64()
+
+			log := log.With(
+				"id", id,
+			)
+
 			log.Info("Handling debt creation")
 
 			debtsCreateDialogAddButton.SetSensitive(false)
@@ -1112,7 +1142,54 @@ func main() {
 				defer debtsCreateDialogAddSpinner.SetVisible(false)
 				defer debtsCreateDialogAddButton.SetSensitive(true)
 
-				// TODO: Create debt via API
+				redirected, c, _, err := authorize(
+					ctx,
+
+					false,
+				)
+				if err != nil {
+					log.Warn("Could not authorize user for create debt action", "err", err)
+
+					handlePanic(err)
+
+					return
+				} else if redirected {
+					return
+				}
+
+				var description *string
+				if v := debtsCreateDialogDescriptionInput.Buffer().Text(
+					debtsCreateDialogDescriptionInput.Buffer().StartIter(),
+					debtsCreateDialogDescriptionInput.Buffer().EndIter(),
+					true,
+				); v != "" {
+					description = &v
+				}
+
+				req := api.CreateDebtJSONRequestBody{
+					Amount:      float32(debtsCreateDialogAmountInput.Value()),
+					ContactId:   id,
+					Currency:    debtsCreateDialogCurrencyInput.Text(),
+					Description: description,
+					YouOwe:      debtsCreateDialogYouOweRadio.Active(),
+				}
+
+				log.Debug("Creating debt", "request", req)
+
+				res, err := c.CreateDebtWithResponse(ctx, req)
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+
+				log.Debug("Created debt", "status", res.StatusCode())
+
+				if res.StatusCode() != http.StatusOK {
+					handlePanic(errors.New(res.Status()))
+
+					return
+				}
 
 				mto.AddToast(adw.NewToast(gcore.Local("Created debt")))
 
@@ -1656,7 +1733,7 @@ func main() {
 				"id", id,
 			)
 
-			log.Info("Handling delete contact action", "id", id)
+			log.Info("Handling delete contact action")
 
 			confirm := adw.NewAlertDialog(
 				gcore.Local("Deleting a contact"),
@@ -1717,7 +1794,7 @@ func main() {
 				"id", id,
 			)
 
-			log.Info("Handling settle debt action", "id", id)
+			log.Info("Handling settle debt action")
 
 			confirm := adw.NewAlertDialog(
 				gcore.Local("Settling a debt"),
@@ -1778,7 +1855,7 @@ func main() {
 				"id", id,
 			)
 
-			log.Info("Handling delete activity action", "id", id)
+			log.Info("Handling delete activity action")
 
 			confirm := adw.NewAlertDialog(
 				gcore.Local("Deleting an activity"),
@@ -1891,6 +1968,8 @@ func main() {
 					}
 
 					defer clearContactsError()
+
+					validateContactsCreateDialogForm()
 
 					contactsListBox.RemoveAll()
 
@@ -2042,6 +2121,15 @@ func main() {
 						contactsViewOptionalFieldsPreferencesGroup.SetVisible(false)
 					}
 
+					validateDebtsCreateDialogForm()
+
+					debtsCreateDialogAddButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Entry.Id))
+
+					debtsCreateDialogTitle.SetSubtitle(*res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName)
+
+					debtsCreateDialogYouOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("You owe %v", *res.JSON200.Entry.FirstName)))
+					debtsCreateDialogTheyOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("%v owes you", *res.JSON200.Entry.FirstName)))
+
 					contactsViewDebtsListBox.RemoveAll()
 
 					for _, debt := range *res.JSON200.Debts {
@@ -2056,8 +2144,6 @@ func main() {
 
 						if *debt.Description != "" {
 							subtitle += ": " + *debt.Description
-						} else {
-							subtitle += "."
 						}
 
 						r.SetTitle(subtitle)
