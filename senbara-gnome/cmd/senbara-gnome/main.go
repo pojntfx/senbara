@@ -338,6 +338,7 @@ func main() {
 
 		contactsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceContactsCreateDialogUIPath)
 		debtsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceDebtsCreateDialogUIPath)
+		activitiesCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ActivitiesDebtsCreateDialogUIPath)
 
 		w = b.GetObject("main-window").Cast().(*adw.Window)
 
@@ -452,6 +453,13 @@ func main() {
 
 			debtsCreateDialogYouOweActionRow  = debtsCreateDialogBuilder.GetObject("debts-create-dialog-debt-type-you-owe-row").Cast().(*adw.ActionRow)
 			debtsCreateDialogTheyOweActionRow = debtsCreateDialogBuilder.GetObject("debts-create-dialog-debt-type-they-owe-row").Cast().(*adw.ActionRow)
+
+			activitiesCreateDialog = activitiesCreateDialogBuilder.GetObject("activities-create-dialog").Cast().(*adw.Dialog)
+
+			activitiesCreateDialogAddButton  = activitiesCreateDialogBuilder.GetObject("activities-create-dialog-add-button").Cast().(*gtk.Button)
+			activitiesCreateDialogAddSpinner = activitiesCreateDialogBuilder.GetObject("activities-create-dialog-add-spinner").Cast().(*adw.Spinner)
+
+			activitiesCreateDialogTitle = activitiesCreateDialogBuilder.GetObject("activities-create-dialog-title").Cast().(*adw.WindowTitle)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -1194,6 +1202,32 @@ func main() {
 				mto.AddToast(adw.NewToast(gcore.Local("Created debt")))
 
 				debtsCreateDialog.Close()
+
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
+			}()
+		})
+
+		activitiesCreateDialogAddButton.ConnectClicked(func() {
+			id := activitiesCreateDialogAddButton.ActionTargetValue().Int64()
+
+			log := log.With(
+				"id", id,
+			)
+
+			log.Info("Handling activity creation")
+
+			activitiesCreateDialogAddButton.SetSensitive(false)
+			activitiesCreateDialogAddSpinner.SetVisible(true)
+
+			go func() {
+				defer activitiesCreateDialogAddSpinner.SetVisible(false)
+				defer activitiesCreateDialogAddButton.SetSensitive(true)
+
+				// TODO: Make API request to create activities
+
+				mto.AddToast(adw.NewToast(gcore.Local("Created activity")))
+
+				activitiesCreateDialog.Close()
 
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
 			}()
@@ -2182,6 +2216,10 @@ func main() {
 
 					contactsViewDebtsListBox.Append(addDebtButton)
 
+					activitiesCreateDialogAddButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Entry.Id))
+
+					activitiesCreateDialogTitle.SetSubtitle(*res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName)
+
 					contactsViewActivitiesListBox.RemoveAll()
 
 					for _, activity := range *res.JSON200.Activities {
@@ -2219,7 +2257,10 @@ func main() {
 					addActivityButton := adw.NewButtonRow()
 					addActivityButton.SetStartIconName("list-add-symbolic")
 					addActivityButton.SetTitle(gcore.Local("Add an activity"))
-					addActivityButton.SetSensitive(false)
+
+					addActivityButton.ConnectActivated(func() {
+						activitiesCreateDialog.Present(w)
+					})
 
 					contactsViewActivitiesListBox.Append(addActivityButton)
 				}()
@@ -2369,6 +2410,11 @@ func main() {
 
 		contactsViewActivitiesListBox.ConnectRowSelected(func(row *gtk.ListBoxRow) {
 			if row != nil {
+				row, ok := row.Cast().(*adw.ActionRow)
+				if !ok {
+					return
+				}
+
 				u, err := url.Parse(row.Cast().(*adw.ActionRow).Name())
 				if err != nil {
 					log.Warn("Could not parse activity row URL", "err", err)

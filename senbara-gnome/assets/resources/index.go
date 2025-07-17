@@ -66,6 +66,7 @@ var (
 	ResourceWindowUIPath               = path.Join(appPath, "window.ui")
 	ResourceContactsCreateDialogUIPath = path.Join(appPath, "contacts-create-dialog.ui")
 	ResourceDebtsCreateDialogUIPath    = path.Join(appPath, "debts-create-dialog.ui")
+	ActivitiesDebtsCreateDialogUIPath  = path.Join(appPath, "activities-create-dialog.ui")
 	ResourceIndexCSSPath               = path.Join(appPath, "index.css")
 	ResourceGSchemasCompiledPath       = path.Join(appPath, "gschemas.compiled")
 	ResourceMetainfoPath               = path.Join(appPath, "metainfo.xml")

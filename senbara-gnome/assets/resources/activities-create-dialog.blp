@@ -1,0 +1,108 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.Dialog activities-create-dialog {
+    title: _("Create an activity");
+
+    Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+            show-start-title-buttons: false;
+            show-end-title-buttons: false;
+
+            title-widget: Adw.WindowTitle activities-create-dialog-title {
+                title: bind activities-create-dialog.title;
+            };
+
+            [start]
+            Button {
+                label: _("Cancel");
+                action-name: 'window.close';
+            }
+
+            [end]
+            Button activities-create-dialog-add-button {
+                sensitive: false;
+
+                Box {
+                    spacing: 10;
+
+                    Adw.Spinner activities-create-dialog-add-spinner {
+                        visible: false;
+                    }
+
+                    Label {
+                        label: _("Create");
+                    }
+                }
+
+                styles [
+                    "suggested-action",
+                ]
+            }
+        }
+
+        Adw.PreferencesPage {
+            Adw.PreferencesGroup {
+                Adw.EntryRow activities-create-dialog-name-input {
+                    title: _("Name");
+                }
+
+                Adw.EntryRow activities-create-dialog-date-input {
+                    title: _("Date");
+
+                    [suffix]
+                    MenuButton activities-create-dialog-date-warning-button {
+                        icon-name: "dialog-warning-symbolic";
+                        tooltip-text: _("Show error");
+                        valign: center;
+                        popover: activities-create-dialog-date-popover;
+                        visible: false;
+
+                        styles [
+                            "flat",
+                            "circular",
+                        ]
+                    }
+                }
+            }
+
+            Adw.PreferencesGroup {
+                Adw.ExpanderRow activities-create-dialog-description-expander {
+                    title: _("Description");
+                    subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
+
+                    ScrolledWindow {
+                        height-request: 100;
+                        margin-top: 6;
+                        margin-bottom: 6;
+                        margin-start: 6;
+                        margin-end: 6;
+
+                        TextView activities-create-dialog-description-input {
+                            wrap-mode: word;
+                            left-margin: 12;
+                            right-margin: 12;
+                            top-margin: 12;
+                            bottom-margin: 12;
+                            accepts-tab: false;
+
+                            styles [
+                                "card",
+                                "monospace",
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+Popover activities-create-dialog-date-popover {
+    Label {
+        label: _("Not a valid date");
+        accessible-role: alert;
+        selectable: true;
+    }
+}
