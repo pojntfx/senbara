@@ -460,6 +460,15 @@ func main() {
 			activitiesCreateDialogAddSpinner = activitiesCreateDialogBuilder.GetObject("activities-create-dialog-add-spinner").Cast().(*adw.Spinner)
 
 			activitiesCreateDialogTitle = activitiesCreateDialogBuilder.GetObject("activities-create-dialog-title").Cast().(*adw.WindowTitle)
+
+			activitiesCreateDialogNameInput           = activitiesCreateDialogBuilder.GetObject("activities-create-dialog-name-input").Cast().(*adw.EntryRow)
+			activitiesCreateDialogDateInput           = activitiesCreateDialogBuilder.GetObject("activities-create-dialog-date-input").Cast().(*adw.EntryRow)
+			activitiesCreateDialogDescriptionExpander = activitiesCreateDialogBuilder.GetObject("activities-create-dialog-description-expander").Cast().(*adw.ExpanderRow)
+			activitiesCreateDialogDescriptionInput    = activitiesCreateDialogBuilder.GetObject("activities-create-dialog-description-input").Cast().(*gtk.TextView)
+
+			activitiesCreateDialogDateWarningButton = activitiesCreateDialogBuilder.GetObject("activities-create-dialog-date-warning-button").Cast().(*gtk.MenuButton)
+
+			activitiesCreateDialogPopoverLabel = activitiesCreateDialogBuilder.GetObject("activities-create-dialog-date-popover-label").Cast().(*gtk.Label)
 		)
 
 		welcomeGetStartedButton.ConnectClicked(func() {
@@ -475,6 +484,12 @@ func main() {
 				configServerURLContinueButton.SetSensitive(false)
 			}
 		}
+
+		parseLocaleDate := func(localeDate string) (time.Time, error) {
+			return time.Parse(glib.NewDateTimeFromGo(time.Date(2006, 1, 2, 0, 0, 0, 0, time.UTC)).Format("%x"), localeDate)
+		}
+
+		activitiesCreateDialogPopoverLabel.SetLabel(gcore.Local(fmt.Sprintf("Not a valid date (format: %v)", glib.NewDateTimeFromGo(time.Date(2006, 1, 2, 0, 0, 0, 0, time.UTC)).Format("%x"))))
 
 		var deregistrationLock sync.Mutex
 		deregisterOIDCClient := func() error {
@@ -938,6 +953,43 @@ func main() {
 			debtsCreateDialogDescriptionInput.Buffer().SetText("")
 		})
 
+		validateActivitiesCreateDialogForm := func() {
+			if date := activitiesCreateDialogDateInput.Text(); date != "" {
+				if _, err := parseLocaleDate(date); err != nil {
+					activitiesCreateDialogDateInput.AddCSSClass("error")
+					activitiesCreateDialogDateWarningButton.SetVisible(true)
+
+					activitiesCreateDialogAddButton.SetSensitive(false)
+
+					return
+				}
+			}
+
+			activitiesCreateDialogDateInput.RemoveCSSClass("error")
+			activitiesCreateDialogDateWarningButton.SetVisible(false)
+
+			if activitiesCreateDialogNameInput.Text() != "" &&
+				activitiesCreateDialogDateInput.Text() != "" {
+				activitiesCreateDialogAddButton.SetSensitive(true)
+			} else {
+				activitiesCreateDialogAddButton.SetSensitive(false)
+			}
+		}
+
+		activitiesCreateDialogNameInput.ConnectChanged(validateActivitiesCreateDialogForm)
+		activitiesCreateDialogDateInput.ConnectChanged(validateActivitiesCreateDialogForm)
+
+		activitiesCreateDialog.ConnectClosed(func() {
+			activitiesCreateDialogNameInput.SetText("")
+			activitiesCreateDialogDateInput.SetText("")
+
+			activitiesCreateDialogDateWarningButton.SetVisible(false)
+			activitiesCreateDialogDateInput.RemoveCSSClass("error")
+
+			activitiesCreateDialogDescriptionExpander.SetExpanded(false)
+			activitiesCreateDialogDescriptionInput.Buffer().SetText("")
+		})
+
 		createErrAndLoadingHandlers := func(
 			errorStatusPage *adw.StatusPage,
 			errorRefreshButton *gtk.Button,
@@ -1223,7 +1275,62 @@ func main() {
 				defer activitiesCreateDialogAddSpinner.SetVisible(false)
 				defer activitiesCreateDialogAddButton.SetSensitive(true)
 
-				// TODO: Make API request to create activities
+				redirected, c, _, err := authorize(
+					ctx,
+
+					false,
+				)
+				if err != nil {
+					log.Warn("Could not authorize user for create activity action", "err", err)
+
+					handlePanic(err)
+
+					return
+				} else if redirected {
+					return
+				}
+
+				var description *string
+				if v := activitiesCreateDialogDescriptionInput.Buffer().Text(
+					activitiesCreateDialogDescriptionInput.Buffer().StartIter(),
+					activitiesCreateDialogDescriptionInput.Buffer().EndIter(),
+					true,
+				); v != "" {
+					description = &v
+				}
+
+				localeDate, err := parseLocaleDate(activitiesCreateDialogDateInput.Text())
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+
+				req := api.CreateActivityJSONRequestBody{
+					ContactId: id,
+					Date: types.Date{
+						Time: localeDate,
+					},
+					Description: description,
+					Name:        activitiesCreateDialogNameInput.Text(),
+				}
+
+				log.Debug("Creating activity", "request", req)
+
+				res, err := c.CreateActivityWithResponse(ctx, req)
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+
+				log.Debug("Created activity", "status", res.StatusCode())
+
+				if res.StatusCode() != http.StatusOK {
+					handlePanic(errors.New(res.Status()))
+
+					return
+				}
 
 				mto.AddToast(adw.NewToast(gcore.Local("Created activity")))
 
@@ -2215,6 +2322,8 @@ func main() {
 					})
 
 					contactsViewDebtsListBox.Append(addDebtButton)
+
+					validateActivitiesCreateDialogForm()
 
 					activitiesCreateDialogAddButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Entry.Id))
 
