@@ -2058,6 +2058,18 @@ func main() {
 			selectedActivityID = -1
 		)
 
+		editActivityAction := gio.NewSimpleAction("editActivity", nil)
+		editActivityAction.ConnectActivate(func(parameter *glib.Variant) {
+			log := log.With(
+				"id", selectedActivityID,
+			)
+
+			log.Info("Handling edit activity action")
+
+			homeNavigation.PushByTag(resources.PageActivitiesEdit)
+		})
+		a.AddAction(editActivityAction)
+
 		handleHomeNavigation := func() {
 			var (
 				tag = homeNavigation.VisiblePage().Tag()
@@ -2350,9 +2362,7 @@ func main() {
 						deleteActivityMenuItem.SetActionAndTargetValue("app.deleteActivity", glib.NewVariantInt64(*activity.Id))
 						menu.AppendItem(deleteActivityMenuItem)
 
-						editActivityMenuItem := gio.NewMenuItem(gcore.Local("Edit activity"), "app.editActivity")
-						editActivityMenuItem.SetActionAndTargetValue("app.editActivity", glib.NewVariantInt64(*activity.Id))
-						menu.AppendItem(editActivityMenuItem)
+						menu.Append(gcore.Local("Edit activity"), "app.editActivity")
 
 						menuButton.SetMenuModel(menu)
 

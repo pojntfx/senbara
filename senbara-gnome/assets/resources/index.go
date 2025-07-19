@@ -56,6 +56,8 @@ const (
 	PageActivitiesViewLoading = "/activities/view/loading"
 	PageActivitiesViewData    = "/activities/view/data"
 	PageActivitiesViewError   = "/activities/view/error"
+
+	PageActivitiesEdit = "/activities/edit"
 )
 
 //go:generate sh -c "blueprint-compiler batch-compile . . *.blp && sass .:. && glib-compile-schemas . && glib-compile-resources *.gresource.xml"

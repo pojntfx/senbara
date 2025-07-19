@@ -806,6 +806,109 @@ Adw.Window main-window {
                                 }
                             }
 
+                            Adw.NavigationPage activities-edit-page {
+                                title: _("Edit activity");
+                                tag: "/activities/edit";
+                                can-pop: false;
+
+                                Adw.ToolbarView {
+                                    [top]
+                                    Adw.HeaderBar {
+                                        title-widget: Adw.WindowTitle activities-edit-page-title {
+                                            title: bind activities-edit-page.title;
+                                        };
+
+                                        [start]
+                                        Button {
+                                            label: _("Cancel");
+                                            action-name: "navigation.pop";
+                                        }
+
+                                        [end]
+                                        Button activities-edit-save-button {
+                                            sensitive: false;
+
+                                            Box {
+                                                spacing: 10;
+
+                                                Adw.Spinner activities-edit-save-spinner {
+                                                    visible: false;
+                                                }
+
+                                                Label {
+                                                    label: _("Save");
+                                                }
+                                            }
+
+                                            styles [
+                                                "suggested-action",
+                                            ]
+                                        }
+                                    }
+
+                                    ScrolledWindow {
+                                        Adw.Clamp {
+                                            maximum-size: 600;
+
+                                            Adw.PreferencesPage {
+                                                Adw.PreferencesGroup {
+                                                    Adw.EntryRow activities-edit-page-name-input {
+                                                        title: _("Name");
+                                                    }
+
+                                                    Adw.EntryRow activities-edit-page-date-input {
+                                                        title: _("Date");
+
+                                                        [suffix]
+                                                        MenuButton activities-edit-page-date-warning-button {
+                                                            icon-name: "dialog-warning-symbolic";
+                                                            tooltip-text: _("Show error");
+                                                            valign: center;
+                                                            popover: activities-edit-page-date-popover;
+                                                            visible: false;
+
+                                                            styles [
+                                                                "flat",
+                                                                "circular",
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+
+                                                Adw.PreferencesGroup {
+                                                    Adw.ExpanderRow activities-edit-page-description-expander {
+                                                        title: _("Description (optional)");
+                                                        subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
+
+                                                        ScrolledWindow {
+                                                            height-request: 100;
+                                                            margin-top: 6;
+                                                            margin-bottom: 6;
+                                                            margin-start: 6;
+                                                            margin-end: 6;
+
+                                                            TextView activities-edit-page-description-input {
+                                                                wrap-mode: word;
+                                                                left-margin: 12;
+                                                                right-margin: 12;
+                                                                top-margin: 12;
+                                                                bottom-margin: 12;
+                                                                accepts-tab: false;
+
+                                                                styles [
+                                                                    "card",
+                                                                    "monospace",
+                                                                ]
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             Adw.NavigationPage {
                                 title: _("Journal");
                                 tag: "/journal";
@@ -1007,5 +1110,12 @@ menu home-menu {
     item {
         label: _("About Senbara Forms");
         action: "app.about";
+    }
+}
+
+Popover activities-edit-page-date-popover {
+    Label activities-edit-page-date-popover-label {
+        accessible-role: alert;
+        selectable: true;
     }
 }
