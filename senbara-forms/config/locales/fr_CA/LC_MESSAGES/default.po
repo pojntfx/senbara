@@ -148,6 +148,9 @@ msgstr "Montant"
 msgid "Currency"
 msgstr "Devise"
 
+msgid "No description provided."
+msgstr "Aucune description fournie."
+
 # Journal
 msgid "Journal"
 msgstr "Journal"

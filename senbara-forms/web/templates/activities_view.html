@@ -18,7 +18,7 @@
     </header>
 
     <main>
-      {{ RenderMarkdown .Entry.Description }}
+      {{ RenderMarkdown (or .Entry.Description ($.Locale.Get "No description provided.")) }}
 
       <form
         id="delete"

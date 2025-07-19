@@ -2473,9 +2473,15 @@ func main() {
 						return false
 					})
 
-					glib.IdleAdd(func() {
-						activitiesViewPageBodyWebView.LoadHtml(`<meta name="color-scheme" content="light dark" />`+buf.String(), "about:blank")
-					})
+					if description := *res.JSON200.Description; description != "" {
+						glib.IdleAdd(func() {
+							activitiesViewPageBodyWebView.LoadHtml(`<meta name="color-scheme" content="light dark" />`+buf.String(), "about:blank")
+						})
+					} else {
+						glib.IdleAdd(func() {
+							activitiesViewPageBodyWebView.LoadHtml(`<meta name="color-scheme" content="light dark" />`+gcore.Local("No description provided."), "about:blank")
+						})
+					}
 
 					defer clearActivitiesViewError()
 				}()
