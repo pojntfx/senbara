@@ -444,6 +444,12 @@ func main() {
 
 			activitiesViewPageBodyWebView = b.GetObject("activities-view-body").Cast().(*webkit.WebView)
 
+			activitiesEditPageTitle              = b.GetObject("activities-edit-page-title").Cast().(*adw.WindowTitle)
+			activitiesEditStack                  = b.GetObject("activities-edit-stack").Cast().(*gtk.Stack)
+			activitiesEditErrorStatusPage        = b.GetObject("activities-edit-error-status-page").Cast().(*adw.StatusPage)
+			activitiesEditErrorRefreshButton     = b.GetObject("activities-edit-error-refresh-button").Cast().(*gtk.Button)
+			activitiesEditErrorCopyDetailsButton = b.GetObject("activities-edit-error-copy-details").Cast().(*gtk.Button)
+
 			debtsCreateDialog = debtsCreateDialogBuilder.GetObject("debts-create-dialog").Cast().(*adw.Dialog)
 
 			debtsCreateDialogAddButton  = debtsCreateDialogBuilder.GetObject("debts-create-dialog-add-button").Cast().(*gtk.Button)
@@ -1125,6 +1131,30 @@ func main() {
 					activitiesViewStack.SetVisibleChildName(resources.PageActivitiesViewData)
 				} else {
 					activitiesViewStack.SetVisibleChildName(resources.PageActivitiesViewError)
+				}
+			},
+		)
+
+		handleActivitiesEditError,
+			enableActivitiesEditLoading,
+			disableActivitiesEditLoading,
+			clearActivitiesEditError := createErrAndLoadingHandlers(
+			activitiesEditErrorStatusPage,
+			activitiesEditErrorRefreshButton,
+			activitiesEditErrorCopyDetailsButton,
+
+			func() {
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageActivitiesView, resources.PageActivitiesEdit})
+			},
+
+			func() {
+				activitiesEditStack.SetVisibleChildName(resources.PageActivitiesEditLoading)
+			},
+			func(err string) {
+				if err == "" {
+					activitiesEditStack.SetVisibleChildName(resources.PageActivitiesEditData)
+				} else {
+					activitiesEditStack.SetVisibleChildName(resources.PageActivitiesEditError)
 				}
 			},
 		)
@@ -2511,6 +2541,50 @@ func main() {
 
 					defer clearActivitiesViewError()
 				}()
+
+			case resources.PageActivitiesEdit:
+				go func() {
+					enableActivitiesEditLoading()
+					defer disableActivitiesEditLoading()
+
+					redirected, c, _, err := authorize(
+						ctx,
+
+						true,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for activities edit page", "err", err)
+
+						handleActivitiesEditError(err)
+
+						return
+					} else if redirected {
+						return
+					}
+
+					log.Debug("Getting activity", "id", selectedActivityID)
+
+					res, err := c.GetActivityWithResponse(ctx, int64(selectedActivityID))
+					if err != nil {
+						handleActivitiesEditError(err)
+
+						return
+					}
+
+					log.Debug("Got activity", "status", res.StatusCode())
+
+					if res.StatusCode() != http.StatusOK {
+						handleActivitiesEditError(errors.New(res.Status()))
+
+						return
+					}
+
+					activitiesEditPageTitle.SetSubtitle(*res.JSON200.FirstName + " " + *res.JSON200.LastName)
+
+					// TODO: Set fields to their current value
+
+					defer clearActivitiesEditError()
+				}()
 			}
 		}
 
@@ -2607,6 +2681,9 @@ func main() {
 			case resources.PageActivitiesView:
 				activitiesViewPageTitle.SetTitle("")
 				activitiesViewPageTitle.SetSubtitle("")
+
+			case resources.PageActivitiesEdit:
+				activitiesEditPageTitle.SetSubtitle("")
 			}
 		})
 		homeNavigation.ConnectPushed(handleHomeNavigation)

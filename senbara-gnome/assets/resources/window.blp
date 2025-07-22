@@ -850,58 +850,105 @@ Adw.Window main-window {
                                         Adw.Clamp {
                                             maximum-size: 600;
 
-                                            Adw.PreferencesPage {
-                                                Adw.PreferencesGroup {
-                                                    Adw.EntryRow activities-edit-page-name-input {
-                                                        title: _("Name");
-                                                    }
+                                            Stack activities-edit-stack {
+                                                StackPage {
+                                                    name: "/activities/edit/loading";
 
-                                                    Adw.EntryRow activities-edit-page-date-input {
-                                                        title: _("Date");
+                                                    child: Box {
+                                                        halign: center;
 
-                                                        [suffix]
-                                                        MenuButton activities-edit-page-date-warning-button {
-                                                            icon-name: "dialog-warning-symbolic";
-                                                            tooltip-text: _("Show error");
-                                                            valign: center;
-                                                            popover: activities-edit-page-date-popover;
-                                                            visible: false;
-
-                                                            styles [
-                                                                "flat",
-                                                                "circular",
-                                                            ]
+                                                        Adw.Spinner {
+                                                            width-request: 32;
+                                                            height-request: 32;
                                                         }
-                                                    }
+                                                    };
                                                 }
 
-                                                Adw.PreferencesGroup {
-                                                    Adw.ExpanderRow activities-edit-page-description-expander {
-                                                        title: _("Description (optional)");
-                                                        subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
+                                                StackPage {
+                                                    name: "/activities/edit/data";
 
-                                                        ScrolledWindow {
-                                                            height-request: 100;
-                                                            margin-top: 6;
-                                                            margin-bottom: 6;
-                                                            margin-start: 6;
-                                                            margin-end: 6;
+                                                    child: Adw.PreferencesPage {
+                                                        Adw.PreferencesGroup {
+                                                            Adw.EntryRow activities-edit-page-name-input {
+                                                                title: _("Name");
+                                                            }
 
-                                                            TextView activities-edit-page-description-input {
-                                                                wrap-mode: word;
-                                                                left-margin: 12;
-                                                                right-margin: 12;
-                                                                top-margin: 12;
-                                                                bottom-margin: 12;
-                                                                accepts-tab: false;
+                                                            Adw.EntryRow activities-edit-page-date-input {
+                                                                title: _("Date");
 
-                                                                styles [
-                                                                    "card",
-                                                                    "monospace",
-                                                                ]
+                                                                [suffix]
+                                                                MenuButton activities-edit-page-date-warning-button {
+                                                                    icon-name: "dialog-warning-symbolic";
+                                                                    tooltip-text: _("Show error");
+                                                                    valign: center;
+                                                                    popover: activities-edit-page-date-popover;
+                                                                    visible: false;
+
+                                                                    styles [
+                                                                        "flat",
+                                                                        "circular",
+                                                                    ]
+                                                                }
                                                             }
                                                         }
-                                                    }
+
+                                                        Adw.PreferencesGroup {
+                                                            Adw.ExpanderRow activities-edit-page-description-expander {
+                                                                title: _("Description (optional)");
+                                                                subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
+
+                                                                ScrolledWindow {
+                                                                    height-request: 100;
+                                                                    margin-top: 6;
+                                                                    margin-bottom: 6;
+                                                                    margin-start: 6;
+                                                                    margin-end: 6;
+
+                                                                    TextView activities-edit-page-description-input {
+                                                                        wrap-mode: word;
+                                                                        left-margin: 12;
+                                                                        right-margin: 12;
+                                                                        top-margin: 12;
+                                                                        bottom-margin: 12;
+                                                                        accepts-tab: false;
+
+                                                                        styles [
+                                                                            "card",
+                                                                            "monospace",
+                                                                        ]
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    };
+                                                }
+
+                                                StackPage {
+                                                    name: "/activities/edit/error";
+
+                                                    child: Adw.StatusPage activities-edit-error-status-page {
+                                                        title: _("Activity could not be loaded");
+                                                        icon-name: "dialog-warning-symbolic";
+
+                                                        Box {
+                                                            spacing: 10;
+                                                            halign: center;
+
+                                                            Button activities-edit-error-refresh-button {
+                                                                halign: center;
+                                                                label: _("Refresh");
+
+                                                                styles [
+                                                                    "suggested-action",
+                                                                ]
+                                                            }
+
+                                                            Button activities-edit-error-copy-details {
+                                                                halign: center;
+                                                                label: _("Copy details");
+                                                            }
+                                                        }
+                                                    };
                                                 }
                                             }
                                         }
