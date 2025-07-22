@@ -421,6 +421,9 @@ func main() {
 			contactsViewErrorRefreshButton     = b.GetObject("contacts-view-error-refresh-button").Cast().(*gtk.Button)
 			contactsViewErrorCopyDetailsButton = b.GetObject("contacts-view-error-copy-details").Cast().(*gtk.Button)
 
+			contactsViewEditButton   = b.GetObject("contacts-view-edit-button").Cast().(*gtk.Button)
+			contactsViewDeleteButton = b.GetObject("contacts-view-delete-button").Cast().(*gtk.Button)
+
 			contactsViewOptionalFieldsPreferencesGroup = b.GetObject("contacts-view-optional-fields").Cast().(*adw.PreferencesGroup)
 
 			contactsViewBirthdayRow = b.GetObject("contacts-view-birthday").Cast().(*adw.ActionRow)
@@ -435,6 +438,9 @@ func main() {
 			activitiesViewErrorStatusPage        = b.GetObject("activities-view-error-status-page").Cast().(*adw.StatusPage)
 			activitiesViewErrorRefreshButton     = b.GetObject("activities-view-error-refresh-button").Cast().(*gtk.Button)
 			activitiesViewErrorCopyDetailsButton = b.GetObject("activities-view-error-copy-details").Cast().(*gtk.Button)
+
+			activitiesViewEditButton   = b.GetObject("activities-view-edit-button").Cast().(*gtk.Button)
+			activitiesViewDeleteButton = b.GetObject("activities-view-delete-button").Cast().(*gtk.Button)
 
 			activitiesViewPageBodyWebView = b.GetObject("activities-view-body").Cast().(*webkit.WebView)
 
@@ -2049,6 +2055,20 @@ func main() {
 		})
 		a.AddAction(deleteActivityAction)
 
+		editActivityAction := gio.NewSimpleAction("editActivity", glib.NewVariantType("x"))
+		editActivityAction.ConnectActivate(func(parameter *glib.Variant) {
+			id := parameter.Int64()
+
+			log := log.With(
+				"id", id,
+			)
+
+			log.Info("Handling edit activity action")
+
+			homeNavigation.PushByTag(resources.PageActivitiesEdit)
+		})
+		a.AddAction(editActivityAction)
+
 		md := goldmark.New(
 			goldmark.WithExtensions(extension.GFM),
 		)
@@ -2057,18 +2077,6 @@ func main() {
 			selectedContactID  = -1
 			selectedActivityID = -1
 		)
-
-		editActivityAction := gio.NewSimpleAction("editActivity", nil)
-		editActivityAction.ConnectActivate(func(parameter *glib.Variant) {
-			log := log.With(
-				"id", selectedActivityID,
-			)
-
-			log.Info("Handling edit activity action")
-
-			homeNavigation.PushByTag(resources.PageActivitiesEdit)
-		})
-		a.AddAction(editActivityAction)
 
 		handleHomeNavigation := func() {
 			var (
@@ -2223,11 +2231,14 @@ func main() {
 
 					defer clearContactsViewError()
 
+					contactsViewEditButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Entry.Id))
+					contactsViewDeleteButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Entry.Id))
+
 					title := *res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName
 					if *res.JSON200.Entry.Nickname != "" {
 						title += " (" + *res.JSON200.Entry.Nickname + ")"
 					}
-					contactsViewPageTitle.SetTitle(*res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName)
+					contactsViewPageTitle.SetTitle(title)
 
 					subtitle := ""
 					if *res.JSON200.Entry.Email != "" {
@@ -2362,7 +2373,9 @@ func main() {
 						deleteActivityMenuItem.SetActionAndTargetValue("app.deleteActivity", glib.NewVariantInt64(*activity.Id))
 						menu.AppendItem(deleteActivityMenuItem)
 
-						menu.Append(gcore.Local("Edit activity"), "app.editActivity")
+						editActivityMenuItem := gio.NewMenuItem(gcore.Local("Edit activity"), "app.editActivity")
+						editActivityMenuItem.SetActionAndTargetValue("app.editActivity", glib.NewVariantInt64(*activity.Id))
+						menu.AppendItem(editActivityMenuItem)
 
 						menuButton.SetMenuModel(menu)
 
@@ -2420,6 +2433,9 @@ func main() {
 
 						return
 					}
+
+					activitiesViewEditButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.ActivityId))
+					activitiesViewDeleteButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.ActivityId))
 
 					activitiesViewPageTitle.SetTitle(*res.JSON200.Name)
 					activitiesViewPageTitle.SetSubtitle(glib.NewDateTimeFromGo(res.JSON200.Date.Time).Format("%x"))
