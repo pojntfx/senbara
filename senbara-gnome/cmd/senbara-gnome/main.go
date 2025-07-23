@@ -450,6 +450,18 @@ func main() {
 			activitiesEditErrorRefreshButton     = b.GetObject("activities-edit-error-refresh-button").Cast().(*gtk.Button)
 			activitiesEditErrorCopyDetailsButton = b.GetObject("activities-edit-error-copy-details").Cast().(*gtk.Button)
 
+			activitiesEditPageSaveButton  = b.GetObject("activities-edit-save-button").Cast().(*gtk.Button)
+			activitiesEditPageSaveSpinner = b.GetObject("activities-edit-save-spinner").Cast().(*adw.Spinner)
+
+			activitiesEditPageNameInput           = b.GetObject("activities-edit-page-name-input").Cast().(*adw.EntryRow)
+			activitiesEditPageDateInput           = b.GetObject("activities-edit-page-date-input").Cast().(*adw.EntryRow)
+			activitiesEditPageDescriptionExpander = b.GetObject("activities-edit-page-description-expander").Cast().(*adw.ExpanderRow)
+			activitiesEditPageDescriptionInput    = b.GetObject("activities-edit-page-description-input").Cast().(*gtk.TextView)
+
+			activitiesEditPageDateWarningButton = b.GetObject("activities-edit-page-date-warning-button").Cast().(*gtk.MenuButton)
+
+			activitiesEditPagePopoverLabel = b.GetObject("activities-edit-page-date-popover-label").Cast().(*gtk.Label)
+
 			debtsCreateDialog = debtsCreateDialogBuilder.GetObject("debts-create-dialog").Cast().(*adw.Dialog)
 
 			debtsCreateDialogAddButton  = debtsCreateDialogBuilder.GetObject("debts-create-dialog-add-button").Cast().(*gtk.Button)
@@ -501,7 +513,9 @@ func main() {
 			return time.Parse(glib.NewDateTimeFromGo(time.Date(2006, 1, 2, 0, 0, 0, 0, time.UTC)).Format("%x"), localeDate)
 		}
 
-		activitiesCreateDialogPopoverLabel.SetLabel(gcore.Local(fmt.Sprintf("Not a valid date (format: %v)", glib.NewDateTimeFromGo(time.Date(2006, 1, 2, 0, 0, 0, 0, time.UTC)).Format("%x"))))
+		invalidDateLabel := fmt.Sprintf("Not a valid date (format: %v)", glib.NewDateTimeFromGo(time.Date(2006, 1, 2, 0, 0, 0, 0, time.UTC)).Format("%x"))
+		activitiesCreateDialogPopoverLabel.SetLabel(gcore.Local(invalidDateLabel))
+		activitiesEditPagePopoverLabel.SetLabel(gcore.Local(invalidDateLabel))
 
 		var deregistrationLock sync.Mutex
 		deregisterOIDCClient := func() error {
@@ -991,6 +1005,32 @@ func main() {
 		activitiesCreateDialogNameInput.ConnectChanged(validateActivitiesCreateDialogForm)
 		activitiesCreateDialogDateInput.ConnectChanged(validateActivitiesCreateDialogForm)
 
+		validateActivitiesEditPageForm := func() {
+			if date := activitiesEditPageDateInput.Text(); date != "" {
+				if _, err := parseLocaleDate(date); err != nil {
+					activitiesEditPageDateInput.AddCSSClass("error")
+					activitiesEditPageDateWarningButton.SetVisible(true)
+
+					activitiesEditPageSaveButton.SetSensitive(false)
+
+					return
+				}
+			}
+
+			activitiesEditPageDateInput.RemoveCSSClass("error")
+			activitiesEditPageDateWarningButton.SetVisible(false)
+
+			if activitiesEditPageNameInput.Text() != "" &&
+				activitiesEditPageDateInput.Text() != "" {
+				activitiesEditPageSaveButton.SetSensitive(true)
+			} else {
+				activitiesEditPageSaveButton.SetSensitive(false)
+			}
+		}
+
+		activitiesEditPageNameInput.ConnectChanged(validateActivitiesEditPageForm)
+		activitiesEditPageDateInput.ConnectChanged(validateActivitiesEditPageForm)
+
 		activitiesCreateDialog.ConnectClosed(func() {
 			activitiesCreateDialogNameInput.SetText("")
 			activitiesCreateDialogDateInput.SetText("")
@@ -1373,6 +1413,84 @@ func main() {
 				activitiesCreateDialog.Close()
 
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
+			}()
+		})
+
+		activitiesEditPageSaveButton.ConnectClicked(func() {
+			id := activitiesEditPageSaveButton.ActionTargetValue().Int64()
+
+			log := log.With(
+				"id", id,
+			)
+
+			log.Info("Handling activity update")
+
+			activitiesEditPageSaveButton.SetSensitive(false)
+			activitiesEditPageSaveSpinner.SetVisible(true)
+
+			go func() {
+				defer activitiesEditPageSaveSpinner.SetVisible(false)
+				defer activitiesEditPageSaveButton.SetSensitive(true)
+
+				redirected, c, _, err := authorize(
+					ctx,
+
+					false,
+				)
+				if err != nil {
+					log.Warn("Could not authorize user for update activity action", "err", err)
+
+					handlePanic(err)
+
+					return
+				} else if redirected {
+					return
+				}
+
+				var description *string
+				if v := activitiesEditPageDescriptionInput.Buffer().Text(
+					activitiesEditPageDescriptionInput.Buffer().StartIter(),
+					activitiesEditPageDescriptionInput.Buffer().EndIter(),
+					true,
+				); v != "" {
+					description = &v
+				}
+
+				localeDate, err := parseLocaleDate(activitiesEditPageDateInput.Text())
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+
+				req := api.UpdateActivityJSONRequestBody{
+					Date: types.Date{
+						Time: localeDate,
+					},
+					Description: description,
+					Name:        activitiesEditPageNameInput.Text(),
+				}
+
+				log.Debug("Updating activity", "request", req)
+
+				res, err := c.UpdateActivityWithResponse(ctx, id, req)
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+
+				log.Debug("Updated activity", "status", res.StatusCode())
+
+				if res.StatusCode() != http.StatusOK {
+					handlePanic(errors.New(res.Status()))
+
+					return
+				}
+
+				mto.AddToast(adw.NewToast(gcore.Local("Updated activity")))
+
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageActivitiesView})
 			}()
 		})
 
@@ -2085,6 +2203,8 @@ func main() {
 		})
 		a.AddAction(deleteActivityAction)
 
+		var selectedActivityID = -1
+
 		editActivityAction := gio.NewSimpleAction("editActivity", glib.NewVariantType("x"))
 		editActivityAction.ConnectActivate(func(parameter *glib.Variant) {
 			id := parameter.Int64()
@@ -2095,6 +2215,8 @@ func main() {
 
 			log.Info("Handling edit activity action")
 
+			selectedActivityID = int(id)
+
 			homeNavigation.PushByTag(resources.PageActivitiesEdit)
 		})
 		a.AddAction(editActivityAction)
@@ -2104,8 +2226,7 @@ func main() {
 		)
 
 		var (
-			selectedContactID  = -1
-			selectedActivityID = -1
+			selectedContactID = -1
 		)
 
 		handleHomeNavigation := func() {
@@ -2579,11 +2700,20 @@ func main() {
 						return
 					}
 
+					defer clearActivitiesEditError()
+
+					activitiesEditPageSaveButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.ActivityId))
+
 					activitiesEditPageTitle.SetSubtitle(*res.JSON200.FirstName + " " + *res.JSON200.LastName)
 
-					// TODO: Set fields to their current value
+					activitiesEditPageNameInput.SetText(*res.JSON200.Name)
+					activitiesEditPageDateInput.SetText(glib.NewDateTimeFromGo(res.JSON200.Date.Time).Format("%x"))
 
-					defer clearActivitiesEditError()
+					activitiesEditPageDateWarningButton.SetVisible(false)
+					activitiesEditPageDateInput.RemoveCSSClass("error")
+
+					activitiesEditPageDescriptionExpander.SetExpanded(*res.JSON200.Description != "")
+					activitiesEditPageDescriptionInput.Buffer().SetText(*res.JSON200.Description)
 				}()
 			}
 		}
@@ -2684,6 +2814,15 @@ func main() {
 
 			case resources.PageActivitiesEdit:
 				activitiesEditPageTitle.SetSubtitle("")
+
+				activitiesEditPageNameInput.SetText("")
+				activitiesEditPageDateInput.SetText("")
+
+				activitiesEditPageDateWarningButton.SetVisible(false)
+				activitiesEditPageDateInput.RemoveCSSClass("error")
+
+				activitiesEditPageDescriptionExpander.SetExpanded(false)
+				activitiesEditPageDescriptionInput.Buffer().SetText("")
 			}
 		})
 		homeNavigation.ConnectPushed(handleHomeNavigation)
