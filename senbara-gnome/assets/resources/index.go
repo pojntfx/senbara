@@ -61,6 +61,11 @@ const (
 	PageActivitiesEditLoading = "/activities/edit/loading"
 	PageActivitiesEditData    = "/activities/edit/data"
 	PageActivitiesEditError   = "/activities/edit/error"
+
+	PageDebtsEdit        = "/debts/edit"
+	PageDebtsEditLoading = "/debts/edit/loading"
+	PageDebtsEditData    = "/debts/edit/data"
+	PageDebtsEditError   = "/debts/edit/error"
 )
 
 //go:generate sh -c "blueprint-compiler batch-compile . . *.blp && sass .:. && glib-compile-schemas . && glib-compile-resources *.gresource.xml"

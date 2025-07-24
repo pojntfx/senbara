@@ -462,6 +462,15 @@ func main() {
 
 			activitiesEditPagePopoverLabel = b.GetObject("activities-edit-page-date-popover-label").Cast().(*gtk.Label)
 
+			// debtsEditPageTitle              = b.GetObject("debts-edit-page-title").Cast().(*adw.WindowTitle)
+			debtsEditStack                  = b.GetObject("debts-edit-stack").Cast().(*gtk.Stack)
+			debtsEditErrorStatusPage        = b.GetObject("debts-edit-error-status-page").Cast().(*adw.StatusPage)
+			debtsEditErrorRefreshButton     = b.GetObject("debts-edit-error-refresh-button").Cast().(*gtk.Button)
+			debtsEditErrorCopyDetailsButton = b.GetObject("debts-edit-error-copy-details").Cast().(*gtk.Button)
+
+			// debtsEditPageSaveButton  = b.GetObject("debts-edit-save-button").Cast().(*gtk.Button)
+			// debtsEditPageSaveSpinner = b.GetObject("debts-edit-save-spinner").Cast().(*adw.Spinner)
+
 			debtsCreateDialog = debtsCreateDialogBuilder.GetObject("debts-create-dialog").Cast().(*adw.Dialog)
 
 			debtsCreateDialogAddButton  = debtsCreateDialogBuilder.GetObject("debts-create-dialog-add-button").Cast().(*gtk.Button)
@@ -1195,6 +1204,30 @@ func main() {
 					activitiesEditStack.SetVisibleChildName(resources.PageActivitiesEditData)
 				} else {
 					activitiesEditStack.SetVisibleChildName(resources.PageActivitiesEditError)
+				}
+			},
+		)
+
+		_,
+			enableDebtsEditLoading,
+			disableDebtsEditLoading,
+			clearDebtsEditError := createErrAndLoadingHandlers(
+			debtsEditErrorStatusPage,
+			debtsEditErrorRefreshButton,
+			debtsEditErrorCopyDetailsButton,
+
+			func() {
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageDebtsEdit})
+			},
+
+			func() {
+				debtsEditStack.SetVisibleChildName(resources.PageDebtsEditLoading)
+			},
+			func(err string) {
+				if err == "" {
+					debtsEditStack.SetVisibleChildName(resources.PageDebtsEditData)
+				} else {
+					debtsEditStack.SetVisibleChildName(resources.PageDebtsEditError)
 				}
 			},
 		)
@@ -2221,6 +2254,24 @@ func main() {
 		})
 		a.AddAction(editActivityAction)
 
+		// var selectedDebtID = -1
+
+		editDebtAction := gio.NewSimpleAction("editDebt", glib.NewVariantType("x"))
+		editDebtAction.ConnectActivate(func(parameter *glib.Variant) {
+			id := parameter.Int64()
+
+			log := log.With(
+				"id", id,
+			)
+
+			log.Info("Handling edit debt action")
+
+			// selectedDebtID = int(id)
+
+			homeNavigation.PushByTag(resources.PageDebtsEdit)
+		})
+		a.AddAction(editDebtAction)
+
 		md := goldmark.New(
 			goldmark.WithExtensions(extension.GFM),
 		)
@@ -2714,6 +2765,18 @@ func main() {
 
 					activitiesEditPageDescriptionExpander.SetExpanded(*res.JSON200.Description != "")
 					activitiesEditPageDescriptionInput.Buffer().SetText(*res.JSON200.Description)
+				}()
+
+			case resources.PageDebtsEdit:
+				go func() {
+					enableDebtsEditLoading()
+					defer disableDebtsEditLoading()
+
+					// TODO: Make API request
+
+					defer clearDebtsEditError()
+
+					// TODO: Set save button target value, subtitle and input fields
 				}()
 			}
 		}

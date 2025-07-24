@@ -806,6 +806,166 @@ Adw.Window main-window {
                                 }
                             }
 
+                            Adw.NavigationPage debts-edit-page {
+                                title: _("Edit debt");
+                                tag: "/debts/edit";
+                                can-pop: false;
+
+                                Adw.ToolbarView {
+                                    [top]
+                                    Adw.HeaderBar {
+                                        title-widget: Adw.WindowTitle debts-edit-page-title {
+                                            title: bind debts-edit-page.title;
+                                        };
+
+                                        [start]
+                                        Button {
+                                            label: _("Cancel");
+                                            action-name: "navigation.pop";
+                                        }
+
+                                        [end]
+                                        Button debts-edit-save-button {
+                                            sensitive: false;
+
+                                            Box {
+                                                spacing: 10;
+
+                                                Adw.Spinner debts-edit-save-spinner {
+                                                    visible: false;
+                                                }
+
+                                                Label {
+                                                    label: _("Save");
+                                                }
+                                            }
+
+                                            styles [
+                                                "suggested-action",
+                                            ]
+                                        }
+                                    }
+
+                                    ScrolledWindow {
+                                        Adw.Clamp {
+                                            maximum-size: 600;
+
+                                            Stack debts-edit-stack {
+                                                StackPage {
+                                                    name: "/debts/edit/loading";
+
+                                                    child: Box {
+                                                        halign: center;
+
+                                                        Adw.Spinner {
+                                                            width-request: 32;
+                                                            height-request: 32;
+                                                        }
+                                                    };
+                                                }
+
+                                                StackPage {
+                                                    name: "/debts/edit/data";
+
+                                                    child: Adw.PreferencesPage {
+                                                        Adw.PreferencesGroup {
+                                                            Adw.ActionRow debts-edit-page-debt-type-you-owe-row {
+                                                                activatable-widget: debts-edit-page-you-owe-radio;
+
+                                                                [prefix]
+                                                                CheckButton debts-edit-page-you-owe-radio {
+                                                                    active: true;
+                                                                }
+                                                            }
+
+                                                            Adw.ActionRow debts-edit-page-debt-type-they-owe-row {
+                                                                activatable-widget: debts-edit-page-they-owe-radio;
+
+                                                                [prefix]
+                                                                CheckButton debts-edit-page-they-owe-radio {
+                                                                    group: debts-edit-page-you-owe-radio;
+                                                                }
+                                                            }
+                                                        }
+
+                                                        Adw.PreferencesGroup {
+                                                            Adw.SpinRow debts-edit-page-amount-input {
+                                                                title: _("Amount");
+
+                                                                adjustment: Gtk.Adjustment {
+                                                                    lower: 0;
+                                                                    upper: 2147483647;
+                                                                    step-increment: 1;
+                                                                };
+                                                            }
+
+                                                            Adw.EntryRow debts-edit-page-currency-input {
+                                                                title: _("Currency");
+                                                            }
+                                                        }
+
+                                                        Adw.PreferencesGroup {
+                                                            Adw.ExpanderRow debts-edit-page-description-expander {
+                                                                title: _("Description (optional)");
+
+                                                                ScrolledWindow {
+                                                                    height-request: 100;
+                                                                    margin-top: 6;
+                                                                    margin-bottom: 6;
+                                                                    margin-start: 6;
+                                                                    margin-end: 6;
+
+                                                                    TextView debts-edit-page-description-input {
+                                                                        wrap-mode: word;
+                                                                        left-margin: 12;
+                                                                        right-margin: 12;
+                                                                        top-margin: 12;
+                                                                        bottom-margin: 12;
+                                                                        accepts-tab: false;
+
+                                                                        styles [
+                                                                            "card",
+                                                                        ]
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    };
+                                                }
+
+                                                StackPage {
+                                                    name: "/debts/edit/error";
+
+                                                    child: Adw.StatusPage debts-edit-error-status-page {
+                                                        title: _("Debt could not be loaded");
+                                                        icon-name: "dialog-warning-symbolic";
+
+                                                        Box {
+                                                            spacing: 10;
+                                                            halign: center;
+
+                                                            Button debts-edit-error-refresh-button {
+                                                                halign: center;
+                                                                label: _("Refresh");
+
+                                                                styles [
+                                                                    "suggested-action",
+                                                                ]
+                                                            }
+
+                                                            Button debts-edit-error-copy-details {
+                                                                halign: center;
+                                                                label: _("Copy details");
+                                                            }
+                                                        }
+                                                    };
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             Adw.NavigationPage activities-edit-page {
                                 title: _("Edit activity");
                                 tag: "/activities/edit";
