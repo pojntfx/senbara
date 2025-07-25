@@ -49,6 +49,7 @@ var (
 	errInvalidContactID         = errors.New("invalid contact ID")
 	errMissingActivityID        = errors.New("missing activity ID")
 	errInvalidActivityID        = errors.New("invalid activity ID")
+	errDebtDoesNotExist         = errors.New("debt does not exist")
 )
 
 const (
@@ -462,14 +463,23 @@ func main() {
 
 			activitiesEditPagePopoverLabel = b.GetObject("activities-edit-page-date-popover-label").Cast().(*gtk.Label)
 
-			// debtsEditPageTitle              = b.GetObject("debts-edit-page-title").Cast().(*adw.WindowTitle)
+			debtsEditPageTitle              = b.GetObject("debts-edit-page-title").Cast().(*adw.WindowTitle)
 			debtsEditStack                  = b.GetObject("debts-edit-stack").Cast().(*gtk.Stack)
 			debtsEditErrorStatusPage        = b.GetObject("debts-edit-error-status-page").Cast().(*adw.StatusPage)
 			debtsEditErrorRefreshButton     = b.GetObject("debts-edit-error-refresh-button").Cast().(*gtk.Button)
 			debtsEditErrorCopyDetailsButton = b.GetObject("debts-edit-error-copy-details").Cast().(*gtk.Button)
 
-			// debtsEditPageSaveButton  = b.GetObject("debts-edit-save-button").Cast().(*gtk.Button)
-			// debtsEditPageSaveSpinner = b.GetObject("debts-edit-save-spinner").Cast().(*adw.Spinner)
+			debtsEditPageSaveButton  = b.GetObject("debts-edit-save-button").Cast().(*gtk.Button)
+			debtsEditPageSaveSpinner = b.GetObject("debts-edit-save-spinner").Cast().(*adw.Spinner)
+
+			debtsEditPageYouOweRadio         = b.GetObject("debts-edit-page-you-owe-radio").Cast().(*gtk.CheckButton)
+			debtsEditPageAmountInput         = b.GetObject("debts-edit-page-amount-input").Cast().(*adw.SpinRow)
+			debtsEditPageCurrencyInput       = b.GetObject("debts-edit-page-currency-input").Cast().(*adw.EntryRow)
+			debtsEditPageDescriptionExpander = b.GetObject("debts-edit-page-description-expander").Cast().(*adw.ExpanderRow)
+			debtsEditPageDescriptionInput    = b.GetObject("debts-edit-page-description-input").Cast().(*gtk.TextView)
+
+			debtsEditPageYouOweActionRow  = b.GetObject("debts-edit-page-debt-type-you-owe-row").Cast().(*adw.ActionRow)
+			debtsEditPageTheyOweActionRow = b.GetObject("debts-edit-page-debt-type-they-owe-row").Cast().(*adw.ActionRow)
 
 			debtsCreateDialog = debtsCreateDialogBuilder.GetObject("debts-create-dialog").Cast().(*adw.Dialog)
 
@@ -980,10 +990,27 @@ func main() {
 
 		debtsCreateDialogCurrencyInput.ConnectChanged(validateDebtsCreateDialogForm)
 
+		validateDebtsEditPageForm := func() {
+			if debtsEditPageCurrencyInput.Text() != "" {
+				debtsEditPageSaveButton.SetSensitive(true)
+			} else {
+				debtsEditPageSaveButton.SetSensitive(false)
+			}
+		}
+
+		debtsEditPageCurrencyInput.ConnectChanged(validateDebtsEditPageForm)
+
 		debtsCreateDialog.ConnectClosed(func() {
+			debtsCreateDialogTitle.SetSubtitle("")
+
+			debtsCreateDialogYouOweActionRow.SetTitle("")
+			debtsCreateDialogTheyOweActionRow.SetTitle("")
+
 			debtsCreateDialogYouOweRadio.SetActive(true)
+
 			debtsCreateDialogAmountInput.SetValue(0)
 			debtsCreateDialogCurrencyInput.SetText("")
+
 			debtsCreateDialogDescriptionExpander.SetExpanded(false)
 			debtsCreateDialogDescriptionInput.Buffer().SetText("")
 		})
@@ -1208,7 +1235,7 @@ func main() {
 			},
 		)
 
-		_,
+		handleDebtsEditError,
 			enableDebtsEditLoading,
 			disableDebtsEditLoading,
 			clearDebtsEditError := createErrAndLoadingHandlers(
@@ -1524,6 +1551,76 @@ func main() {
 				mto.AddToast(adw.NewToast(gcore.Local("Updated activity")))
 
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageActivitiesView})
+			}()
+		})
+
+		debtsEditPageSaveButton.ConnectClicked(func() {
+			id := debtsEditPageSaveButton.ActionTargetValue().Int64()
+
+			log := log.With(
+				"id", id,
+			)
+
+			log.Info("Handling debt update")
+
+			debtsEditPageSaveButton.SetSensitive(false)
+			debtsEditPageSaveSpinner.SetVisible(true)
+
+			go func() {
+				defer debtsEditPageSaveSpinner.SetVisible(false)
+				defer debtsEditPageSaveButton.SetSensitive(true)
+
+				redirected, c, _, err := authorize(
+					ctx,
+
+					false,
+				)
+				if err != nil {
+					log.Warn("Could not authorize user for update debt action", "err", err)
+
+					handlePanic(err)
+
+					return
+				} else if redirected {
+					return
+				}
+
+				var description *string
+				if v := debtsEditPageDescriptionInput.Buffer().Text(
+					debtsEditPageDescriptionInput.Buffer().StartIter(),
+					debtsEditPageDescriptionInput.Buffer().EndIter(),
+					true,
+				); v != "" {
+					description = &v
+				}
+
+				req := api.UpdateDebtJSONRequestBody{
+					Amount:      float32(debtsEditPageAmountInput.Value()),
+					Currency:    debtsEditPageCurrencyInput.Text(),
+					Description: description,
+					YouOwe:      debtsEditPageYouOweRadio.Active(),
+				}
+
+				log.Debug("Updating debt", "request", req)
+
+				res, err := c.UpdateDebtWithResponse(ctx, id, req)
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+
+				log.Debug("Updated debt", "status", res.StatusCode())
+
+				if res.StatusCode() != http.StatusOK {
+					handlePanic(errors.New(res.Status()))
+
+					return
+				}
+
+				mto.AddToast(adw.NewToast(gcore.Local("Updated debt")))
+
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
 			}()
 		})
 
@@ -2254,7 +2351,7 @@ func main() {
 		})
 		a.AddAction(editActivityAction)
 
-		// var selectedDebtID = -1
+		var selectedDebtID = -1
 
 		editDebtAction := gio.NewSimpleAction("editDebt", glib.NewVariantType("x"))
 		editDebtAction.ConnectActivate(func(parameter *glib.Variant) {
@@ -2266,7 +2363,7 @@ func main() {
 
 			log.Info("Handling edit debt action")
 
-			// selectedDebtID = int(id)
+			selectedDebtID = int(id)
 
 			homeNavigation.PushByTag(resources.PageDebtsEdit)
 		})
@@ -2508,11 +2605,11 @@ func main() {
 							subtitle = gcore.Local(fmt.Sprintf("%v owes you %v %v", *res.JSON200.Entry.FirstName, math.Abs(float64(*debt.Amount)), *debt.Currency))
 						}
 
-						if *debt.Description != "" {
-							subtitle += ": " + *debt.Description
-						}
-
 						r.SetTitle(subtitle)
+
+						if *debt.Description != "" {
+							r.SetSubtitle(*debt.Description)
+						}
 
 						menuButton := gtk.NewMenuButton()
 						menuButton.SetVAlign(gtk.AlignCenter)
@@ -2772,11 +2869,68 @@ func main() {
 					enableDebtsEditLoading()
 					defer disableDebtsEditLoading()
 
-					// TODO: Make API request
+					redirected, c, _, err := authorize(
+						ctx,
+
+						true,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for debts edit page", "err", err)
+
+						handleDebtsEditError(err)
+
+						return
+					} else if redirected {
+						return
+					}
+
+					log.Debug("Getting contact", "id", selectedContactID)
+
+					res, err := c.GetContactWithResponse(ctx, int64(selectedContactID))
+					if err != nil {
+						handleDebtsEditError(err)
+
+						return
+					}
+
+					log.Debug("Got contact", "status", res.StatusCode())
+
+					if res.StatusCode() != http.StatusOK {
+						handleDebtsEditError(errors.New(res.Status()))
+
+						return
+					}
+
+					var debt *api.Debt
+					for _, d := range *res.JSON200.Debts {
+						if *d.Id == int64(selectedDebtID) {
+							debt = &d
+
+							break
+						}
+					}
+
+					if debt == nil {
+						handleDebtsEditError(errDebtDoesNotExist)
+
+						return
+					}
 
 					defer clearDebtsEditError()
 
-					// TODO: Set save button target value, subtitle and input fields
+					debtsEditPageSaveButton.SetActionTargetValue(glib.NewVariantInt64(*debt.Id))
+
+					debtsEditPageTitle.SetSubtitle(*res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName)
+
+					debtsEditPageYouOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("You owe %v", *res.JSON200.Entry.FirstName)))
+					debtsEditPageTheyOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("%v owes you", *res.JSON200.Entry.FirstName)))
+
+					debtsEditPageYouOweRadio.SetActive(*debt.Amount < 0)
+					debtsEditPageAmountInput.SetValue(math.Abs(float64(*debt.Amount)))
+					debtsEditPageCurrencyInput.SetText(*debt.Currency)
+
+					debtsEditPageDescriptionExpander.SetExpanded(*debt.Description != "")
+					debtsEditPageDescriptionInput.Buffer().SetText(*debt.Description)
 				}()
 			}
 		}
@@ -2886,6 +3040,20 @@ func main() {
 
 				activitiesEditPageDescriptionExpander.SetExpanded(false)
 				activitiesEditPageDescriptionInput.Buffer().SetText("")
+
+			case resources.PageDebtsEdit:
+				debtsEditPageTitle.SetSubtitle("")
+
+				debtsEditPageYouOweActionRow.SetTitle("")
+				debtsEditPageTheyOweActionRow.SetTitle("")
+
+				debtsEditPageYouOweRadio.SetActive(true)
+
+				debtsEditPageAmountInput.SetValue(0)
+				debtsEditPageCurrencyInput.SetText("")
+
+				debtsEditPageDescriptionExpander.SetExpanded(false)
+				debtsEditPageDescriptionInput.Buffer().SetText("")
 			}
 		})
 		homeNavigation.ConnectPushed(handleHomeNavigation)
