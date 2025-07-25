@@ -950,8 +950,8 @@ func main() {
 		validateContactsCreateDialogForm := func() {
 			if email := contactsCreateDialogEmailInput.Text(); email != "" {
 				if _, err := mail.ParseAddress(email); err != nil {
+					contactsCreateDialogEmailInput.AddSuffix(contactsCreateDialogEmailWarningButton)
 					contactsCreateDialogEmailInput.AddCSSClass("error")
-					contactsCreateDialogEmailWarningButton.SetVisible(true)
 
 					contactsCreateDialogAddButton.SetSensitive(false)
 
@@ -959,8 +959,8 @@ func main() {
 				}
 			}
 
+			contactsCreateDialogEmailInput.Remove(contactsCreateDialogEmailWarningButton)
 			contactsCreateDialogEmailInput.RemoveCSSClass("error")
-			contactsCreateDialogEmailWarningButton.SetVisible(false)
 
 			if contactsCreateDialogFirstNameInput.Text() != "" &&
 				contactsCreateDialogLastNameInput.Text() != "" &&
@@ -985,8 +985,8 @@ func main() {
 			contactsCreateDialogEmailInput.SetText("")
 			contactsCreateDialogPronounsInput.SetText("")
 
-			contactsCreateDialogEmailWarningButton.SetVisible(false)
 			contactsCreateDialogEmailInput.RemoveCSSClass("error")
+			contactsCreateDialogEmailInput.Remove(contactsCreateDialogEmailWarningButton)
 		})
 
 		validateDebtsCreateDialogForm := func() {

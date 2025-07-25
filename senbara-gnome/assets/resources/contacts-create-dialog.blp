@@ -57,20 +57,6 @@ Adw.Dialog contacts-create-dialog {
                 Adw.EntryRow contacts-create-dialog-email-input {
                     title: _("Email");
                     input-purpose: email;
-
-                    [suffix]
-                    MenuButton contacts-create-dialog-email-warning-button {
-                        icon-name: "dialog-warning-symbolic";
-                        tooltip-text: _("Show error");
-                        valign: center;
-                        popover: contacts-create-dialog-email-popover;
-                        visible: false;
-
-                        styles [
-                            "flat",
-                            "circular",
-                        ]
-                    }
                 }
 
                 Adw.EntryRow contacts-create-dialog-pronouns-input {
@@ -79,6 +65,18 @@ Adw.Dialog contacts-create-dialog {
             }
         }
     }
+}
+
+MenuButton contacts-create-dialog-email-warning-button {
+    icon-name: "dialog-warning-symbolic";
+    tooltip-text: _("Show error");
+    valign: center;
+    popover: contacts-create-dialog-email-popover;
+
+    styles [
+        "flat",
+        "circular",
+    ]
 }
 
 Popover contacts-create-dialog-email-popover {
