@@ -481,6 +481,15 @@ func main() {
 			debtsEditPageYouOweActionRow  = b.GetObject("debts-edit-page-debt-type-you-owe-row").Cast().(*adw.ActionRow)
 			debtsEditPageTheyOweActionRow = b.GetObject("debts-edit-page-debt-type-they-owe-row").Cast().(*adw.ActionRow)
 
+			contactsEditPageTitle              = b.GetObject("contacts-edit-page-title").Cast().(*adw.WindowTitle)
+			contactsEditStack                  = b.GetObject("contacts-edit-stack").Cast().(*gtk.Stack)
+			contactsEditErrorStatusPage        = b.GetObject("contacts-edit-error-status-page").Cast().(*adw.StatusPage)
+			contactsEditErrorRefreshButton     = b.GetObject("contacts-edit-error-refresh-button").Cast().(*gtk.Button)
+			contactsEditErrorCopyDetailsButton = b.GetObject("contacts-edit-error-copy-details").Cast().(*gtk.Button)
+
+			contactsEditPageSaveButton = b.GetObject("contacts-edit-save-button").Cast().(*gtk.Button)
+			// contactsEditPageSaveSpinner = b.GetObject("contacts-edit-save-spinner").Cast().(*adw.Spinner)
+
 			debtsCreateDialog = debtsCreateDialogBuilder.GetObject("debts-create-dialog").Cast().(*adw.Dialog)
 
 			debtsCreateDialogAddButton  = debtsCreateDialogBuilder.GetObject("debts-create-dialog-add-button").Cast().(*gtk.Button)
@@ -1255,6 +1264,30 @@ func main() {
 					debtsEditStack.SetVisibleChildName(resources.PageDebtsEditData)
 				} else {
 					debtsEditStack.SetVisibleChildName(resources.PageDebtsEditError)
+				}
+			},
+		)
+
+		handleContactsEditError,
+			enableContactsEditLoading,
+			disableContactsEditLoading,
+			clearContactsEditError := createErrAndLoadingHandlers(
+			contactsEditErrorStatusPage,
+			contactsEditErrorRefreshButton,
+			contactsEditErrorCopyDetailsButton,
+
+			func() {
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageContactsEdit})
+			},
+
+			func() {
+				contactsEditStack.SetVisibleChildName(resources.PageContactsEditLoading)
+			},
+			func(err string) {
+				if err == "" {
+					contactsEditStack.SetVisibleChildName(resources.PageContactsEditData)
+				} else {
+					contactsEditStack.SetVisibleChildName(resources.PageContactsEditError)
 				}
 			},
 		)
@@ -2369,12 +2402,26 @@ func main() {
 		})
 		a.AddAction(editDebtAction)
 
+		var selectedContactID = -1
+
+		editContactAction := gio.NewSimpleAction("editContact", glib.NewVariantType("x"))
+		editContactAction.ConnectActivate(func(parameter *glib.Variant) {
+			id := parameter.Int64()
+
+			log := log.With(
+				"id", id,
+			)
+
+			log.Info("Handling edit contact action")
+
+			selectedContactID = int(id)
+
+			homeNavigation.PushByTag(resources.PageContactsEdit)
+		})
+		a.AddAction(editContactAction)
+
 		md := goldmark.New(
 			goldmark.WithExtensions(extension.GFM),
-		)
-
-		var (
-			selectedContactID = -1
 		)
 
 		handleHomeNavigation := func() {
@@ -2931,6 +2978,52 @@ func main() {
 
 					debtsEditPageDescriptionExpander.SetExpanded(*debt.Description != "")
 					debtsEditPageDescriptionInput.Buffer().SetText(*debt.Description)
+				}()
+
+			case resources.PageContactsEdit:
+				go func() {
+					enableContactsEditLoading()
+					defer disableContactsEditLoading()
+
+					redirected, c, _, err := authorize(
+						ctx,
+
+						true,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for contacts edit page", "err", err)
+
+						handleContactsEditError(err)
+
+						return
+					} else if redirected {
+						return
+					}
+
+					log.Debug("Getting contact", "id", selectedContactID)
+
+					res, err := c.GetContactWithResponse(ctx, int64(selectedContactID))
+					if err != nil {
+						handleContactsEditError(err)
+
+						return
+					}
+
+					log.Debug("Got contact", "status", res.StatusCode())
+
+					if res.StatusCode() != http.StatusOK {
+						handleContactsEditError(errors.New(res.Status()))
+
+						return
+					}
+
+					defer clearContactsEditError()
+
+					contactsEditPageSaveButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Entry.Id))
+
+					contactsEditPageTitle.SetSubtitle(*res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName)
+
+					// TODO: Set input fields
 				}()
 			}
 		}
