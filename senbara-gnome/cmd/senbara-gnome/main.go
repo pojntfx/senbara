@@ -959,7 +959,9 @@ func main() {
 				}
 			}
 
-			contactsCreateDialogEmailInput.Remove(contactsCreateDialogEmailWarningButton)
+			if contactsCreateDialogEmailWarningButton.Parent() != nil {
+				contactsCreateDialogEmailInput.Remove(contactsCreateDialogEmailWarningButton)
+			}
 			contactsCreateDialogEmailInput.RemoveCSSClass("error")
 
 			if contactsCreateDialogFirstNameInput.Text() != "" &&
@@ -986,7 +988,9 @@ func main() {
 			contactsCreateDialogPronounsInput.SetText("")
 
 			contactsCreateDialogEmailInput.RemoveCSSClass("error")
-			contactsCreateDialogEmailInput.Remove(contactsCreateDialogEmailWarningButton)
+			if contactsCreateDialogEmailWarningButton.Parent() != nil {
+				contactsCreateDialogEmailInput.Remove(contactsCreateDialogEmailWarningButton)
+			}
 		})
 
 		validateDebtsCreateDialogForm := func() {
