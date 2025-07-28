@@ -523,6 +523,16 @@ func main() {
 			activitiesCreateDialogPopoverLabel = activitiesCreateDialogBuilder.GetObject("activities-create-dialog-date-popover-label").Cast().(*gtk.Label)
 		)
 
+		setValidationSuffixVisible := func(input *adw.EntryRow, suffix *gtk.MenuButton, visible bool) {
+			if visible && suffix.Parent() == nil {
+				input.AddSuffix(suffix)
+				input.AddCSSClass("error")
+			} else if !visible && suffix.Parent() != nil {
+				input.RemoveCSSClass("error")
+				input.Remove(suffix)
+			}
+		}
+
 		welcomeGetStartedButton.ConnectClicked(func() {
 			nv.PushByTag(resources.PageConfigServerURL)
 		})
@@ -950,8 +960,7 @@ func main() {
 		validateContactsCreateDialogForm := func() {
 			if email := contactsCreateDialogEmailInput.Text(); email != "" {
 				if _, err := mail.ParseAddress(email); err != nil {
-					contactsCreateDialogEmailInput.AddSuffix(contactsCreateDialogEmailWarningButton)
-					contactsCreateDialogEmailInput.AddCSSClass("error")
+					setValidationSuffixVisible(contactsCreateDialogEmailInput, contactsCreateDialogEmailWarningButton, true)
 
 					contactsCreateDialogAddButton.SetSensitive(false)
 
@@ -959,10 +968,7 @@ func main() {
 				}
 			}
 
-			if contactsCreateDialogEmailWarningButton.Parent() != nil {
-				contactsCreateDialogEmailInput.Remove(contactsCreateDialogEmailWarningButton)
-			}
-			contactsCreateDialogEmailInput.RemoveCSSClass("error")
+			setValidationSuffixVisible(contactsCreateDialogEmailInput, contactsCreateDialogEmailWarningButton, false)
 
 			if contactsCreateDialogFirstNameInput.Text() != "" &&
 				contactsCreateDialogLastNameInput.Text() != "" &&
@@ -987,10 +993,7 @@ func main() {
 			contactsCreateDialogEmailInput.SetText("")
 			contactsCreateDialogPronounsInput.SetText("")
 
-			contactsCreateDialogEmailInput.RemoveCSSClass("error")
-			if contactsCreateDialogEmailWarningButton.Parent() != nil {
-				contactsCreateDialogEmailInput.Remove(contactsCreateDialogEmailWarningButton)
-			}
+			setValidationSuffixVisible(contactsCreateDialogEmailInput, contactsCreateDialogEmailWarningButton, false)
 		})
 
 		validateDebtsCreateDialogForm := func() {
@@ -1031,8 +1034,7 @@ func main() {
 		validateActivitiesCreateDialogForm := func() {
 			if date := activitiesCreateDialogDateInput.Text(); date != "" {
 				if _, err := parseLocaleDate(date); err != nil {
-					activitiesCreateDialogDateInput.AddCSSClass("error")
-					activitiesCreateDialogDateWarningButton.SetVisible(true)
+					setValidationSuffixVisible(activitiesCreateDialogDateInput, activitiesCreateDialogDateWarningButton, true)
 
 					activitiesCreateDialogAddButton.SetSensitive(false)
 
@@ -1040,8 +1042,7 @@ func main() {
 				}
 			}
 
-			activitiesCreateDialogDateInput.RemoveCSSClass("error")
-			activitiesCreateDialogDateWarningButton.SetVisible(false)
+			setValidationSuffixVisible(activitiesCreateDialogDateInput, activitiesCreateDialogDateWarningButton, false)
 
 			if activitiesCreateDialogNameInput.Text() != "" &&
 				activitiesCreateDialogDateInput.Text() != "" {
@@ -1057,8 +1058,7 @@ func main() {
 		validateActivitiesEditPageForm := func() {
 			if date := activitiesEditPageDateInput.Text(); date != "" {
 				if _, err := parseLocaleDate(date); err != nil {
-					activitiesEditPageDateInput.AddCSSClass("error")
-					activitiesEditPageDateWarningButton.SetVisible(true)
+					setValidationSuffixVisible(activitiesEditPageDateInput, activitiesEditPageDateWarningButton, true)
 
 					activitiesEditPageSaveButton.SetSensitive(false)
 
@@ -1066,8 +1066,7 @@ func main() {
 				}
 			}
 
-			activitiesEditPageDateInput.RemoveCSSClass("error")
-			activitiesEditPageDateWarningButton.SetVisible(false)
+			setValidationSuffixVisible(activitiesEditPageDateInput, activitiesEditPageDateWarningButton, false)
 
 			if activitiesEditPageNameInput.Text() != "" &&
 				activitiesEditPageDateInput.Text() != "" {
@@ -1084,8 +1083,7 @@ func main() {
 			activitiesCreateDialogNameInput.SetText("")
 			activitiesCreateDialogDateInput.SetText("")
 
-			activitiesCreateDialogDateWarningButton.SetVisible(false)
-			activitiesCreateDialogDateInput.RemoveCSSClass("error")
+			setValidationSuffixVisible(activitiesCreateDialogDateInput, activitiesCreateDialogDateWarningButton, false)
 
 			activitiesCreateDialogDescriptionExpander.SetExpanded(false)
 			activitiesCreateDialogDescriptionInput.Buffer().SetText("")
@@ -2908,8 +2906,7 @@ func main() {
 					activitiesEditPageNameInput.SetText(*res.JSON200.Name)
 					activitiesEditPageDateInput.SetText(glib.NewDateTimeFromGo(res.JSON200.Date.Time).Format("%x"))
 
-					activitiesEditPageDateWarningButton.SetVisible(false)
-					activitiesEditPageDateInput.RemoveCSSClass("error")
+					setValidationSuffixVisible(activitiesEditPageDateInput, activitiesEditPageDateWarningButton, false)
 
 					activitiesEditPageDescriptionExpander.SetExpanded(*res.JSON200.Description != "")
 					activitiesEditPageDescriptionInput.Buffer().SetText(*res.JSON200.Description)
@@ -3132,8 +3129,7 @@ func main() {
 				activitiesEditPageNameInput.SetText("")
 				activitiesEditPageDateInput.SetText("")
 
-				activitiesEditPageDateWarningButton.SetVisible(false)
-				activitiesEditPageDateInput.RemoveCSSClass("error")
+				setValidationSuffixVisible(activitiesEditPageDateInput, activitiesEditPageDateWarningButton, false)
 
 				activitiesEditPageDescriptionExpander.SetExpanded(false)
 				activitiesEditPageDescriptionInput.Buffer().SetText("")

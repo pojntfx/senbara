@@ -50,20 +50,6 @@ Adw.Dialog activities-create-dialog {
 
                 Adw.EntryRow activities-create-dialog-date-input {
                     title: _("Date");
-
-                    [suffix]
-                    MenuButton activities-create-dialog-date-warning-button {
-                        icon-name: "dialog-warning-symbolic";
-                        tooltip-text: _("Show error");
-                        valign: center;
-                        popover: activities-create-dialog-date-popover;
-                        visible: false;
-
-                        styles [
-                            "flat",
-                            "circular",
-                        ]
-                    }
                 }
             }
 
@@ -97,6 +83,18 @@ Adw.Dialog activities-create-dialog {
             }
         }
     }
+}
+
+MenuButton activities-create-dialog-date-warning-button {
+    icon-name: "dialog-warning-symbolic";
+    tooltip-text: _("Show error");
+    valign: center;
+    popover: activities-create-dialog-date-popover;
+
+    styles [
+        "flat",
+        "circular",
+    ]
 }
 
 Popover activities-create-dialog-date-popover {

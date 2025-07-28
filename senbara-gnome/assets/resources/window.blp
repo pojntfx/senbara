@@ -1035,20 +1035,6 @@ Adw.Window main-window {
 
                                                             Adw.EntryRow activities-edit-page-date-input {
                                                                 title: _("Date");
-
-                                                                [suffix]
-                                                                MenuButton activities-edit-page-date-warning-button {
-                                                                    icon-name: "dialog-warning-symbolic";
-                                                                    tooltip-text: _("Show error");
-                                                                    valign: center;
-                                                                    popover: activities-edit-page-date-popover;
-                                                                    visible: false;
-
-                                                                    styles [
-                                                                        "flat",
-                                                                        "circular",
-                                                                    ]
-                                                                }
                                                             }
                                                         }
 
@@ -1196,20 +1182,6 @@ Adw.Window main-window {
                                                             Adw.EntryRow contacts-edit-page-email-input {
                                                                 title: _("Email");
                                                                 input-purpose: email;
-
-                                                                [suffix]
-                                                                MenuButton contacts-edit-page-email-warning-button {
-                                                                    icon-name: "dialog-warning-symbolic";
-                                                                    tooltip-text: _("Show error");
-                                                                    valign: center;
-                                                                    popover: contacts-edit-page-email-popover;
-                                                                    visible: false;
-
-                                                                    styles [
-                                                                        "flat",
-                                                                        "circular",
-                                                                    ]
-                                                                }
                                                             }
 
                                                             Adw.EntryRow contacts-edit-page-pronouns-input {
@@ -1218,20 +1190,6 @@ Adw.Window main-window {
 
                                                             Adw.EntryRow contacts-edit-page-birthday-input {
                                                                 title: _("Birthday (optional)");
-
-                                                                [suffix]
-                                                                MenuButton contacts-edit-page-birthday-warning-button {
-                                                                    icon-name: "dialog-warning-symbolic";
-                                                                    tooltip-text: _("Show error");
-                                                                    valign: center;
-                                                                    popover: contacts-edit-page-birthday-popover;
-                                                                    visible: false;
-
-                                                                    styles [
-                                                                        "flat",
-                                                                        "circular",
-                                                                    ]
-                                                                }
                                                             }
                                                         }
 
@@ -1526,6 +1484,42 @@ menu home-menu {
         label: _("About Senbara Forms");
         action: "app.about";
     }
+}
+
+MenuButton contacts-edit-page-birthday-warning-button {
+    icon-name: "dialog-warning-symbolic";
+    tooltip-text: _("Show error");
+    valign: center;
+    popover: contacts-edit-page-birthday-popover;
+
+    styles [
+        "flat",
+        "circular",
+    ]
+}
+
+MenuButton contacts-edit-page-email-warning-button {
+    icon-name: "dialog-warning-symbolic";
+    tooltip-text: _("Show error");
+    valign: center;
+    popover: contacts-edit-page-email-popover;
+
+    styles [
+        "flat",
+        "circular",
+    ]
+}
+
+MenuButton activities-edit-page-date-warning-button {
+    icon-name: "dialog-warning-symbolic";
+    tooltip-text: _("Show error");
+    valign: center;
+    popover: activities-edit-page-date-popover;
+
+    styles [
+        "flat",
+        "circular",
+    ]
 }
 
 Popover activities-edit-page-date-popover {
