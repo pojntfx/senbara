@@ -487,8 +487,25 @@ func main() {
 			contactsEditErrorRefreshButton     = b.GetObject("contacts-edit-error-refresh-button").Cast().(*gtk.Button)
 			contactsEditErrorCopyDetailsButton = b.GetObject("contacts-edit-error-copy-details").Cast().(*gtk.Button)
 
-			contactsEditPageSaveButton = b.GetObject("contacts-edit-save-button").Cast().(*gtk.Button)
-			// contactsEditPageSaveSpinner = b.GetObject("contacts-edit-save-spinner").Cast().(*adw.Spinner)
+			contactsEditPageSaveButton  = b.GetObject("contacts-edit-save-button").Cast().(*gtk.Button)
+			contactsEditPageSaveSpinner = b.GetObject("contacts-edit-save-spinner").Cast().(*adw.Spinner)
+
+			contactsEditPageFirstNameInput = b.GetObject("contacts-edit-page-first-name-input").Cast().(*adw.EntryRow)
+			contactsEditPageLastNameInput  = b.GetObject("contacts-edit-page-last-name-input").Cast().(*adw.EntryRow)
+			contactsEditPageNicknameInput  = b.GetObject("contacts-edit-page-nickname-input").Cast().(*adw.EntryRow)
+			contactsEditPageEmailInput     = b.GetObject("contacts-edit-page-email-input").Cast().(*adw.EntryRow)
+			contactsEditPagePronounsInput  = b.GetObject("contacts-edit-page-pronouns-input").Cast().(*adw.EntryRow)
+
+			contactsEditPageBirthdayInput   = b.GetObject("contacts-edit-page-birthday-input").Cast().(*adw.EntryRow)
+			contactsEditPageAddressExpander = b.GetObject("contacts-edit-page-address-expander").Cast().(*adw.ExpanderRow)
+			contactsEditPageAddressInput    = b.GetObject("contacts-edit-page-address-input").Cast().(*gtk.TextView)
+			contactsEditPageNotesExpander   = b.GetObject("contacts-edit-page-notes-expander").Cast().(*adw.ExpanderRow)
+			contactsEditPageNotesInput      = b.GetObject("contacts-edit-page-notes-input").Cast().(*gtk.TextView)
+
+			contactsEditPageEmailWarningButton    = b.GetObject("contacts-edit-page-email-warning-button").Cast().(*gtk.MenuButton)
+			contactsEditPageBirthdayWarningButton = b.GetObject("contacts-edit-page-birthday-warning-button").Cast().(*gtk.MenuButton)
+
+			contactsEditPagePopoverLabel = b.GetObject("contacts-edit-page-birthday-popover-label").Cast().(*gtk.Label)
 
 			debtsCreateDialog = debtsCreateDialogBuilder.GetObject("debts-create-dialog").Cast().(*adw.Dialog)
 
@@ -554,6 +571,7 @@ func main() {
 		invalidDateLabel := fmt.Sprintf("Not a valid date (format: %v)", glib.NewDateTimeFromGo(time.Date(2006, 1, 2, 0, 0, 0, 0, time.UTC)).Format("%x"))
 		activitiesCreateDialogPopoverLabel.SetLabel(gcore.Local(invalidDateLabel))
 		activitiesEditPagePopoverLabel.SetLabel(gcore.Local(invalidDateLabel))
+		contactsEditPagePopoverLabel.SetLabel(gcore.Local(invalidDateLabel))
 
 		var deregistrationLock sync.Mutex
 		deregisterOIDCClient := func() error {
@@ -1055,6 +1073,16 @@ func main() {
 		activitiesCreateDialogNameInput.ConnectChanged(validateActivitiesCreateDialogForm)
 		activitiesCreateDialogDateInput.ConnectChanged(validateActivitiesCreateDialogForm)
 
+		activitiesCreateDialog.ConnectClosed(func() {
+			activitiesCreateDialogNameInput.SetText("")
+			activitiesCreateDialogDateInput.SetText("")
+
+			setValidationSuffixVisible(activitiesCreateDialogDateInput, activitiesCreateDialogDateWarningButton, false)
+
+			activitiesCreateDialogDescriptionExpander.SetExpanded(false)
+			activitiesCreateDialogDescriptionInput.Buffer().SetText("")
+		})
+
 		validateActivitiesEditPageForm := func() {
 			if date := activitiesEditPageDateInput.Text(); date != "" {
 				if _, err := parseLocaleDate(date); err != nil {
@@ -1079,15 +1107,48 @@ func main() {
 		activitiesEditPageNameInput.ConnectChanged(validateActivitiesEditPageForm)
 		activitiesEditPageDateInput.ConnectChanged(validateActivitiesEditPageForm)
 
-		activitiesCreateDialog.ConnectClosed(func() {
-			activitiesCreateDialogNameInput.SetText("")
-			activitiesCreateDialogDateInput.SetText("")
+		validateContactsEditPageForm := func() {
+			if email := contactsEditPageEmailInput.Text(); email != "" {
+				if _, err := mail.ParseAddress(email); err != nil {
+					setValidationSuffixVisible(contactsEditPageEmailInput, contactsEditPageEmailWarningButton, true)
 
-			setValidationSuffixVisible(activitiesCreateDialogDateInput, activitiesCreateDialogDateWarningButton, false)
+					contactsEditPageSaveButton.SetSensitive(false)
 
-			activitiesCreateDialogDescriptionExpander.SetExpanded(false)
-			activitiesCreateDialogDescriptionInput.Buffer().SetText("")
-		})
+					return
+				}
+			}
+
+			setValidationSuffixVisible(contactsEditPageEmailInput, contactsEditPageEmailWarningButton, false)
+
+			if date := contactsEditPageBirthdayInput.Text(); date != "" {
+				if _, err := parseLocaleDate(date); err != nil {
+					setValidationSuffixVisible(contactsEditPageBirthdayInput, contactsEditPageBirthdayWarningButton, true)
+
+					contactsEditPageSaveButton.SetSensitive(false)
+
+					return
+				}
+			}
+
+			setValidationSuffixVisible(contactsEditPageBirthdayInput, contactsEditPageBirthdayWarningButton, false)
+
+			if contactsEditPageFirstNameInput.Text() != "" &&
+				contactsEditPageLastNameInput.Text() != "" &&
+				contactsEditPageEmailInput.Text() != "" &&
+				contactsEditPagePronounsInput.Text() != "" {
+				contactsEditPageSaveButton.SetSensitive(true)
+			} else {
+				contactsEditPageSaveButton.SetSensitive(false)
+			}
+		}
+
+		contactsEditPageFirstNameInput.ConnectChanged(validateContactsEditPageForm)
+		contactsEditPageLastNameInput.ConnectChanged(validateContactsEditPageForm)
+		contactsEditPageNicknameInput.ConnectChanged(validateContactsEditPageForm)
+		contactsEditPageEmailInput.ConnectChanged(validateContactsEditPageForm)
+		contactsEditPagePronounsInput.ConnectChanged(validateContactsEditPageForm)
+
+		contactsEditPageBirthdayInput.ConnectChanged(validateContactsEditPageForm)
 
 		createErrAndLoadingHandlers := func(
 			errorStatusPage *adw.StatusPage,
@@ -1654,6 +1715,109 @@ func main() {
 				}
 
 				mto.AddToast(adw.NewToast(gcore.Local("Updated debt")))
+
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
+			}()
+		})
+
+		contactsEditPageSaveButton.ConnectClicked(func() {
+			id := contactsEditPageSaveButton.ActionTargetValue().Int64()
+
+			log := log.With(
+				"id", id,
+			)
+
+			log.Info("Handling contact update")
+
+			contactsEditPageSaveButton.SetSensitive(false)
+			contactsEditPageSaveSpinner.SetVisible(true)
+
+			go func() {
+				defer contactsEditPageSaveSpinner.SetVisible(false)
+				defer contactsEditPageSaveButton.SetSensitive(true)
+
+				redirected, c, _, err := authorize(
+					ctx,
+
+					false,
+				)
+				if err != nil {
+					log.Warn("Could not authorize user for update contact action", "err", err)
+
+					handlePanic(err)
+
+					return
+				} else if redirected {
+					return
+				}
+
+				var nickname *string
+				if v := contactsEditPageNicknameInput.Text(); v != "" {
+					nickname = &v
+				}
+
+				var birthday *types.Date
+				if v := contactsEditPageBirthdayInput.Text(); v != "" {
+					localeBirthday, err := parseLocaleDate(contactsEditPageBirthdayInput.Text())
+					if err != nil {
+						handlePanic(err)
+
+						return
+					}
+
+					birthday = &types.Date{
+						Time: localeBirthday,
+					}
+				}
+
+				var address *string
+				if v := contactsEditPageAddressInput.Buffer().Text(
+					contactsEditPageAddressInput.Buffer().StartIter(),
+					contactsEditPageAddressInput.Buffer().EndIter(),
+					true,
+				); v != "" {
+					address = &v
+				}
+
+				var notes *string
+				if v := contactsEditPageNotesInput.Buffer().Text(
+					contactsEditPageNotesInput.Buffer().StartIter(),
+					contactsEditPageNotesInput.Buffer().EndIter(),
+					true,
+				); v != "" {
+					notes = &v
+				}
+
+				req := api.UpdateContactJSONRequestBody{
+					Email:     (types.Email)(contactsEditPageEmailInput.Text()),
+					FirstName: contactsEditPageFirstNameInput.Text(),
+					LastName:  contactsEditPageLastNameInput.Text(),
+					Nickname:  nickname,
+					Pronouns:  contactsEditPagePronounsInput.Text(),
+
+					Birthday: birthday,
+					Address:  address,
+					Notes:    notes,
+				}
+
+				log.Debug("Creating contact", "request", req)
+
+				res, err := c.UpdateContactWithResponse(ctx, id, req)
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+
+				log.Debug("Updated contact", "status", res.StatusCode())
+
+				if res.StatusCode() != http.StatusOK {
+					handlePanic(errors.New(res.Status()))
+
+					return
+				}
+
+				mto.AddToast(adw.NewToast(gcore.Local("Updated contact")))
 
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
 			}()
@@ -3024,7 +3188,34 @@ func main() {
 
 					contactsEditPageTitle.SetSubtitle(*res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName)
 
-					// TODO: Set input fields
+					contactsEditPageFirstNameInput.SetText(*res.JSON200.Entry.FirstName)
+					contactsEditPageLastNameInput.SetText(*res.JSON200.Entry.LastName)
+					contactsEditPageNicknameInput.SetText(*res.JSON200.Entry.Nickname)
+					contactsEditPageEmailInput.SetText(string(*res.JSON200.Entry.Email))
+					contactsEditPagePronounsInput.SetText(string(*res.JSON200.Entry.Pronouns))
+
+					var (
+						birthday = res.JSON200.Entry.Birthday
+						address  = res.JSON200.Entry.Address
+						notes    = res.JSON200.Entry.Notes
+					)
+					if birthday != nil {
+						contactsEditPageBirthdayInput.SetText(glib.NewDateTimeFromGo(birthday.Time).Format("%x"))
+					}
+
+					if *address != "" {
+						contactsEditPageAddressExpander.SetExpanded(true)
+						contactsEditPageAddressInput.Buffer().SetText(*address)
+					} else {
+						contactsEditPageAddressExpander.SetExpanded(false)
+					}
+
+					if *notes != "" {
+						contactsEditPageNotesExpander.SetExpanded(true)
+						contactsEditPageNotesInput.Buffer().SetText(*notes)
+					} else {
+						contactsEditPageNotesExpander.SetExpanded(false)
+					}
 				}()
 			}
 		}
@@ -3147,6 +3338,25 @@ func main() {
 
 				debtsEditPageDescriptionExpander.SetExpanded(false)
 				debtsEditPageDescriptionInput.Buffer().SetText("")
+
+			case resources.PageContactsEdit:
+				contactsEditPageTitle.SetSubtitle("")
+
+				contactsEditPageFirstNameInput.SetText("")
+				contactsEditPageLastNameInput.SetText("")
+				contactsEditPageNicknameInput.SetText("")
+				contactsEditPageEmailInput.SetText("")
+				contactsEditPagePronounsInput.SetText("")
+
+				contactsEditPageBirthdayInput.SetText("")
+
+				contactsEditPageAddressExpander.SetExpanded(false)
+				contactsEditPageAddressInput.Buffer().SetText("")
+
+				contactsEditPageNotesExpander.SetExpanded(false)
+				contactsEditPageNotesInput.Buffer().SetText("")
+
+				setValidationSuffixVisible(contactsEditPageEmailInput, contactsEditPageEmailWarningButton, false)
 			}
 		})
 		homeNavigation.ConnectPushed(handleHomeNavigation)
