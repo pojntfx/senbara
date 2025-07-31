@@ -26,6 +26,7 @@ select id,
     date,
     description
 from insertion;
+
 -- name: GetActivities :many
 select activities.id,
     activities.name,
@@ -35,17 +36,20 @@ from contacts
     right join activities on activities.contact_id = contacts.id
 where contacts.id = $1
     and contacts.namespace = $2;
+
 -- name: DeleteActivity :one
 delete from activities using contacts
 where activities.id = $1
     and activities.contact_id = contacts.id
     and contacts.namespace = $2
 returning activities.id;
+
 -- name: DeleteActivitesForContact :exec
 delete from activities using contacts
 where activities.contact_id = contacts.id
     and contacts.id = $1
     and contacts.namespace = $2;
+
 -- name: GetActivityAndContact :one
 select activities.id as activity_id,
     activities.name,
@@ -58,6 +62,7 @@ from contacts
     inner join activities on activities.contact_id = contacts.id
 where activities.id = $1
     and contacts.namespace = $2;
+
 -- name: UpdateActivity :one
 update activities
 set name = $3,
@@ -71,6 +76,7 @@ returning activities.id,
     activities.name,
     activities.date,
     activities.description;
+
 -- name: GetActivitiesExportForNamespace :many
 select 'activites' as table_name,
     activities.id,
@@ -81,6 +87,7 @@ select 'activites' as table_name,
 from contacts
     right join activities on activities.contact_id = contacts.id
 where contacts.namespace = $1;
+
 -- name: DeleteActivitiesForNamespace :many
 delete from activities using contacts
 where activities.contact_id = contacts.id

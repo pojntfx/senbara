@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+
+	"github.com/pojntfx/senbara/senbara-common/pkg/models"
 )
 
 type indexData struct {
@@ -25,27 +27,16 @@ func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var contactsCount, journalEntriesCount int64
+		var contactsAndJournalEntriesCount models.ContactsAndJournalEntriesCount
 		if strings.TrimSpace(userData.Email) != "" {
 			log := c.log.With("namespace", userData.Email)
 
-			log.Debug("Counting contacts for index summary")
+			log.Debug("Counting contacts and journal entries for index summary")
 
 			var err error
-			contactsCount, err = c.persister.CountContacts(r.Context(), userData.Email)
+			contactsAndJournalEntriesCount, err = c.persister.CountContactsAndJournalEntries(r.Context(), userData.Email)
 			if err != nil {
-				log.Warn("Could not count contacts for index summary", "err", errors.Join(errCouldNotFetchFromDB, err))
-
-				http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
-
-				return
-			}
-
-			log.Debug("Counting journal entries for index summary")
-
-			journalEntriesCount, err = c.persister.CountJournalEntries(r.Context(), userData.Email)
-			if err != nil {
-				log.Warn("Could not count journal entries for index summary", "err", errors.Join(errCouldNotFetchFromDB, err))
+				log.Warn("Could not count contacts and journal entries for index summary", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 				http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
 
@@ -62,8 +53,8 @@ func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 				TosURL:     c.tosURL,
 				ImprintURL: c.imprintURL,
 			},
-			ContactsCount:       contactsCount,
-			JournalEntriesCount: journalEntriesCount,
+			ContactsCount:       contactsAndJournalEntriesCount.ContactCount,
+			JournalEntriesCount: contactsAndJournalEntriesCount.JournalEntriesCount,
 		}); err != nil {
 			c.log.Warn("Could not render index template", "err", errors.Join(errCouldNotRenderTemplate, err))
 

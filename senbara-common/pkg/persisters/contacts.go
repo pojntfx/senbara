@@ -113,9 +113,3 @@ func (p *Persister) UpdateContact(
 		Notes:     notes,
 	})
 }
-
-func (p *Persister) CountContacts(ctx context.Context, namespace string) (int64, error) {
-	p.log.With("namespace", namespace).Debug("Counting contacts")
-
-	return p.queries.CountContacts(ctx, namespace)
-}

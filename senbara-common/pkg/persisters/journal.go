@@ -52,9 +52,3 @@ func (p *Persister) UpdateJournalEntry(ctx context.Context, id int32, title, bod
 		Rating:    rating,
 	})
 }
-
-func (p *Persister) CountJournalEntries(ctx context.Context, namespace string) (int64, error) {
-	p.log.With("namespace", namespace).Debug("Counting journal entries")
-
-	return p.queries.CountJournalEntries(ctx, namespace)
-}

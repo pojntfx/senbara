@@ -15,26 +15,17 @@ func (c *Controller) GetIndex(ctx context.Context, request api.GetIndexRequestOb
 
 	log.Debug("Handling index")
 
-	log.Debug("Counting contacts for index summary")
+	log.Debug("Counting contacts and journal entries for index summary")
 
-	contactsCount, err := c.persister.CountContacts(ctx, namespace)
+	contactsAndJournalEntriesCount, err := c.persister.CountContactsAndJournalEntries(ctx, namespace)
 	if err != nil {
-		log.Warn("Could not count contacts for index summary", "err", errors.Join(errCouldNotFetchFromDB, err))
-
-		return api.GetIndex500TextResponse(errCouldNotFetchFromDB.Error()), nil
-	}
-
-	log.Debug("Counting journal entries for index summary")
-
-	journalEntriesCount, err := c.persister.CountJournalEntries(ctx, namespace)
-	if err != nil {
-		log.Warn("Could not count journal entries for index summary", "err", errors.Join(errCouldNotFetchFromDB, err))
+		log.Warn("Could not count contacts and journal entries for index summary", "err", errors.Join(errCouldNotFetchFromDB, err))
 
 		return api.GetIndex500TextResponse(errCouldNotFetchFromDB.Error()), nil
 	}
 
 	return api.GetIndex200JSONResponse(api.IndexData{
-		ContactsCount:       &contactsCount,
-		JournalEntriesCount: &journalEntriesCount,
+		ContactsCount:       &contactsAndJournalEntriesCount.ContactCount,
+		JournalEntriesCount: &contactsAndJournalEntriesCount.JournalEntriesCount,
 	}), nil
 }

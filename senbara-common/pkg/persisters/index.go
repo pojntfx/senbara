@@ -9,6 +9,7 @@ import (
 
 	"github.com/pojntfx/senbara/senbara-common/db/migrations"
 	"github.com/pojntfx/senbara/senbara-common/internal/tables"
+	"github.com/pojntfx/senbara/senbara-common/pkg/models"
 	"github.com/pressly/goose/v3"
 )
 
@@ -51,4 +52,10 @@ func (p *Persister) Init(ctx context.Context) error {
 	p.queries = tables.New(p.db)
 
 	return nil
+}
+
+func (p *Persister) CountContactsAndJournalEntries(ctx context.Context, namespace string) (models.ContactsAndJournalEntriesCount, error) {
+	p.log.With("namespace", namespace).Debug("Counting contacts and journal entries")
+
+	return p.queries.CountContactsAndJournalEntries(ctx, namespace)
 }
