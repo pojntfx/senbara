@@ -750,33 +750,37 @@ Adw.Window main-window {
                                     }
 
                                     ScrolledWindow {
-                                        Adw.Clamp {
-                                            maximum-size: 600;
+                                        Stack activities-view-stack {
+                                            StackPage {
+                                                name: "/activities/view/loading";
 
-                                            Stack activities-view-stack {
-                                                StackPage {
-                                                    name: "/activities/view/loading";
+                                                child: Adw.Clamp {
+                                                    maximum-size: 600;
 
-                                                    child: Box {
+                                                    Box {
                                                         halign: center;
 
                                                         Adw.Spinner {
                                                             width-request: 32;
                                                             height-request: 32;
                                                         }
-                                                    };
-                                                }
+                                                    }
+                                                };
+                                            }
 
-                                                StackPage {
-                                                    name: "/activities/view/data";
+                                            StackPage {
+                                                name: "/activities/view/data";
 
-                                                    child: WebKit.WebView activities-view-body {};
-                                                }
+                                                child: WebKit.WebView activities-view-body {};
+                                            }
 
-                                                StackPage {
-                                                    name: "/activities/view/error";
+                                            StackPage {
+                                                name: "/activities/view/error";
 
-                                                    child: Adw.StatusPage activities-view-error-status-page {
+                                                child: Adw.Clamp {
+                                                    maximum-size: 600;
+
+                                                    Adw.StatusPage activities-view-error-status-page {
                                                         title: _("Activity could not be loaded");
                                                         icon-name: "dialog-warning-symbolic";
 
@@ -798,8 +802,8 @@ Adw.Window main-window {
                                                                 label: _("Copy details");
                                                             }
                                                         }
-                                                    };
-                                                }
+                                                    }
+                                                };
                                             }
                                         }
                                     }
