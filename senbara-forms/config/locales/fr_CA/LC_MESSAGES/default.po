@@ -47,6 +47,9 @@ msgstr "Voulez-vous vraiment supprimer vos données et votre compte ?"
 msgid "Contacts"
 msgstr "Contacts"
 
+msgid "Total contacts"
+msgstr "Total des contacts"
+
 msgid "Add a contact"
 msgstr "Ajouter un contact"
 
@@ -185,6 +188,9 @@ msgstr "Aucune écriture dans le journal pour le moment."
 msgid "Journal entries"
 msgstr "Écritures de journal"
 
+msgid "Total journal entries"
+msgstr "Total des écritures de journal"
+
 # Forms
 msgid "Name"
 msgstr "Nom"
@@ -225,6 +231,9 @@ msgstr "Accueil"
 
 msgid "Summary"
 msgstr "Sommaire"
+
+msgid "Statistics"
+msgstr "Statistiques"
 
 # Legal
 msgid "© 2025 Felicitas Pojtinger and contributors (AGPL-3.0)"

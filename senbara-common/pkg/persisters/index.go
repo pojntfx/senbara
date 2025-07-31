@@ -59,3 +59,14 @@ func (p *Persister) CountContactsAndJournalEntries(ctx context.Context, namespac
 
 	return p.queries.CountContactsAndJournalEntries(ctx, namespace)
 }
+
+func (p *Persister) CountAllContactsAndJournalEntries(ctx context.Context) (models.ContactsAndJournalEntriesCount, error) {
+	p.log.Debug("Counting all contacts and journal entries")
+
+	allContactsAndJournalEntriesCount, err := p.queries.CountAllContactsAndJournalEntries(ctx)
+	if err != nil {
+		return tables.CountContactsAndJournalEntriesRow{}, err
+	}
+
+	return models.ContactsAndJournalEntriesCount(allContactsAndJournalEntriesCount), nil
+}

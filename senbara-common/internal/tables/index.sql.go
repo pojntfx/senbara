@@ -9,6 +9,29 @@ import (
 	"context"
 )
 
+const countAllContactsAndJournalEntries = `-- name: CountAllContactsAndJournalEntries :one
+select (
+        select count(*)
+        from contacts
+    ) as contact_count,
+    (
+        select count(*)
+        from journal_entries
+    ) as journal_entries_count
+`
+
+type CountAllContactsAndJournalEntriesRow struct {
+	ContactCount        int64
+	JournalEntriesCount int64
+}
+
+func (q *Queries) CountAllContactsAndJournalEntries(ctx context.Context) (CountAllContactsAndJournalEntriesRow, error) {
+	row := q.db.QueryRowContext(ctx, countAllContactsAndJournalEntries)
+	var i CountAllContactsAndJournalEntriesRow
+	err := row.Scan(&i.ContactCount, &i.JournalEntriesCount)
+	return i, err
+}
+
 const countContactsAndJournalEntries = `-- name: CountContactsAndJournalEntries :one
 select (
         select count(*)

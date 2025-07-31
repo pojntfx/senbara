@@ -15,14 +15,27 @@ Designed as a reference for modern JS-free Web 2.0 development with Go.`
       </h3>
     </header>
 
-    {{ if ne .LogoutURL "" }}
+    {{ if eq .LogoutURL "" }}
+    <main>
+      <h2>{{ $.Locale.Get "Statistics" }}</h2>
+
+      <dl>
+        <dt>{{ $.Locale.Get "Total contacts" }}</dt>
+        <dd>{{ .ContactsCount }}</dd>
+        <dt>{{ $.Locale.Get "Total journal entries" }}</dt>
+        <dd>{{ .JournalEntriesCount }}</dd>
+      </dl>
+    </main>
+    {{ else }}
     <main>
       <h2>{{ $.Locale.Get "Summary" }}</h2>
 
       <dl>
         <dt><a href="/contacts">{{ $.Locale.Get "Contacts" }}</a></dt>
         <dd>{{ .ContactsCount }}</dd>
-        <dt><a href="/journal">{{ $.Locale.Get "Journal entries" }}</a></dt>
+        <dt>
+          <a href="/journal">{{ $.Locale.Get "Journal entries" }}</a>
+        </dt>
         <dd>{{ .JournalEntriesCount }}</dd>
       </dl>
     </main>

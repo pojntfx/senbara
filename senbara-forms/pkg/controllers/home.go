@@ -28,7 +28,19 @@ func (c *Controller) HandleIndex(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var contactsAndJournalEntriesCount models.ContactsAndJournalEntriesCount
-		if strings.TrimSpace(userData.Email) != "" {
+		if strings.TrimSpace(userData.Email) == "" {
+			c.log.Debug("Counting all contacts and journal entries for index summary")
+
+			var err error
+			contactsAndJournalEntriesCount, err = c.persister.CountAllContactsAndJournalEntries(r.Context())
+			if err != nil {
+				c.log.Warn("Could not count all contacts and journal entries for index summary", "err", errors.Join(errCouldNotFetchFromDB, err))
+
+				http.Error(w, errCouldNotFetchFromDB.Error(), http.StatusInternalServerError)
+
+				return
+			}
+		} else {
 			log := c.log.With("namespace", userData.Email)
 
 			log.Debug("Counting contacts and journal entries for index summary")

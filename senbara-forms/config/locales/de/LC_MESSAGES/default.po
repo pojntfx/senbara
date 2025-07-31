@@ -47,6 +47,9 @@ msgstr "Möchten Sie Ihre Benutzerdaten und Ihr Konto wirklich löschen?"
 msgid "Contacts"
 msgstr "Kontakte"
 
+msgid "Total contacts"
+msgstr "Kontakte insgesamt"
+
 msgid "Add a contact"
 msgstr "Kontakt hinzufügen"
 
@@ -185,6 +188,9 @@ msgstr "Noch keine Tagebucheinträge vorhanden."
 msgid "Journal entries"
 msgstr "Tagebucheinträge"
 
+msgid "Total journal entries"
+msgstr "Tagebucheinträge insgesamt"
+
 # Forms
 msgid "Name"
 msgstr "Name"
@@ -225,6 +231,9 @@ msgstr "Startseite"
 
 msgid "Summary"
 msgstr "Zusammenfassung"
+
+msgid "Statistics"
+msgstr "Statistiken"
 
 # Legal
 msgid "© 2025 Felicitas Pojtinger and contributors (AGPL-3.0)"
