@@ -2708,6 +2708,8 @@ func main() {
 
 							r.AddSuffix(gtk.NewImageFromIconName("go-next-symbolic"))
 
+							r.SetActivatable(true)
+
 							contactsListBox.Append(r)
 						}
 					} else {
@@ -2907,6 +2909,8 @@ func main() {
 
 						r.AddSuffix(gtk.NewImageFromIconName("go-next-symbolic"))
 
+						r.SetActivatable(true)
+
 						contactsViewActivitiesListBox.Append(r)
 					}
 
@@ -2917,6 +2921,8 @@ func main() {
 					addActivityButton.ConnectActivated(func() {
 						activitiesCreateDialog.Present(w)
 					})
+
+					addActivityButton.SetActivatable(true)
 
 					contactsViewActivitiesListBox.Append(addActivityButton)
 				}()
@@ -3232,7 +3238,7 @@ func main() {
 			}
 		}
 
-		contactsListBox.ConnectRowSelected(func(row *gtk.ListBoxRow) {
+		contactsListBox.ConnectRowActivated(func(row *gtk.ListBoxRow) {
 			if row != nil {
 				u, err := url.Parse(row.Cast().(*adw.ActionRow).Name())
 				if err != nil {
@@ -3267,7 +3273,7 @@ func main() {
 			}
 		})
 
-		contactsViewActivitiesListBox.ConnectRowSelected(func(row *gtk.ListBoxRow) {
+		contactsViewActivitiesListBox.ConnectRowActivated(func(row *gtk.ListBoxRow) {
 			if row != nil {
 				row, ok := row.Cast().(*adw.ActionRow)
 				if !ok {
@@ -3374,7 +3380,7 @@ func main() {
 		homeNavigation.ConnectPushed(handleHomeNavigation)
 		homeNavigation.ConnectReplaced(handleHomeNavigation)
 
-		homeSidebarListbox.ConnectRowSelected(func(row *gtk.ListBoxRow) {
+		homeSidebarListbox.ConnectRowActivated(func(row *gtk.ListBoxRow) {
 			homeNavigation.ReplaceWithTags([]string{row.Cast().(*adw.ActionRow).Name()})
 		})
 
@@ -3525,8 +3531,6 @@ func main() {
 
 					settings.SetBoolean(resources.SettingAnonymousMode, false)
 
-					homeSidebarListbox.SelectRow(homeSidebarListbox.RowAtIndex(0))
-
 					log.Debug("Getting summary")
 
 					res, err := c.GetIndexWithResponse(ctx)
@@ -3546,6 +3550,9 @@ func main() {
 
 					homeSidebarContactsCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.ContactsCount))
 					homeSidebarJournalEntriesCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.JournalEntriesCount))
+
+					homeSidebarListbox.SelectRow(homeSidebarListbox.RowAtIndex(0))
+					homeNavigation.ReplaceWithTags([]string{resources.PageContacts})
 				}()
 			}
 		}
