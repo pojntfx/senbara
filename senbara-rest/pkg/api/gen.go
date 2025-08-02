@@ -264,9 +264,6 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
-	// GetIndex request
-	GetIndex(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// CreateActivityWithBody request with any body
 	CreateActivityWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -340,6 +337,12 @@ type ClientInterface interface {
 	// GetOpenAPISpec request
 	GetOpenAPISpec(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetStatistics request
+	GetStatistics(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetSummary request
+	GetSummary(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// DeleteUserData request
 	DeleteUserData(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -348,18 +351,6 @@ type ClientInterface interface {
 
 	// ImportUserDataWithBody request with any body
 	ImportUserDataWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-}
-
-func (c *Client) GetIndex(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetIndexRequest(c.Server)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
 }
 
 func (c *Client) CreateActivityWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -686,6 +677,30 @@ func (c *Client) GetOpenAPISpec(ctx context.Context, reqEditors ...RequestEditor
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetStatistics(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetStatisticsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetSummary(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetSummaryRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) DeleteUserData(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteUserDataRequest(c.Server)
 	if err != nil {
@@ -720,33 +735,6 @@ func (c *Client) ImportUserDataWithBody(ctx context.Context, contentType string,
 		return nil, err
 	}
 	return c.Client.Do(req)
-}
-
-// NewGetIndexRequest generates requests for GetIndex
-func NewGetIndexRequest(server string) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
 }
 
 // NewCreateActivityRequest calls the generic CreateActivity builder with application/json body
@@ -1443,6 +1431,60 @@ func NewGetOpenAPISpecRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
+// NewGetStatisticsRequest generates requests for GetStatistics
+func NewGetStatisticsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/statistics")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetSummaryRequest generates requests for GetSummary
+func NewGetSummaryRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/summary")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewDeleteUserDataRequest generates requests for DeleteUserData
 func NewDeleteUserDataRequest(server string) (*http.Request, error) {
 	var err error
@@ -1569,9 +1611,6 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
-	// GetIndexWithResponse request
-	GetIndexWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetIndexResponse, error)
-
 	// CreateActivityWithBodyWithResponse request with any body
 	CreateActivityWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateActivityResponse, error)
 
@@ -1645,6 +1684,12 @@ type ClientWithResponsesInterface interface {
 	// GetOpenAPISpecWithResponse request
 	GetOpenAPISpecWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetOpenAPISpecResponse, error)
 
+	// GetStatisticsWithResponse request
+	GetStatisticsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetStatisticsResponse, error)
+
+	// GetSummaryWithResponse request
+	GetSummaryWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSummaryResponse, error)
+
 	// DeleteUserDataWithResponse request
 	DeleteUserDataWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*DeleteUserDataResponse, error)
 
@@ -1653,28 +1698,6 @@ type ClientWithResponsesInterface interface {
 
 	// ImportUserDataWithBodyWithResponse request with any body
 	ImportUserDataWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ImportUserDataResponse, error)
-}
-
-type GetIndexResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *IndexData
-}
-
-// Status returns HTTPResponse.Status
-func (r GetIndexResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetIndexResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
 }
 
 type CreateActivityResponse struct {
@@ -2093,6 +2116,50 @@ func (r GetOpenAPISpecResponse) StatusCode() int {
 	return 0
 }
 
+type GetStatisticsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *IndexData
+}
+
+// Status returns HTTPResponse.Status
+func (r GetStatisticsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetStatisticsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetSummaryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *IndexData
+}
+
+// Status returns HTTPResponse.Status
+func (r GetSummaryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetSummaryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type DeleteUserDataResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2154,15 +2221,6 @@ func (r ImportUserDataResponse) StatusCode() int {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
-}
-
-// GetIndexWithResponse request returning *GetIndexResponse
-func (c *ClientWithResponses) GetIndexWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetIndexResponse, error) {
-	rsp, err := c.GetIndex(ctx, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetIndexResponse(rsp)
 }
 
 // CreateActivityWithBodyWithResponse request with arbitrary body returning *CreateActivityResponse
@@ -2400,6 +2458,24 @@ func (c *ClientWithResponses) GetOpenAPISpecWithResponse(ctx context.Context, re
 	return ParseGetOpenAPISpecResponse(rsp)
 }
 
+// GetStatisticsWithResponse request returning *GetStatisticsResponse
+func (c *ClientWithResponses) GetStatisticsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetStatisticsResponse, error) {
+	rsp, err := c.GetStatistics(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetStatisticsResponse(rsp)
+}
+
+// GetSummaryWithResponse request returning *GetSummaryResponse
+func (c *ClientWithResponses) GetSummaryWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSummaryResponse, error) {
+	rsp, err := c.GetSummary(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetSummaryResponse(rsp)
+}
+
 // DeleteUserDataWithResponse request returning *DeleteUserDataResponse
 func (c *ClientWithResponses) DeleteUserDataWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*DeleteUserDataResponse, error) {
 	rsp, err := c.DeleteUserData(ctx, reqEditors...)
@@ -2425,32 +2501,6 @@ func (c *ClientWithResponses) ImportUserDataWithBodyWithResponse(ctx context.Con
 		return nil, err
 	}
 	return ParseImportUserDataResponse(rsp)
-}
-
-// ParseGetIndexResponse parses an HTTP response from a GetIndexWithResponse call
-func ParseGetIndexResponse(rsp *http.Response) (*GetIndexResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetIndexResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest IndexData
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
 }
 
 // ParseCreateActivityResponse parses an HTTP response from a CreateActivityWithResponse call
@@ -2927,6 +2977,58 @@ func ParseGetOpenAPISpecResponse(rsp *http.Response) (*GetOpenAPISpecResponse, e
 	return response, nil
 }
 
+// ParseGetStatisticsResponse parses an HTTP response from a GetStatisticsWithResponse call
+func ParseGetStatisticsResponse(rsp *http.Response) (*GetStatisticsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetStatisticsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest IndexData
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetSummaryResponse parses an HTTP response from a GetSummaryWithResponse call
+func ParseGetSummaryResponse(rsp *http.Response) (*GetSummaryResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetSummaryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest IndexData
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseDeleteUserDataResponse parses an HTTP response from a DeleteUserDataWithResponse call
 func ParseDeleteUserDataResponse(rsp *http.Response) (*DeleteUserDataResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -2977,9 +3079,6 @@ func ParseImportUserDataResponse(rsp *http.Response) (*ImportUserDataResponse, e
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Get counts of contacts and journal entries for the authenticated user
-	// (GET /)
-	GetIndex(w http.ResponseWriter, r *http.Request)
 	// Create a new activity
 	// (POST /activities)
 	CreateActivity(w http.ResponseWriter, r *http.Request)
@@ -3037,6 +3136,12 @@ type ServerInterface interface {
 	// Get the OpenAPI spec
 	// (GET /openapi.json)
 	GetOpenAPISpec(w http.ResponseWriter, r *http.Request)
+	// Get total counts of contacts and journal entries
+	// (GET /statistics)
+	GetStatistics(w http.ResponseWriter, r *http.Request)
+	// Get counts of contacts and journal entries for the authenticated user
+	// (GET /summary)
+	GetSummary(w http.ResponseWriter, r *http.Request)
 	// Delete all user data
 	// (DELETE /userdata)
 	DeleteUserData(w http.ResponseWriter, r *http.Request)
@@ -3056,26 +3161,6 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
-
-// GetIndex operation middleware
-func (siw *ServerInterfaceWrapper) GetIndex(w http.ResponseWriter, r *http.Request) {
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, OidcScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetIndex(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
 
 // CreateActivity operation middleware
 func (siw *ServerInterfaceWrapper) CreateActivity(w http.ResponseWriter, r *http.Request) {
@@ -3566,6 +3651,40 @@ func (siw *ServerInterfaceWrapper) GetOpenAPISpec(w http.ResponseWriter, r *http
 	handler.ServeHTTP(w, r)
 }
 
+// GetStatistics operation middleware
+func (siw *ServerInterfaceWrapper) GetStatistics(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetStatistics(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetSummary operation middleware
+func (siw *ServerInterfaceWrapper) GetSummary(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, OidcScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetSummary(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // DeleteUserData operation middleware
 func (siw *ServerInterfaceWrapper) DeleteUserData(w http.ResponseWriter, r *http.Request) {
 
@@ -3746,7 +3865,6 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 		ErrorHandlerFunc:   options.ErrorHandlerFunc,
 	}
 
-	m.HandleFunc("GET "+options.BaseURL+"/", wrapper.GetIndex)
 	m.HandleFunc("POST "+options.BaseURL+"/activities", wrapper.CreateActivity)
 	m.HandleFunc("DELETE "+options.BaseURL+"/activities/{id}", wrapper.DeleteActivity)
 	m.HandleFunc("GET "+options.BaseURL+"/activities/{id}", wrapper.GetActivity)
@@ -3766,47 +3884,13 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("GET "+options.BaseURL+"/journal/{id}", wrapper.GetJournalEntry)
 	m.HandleFunc("PUT "+options.BaseURL+"/journal/{id}", wrapper.UpdateJournalEntry)
 	m.HandleFunc("GET "+options.BaseURL+"/openapi.json", wrapper.GetOpenAPISpec)
+	m.HandleFunc("GET "+options.BaseURL+"/statistics", wrapper.GetStatistics)
+	m.HandleFunc("GET "+options.BaseURL+"/summary", wrapper.GetSummary)
 	m.HandleFunc("DELETE "+options.BaseURL+"/userdata", wrapper.DeleteUserData)
 	m.HandleFunc("GET "+options.BaseURL+"/userdata", wrapper.ExportUserData)
 	m.HandleFunc("POST "+options.BaseURL+"/userdata", wrapper.ImportUserData)
 
 	return m
-}
-
-type GetIndexRequestObject struct {
-}
-
-type GetIndexResponseObject interface {
-	VisitGetIndexResponse(w http.ResponseWriter) error
-}
-
-type GetIndex200JSONResponse IndexData
-
-func (response GetIndex200JSONResponse) VisitGetIndexResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetIndex403TextResponse string
-
-func (response GetIndex403TextResponse) VisitGetIndexResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(403)
-
-	_, err := w.Write([]byte(response))
-	return err
-}
-
-type GetIndex500TextResponse string
-
-func (response GetIndex500TextResponse) VisitGetIndexResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(500)
-
-	_, err := w.Write([]byte(response))
-	return err
 }
 
 type CreateActivityRequestObject struct {
@@ -4524,6 +4608,78 @@ func (response GetOpenAPISpec500TextResponse) VisitGetOpenAPISpecResponse(w http
 	return err
 }
 
+type GetStatisticsRequestObject struct {
+}
+
+type GetStatisticsResponseObject interface {
+	VisitGetStatisticsResponse(w http.ResponseWriter) error
+}
+
+type GetStatistics200JSONResponse IndexData
+
+func (response GetStatistics200JSONResponse) VisitGetStatisticsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetStatistics403TextResponse string
+
+func (response GetStatistics403TextResponse) VisitGetStatisticsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type GetStatistics500TextResponse string
+
+func (response GetStatistics500TextResponse) VisitGetStatisticsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type GetSummaryRequestObject struct {
+}
+
+type GetSummaryResponseObject interface {
+	VisitGetSummaryResponse(w http.ResponseWriter) error
+}
+
+type GetSummary200JSONResponse IndexData
+
+func (response GetSummary200JSONResponse) VisitGetSummaryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetSummary403TextResponse string
+
+func (response GetSummary403TextResponse) VisitGetSummaryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(403)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
+type GetSummary500TextResponse string
+
+func (response GetSummary500TextResponse) VisitGetSummaryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(500)
+
+	_, err := w.Write([]byte(response))
+	return err
+}
+
 type DeleteUserDataRequestObject struct {
 }
 
@@ -4649,9 +4805,6 @@ func (response ImportUserData500TextResponse) VisitImportUserDataResponse(w http
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
-	// Get counts of contacts and journal entries for the authenticated user
-	// (GET /)
-	GetIndex(ctx context.Context, request GetIndexRequestObject) (GetIndexResponseObject, error)
 	// Create a new activity
 	// (POST /activities)
 	CreateActivity(ctx context.Context, request CreateActivityRequestObject) (CreateActivityResponseObject, error)
@@ -4709,6 +4862,12 @@ type StrictServerInterface interface {
 	// Get the OpenAPI spec
 	// (GET /openapi.json)
 	GetOpenAPISpec(ctx context.Context, request GetOpenAPISpecRequestObject) (GetOpenAPISpecResponseObject, error)
+	// Get total counts of contacts and journal entries
+	// (GET /statistics)
+	GetStatistics(ctx context.Context, request GetStatisticsRequestObject) (GetStatisticsResponseObject, error)
+	// Get counts of contacts and journal entries for the authenticated user
+	// (GET /summary)
+	GetSummary(ctx context.Context, request GetSummaryRequestObject) (GetSummaryResponseObject, error)
 	// Delete all user data
 	// (DELETE /userdata)
 	DeleteUserData(ctx context.Context, request DeleteUserDataRequestObject) (DeleteUserDataResponseObject, error)
@@ -4747,30 +4906,6 @@ type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
 	options     StrictHTTPServerOptions
-}
-
-// GetIndex operation middleware
-func (sh *strictHandler) GetIndex(w http.ResponseWriter, r *http.Request) {
-	var request GetIndexRequestObject
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetIndex(ctx, request.(GetIndexRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetIndex")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetIndexResponseObject); ok {
-		if err := validResponse.VisitGetIndexResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
 }
 
 // CreateActivity operation middleware
@@ -5307,6 +5442,54 @@ func (sh *strictHandler) GetOpenAPISpec(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
+// GetStatistics operation middleware
+func (sh *strictHandler) GetStatistics(w http.ResponseWriter, r *http.Request) {
+	var request GetStatisticsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetStatistics(ctx, request.(GetStatisticsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetStatistics")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetStatisticsResponseObject); ok {
+		if err := validResponse.VisitGetStatisticsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetSummary operation middleware
+func (sh *strictHandler) GetSummary(w http.ResponseWriter, r *http.Request) {
+	var request GetSummaryRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetSummary(ctx, request.(GetSummaryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetSummary")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetSummaryResponseObject); ok {
+		if err := validResponse.VisitGetSummaryResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // DeleteUserData operation middleware
 func (sh *strictHandler) DeleteUserData(w http.ResponseWriter, r *http.Request) {
 	var request DeleteUserDataRequestObject
@@ -5389,42 +5572,43 @@ func (sh *strictHandler) ImportUserData(w http.ResponseWriter, r *http.Request) 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"H4sIAAAAAAAC/+xbX2/juBH/KgTbR9nKXq4t4KJA0yQNcki76fkWfbgLFrQ0tpmlSJUcJfEG/u4FSf21",
+	"JVnezSa3iZ/iSORwOPObf9TwkUYqSZUEiYZOHqmJlpAw9/MkQn7HcWV/p1qloJGDexMzBPt3rnTCkE78",
+	"g4DiKgU6oQY1lwu6DmgMJtI8Ra6kHb/1nscNMlzin3+s6HCJsABtB0qWQAuFdTlWzW4hQju0YPu/HJen",
+	"SiKLcHsHLB/0cTAHkSc1fMKTCWnOtcGPHRIIqGB9b/cQXLew4liDMa30Z1zjMmartp3KTAg2E0AnqDNo",
+	"2TkkjIvGTP8k2FsIg7WyQ1o8+tT9UiG0CyHVSqpMmv0EfcaQdSIz/48jJO7HHzXM6YT+IazMNcxtNSwN",
+	"tVqMac1WHlwzHE7pDGbYRgUk6tWuyQV+WvfsKG9vNlGZxIbq5kIxrFQns2SWG2CmNcho1aqBJ3I0bZxf",
+	"yhge2nWV+wRzurWLbgDeqkxLJs4lag57zGxj7aeKVouXnqm4Q1htnmmEPGl1T4NNSzO0UzYGH//QOhg5",
+	"imGOaR1QA1GmOa6mFml+c4rHkfubgryMT5WUEOEHLeiEhuN7EGL0Sap7Gdr3PB5FSs75IrMsKlkx1JhN",
+	"A/owsnRHcaRHXHLkTIxYFIExI1SfQI5SpZGJUWbXsd5tbbmDBwSrhjMV+ehYxyL9l9JAuPQi4UoSNlMZ",
+	"ElwCmYKcMc3Iz+fTX8jJ9SW5e0cD6ojTJWJqJmG44LjMZuNIJWGqbiXOH0LjpzndyLmqAdH+zH0qnYPg",
+	"EUdm/p6qW6sY0JYKLUIC/WcxgFwXA7ZWL4mMG0RCnqSaS9yyPFpuZa40YcTwJBVAUtBGSSbI+c/X5B5m",
+	"hKWp4JGXxyzjAsk9x6UTyoUiBpmMmY6J4DPN9Cog762ezkiuKMIyXILEggKTMblWBhcapv+5IjFDRgwq",
+	"zRYwJmdg+EJCTJghjGiYg/Ui4BhMVAxaVvKP4Q6EShOQOUMXakwDKngE0ji05rI7ubi+Gh2Pj/ZQVzgT",
+	"ahYmjMvw6vL0/N/Tcys9kyUJs8ZLr+syKjnKDJeLSi6x4LOAvL88O93YtIU06MS8n09B3/EIBigRlQnj",
+	"lWQJj2hpkLQdlHegjdfw0fid2/fDKNX8jkWrUaoEt25554L5hHLRdeAMkKWcTujx+N3YrpQyXDozCpuR",
+	"MFUGc4P3VnwZ0wk91cAQygAYUA3/y8DgP3LfZw0DvIetYS68NT5O+NDV6dhfINnrztfszriGmE5+rfOX",
+	"T8lZuNl2n42pNhFzD0yqpPGb/eHoaC9RDUtF1lu+oXhHIqe0mJjM+dZ5JoTLMn48Ot5gBOEBw1QwvsHC",
+	"pnS21vogrY9Qmn+G2JL+09Yev5j0iSRW8dbjE9BaaaIil5vEjVhFJ78WUerXm/VN3dQ9aAkjEu4Jq7CL",
+	"bGGsdmvAv7Eka5YQPvJ47YOMAA+5pkGcuec1g0iZZgkgaOM4stt1NlYFAgeiJkSCmkB2ZyY3Xwmo3St0",
+	"Y8nL4e1iyeubMLkTSAFdQIsHvQD8vtAyxP3Ua/8+9GiwWfjdG8bPBaDN01KI+JxHA0CUZi0g+pDG7EW8",
+	"zlME+2eO3d9duM6cct+uiXhwD3GxNlZHKobQctblbacq0xGcqhjoXppdfOZpR9yccWlZDXZLwy9OLJNd",
+	"zi+gS2Cxs9xHd1QFEkdn3KTK8AL68MBsYUcnlCGyaGkrpr+SORdg0f2336hdYIxMjxeff6M06FPY86q7",
+	"CpzqXgrF4kYtairx1HTs/i206098+hR8Woz5SsMddGJXRrnNQ7tt0RR8HaIeveIGCROCRJWuKm3nj1y0",
+	"66k6C9E/VRx6utPwrzjk7j/KrsexGg/1FYOS65LUS0e5nkwwf3UoSeslaVQCu8Um6l5wYDVaGcrrLEYL",
+	"EB1qUV+L9gMo2BU4v/8ytP6Brwcvhzhsq88cGoTLSGQxlwvivlm6A+5adt0VoLvL0eeH01NkAV/6sf0b",
+	"flx/gW/mrzbROBTTvpjenWSUnQt9ObhrK3gy09unG2HfL0Rf1b6wUtlHdV83sZlSApjs/zJUTAuKrdXY",
+	"eGlb8a0m2xCzzw/peD0djz3GCzPxdlGzkZ1Z+BQQRWEqrzMFd6gxbp9vFzVez4R1IaY3W3pmeDy7v34e",
+	"9/vdetxDXpLnJT3eNm/d6zv7/anR3fcsJ8CNJsABx8D5eAKex0MVWp0G3zZFU4NBofpdZ8INZTyVn+ts",
+	"5Hyqjsu6B/PDAr9oucRL+64myPtBfWgwaqSPdVCvWiFd820DT3Q3YP46c8ompg6Hu/nh7m48BUPC4yvo",
+	"NtrPKR3i7Eav0RAg9RQsL4SlQ0B/Ads5VCd5dTIsmOdd9eNCJV3u+H0K8uT6cppCtF+poiIEHBnUwJJW",
+	"YdRB1RRGvqZzA3u1IP3iKDd6jzbRVzdnkFniGrQ2B90Ev5seJOsQcQmkLpOaUhNAlmvUIENukEe9nUfT",
+	"atQ3NN3qQlzL3t3Lxn2n1x73mtpUyASJVCbREDUv+4vc18zu8rKm3lzfBdUeZedDDpr+vX3PHqJ8d//M",
+	"2n7tLhvEJDPuFl6Ji5yyB4V9GecXUfvrsw8GtNNbOzg2JGpA+0tzhxrH1zhCOEU4odS0Ucq/s8Q5f0iV",
+	"xh3S7zFNsa80S9WBW/mb9PIW23bphBjQzvtW4OK1PQwu7YeGl8kWXrrqiyQTyFOmMbQOd1T4ga4SIyto",
+	"DuoT//JioAuPPGnD4xsCh1ftLmB4YvquKFubXFypiInGrWQ/tnHteBKGwo5bKoOTd8fHfwmp5SRfbOs6",
+	"OiAjJQhNVR27ZHMdPPZcGGib5nrjt6dVQGibVApge+IFSNBMtE7jNuNomdOsFdtmFuXR9tyiL6d9b3lD",
+	"yvY0982sbY7/XrQ9obxN0zap1ua2vln/PwAA//+x6NrHk0cAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

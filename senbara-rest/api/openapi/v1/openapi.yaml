@@ -182,12 +182,38 @@ paths:
               schema:
                 type: string
 
-  /:
+  /statistics:
     get:
       tags:
-        - index
+        - statistics
+      summary: Get total counts of contacts and journal entries
+      operationId: getStatistics
+      responses:
+        "200":
+          description: Index information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IndexData"
+        "403":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: An internal error occurred
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /summary:
+    get:
+      tags:
+        - summary
       summary: Get counts of contacts and journal entries for the authenticated user
-      operationId: getIndex
+      operationId: getSummary
       security:
         - oidc: []
       responses:
