@@ -3533,7 +3533,7 @@ func main() {
 
 					log.Debug("Getting summary")
 
-					res, err := c.GetIndexWithResponse(ctx)
+					res, err := c.GetSummaryWithResponse(ctx)
 					if err != nil {
 						handlePanic(err)
 
