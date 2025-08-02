@@ -190,6 +190,96 @@ Adw.Window main-window {
                         title: _("Senbara Forms");
                         description: _("(Preview) GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
                         icon-name: "open-book-symbolic";
+
+                        Gtk.FlowBox {
+                            row-spacing: 21;
+                            column-spacing: 21;
+                            halign: center;
+                            valign: fill;
+                            homogeneous: true;
+                            selection-mode: none;
+                            max-children-per-line: 2;
+
+                            Box {
+                                orientation: vertical;
+                                halign: fill;
+                                valign: center;
+
+                                Box {
+                                    orientation: vertical;
+                                    spacing: 10;
+                                    halign: fill;
+                                    valign: center;
+                                    margin-top: 12;
+                                    margin-bottom: 12;
+                                    margin-start: 12;
+                                    margin-end: 12;
+
+                                    Label {
+                                        label: _("Total contacts");
+                                        halign: center;
+
+                                        styles [
+                                            "heading",
+                                        ]
+                                    }
+
+                                    Label preview-contacts-count-label {
+                                        label: _("0");
+                                        halign: center;
+                                        valign: center;
+
+                                        styles [
+                                            "title-1",
+                                        ]
+                                    }
+                                }
+
+                                styles [
+                                    "card",
+                                ]
+                            }
+
+                            Box {
+                                orientation: vertical;
+                                halign: fill;
+                                valign: center;
+
+                                Box {
+                                    orientation: vertical;
+                                    spacing: 10;
+                                    halign: fill;
+                                    valign: center;
+                                    margin-top: 12;
+                                    margin-bottom: 12;
+                                    margin-start: 12;
+                                    margin-end: 12;
+
+                                    Label {
+                                        label: _("Total journal entries");
+                                        halign: center;
+
+                                        styles [
+                                            "heading",
+                                        ]
+                                    }
+
+                                    Label preview-journal-entries-count-label {
+                                        label: _("0");
+                                        halign: center;
+                                        valign: center;
+
+                                        styles [
+                                            "title-1",
+                                        ]
+                                    }
+                                }
+
+                                styles [
+                                    "card",
+                                ]
+                            }
+                        }
                     }
                 }
             }
