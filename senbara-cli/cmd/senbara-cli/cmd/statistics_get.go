@@ -12,10 +12,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var summaryGetCommand = &cobra.Command{
+var statisticsGetCommand = &cobra.Command{
 	Use:     "get",
 	Aliases: []string{"g"},
-	Short:   "Get counts of contacts and journal entries for the authenticated user",
+	Short:   "Get total counts of contacts and journal entries",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := viper.BindPFlags(cmd.PersistentFlags()); err != nil {
 			return err
@@ -29,20 +29,20 @@ var summaryGetCommand = &cobra.Command{
 			return err
 		}
 
-		log.Debug("Getting summary")
+		log.Debug("Getting statistics")
 
-		res, err := c.GetSummaryWithResponse(ctx)
+		res, err := c.GetStatisticsWithResponse(ctx)
 		if err != nil {
 			return err
 		}
 
-		log.Debug("Got summary", "status", res.StatusCode())
+		log.Debug("Got statistics", "status", res.StatusCode())
 
 		if res.StatusCode() != http.StatusOK {
 			return errors.New(res.Status())
 		}
 
-		log.Debug("Writing summary to stdout")
+		log.Debug("Writing statistics to stdout")
 
 		if err := yaml.NewEncoder(os.Stdout).Encode(res.JSON200); err != nil {
 			return err
@@ -53,9 +53,9 @@ var summaryGetCommand = &cobra.Command{
 }
 
 func init() {
-	addAuthFlags(summaryGetCommand.PersistentFlags())
+	addAuthFlags(statisticsGetCommand.PersistentFlags())
 
 	viper.AutomaticEnv()
 
-	summaryCommand.AddCommand(summaryGetCommand)
+	statisticsCommand.AddCommand(statisticsGetCommand)
 }
