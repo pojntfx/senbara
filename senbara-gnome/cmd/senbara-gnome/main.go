@@ -372,6 +372,12 @@ func main() {
 			previewLoginButton  = b.GetObject("preview-login-button").Cast().(*gtk.Button)
 			previewLoginSpinner = b.GetObject("preview-login-spinner").Cast().(*adw.Spinner)
 
+			previewContactsCountLabel   = b.GetObject("preview-contacts-count-label").Cast().(*gtk.Label)
+			previewContactsCountSpinner = b.GetObject("preview-contacts-count-spinner").Cast().(*adw.Spinner)
+
+			previewJournalEntriesCountLabel   = b.GetObject("preview-journal-entries-count-label").Cast().(*gtk.Label)
+			previewJournalEntriesCountSpinner = b.GetObject("preview-journal-entries-count-spinner").Cast().(*adw.Spinner)
+
 			oidcDcrInitialAccessTokenPortalUrl string
 
 			registerRegisterButton = b.GetObject("register-register-button").Cast().(*gtk.Button)
@@ -931,6 +937,22 @@ func main() {
 
 			homeSidebarContactsCountSpinner.SetVisible(false)
 			homeSidebarContactsCountLabel.SetVisible(true)
+		}
+
+		enablePreviewLoading := func() {
+			previewContactsCountLabel.SetVisible(false)
+			previewContactsCountSpinner.SetVisible(true)
+
+			previewJournalEntriesCountLabel.SetVisible(false)
+			previewJournalEntriesCountSpinner.SetVisible(true)
+		}
+
+		disablePreviewLoading := func() {
+			previewJournalEntriesCountSpinner.SetVisible(false)
+			previewJournalEntriesCountLabel.SetVisible(true)
+
+			previewContactsCountSpinner.SetVisible(false)
+			previewContactsCountLabel.SetVisible(true)
 		}
 
 		var (
@@ -3462,13 +3484,16 @@ func main() {
 
 			case resources.PagePreview:
 				go func() {
+					enablePreviewLoading()
+					defer disablePreviewLoading()
+
 					redirected, c, _, err := authorize(
 						ctx,
 
 						false,
 					)
 					if err != nil {
-						log.Warn("Could not authorize user for home page", "err", err)
+						log.Warn("Could not authorize user for preview page", "err", err)
 
 						handlePanic(err)
 
@@ -3479,31 +3504,25 @@ func main() {
 
 					settings.SetBoolean(resources.SettingAnonymousMode, true)
 
-					log.Debug("Getting OpenAPI spec")
+					log.Debug("Getting statistics")
 
-					res, err := c.GetOpenAPISpec(ctx)
+					res, err := c.GetStatisticsWithResponse(ctx)
 					if err != nil {
 						handlePanic(err)
 
 						return
 					}
-					defer res.Body.Close()
 
-					log.Debug("Got OpenAPI spec", "status", res.StatusCode)
+					log.Debug("Got statistics", "status", res.StatusCode())
 
-					if res.StatusCode != http.StatusOK {
-						handlePanic(errors.New(res.Status))
-
-						return
-					}
-
-					log.Debug("Writing OpenAPI spec to stdout")
-
-					if _, err := io.Copy(os.Stdout, res.Body); err != nil {
-						handlePanic(err)
+					if res.StatusCode() != http.StatusOK {
+						handlePanic(errors.New(res.Status()))
 
 						return
 					}
+
+					previewContactsCountLabel.SetLabel(fmt.Sprintf("%v", *res.JSON200.ContactsCount))
+					previewJournalEntriesCountLabel.SetLabel(fmt.Sprintf("%v", *res.JSON200.JournalEntriesCount))
 				}()
 
 			case resources.PageRegister:
@@ -3559,6 +3578,18 @@ func main() {
 
 		nv.ConnectPopped(func(page *adw.NavigationPage) {
 			handleNavigation()
+
+			var (
+				tag = page.Tag()
+				log = log.With("tag", tag)
+			)
+
+			log.Info("Handling popped page")
+
+			switch tag {
+			case resources.PagePreview:
+				enablePreviewLoading()
+			}
 		})
 		nv.ConnectPushed(handleNavigation)
 		nv.ConnectReplaced(handleNavigation)
