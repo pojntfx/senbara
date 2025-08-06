@@ -2,6 +2,7 @@
 <gresources>
     <gresource prefix="/com/pojtinger/felicitas/Senbara">
         <file>window.ui</file>
+        <file>preferences-dialog.ui</file>
         <file>contacts-create-dialog.ui</file>
         <file>debts-create-dialog.ui</file>
         <file>activities-create-dialog.ui</file>

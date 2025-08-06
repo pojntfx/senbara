@@ -77,12 +77,10 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	opts := &slog.HandlerOptions{}
-	// TODO: Get verbosity level from GSettings
-	if true {
-		opts.Level = slog.LevelDebug
-	}
-	log := slog.New(slog.NewJSONHandler(os.Stderr, opts))
+	level := new(slog.LevelVar)
+	log := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		Level: level,
+	}))
 
 	i18t, err := os.MkdirTemp("", "")
 	if err != nil {
@@ -349,6 +347,7 @@ func main() {
 
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
 
+		preferencesDialogBuilder := gtk.NewBuilderFromResource(resources.ResourcePreferencesDialogUIPath)
 		contactsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceContactsCreateDialogUIPath)
 		debtsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceDebtsCreateDialogUIPath)
 		activitiesCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ActivitiesDebtsCreateDialogUIPath)
@@ -360,6 +359,9 @@ func main() {
 		mto = b.GetObject("main-toasts-overlay").Cast().(*adw.ToastOverlay)
 
 		var (
+			preferencesDialog              = preferencesDialogBuilder.GetObject("preferences-dialog").Cast().(*adw.PreferencesDialog)
+			preferencesDialogVerboseSwitch = preferencesDialogBuilder.GetObject("preferences-dialog-verbose-switch").Cast().(*gtk.Switch)
+
 			welcomeGetStartedButton  = b.GetObject("welcome-get-started-button").Cast().(*gtk.Button)
 			welcomeGetStartedSpinner = b.GetObject("welcome-get-started-spinner").Cast().(*adw.Spinner)
 
@@ -558,6 +560,8 @@ func main() {
 			activitiesCreateDialogPopoverLabel = activitiesCreateDialogBuilder.GetObject("activities-create-dialog-date-popover-label").Cast().(*gtk.Label)
 		)
 
+		settings.Bind(resources.SettingVerboseKey, preferencesDialogVerboseSwitch.Object, "active", gio.SettingsBindDefault)
+
 		setValidationSuffixVisible := func(input *adw.EntryRow, suffix *gtk.MenuButton, visible bool) {
 			if visible && suffix.Parent() == nil {
 				input.AddSuffix(suffix)
@@ -632,6 +636,13 @@ func main() {
 			return nil
 		}
 
+		openPreferencesAction := gio.NewSimpleAction("openPreferences", nil)
+		openPreferencesAction.ConnectActivate(func(parameter *glib.Variant) {
+			preferencesDialog.Present(w)
+		})
+		a.SetAccelsForAction("app.openPreferences", []string{`<Primary>comma`})
+		a.AddAction(openPreferencesAction)
+
 		deregisterClientAction := gio.NewSimpleAction("deregisterClient", nil)
 
 		updateDeregisterClientActionEnabled := func() {
@@ -662,7 +673,15 @@ func main() {
 		a.AddAction(deregisterClientAction)
 
 		settings.ConnectChanged(func(key string) {
-			if key == resources.SettingServerURLKey {
+			switch key {
+			case resources.SettingVerboseKey:
+				if settings.Boolean(resources.SettingVerboseKey) {
+					level.Set(slog.LevelDebug)
+				} else {
+					level.Set(slog.LevelInfo)
+				}
+
+			case resources.SettingServerURLKey:
 				configServerURLContinueButton.SetSensitive(false)
 				configServerURLContinueSpinner.SetVisible(true)
 

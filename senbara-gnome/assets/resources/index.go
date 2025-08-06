@@ -11,6 +11,7 @@ const (
 
 	appPath = "/com/pojtinger/felicitas/Senbara/"
 
+	SettingVerboseKey               = "verbose"
 	SettingServerURLKey             = "server-url"
 	SettingRegistrationClientURIKey = "registration-client-uri"
 	SettingOIDCClientIDKey          = "oidc-client-id"
@@ -79,6 +80,7 @@ var ResourceContents []byte
 
 var (
 	ResourceWindowUIPath               = path.Join(appPath, "window.ui")
+	ResourcePreferencesDialogUIPath    = path.Join(appPath, "preferences-dialog.ui")
 	ResourceContactsCreateDialogUIPath = path.Join(appPath, "contacts-create-dialog.ui")
 	ResourceDebtsCreateDialogUIPath    = path.Join(appPath, "debts-create-dialog.ui")
 	ActivitiesDebtsCreateDialogUIPath  = path.Join(appPath, "activities-create-dialog.ui")

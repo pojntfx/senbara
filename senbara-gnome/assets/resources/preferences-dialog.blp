@@ -1,0 +1,24 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.PreferencesDialog preferences-dialog {
+    title: _("Preferences");
+
+    Adw.PreferencesPage {
+        title: _("General");
+
+        Adw.PreferencesGroup {
+            title: _("Advanced");
+
+            Adw.ActionRow {
+                title: _("Verbose");
+                subtitle: _("Whether to enable verbose logging");
+                activatable-widget: preferences-dialog-verbose-switch;
+
+                Switch preferences-dialog-verbose-switch {
+                    valign: center;
+                }
+            }
+        }
+    }
+}

@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <schemalist>
     <schema id="com.pojtinger.felicitas.Senbara" path="/com/pojtinger/felicitas/Senbara/">
+        <key name="verbose" type="b">
+            <default>false</default>
+            <summary>Verbose</summary>
+            <description>Whether to enable verbose logging</description>
+        </key>
         <key name="server-url" type="s">
             <default>"http://localhost:1337"</default>
             <summary>Server URL</summary>
