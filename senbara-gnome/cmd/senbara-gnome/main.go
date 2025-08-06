@@ -151,9 +151,6 @@ func main() {
 
 	settings := gio.NewSettings(resources.AppID)
 
-	c := gtk.NewCSSProvider()
-	c.LoadFromResource(resources.ResourceIndexCSSPath)
-
 	a := adw.NewApplication(resources.AppID, gio.ApplicationHandlesOpen)
 
 	var (
@@ -334,12 +331,6 @@ func main() {
 	}
 
 	a.ConnectActivate(func() {
-		gtk.StyleContextAddProviderForDisplay(
-			gdk.DisplayGetDefault(),
-			c,
-			gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
-		)
-
 		aboutDialog := adw.NewAboutDialogFromAppdata(resources.ResourceMetainfoPath, resources.AppVersion)
 		aboutDialog.SetDevelopers([]string{"Felicitas Pojtinger"})
 		aboutDialog.SetArtists([]string{"Felicitas Pojtinger"})

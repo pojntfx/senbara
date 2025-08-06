@@ -6,7 +6,7 @@
         <file>contacts-create-dialog.ui</file>
         <file>debts-create-dialog.ui</file>
         <file>activities-create-dialog.ui</file>
-        <file>index.css</file>
+        <file>style.css</file>
         <file>gschemas.compiled</file>
         <file>metainfo.xml</file>
     </gresource>
