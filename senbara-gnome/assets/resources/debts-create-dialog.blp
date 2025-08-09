@@ -1,7 +1,7 @@
 using Gtk 4.0;
 using Adw 1;
 
-Adw.Dialog debts-create-dialog {
+Adw.Dialog debts_create_dialog {
     title: _("Create a debt");
 
     Adw.ToolbarView {
@@ -10,8 +10,8 @@ Adw.Dialog debts-create-dialog {
             show-start-title-buttons: false;
             show-end-title-buttons: false;
 
-            title-widget: Adw.WindowTitle debts-create-dialog-title {
-                title: bind debts-create-dialog.title;
+            title-widget: Adw.WindowTitle debts_create_dialog_title {
+                title: bind debts_create_dialog.title;
             };
 
             [start]
@@ -21,13 +21,13 @@ Adw.Dialog debts-create-dialog {
             }
 
             [end]
-            Button debts-create-dialog-add-button {
+            Button debts_create_dialog_add_button {
                 sensitive: false;
 
                 Box {
                     spacing: 10;
 
-                    Adw.Spinner debts-create-dialog-add-spinner {
+                    Adw.Spinner debts_create_dialog_add_spinner {
                         visible: false;
                     }
 
@@ -44,27 +44,27 @@ Adw.Dialog debts-create-dialog {
 
         Adw.PreferencesPage {
             Adw.PreferencesGroup {
-                Adw.ActionRow debts-create-dialog-debt-type-you-owe-row {
-                    activatable-widget: debts-create-dialog-you-owe-radio;
+                Adw.ActionRow debts_create_dialog_debt_type_you_owe_row {
+                    activatable-widget: debts_create_dialog_you_owe_radio;
 
                     [prefix]
-                    CheckButton debts-create-dialog-you-owe-radio {
+                    CheckButton debts_create_dialog_you_owe_radio {
                         active: true;
                     }
                 }
 
-                Adw.ActionRow debts-create-dialog-debt-type-they-owe-row {
-                    activatable-widget: debts-create-dialog-they-owe-radio;
+                Adw.ActionRow debts_create_dialog_debt_type_they_owe_row {
+                    activatable-widget: debts_create_dialog_they_owe_radio;
 
                     [prefix]
-                    CheckButton debts-create-dialog-they-owe-radio {
-                        group: debts-create-dialog-you-owe-radio;
+                    CheckButton debts_create_dialog_they_owe_radio {
+                        group: debts_create_dialog_you_owe_radio;
                     }
                 }
             }
 
             Adw.PreferencesGroup {
-                Adw.SpinRow debts-create-dialog-amount-input {
+                Adw.SpinRow debts_create_dialog_amount_input {
                     title: _("Amount");
 
                     adjustment: Gtk.Adjustment {
@@ -74,13 +74,13 @@ Adw.Dialog debts-create-dialog {
                     };
                 }
 
-                Adw.EntryRow debts-create-dialog-currency-input {
+                Adw.EntryRow debts_create_dialog_currency_input {
                     title: _("Currency");
                 }
             }
 
             Adw.PreferencesGroup {
-                Adw.ExpanderRow debts-create-dialog-description-expander {
+                Adw.ExpanderRow debts_create_dialog_description_expander {
                     title: _("Description (optional)");
 
                     ScrolledWindow {
@@ -90,7 +90,7 @@ Adw.Dialog debts-create-dialog {
                         margin-start: 6;
                         margin-end: 6;
 
-                        TextView debts-create-dialog-description-input {
+                        TextView debts_create_dialog_description_input {
                             wrap-mode: word;
                             left-margin: 12;
                             right-margin: 12;

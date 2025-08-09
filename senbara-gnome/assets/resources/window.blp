@@ -2,7 +2,7 @@ using Gtk 4.0;
 using Adw 1;
 using WebKit 6.0;
 
-Adw.Window main-window {
+Adw.Window main_window {
     default-width: 960;
     default-height: 540;
     title: _("Senbara Forms");
@@ -12,12 +12,12 @@ Adw.Window main-window {
         condition ("max-width: 500sp")
 
         setters {
-            home-split-view.collapsed: true;
+            home_split_view.collapsed: true;
         }
     }
 
-    Adw.ToastOverlay main-toasts-overlay {
-        Adw.NavigationView main-navigation {
+    Adw.ToastOverlay main_toasts_overlay {
+        Adw.NavigationView main_navigation {
             Adw.NavigationPage {
                 title: _("Loading Senbara Forms");
                 tag: "/";
@@ -31,7 +31,7 @@ Adw.Window main-window {
                         MenuButton {
                             icon-name: "open-menu-symbolic";
                             primary: true;
-                            menu-model: server-setup-menu;
+                            menu-model: server_setup_menu;
                         }
                     }
 
@@ -61,7 +61,7 @@ Adw.Window main-window {
                         MenuButton {
                             icon-name: "open-menu-symbolic";
                             primary: true;
-                            menu-model: server-setup-menu;
+                            menu-model: server_setup_menu;
                         }
                     }
 
@@ -70,13 +70,13 @@ Adw.Window main-window {
                         description: _("GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
                         icon-name: "open-book-symbolic";
 
-                        Button welcome-get-started-button {
+                        Button welcome_get_started_button {
                             halign: center;
 
                             Box {
                                 spacing: 10;
 
-                                Adw.Spinner welcome-get-started-spinner {
+                                Adw.Spinner welcome_get_started_spinner {
                                     visible: false;
                                 }
 
@@ -106,17 +106,17 @@ Adw.Window main-window {
                         MenuButton {
                             icon-name: "open-menu-symbolic";
                             primary: true;
-                            menu-model: server-setup-menu;
+                            menu-model: server_setup_menu;
                         }
 
                         [end]
-                        Button config-server-url-continue-button {
+                        Button config_server_url_continue_button {
                             sensitive: false;
 
                             Box {
                                 spacing: 10;
 
-                                Adw.Spinner config-server-url-continue-spinner {
+                                Adw.Spinner config_server_url_continue_spinner {
                                     visible: false;
                                 }
 
@@ -140,7 +140,7 @@ Adw.Window main-window {
                             maximum-size: 400;
 
                             Adw.PreferencesGroup {
-                                Adw.EntryRow config-server-url-input {
+                                Adw.EntryRow config_server_url_input {
                                     title: _("Senbara Server URL (e.g. https://rest.senbara.p8.lu/)");
                                 }
                             }
@@ -163,15 +163,15 @@ Adw.Window main-window {
                         MenuButton {
                             icon-name: "open-menu-symbolic";
                             primary: true;
-                            menu-model: preview-menu;
+                            menu-model: preview_menu;
                         }
 
                         [end]
-                        Button preview-login-button {
+                        Button preview_login_button {
                             Box {
                                 spacing: 10;
 
-                                Adw.Spinner preview-login-spinner {
+                                Adw.Spinner preview_login_spinner {
                                     visible: false;
                                 }
 
@@ -224,7 +224,7 @@ Adw.Window main-window {
                                         ]
                                     }
 
-                                    Label preview-contacts-count-label {
+                                    Label preview_contacts_count_label {
                                         label: _("0");
                                         halign: center;
                                         valign: center;
@@ -235,7 +235,7 @@ Adw.Window main-window {
                                         ]
                                     }
 
-                                    Adw.Spinner preview-contacts-count-spinner {
+                                    Adw.Spinner preview_contacts_count_spinner {
                                         width-request: 37;
                                         height-request: 37;
                                     }
@@ -270,7 +270,7 @@ Adw.Window main-window {
                                         ]
                                     }
 
-                                    Label preview-journal-entries-count-label {
+                                    Label preview_journal_entries_count_label {
                                         label: _("0");
                                         halign: center;
                                         valign: center;
@@ -281,7 +281,7 @@ Adw.Window main-window {
                                         ]
                                     }
 
-                                    Adw.Spinner preview-journal-entries-count-spinner {
+                                    Adw.Spinner preview_journal_entries_count_spinner {
                                         width-request: 37;
                                         height-request: 37;
                                     }
@@ -309,7 +309,7 @@ Adw.Window main-window {
                         MenuButton {
                             icon-name: "open-menu-symbolic";
                             primary: true;
-                            menu-model: preview-menu;
+                            menu-model: preview_menu;
                         }
                     }
 
@@ -318,7 +318,7 @@ Adw.Window main-window {
                         description: _("You need to manually register Senbara Forms before you can sign in to this server.");
                         icon-name: "configure-symbolic";
 
-                        Button register-register-button {
+                        Button register_register_button {
                             halign: center;
                             label: _("Register");
 
@@ -343,17 +343,17 @@ Adw.Window main-window {
                         MenuButton {
                             icon-name: "open-menu-symbolic";
                             primary: true;
-                            menu-model: server-setup-menu;
+                            menu-model: server_setup_menu;
                         }
 
                         [end]
-                        Button config-initial-access-token-login-button {
+                        Button config_initial_access_token_login_button {
                             sensitive: false;
 
                             Box {
                                 spacing: 10;
 
-                                Adw.Spinner config-initial-access-token-login-spinner {
+                                Adw.Spinner config_initial_access_token_login_spinner {
                                     visible: false;
                                 }
 
@@ -377,7 +377,7 @@ Adw.Window main-window {
                             maximum-size: 400;
 
                             Adw.PreferencesGroup {
-                                Adw.PasswordEntryRow config-initial-access-token-input {
+                                Adw.PasswordEntryRow config_initial_access_token_input {
                                     title: _("Initial access token");
                                 }
                             }
@@ -396,7 +396,7 @@ Adw.Window main-window {
                         show-title: false;
 
                         [start]
-                        Button exchange-login-cancel-button {
+                        Button exchange_login_cancel_button {
                             label: _("Cancel");
                         }
 
@@ -404,7 +404,7 @@ Adw.Window main-window {
                         MenuButton {
                             icon-name: "open-menu-symbolic";
                             primary: true;
-                            menu-model: auth-setup-menu;
+                            menu-model: auth_setup_menu;
                         }
                     }
 
@@ -425,28 +425,28 @@ Adw.Window main-window {
                 tag: "/home";
                 can-pop: false;
 
-                Adw.NavigationSplitView home-split-view {
+                Adw.NavigationSplitView home_split_view {
                     min-sidebar-width: 200;
 
                     sidebar: Adw.NavigationPage {
-                        title: bind main-window.title;
+                        title: bind main_window.title;
                         tag: "/sidebar";
 
                         child: Adw.ToolbarView {
                             [top]
                             Adw.HeaderBar {
                                 [start]
-                                MenuButton home-user-menu-button {
-                                    menu-model: home-user-menu;
+                                MenuButton home_user_menu_button {
+                                    menu-model: home_user_menu;
 
                                     Box {
                                         halign: center;
 
-                                        Adw.Avatar home-user-menu-avatar {
+                                        Adw.Avatar home_user_menu_avatar {
                                             size: 26;
                                         }
 
-                                        Adw.Spinner home-user-menu-spinner {
+                                        Adw.Spinner home_user_menu_spinner {
                                             visible: false;
                                             halign: center;
                                         }
@@ -459,19 +459,19 @@ Adw.Window main-window {
                                 }
 
                                 [end]
-                                MenuButton home-hamburger-menu-button {
+                                MenuButton home_hamburger_menu_button {
                                     primary: true;
-                                    menu-model: home-menu;
+                                    menu-model: home_menu;
                                     has-frame: false;
 
                                     Box {
                                         halign: center;
 
-                                        Gtk.Image home-hamburger-menu-icon {
+                                        Gtk.Image home_hamburger_menu_icon {
                                             icon-name: "open-menu-symbolic";
                                         }
 
-                                        Adw.Spinner home-hamburger-menu-spinner {
+                                        Adw.Spinner home_hamburger_menu_spinner {
                                             visible: false;
                                             halign: center;
                                         }
@@ -480,7 +480,7 @@ Adw.Window main-window {
                             }
 
                             content: Gtk.ScrolledWindow {
-                                Gtk.ListBox home-sidebar-listbox {
+                                Gtk.ListBox home_sidebar_listbox {
                                     selection-mode: single;
 
                                     Adw.ActionRow {
@@ -491,7 +491,7 @@ Adw.Window main-window {
 
                                         [suffix]
                                         Box {
-                                            Gtk.Label home-sidebar-contacts-count-label {
+                                            Gtk.Label home_sidebar_contacts_count_label {
                                                 label: _("0");
                                                 valign: center;
                                                 visible: false;
@@ -501,7 +501,7 @@ Adw.Window main-window {
                                                 ]
                                             }
 
-                                            Adw.Spinner home-sidebar-contacts-count-spinner {}
+                                            Adw.Spinner home_sidebar_contacts_count_spinner {}
                                         }
 
                                         styles [
@@ -517,7 +517,7 @@ Adw.Window main-window {
 
                                         [suffix]
                                         Box {
-                                            Gtk.Label home-sidebar-journal-entries-count-label {
+                                            Gtk.Label home_sidebar_journal_entries_count_label {
                                                 label: _("0");
                                                 valign: center;
                                                 visible: false;
@@ -527,7 +527,7 @@ Adw.Window main-window {
                                                 ]
                                             }
 
-                                            Adw.Spinner home-sidebar-journal-entries-count-spinner {}
+                                            Adw.Spinner home_sidebar_journal_entries_count_spinner {}
                                         }
 
                                         styles [
@@ -543,34 +543,34 @@ Adw.Window main-window {
                         };
                     };
 
-                    content: Adw.NavigationPage home-content-page {
-                        Adw.NavigationView home-navigation {
+                    content: Adw.NavigationPage home_content_page {
+                        Adw.NavigationView home_navigation {
                             Adw.NavigationPage {
                                 title: _("Contacts");
                                 tag: "/contacts";
 
-                                Adw.ToolbarView contacts-toolbarview {
+                                Adw.ToolbarView contacts_toolbarview {
                                     [top]
                                     Adw.HeaderBar {
                                         [start]
-                                        Button contacts-add-button {
+                                        Button contacts_add_button {
                                             icon-name: "list-add-symbolic";
                                             tooltip-text: _("Add a contact");
                                         }
 
                                         [start]
-                                        ToggleButton contacts-search-button {
-                                            active: bind contacts-searchbar.search-mode-enabled bidirectional;
+                                        ToggleButton contacts_search_button {
+                                            active: bind contacts_searchbar.search-mode-enabled bidirectional;
                                             icon-name: "system-search-symbolic";
                                             tooltip-text: _("Search");
                                         }
                                     }
 
                                     [top]
-                                    SearchBar contacts-searchbar {
-                                        key-capture-widget: contacts-toolbarview;
+                                    SearchBar contacts_searchbar {
+                                        key-capture-widget: contacts_toolbarview;
 
-                                        SearchEntry contacts-searchentry {
+                                        SearchEntry contacts_searchentry {
                                             placeholder-text: _("Search contacts");
                                             max-width-chars: 28;
                                             search-delay: 100;
@@ -580,7 +580,7 @@ Adw.Window main-window {
                                     Adw.Clamp {
                                         maximum-size: 600;
 
-                                        Stack contacts-stack {
+                                        Stack contacts_stack {
                                             StackPage {
                                                 name: "/contacts/loading";
 
@@ -597,7 +597,7 @@ Adw.Window main-window {
                                             StackPage {
                                                 name: "/contacts/list";
 
-                                                child: Gtk.ListBox contacts-list {
+                                                child: Gtk.ListBox contacts_list {
                                                     selection-mode: browse;
                                                     valign: start;
                                                     margin-top: 24;
@@ -628,7 +628,7 @@ Adw.Window main-window {
                                                     title: _("No contacts found");
                                                     icon-name: "address-book-symbolic";
 
-                                                    Button contacts-empty-add-button {
+                                                    Button contacts_empty_add_button {
                                                         halign: center;
                                                         label: _("Add a contact");
 
@@ -642,7 +642,7 @@ Adw.Window main-window {
                                             StackPage {
                                                 name: "/contacts/error";
 
-                                                child: Adw.StatusPage contacts-error-status-page {
+                                                child: Adw.StatusPage contacts_error_status_page {
                                                     title: _("Contacts could not be loaded");
                                                     icon-name: "dialog-warning-symbolic";
 
@@ -650,7 +650,7 @@ Adw.Window main-window {
                                                         spacing: 10;
                                                         halign: center;
 
-                                                        Button contacts-error-refresh-button {
+                                                        Button contacts_error_refresh_button {
                                                             halign: center;
                                                             label: _("Refresh");
 
@@ -659,7 +659,7 @@ Adw.Window main-window {
                                                             ]
                                                         }
 
-                                                        Button contacts-error-copy-details {
+                                                        Button contacts_error_copy_details {
                                                             halign: center;
                                                             label: _("Copy details");
                                                         }
@@ -671,24 +671,24 @@ Adw.Window main-window {
                                 }
                             }
 
-                            Adw.NavigationPage contacts-view-page {
+                            Adw.NavigationPage contacts_view_page {
                                 title: _("Contact");
                                 tag: "/contacts/view";
 
                                 Adw.ToolbarView {
                                     [top]
                                     Adw.HeaderBar {
-                                        title-widget: Adw.WindowTitle contacts-view-page-title {};
+                                        title-widget: Adw.WindowTitle contacts_view_page_title {};
 
                                         [end]
-                                        Button contacts-view-delete-button {
+                                        Button contacts_view_delete_button {
                                             icon-name: "user-trash-symbolic";
                                             tooltip-text: _("Delete contact");
                                             action-name: "app.deleteContact";
                                         }
 
                                         [end]
-                                        Button contacts-view-edit-button {
+                                        Button contacts_view_edit_button {
                                             icon-name: "document-edit-symbolic";
                                             tooltip-text: _("Edit contact");
                                             action-name: "app.editContact";
@@ -699,7 +699,7 @@ Adw.Window main-window {
                                         Adw.Clamp {
                                             maximum-size: 600;
 
-                                            Stack contacts-view-stack {
+                                            Stack contacts_view_stack {
                                                 StackPage {
                                                     name: "/contacts/view/loading";
 
@@ -724,10 +724,10 @@ Adw.Window main-window {
                                                         margin-bottom: 24;
                                                         margin-start: 12;
 
-                                                        Adw.PreferencesGroup contacts-view-optional-fields {
+                                                        Adw.PreferencesGroup contacts_view_optional_fields {
                                                             visible: false;
 
-                                                            Adw.ActionRow contacts-view-birthday {
+                                                            Adw.ActionRow contacts_view_birthday {
                                                                 icon-name: "birthday-symbolic";
                                                                 tooltip-text: _("Birthday");
                                                                 visible: false;
@@ -737,7 +737,7 @@ Adw.Window main-window {
                                                                 ]
                                                             }
 
-                                                            Adw.ActionRow contacts-view-address {
+                                                            Adw.ActionRow contacts_view_address {
                                                                 icon-name: "mark-location-symbolic";
                                                                 tooltip-text: _("Address");
                                                                 visible: false;
@@ -747,7 +747,7 @@ Adw.Window main-window {
                                                                 ]
                                                             }
 
-                                                            Adw.ActionRow contacts-view-notes {
+                                                            Adw.ActionRow contacts_view_notes {
                                                                 icon-name: "accessories-text-editor-symbolic";
                                                                 tooltip-text: _("Notes");
                                                                 visible: false;
@@ -765,7 +765,7 @@ Adw.Window main-window {
                                                         Adw.PreferencesGroup {
                                                             title: _("Debts");
 
-                                                            Gtk.ListBox contacts-view-debts {
+                                                            Gtk.ListBox contacts_view_debts {
                                                                 selection-mode: none;
 
                                                                 styles [
@@ -781,7 +781,7 @@ Adw.Window main-window {
                                                         Adw.PreferencesGroup {
                                                             title: _("Activites");
 
-                                                            Gtk.ListBox contacts-view-activities {
+                                                            Gtk.ListBox contacts_view_activities {
                                                                 selection-mode: browse;
 
                                                                 styles [
@@ -799,7 +799,7 @@ Adw.Window main-window {
                                                 StackPage {
                                                     name: "/contacts/view/error";
 
-                                                    child: Adw.StatusPage contacts-view-error-status-page {
+                                                    child: Adw.StatusPage contacts_view_error_status_page {
                                                         title: _("Contact could not be loaded");
                                                         icon-name: "dialog-warning-symbolic";
 
@@ -807,7 +807,7 @@ Adw.Window main-window {
                                                             spacing: 10;
                                                             halign: center;
 
-                                                            Button contacts-view-error-refresh-button {
+                                                            Button contacts_view_error_refresh_button {
                                                                 halign: center;
                                                                 label: _("Refresh");
 
@@ -816,7 +816,7 @@ Adw.Window main-window {
                                                                 ]
                                                             }
 
-                                                            Button contacts-view-error-copy-details {
+                                                            Button contacts_view_error_copy_details {
                                                                 halign: center;
                                                                 label: _("Copy details");
                                                             }
@@ -829,24 +829,24 @@ Adw.Window main-window {
                                 }
                             }
 
-                            Adw.NavigationPage activities-view-page {
+                            Adw.NavigationPage activities_view_page {
                                 title: _("Activity");
                                 tag: "/activities/view";
 
                                 Adw.ToolbarView {
                                     [top]
                                     Adw.HeaderBar {
-                                        title-widget: Adw.WindowTitle activities-view-page-title {};
+                                        title-widget: Adw.WindowTitle activities_view_page_title {};
 
                                         [end]
-                                        Button activities-view-delete-button {
+                                        Button activities_view_delete_button {
                                             icon-name: "user-trash-symbolic";
                                             tooltip-text: _("Delete activity");
                                             action-name: "app.deleteActivity";
                                         }
 
                                         [end]
-                                        Button activities-view-edit-button {
+                                        Button activities_view_edit_button {
                                             icon-name: "document-edit-symbolic";
                                             tooltip-text: _("Edit activity");
                                             action-name: "app.editActivity";
@@ -854,7 +854,7 @@ Adw.Window main-window {
                                     }
 
                                     ScrolledWindow {
-                                        Stack activities-view-stack {
+                                        Stack activities_view_stack {
                                             StackPage {
                                                 name: "/activities/view/loading";
 
@@ -875,7 +875,7 @@ Adw.Window main-window {
                                             StackPage {
                                                 name: "/activities/view/data";
 
-                                                child: WebKit.WebView activities-view-body {};
+                                                child: WebKit.WebView activities_view_body {};
                                             }
 
                                             StackPage {
@@ -884,7 +884,7 @@ Adw.Window main-window {
                                                 child: Adw.Clamp {
                                                     maximum-size: 600;
 
-                                                    Adw.StatusPage activities-view-error-status-page {
+                                                    Adw.StatusPage activities_view_error_status_page {
                                                         title: _("Activity could not be loaded");
                                                         icon-name: "dialog-warning-symbolic";
 
@@ -892,7 +892,7 @@ Adw.Window main-window {
                                                             spacing: 10;
                                                             halign: center;
 
-                                                            Button activities-view-error-refresh-button {
+                                                            Button activities_view_error_refresh_button {
                                                                 halign: center;
                                                                 label: _("Refresh");
 
@@ -901,7 +901,7 @@ Adw.Window main-window {
                                                                 ]
                                                             }
 
-                                                            Button activities-view-error-copy-details {
+                                                            Button activities_view_error_copy_details {
                                                                 halign: center;
                                                                 label: _("Copy details");
                                                             }
@@ -914,7 +914,7 @@ Adw.Window main-window {
                                 }
                             }
 
-                            Adw.NavigationPage debts-edit-page {
+                            Adw.NavigationPage debts_edit_page {
                                 title: _("Edit debt");
                                 tag: "/debts/edit";
                                 can-pop: false;
@@ -922,8 +922,8 @@ Adw.Window main-window {
                                 Adw.ToolbarView {
                                     [top]
                                     Adw.HeaderBar {
-                                        title-widget: Adw.WindowTitle debts-edit-page-title {
-                                            title: bind debts-edit-page.title;
+                                        title-widget: Adw.WindowTitle debts_edit_page_title {
+                                            title: bind debts_edit_page.title;
                                         };
 
                                         [start]
@@ -933,13 +933,13 @@ Adw.Window main-window {
                                         }
 
                                         [end]
-                                        Button debts-edit-save-button {
+                                        Button debts_edit_save_button {
                                             sensitive: false;
 
                                             Box {
                                                 spacing: 10;
 
-                                                Adw.Spinner debts-edit-save-spinner {
+                                                Adw.Spinner debts_edit_save_spinner {
                                                     visible: false;
                                                 }
 
@@ -958,7 +958,7 @@ Adw.Window main-window {
                                         Adw.Clamp {
                                             maximum-size: 600;
 
-                                            Stack debts-edit-stack {
+                                            Stack debts_edit_stack {
                                                 StackPage {
                                                     name: "/debts/edit/loading";
 
@@ -977,27 +977,27 @@ Adw.Window main-window {
 
                                                     child: Adw.PreferencesPage {
                                                         Adw.PreferencesGroup {
-                                                            Adw.ActionRow debts-edit-page-debt-type-you-owe-row {
-                                                                activatable-widget: debts-edit-page-you-owe-radio;
+                                                            Adw.ActionRow debts_edit_page_debt_type_you_owe_row {
+                                                                activatable-widget: debts_edit_page_you_owe_radio;
 
                                                                 [prefix]
-                                                                CheckButton debts-edit-page-you-owe-radio {
+                                                                CheckButton debts_edit_page_you_owe_radio {
                                                                     active: true;
                                                                 }
                                                             }
 
-                                                            Adw.ActionRow debts-edit-page-debt-type-they-owe-row {
-                                                                activatable-widget: debts-edit-page-they-owe-radio;
+                                                            Adw.ActionRow debts_edit_page_debt_type_they_owe_row {
+                                                                activatable-widget: debts_edit_page_they_owe_radio;
 
                                                                 [prefix]
-                                                                CheckButton debts-edit-page-they-owe-radio {
-                                                                    group: debts-edit-page-you-owe-radio;
+                                                                CheckButton debts_edit_page_they_owe_radio {
+                                                                    group: debts_edit_page_you_owe_radio;
                                                                 }
                                                             }
                                                         }
 
                                                         Adw.PreferencesGroup {
-                                                            Adw.SpinRow debts-edit-page-amount-input {
+                                                            Adw.SpinRow debts_edit_page_amount_input {
                                                                 title: _("Amount");
 
                                                                 adjustment: Gtk.Adjustment {
@@ -1007,13 +1007,13 @@ Adw.Window main-window {
                                                                 };
                                                             }
 
-                                                            Adw.EntryRow debts-edit-page-currency-input {
+                                                            Adw.EntryRow debts_edit_page_currency_input {
                                                                 title: _("Currency");
                                                             }
                                                         }
 
                                                         Adw.PreferencesGroup {
-                                                            Adw.ExpanderRow debts-edit-page-description-expander {
+                                                            Adw.ExpanderRow debts_edit_page_description_expander {
                                                                 title: _("Description (optional)");
 
                                                                 ScrolledWindow {
@@ -1023,7 +1023,7 @@ Adw.Window main-window {
                                                                     margin-start: 6;
                                                                     margin-end: 6;
 
-                                                                    TextView debts-edit-page-description-input {
+                                                                    TextView debts_edit_page_description_input {
                                                                         wrap-mode: word;
                                                                         left-margin: 12;
                                                                         right-margin: 12;
@@ -1044,7 +1044,7 @@ Adw.Window main-window {
                                                 StackPage {
                                                     name: "/debts/edit/error";
 
-                                                    child: Adw.StatusPage debts-edit-error-status-page {
+                                                    child: Adw.StatusPage debts_edit_error_status_page {
                                                         title: _("Debt could not be loaded");
                                                         icon-name: "dialog-warning-symbolic";
 
@@ -1052,7 +1052,7 @@ Adw.Window main-window {
                                                             spacing: 10;
                                                             halign: center;
 
-                                                            Button debts-edit-error-refresh-button {
+                                                            Button debts_edit_error_refresh_button {
                                                                 halign: center;
                                                                 label: _("Refresh");
 
@@ -1061,7 +1061,7 @@ Adw.Window main-window {
                                                                 ]
                                                             }
 
-                                                            Button debts-edit-error-copy-details {
+                                                            Button debts_edit_error_copy_details {
                                                                 halign: center;
                                                                 label: _("Copy details");
                                                             }
@@ -1074,7 +1074,7 @@ Adw.Window main-window {
                                 }
                             }
 
-                            Adw.NavigationPage activities-edit-page {
+                            Adw.NavigationPage activities_edit_page {
                                 title: _("Edit activity");
                                 tag: "/activities/edit";
                                 can-pop: false;
@@ -1082,8 +1082,8 @@ Adw.Window main-window {
                                 Adw.ToolbarView {
                                     [top]
                                     Adw.HeaderBar {
-                                        title-widget: Adw.WindowTitle activities-edit-page-title {
-                                            title: bind activities-edit-page.title;
+                                        title-widget: Adw.WindowTitle activities_edit_page_title {
+                                            title: bind activities_edit_page.title;
                                         };
 
                                         [start]
@@ -1093,13 +1093,13 @@ Adw.Window main-window {
                                         }
 
                                         [end]
-                                        Button activities-edit-save-button {
+                                        Button activities_edit_save_button {
                                             sensitive: false;
 
                                             Box {
                                                 spacing: 10;
 
-                                                Adw.Spinner activities-edit-save-spinner {
+                                                Adw.Spinner activities_edit_save_spinner {
                                                     visible: false;
                                                 }
 
@@ -1118,7 +1118,7 @@ Adw.Window main-window {
                                         Adw.Clamp {
                                             maximum-size: 600;
 
-                                            Stack activities-edit-stack {
+                                            Stack activities_edit_stack {
                                                 StackPage {
                                                     name: "/activities/edit/loading";
 
@@ -1137,17 +1137,17 @@ Adw.Window main-window {
 
                                                     child: Adw.PreferencesPage {
                                                         Adw.PreferencesGroup {
-                                                            Adw.EntryRow activities-edit-page-name-input {
+                                                            Adw.EntryRow activities_edit_page_name_input {
                                                                 title: _("Name");
                                                             }
 
-                                                            Adw.EntryRow activities-edit-page-date-input {
+                                                            Adw.EntryRow activities_edit_page_date_input {
                                                                 title: _("Date");
                                                             }
                                                         }
 
                                                         Adw.PreferencesGroup {
-                                                            Adw.ExpanderRow activities-edit-page-description-expander {
+                                                            Adw.ExpanderRow activities_edit_page_description_expander {
                                                                 title: _("Description (optional)");
                                                                 subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
 
@@ -1158,7 +1158,7 @@ Adw.Window main-window {
                                                                     margin-start: 6;
                                                                     margin-end: 6;
 
-                                                                    TextView activities-edit-page-description-input {
+                                                                    TextView activities_edit_page_description_input {
                                                                         wrap-mode: word;
                                                                         left-margin: 12;
                                                                         right-margin: 12;
@@ -1180,7 +1180,7 @@ Adw.Window main-window {
                                                 StackPage {
                                                     name: "/activities/edit/error";
 
-                                                    child: Adw.StatusPage activities-edit-error-status-page {
+                                                    child: Adw.StatusPage activities_edit_error_status_page {
                                                         title: _("Activity could not be loaded");
                                                         icon-name: "dialog-warning-symbolic";
 
@@ -1188,7 +1188,7 @@ Adw.Window main-window {
                                                             spacing: 10;
                                                             halign: center;
 
-                                                            Button activities-edit-error-refresh-button {
+                                                            Button activities_edit_error_refresh_button {
                                                                 halign: center;
                                                                 label: _("Refresh");
 
@@ -1197,7 +1197,7 @@ Adw.Window main-window {
                                                                 ]
                                                             }
 
-                                                            Button activities-edit-error-copy-details {
+                                                            Button activities_edit_error_copy_details {
                                                                 halign: center;
                                                                 label: _("Copy details");
                                                             }
@@ -1210,7 +1210,7 @@ Adw.Window main-window {
                                 }
                             }
 
-                            Adw.NavigationPage contacts-edit-page {
+                            Adw.NavigationPage contacts_edit_page {
                                 title: _("Edit contact");
                                 tag: "/contacts/edit";
                                 can-pop: false;
@@ -1218,8 +1218,8 @@ Adw.Window main-window {
                                 Adw.ToolbarView {
                                     [top]
                                     Adw.HeaderBar {
-                                        title-widget: Adw.WindowTitle contacts-edit-page-title {
-                                            title: bind contacts-edit-page.title;
+                                        title-widget: Adw.WindowTitle contacts_edit_page_title {
+                                            title: bind contacts_edit_page.title;
                                         };
 
                                         [start]
@@ -1229,13 +1229,13 @@ Adw.Window main-window {
                                         }
 
                                         [end]
-                                        Button contacts-edit-save-button {
+                                        Button contacts_edit_save_button {
                                             sensitive: false;
 
                                             Box {
                                                 spacing: 10;
 
-                                                Adw.Spinner contacts-edit-save-spinner {
+                                                Adw.Spinner contacts_edit_save_spinner {
                                                     visible: false;
                                                 }
 
@@ -1254,7 +1254,7 @@ Adw.Window main-window {
                                         Adw.Clamp {
                                             maximum-size: 600;
 
-                                            Stack contacts-edit-stack {
+                                            Stack contacts_edit_stack {
                                                 StackPage {
                                                     name: "/contacts/edit/loading";
 
@@ -1273,36 +1273,36 @@ Adw.Window main-window {
 
                                                     child: Adw.PreferencesPage {
                                                         Adw.PreferencesGroup {
-                                                            Adw.EntryRow contacts-edit-page-first-name-input {
+                                                            Adw.EntryRow contacts_edit_page_first_name_input {
                                                                 title: _("First name");
                                                                 input-purpose: name;
                                                             }
 
-                                                            Adw.EntryRow contacts-edit-page-last-name-input {
+                                                            Adw.EntryRow contacts_edit_page_last_name_input {
                                                                 title: _("Last name");
                                                                 input-purpose: name;
                                                             }
 
-                                                            Adw.EntryRow contacts-edit-page-nickname-input {
+                                                            Adw.EntryRow contacts_edit_page_nickname_input {
                                                                 title: _("Nickname (optional)");
                                                             }
 
-                                                            Adw.EntryRow contacts-edit-page-email-input {
+                                                            Adw.EntryRow contacts_edit_page_email_input {
                                                                 title: _("Email");
                                                                 input-purpose: email;
                                                             }
 
-                                                            Adw.EntryRow contacts-edit-page-pronouns-input {
+                                                            Adw.EntryRow contacts_edit_page_pronouns_input {
                                                                 title: _("Pronouns");
                                                             }
 
-                                                            Adw.EntryRow contacts-edit-page-birthday-input {
+                                                            Adw.EntryRow contacts_edit_page_birthday_input {
                                                                 title: _("Birthday (optional)");
                                                             }
                                                         }
 
                                                         Adw.PreferencesGroup {
-                                                            Adw.ExpanderRow contacts-edit-page-address-expander {
+                                                            Adw.ExpanderRow contacts_edit_page_address_expander {
                                                                 title: _("Address (optional)");
 
                                                                 ScrolledWindow {
@@ -1312,7 +1312,7 @@ Adw.Window main-window {
                                                                     margin-start: 6;
                                                                     margin-end: 6;
 
-                                                                    TextView contacts-edit-page-address-input {
+                                                                    TextView contacts_edit_page_address_input {
                                                                         wrap-mode: word;
                                                                         left-margin: 12;
                                                                         right-margin: 12;
@@ -1328,7 +1328,7 @@ Adw.Window main-window {
                                                                 }
                                                             }
 
-                                                            Adw.ExpanderRow contacts-edit-page-notes-expander {
+                                                            Adw.ExpanderRow contacts_edit_page_notes_expander {
                                                                 title: _("Notes (optional)");
 
                                                                 ScrolledWindow {
@@ -1338,7 +1338,7 @@ Adw.Window main-window {
                                                                     margin-start: 6;
                                                                     margin-end: 6;
 
-                                                                    TextView contacts-edit-page-notes-input {
+                                                                    TextView contacts_edit_page_notes_input {
                                                                         wrap-mode: word;
                                                                         left-margin: 12;
                                                                         right-margin: 12;
@@ -1360,7 +1360,7 @@ Adw.Window main-window {
                                                 StackPage {
                                                     name: "/contacts/edit/error";
 
-                                                    child: Adw.StatusPage contacts-edit-error-status-page {
+                                                    child: Adw.StatusPage contacts_edit_error_status_page {
                                                         title: _("Contact could not be loaded");
                                                         icon-name: "dialog-warning-symbolic";
 
@@ -1368,7 +1368,7 @@ Adw.Window main-window {
                                                             spacing: 10;
                                                             halign: center;
 
-                                                            Button contacts-edit-error-refresh-button {
+                                                            Button contacts_edit_error_refresh_button {
                                                                 halign: center;
                                                                 label: _("Refresh");
 
@@ -1377,7 +1377,7 @@ Adw.Window main-window {
                                                                 ]
                                                             }
 
-                                                            Button contacts-edit-error-copy-details {
+                                                            Button contacts_edit_error_copy_details {
                                                                 halign: center;
                                                                 label: _("Copy details");
                                                             }
@@ -1418,7 +1418,7 @@ Adw.Window main-window {
                         show-title: false;
 
                         [start]
-                        Button exchange-logout-cancel-button {
+                        Button exchange_logout_cancel_button {
                             label: _("Cancel");
                         }
 
@@ -1426,7 +1426,7 @@ Adw.Window main-window {
                         MenuButton {
                             icon-name: "open-menu-symbolic";
                             primary: true;
-                            menu-model: auth-setup-menu;
+                            menu-model: auth_setup_menu;
                         }
                     }
 
@@ -1445,7 +1445,7 @@ Adw.Window main-window {
     }
 }
 
-menu server-setup-menu {
+menu server_setup_menu {
     item {
         label: _("Deregister client");
         action: "app.deregisterClient";
@@ -1464,7 +1464,7 @@ menu server-setup-menu {
     }
 }
 
-menu preview-menu {
+menu preview_menu {
     item {
         label: _("Select different Senbara server");
         action: "app.selectDifferentServer";
@@ -1507,7 +1507,7 @@ menu preview-menu {
     }
 }
 
-menu auth-setup-menu {
+menu auth_setup_menu {
     section {
         item {
             label: _("Preferences");
@@ -1545,7 +1545,7 @@ menu auth-setup-menu {
     }
 }
 
-menu home-user-menu {
+menu home_user_menu {
     item {
         label: _("Logout");
         action: "app.logout";
@@ -1573,7 +1573,7 @@ menu home-user-menu {
     }
 }
 
-menu home-menu {
+menu home_menu {
     item {
         label: _("Preferences");
         action: "app.openPreferences";
@@ -1614,11 +1614,11 @@ menu home-menu {
     }
 }
 
-MenuButton contacts-edit-page-birthday-warning-button {
+MenuButton contacts_edit_page_birthday_warning_button {
     icon-name: "dialog-warning-symbolic";
     tooltip-text: _("Show error");
     valign: center;
-    popover: contacts-edit-page-birthday-popover;
+    popover: contacts_edit_page_birthday_popover;
 
     styles [
         "flat",
@@ -1626,11 +1626,11 @@ MenuButton contacts-edit-page-birthday-warning-button {
     ]
 }
 
-MenuButton contacts-edit-page-email-warning-button {
+MenuButton contacts_edit_page_email_warning_button {
     icon-name: "dialog-warning-symbolic";
     tooltip-text: _("Show error");
     valign: center;
-    popover: contacts-edit-page-email-popover;
+    popover: contacts_edit_page_email_popover;
 
     styles [
         "flat",
@@ -1638,11 +1638,11 @@ MenuButton contacts-edit-page-email-warning-button {
     ]
 }
 
-MenuButton activities-edit-page-date-warning-button {
+MenuButton activities_edit_page_date_warning_button {
     icon-name: "dialog-warning-symbolic";
     tooltip-text: _("Show error");
     valign: center;
-    popover: activities-edit-page-date-popover;
+    popover: activities_edit_page_date_popover;
 
     styles [
         "flat",
@@ -1650,14 +1650,14 @@ MenuButton activities-edit-page-date-warning-button {
     ]
 }
 
-Popover activities-edit-page-date-popover {
-    Label activities-edit-page-date-popover-label {
+Popover activities_edit_page_date_popover {
+    Label activities_edit_page_date_popover_label {
         accessible-role: alert;
         selectable: true;
     }
 }
 
-Popover contacts-edit-page-email-popover {
+Popover contacts_edit_page_email_popover {
     Label {
         label: _("Not a valid email");
         accessible-role: alert;
@@ -1665,8 +1665,8 @@ Popover contacts-edit-page-email-popover {
     }
 }
 
-Popover contacts-edit-page-birthday-popover {
-    Label contacts-edit-page-birthday-popover-label {
+Popover contacts_edit_page_birthday_popover {
+    Label contacts_edit_page_birthday_popover_label {
         accessible-role: alert;
         selectable: true;
     }

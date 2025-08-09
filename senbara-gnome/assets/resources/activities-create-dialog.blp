@@ -1,7 +1,7 @@
 using Gtk 4.0;
 using Adw 1;
 
-Adw.Dialog activities-create-dialog {
+Adw.Dialog activities_create_dialog {
     title: _("Create an activity");
 
     Adw.ToolbarView {
@@ -10,8 +10,8 @@ Adw.Dialog activities-create-dialog {
             show-start-title-buttons: false;
             show-end-title-buttons: false;
 
-            title-widget: Adw.WindowTitle activities-create-dialog-title {
-                title: bind activities-create-dialog.title;
+            title-widget: Adw.WindowTitle activities_create_dialog_title {
+                title: bind activities_create_dialog.title;
             };
 
             [start]
@@ -21,13 +21,13 @@ Adw.Dialog activities-create-dialog {
             }
 
             [end]
-            Button activities-create-dialog-add-button {
+            Button activities_create_dialog_add_button {
                 sensitive: false;
 
                 Box {
                     spacing: 10;
 
-                    Adw.Spinner activities-create-dialog-add-spinner {
+                    Adw.Spinner activities_create_dialog_add_spinner {
                         visible: false;
                     }
 
@@ -44,17 +44,17 @@ Adw.Dialog activities-create-dialog {
 
         Adw.PreferencesPage {
             Adw.PreferencesGroup {
-                Adw.EntryRow activities-create-dialog-name-input {
+                Adw.EntryRow activities_create_dialog_name_input {
                     title: _("Name");
                 }
 
-                Adw.EntryRow activities-create-dialog-date-input {
+                Adw.EntryRow activities_create_dialog_date_input {
                     title: _("Date");
                 }
             }
 
             Adw.PreferencesGroup {
-                Adw.ExpanderRow activities-create-dialog-description-expander {
+                Adw.ExpanderRow activities_create_dialog_description_expander {
                     title: _("Description (optional)");
                     subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
 
@@ -65,7 +65,7 @@ Adw.Dialog activities-create-dialog {
                         margin-start: 6;
                         margin-end: 6;
 
-                        TextView activities-create-dialog-description-input {
+                        TextView activities_create_dialog_description_input {
                             wrap-mode: word;
                             left-margin: 12;
                             right-margin: 12;
@@ -85,11 +85,11 @@ Adw.Dialog activities-create-dialog {
     }
 }
 
-MenuButton activities-create-dialog-date-warning-button {
+MenuButton activities_create_dialog_date_warning_button {
     icon-name: "dialog-warning-symbolic";
     tooltip-text: _("Show error");
     valign: center;
-    popover: activities-create-dialog-date-popover;
+    popover: activities_create_dialog_date_popover;
 
     styles [
         "flat",
@@ -97,8 +97,8 @@ MenuButton activities-create-dialog-date-warning-button {
     ]
 }
 
-Popover activities-create-dialog-date-popover {
-    Label activities-create-dialog-date-popover-label {
+Popover activities_create_dialog_date_popover {
+    Label activities_create_dialog_date_popover_label {
         accessible-role: alert;
         selectable: true;
     }

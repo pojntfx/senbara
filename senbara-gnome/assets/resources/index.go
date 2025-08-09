@@ -3,13 +3,12 @@ package resources
 import (
 	_ "embed"
 	"path"
+	"strings"
 )
 
 const (
 	AppID      = "com.pojtinger.felicitas.Senbara"
 	AppVersion = "0.1.0"
-
-	appPath = "/com/pojtinger/felicitas/Senbara/"
 
 	SettingVerboseKey               = "verbose"
 	SettingServerURLKey             = "server-url"
@@ -79,11 +78,17 @@ const (
 var ResourceContents []byte
 
 var (
-	ResourceWindowUIPath               = path.Join(appPath, "window.ui")
-	ResourcePreferencesDialogUIPath    = path.Join(appPath, "preferences-dialog.ui")
-	ResourceContactsCreateDialogUIPath = path.Join(appPath, "contacts-create-dialog.ui")
-	ResourceDebtsCreateDialogUIPath    = path.Join(appPath, "debts-create-dialog.ui")
-	ActivitiesDebtsCreateDialogUIPath  = path.Join(appPath, "activities-create-dialog.ui")
-	ResourceGSchemasCompiledPath       = path.Join(appPath, "gschemas.compiled")
-	ResourceMetainfoPath               = path.Join(appPath, "metainfo.xml")
+	AppPath = path.Join("/com", "pojtinger", "felicitas", "Senbara")
+
+	AppDevelopers = []string{"Felicitas Pojtinger"}
+	AppArtists    = AppDevelopers
+	AppCopyright  = "© 2025 " + strings.Join(AppDevelopers, ", ")
+
+	ResourceWindowUIPath               = path.Join(AppPath, "window.ui")
+	ResourcePreferencesDialogUIPath    = path.Join(AppPath, "preferences-dialog.ui")
+	ResourceContactsCreateDialogUIPath = path.Join(AppPath, "contacts-create-dialog.ui")
+	ResourceDebtsCreateDialogUIPath    = path.Join(AppPath, "debts-create-dialog.ui")
+	ActivitiesDebtsCreateDialogUIPath  = path.Join(AppPath, "activities-create-dialog.ui")
+	ResourceGSchemasCompiledPath       = path.Join(AppPath, "gschemas.compiled")
+	ResourceMetainfoPath               = path.Join(AppPath, "metainfo.xml")
 )

@@ -1,7 +1,7 @@
 using Gtk 4.0;
 using Adw 1;
 
-Adw.PreferencesDialog preferences-dialog {
+Adw.PreferencesDialog preferences_dialog {
     title: _("Preferences");
     search-enabled: true;
 
@@ -14,9 +14,9 @@ Adw.PreferencesDialog preferences-dialog {
             Adw.ActionRow {
                 title: _("Verbose");
                 subtitle: _("Whether to enable verbose logging");
-                activatable-widget: preferences-dialog-verbose-switch;
+                activatable-widget: preferences_dialog_verbose_switch;
 
-                Switch preferences-dialog-verbose-switch {
+                Switch preferences_dialog_verbose_switch {
                     valign: center;
                 }
             }

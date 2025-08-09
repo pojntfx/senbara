@@ -1,7 +1,7 @@
 using Gtk 4.0;
 using Adw 1;
 
-Adw.Dialog contacts-create-dialog {
+Adw.Dialog contacts_create_dialog {
     title: _("Create a contact");
 
     Adw.ToolbarView {
@@ -17,13 +17,13 @@ Adw.Dialog contacts-create-dialog {
             }
 
             [end]
-            Button contacts-create-dialog-add-button {
+            Button contacts_create_dialog_add_button {
                 sensitive: false;
 
                 Box {
                     spacing: 10;
 
-                    Adw.Spinner contacts-create-dialog-add-spinner {
+                    Adw.Spinner contacts_create_dialog_add_spinner {
                         visible: false;
                     }
 
@@ -40,26 +40,26 @@ Adw.Dialog contacts-create-dialog {
 
         Adw.PreferencesPage {
             Adw.PreferencesGroup {
-                Adw.EntryRow contacts-create-dialog-first-name-input {
+                Adw.EntryRow contacts_create_dialog_first_name_input {
                     title: _("First name");
                     input-purpose: name;
                 }
 
-                Adw.EntryRow contacts-create-dialog-last-name-input {
+                Adw.EntryRow contacts_create_dialog_last_name_input {
                     title: _("Last name");
                     input-purpose: name;
                 }
 
-                Adw.EntryRow contacts-create-dialog-nickname-input {
+                Adw.EntryRow contacts_create_dialog_nickname_input {
                     title: _("Nickname (optional)");
                 }
 
-                Adw.EntryRow contacts-create-dialog-email-input {
+                Adw.EntryRow contacts_create_dialog_email_input {
                     title: _("Email");
                     input-purpose: email;
                 }
 
-                Adw.EntryRow contacts-create-dialog-pronouns-input {
+                Adw.EntryRow contacts_create_dialog_pronouns_input {
                     title: _("Pronouns");
                 }
             }
@@ -67,11 +67,11 @@ Adw.Dialog contacts-create-dialog {
     }
 }
 
-MenuButton contacts-create-dialog-email-warning-button {
+MenuButton contacts_create_dialog_email_warning_button {
     icon-name: "dialog-warning-symbolic";
     tooltip-text: _("Show error");
     valign: center;
-    popover: contacts-create-dialog-email-popover;
+    popover: contacts_create_dialog_email_popover;
 
     styles [
         "flat",
@@ -79,7 +79,7 @@ MenuButton contacts-create-dialog-email-warning-button {
     ]
 }
 
-Popover contacts-create-dialog-email-popover {
+Popover contacts_create_dialog_email_popover {
     Label {
         label: _("Not a valid email");
         accessible-role: alert;
