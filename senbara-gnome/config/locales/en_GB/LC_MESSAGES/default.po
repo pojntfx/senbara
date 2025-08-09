@@ -45,12 +45,12 @@ msgstr ""
 #: ../../assets/resources/window.blp:69 ../../assets/resources/window.blp:153
 #: ../../assets/resources/window.blp:190 ../../assets/resources/window.blp:424
 msgid "Senbara Forms"
-msgstr "Formulaires Senbara"
+msgstr "Senbara Forms"
 
 #: ../../assets/resources/window.blp:22 ../../assets/resources/window.blp:39
 #, fuzzy
 msgid "Loading Senbara Forms"
-msgstr "Formulaires Senbara"
+msgstr "Senbara Forms"
 
 #: ../../assets/resources/window.blp:40
 msgid "Checking configuration ..."
@@ -61,8 +61,8 @@ msgid ""
 "GNOME app to interact with the Senbara REST API. Designed as a reference for "
 "modern GNOME/GTK development with Go."
 msgstr ""
-"Application GNOME pour interagir avec l'API REST Senbara. Conçue comme "
-"modèle de référence pour le développement moderne GNOME/GTK avec Go."
+"GNOME app to interact with the Senbara REST API. Designed as a reference for "
+"modern GNOME/GTK development with Go."
 
 #: ../../assets/resources/window.blp:84
 msgid "Get started"
@@ -98,8 +98,8 @@ msgid ""
 "(Preview) GNOME app to interact with the Senbara REST API. Designed as a "
 "reference for modern GNOME/GTK development with Go."
 msgstr ""
-"Application GNOME pour interagir avec l'API REST Senbara. Conçue comme "
-"modèle de référence pour le développement moderne GNOME/GTK avec Go."
+"GNOME app to interact with the Senbara REST API. Designed as a reference for "
+"modern GNOME/GTK development with Go."
 
 #: ../../assets/resources/window.blp:219
 msgid "Total contacts"
@@ -117,7 +117,7 @@ msgstr ""
 #: ../../assets/resources/window.blp:300
 #, fuzzy
 msgid "Register Senbara Forms"
-msgstr "Formulaires Senbara"
+msgstr "Senbara Forms"
 
 #: ../../assets/resources/window.blp:317
 msgid "Registration required"
@@ -350,7 +350,7 @@ msgstr ""
 #: ../../assets/resources/window.blp:1612
 #, fuzzy
 msgid "About Senbara Forms"
-msgstr "Formulaires Senbara"
+msgstr "Senbara Forms"
 
 #: ../../assets/resources/window.blp:1469
 msgid "Select different Senbara server"
@@ -484,7 +484,7 @@ msgstr ""
 #: ../../cmd/senbara-gnome/main.go:2162 ../../cmd/senbara-gnome/main.go:2205
 #, fuzzy
 msgid "Senbara Forms userdata"
-msgstr "Formulaires Senbara"
+msgstr "Senbara Forms"
 
 #: ../../cmd/senbara-gnome/main.go:2194
 msgid "Exported user data"
@@ -493,7 +493,7 @@ msgstr ""
 #: ../../cmd/senbara-gnome/main.go:2211
 #, fuzzy
 msgid "Senbara Forms userdata files"
-msgstr "Formulaires Senbara"
+msgstr "Senbara Forms"
 
 #: ../../cmd/senbara-gnome/main.go:2218
 msgid "All files"
