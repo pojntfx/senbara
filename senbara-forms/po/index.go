@@ -1,4 +1,4 @@
-package locales
+package po
 
 import "embed"
 

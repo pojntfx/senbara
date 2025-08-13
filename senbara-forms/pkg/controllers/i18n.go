@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/leonelquinteros/gotext"
-	"github.com/pojntfx/senbara/senbara-forms/config/locales"
+	"github.com/pojntfx/senbara/senbara-forms/po"
 	"golang.org/x/text/language"
 )
 
@@ -21,7 +21,7 @@ func (c *Controller) localize(r *http.Request) (*gotext.Locale, error) {
 	} else if len(tags) == 0 {
 		c.log.Debug("Could not find locale, falling back to en_US")
 
-		locale = gotext.NewLocaleFS("en_US", locales.FS)
+		locale = gotext.NewLocaleFS("en_US", po.FS)
 	} else {
 		localeCode := strings.ReplaceAll(tags[0].String(), "-", "_")
 
@@ -29,7 +29,7 @@ func (c *Controller) localize(r *http.Request) (*gotext.Locale, error) {
 
 		locale = gotext.NewLocaleFS(
 			localeCode,
-			locales.FS,
+			po.FS,
 		)
 	}
 
