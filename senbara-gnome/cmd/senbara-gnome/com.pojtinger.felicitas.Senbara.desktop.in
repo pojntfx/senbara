@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Senbara Forms
+Comment=GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.
+Exec=senbara-gnome %u
+Icon=com.pojtinger.felicitas.Senbara
+Categories=Utility
+MimeType=x-scheme-handler/senbara;
