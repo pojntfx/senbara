@@ -34,7 +34,7 @@ import (
 	"github.com/oapi-codegen/runtime/types"
 	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
-	"github.com/pojntfx/senbara/senbara-gnome/config/locales"
+	"github.com/pojntfx/senbara/senbara-gnome/po"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
@@ -88,7 +88,7 @@ func main() {
 	}
 	defer os.RemoveAll(i18t)
 
-	if err := fs.WalkDir(locales.FS, ".", func(path string, d fs.DirEntry, err error) error {
+	if err := fs.WalkDir(po.FS, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -101,7 +101,7 @@ func main() {
 			return nil
 		}
 
-		src, err := locales.FS.Open(path)
+		src, err := po.FS.Open(path)
 		if err != nil {
 			return err
 		}

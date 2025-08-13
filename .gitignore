@@ -1,6 +1,9 @@
-*.compiled
 *.gresource
 *.ui
+*.mo
+LINGUAS
+metainfo.xml
+*.desktop
+*.compiled
 *.css*
 .sass-cache
-*.mo
