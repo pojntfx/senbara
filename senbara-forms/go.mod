@@ -2,9 +2,17 @@ module github.com/pojntfx/senbara/senbara-forms
 
 go 1.24.0
 
+tool github.com/leonelquinteros/gotext/cli/xgotext
+
+require (
+	github.com/leonelquinteros/gotext v1.7.2
+	golang.org/x/mod v0.24.0 // indirect
+	golang.org/x/sync v0.14.0 // indirect
+	golang.org/x/tools v0.31.0 // indirect
+)
+
 require (
 	github.com/adrg/xdg v0.5.3
-	github.com/leonelquinteros/gotext v1.7.1
 	github.com/lib/pq v1.10.9
 	github.com/pojntfx/senbara/senbara-common v0.0.0-20250520062435-d85e71a7a89f
 	github.com/spf13/cobra v1.9.1
@@ -44,7 +52,6 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/oauth2 v0.29.0 // indirect
-	golang.org/x/sync v0.14.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
