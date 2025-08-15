@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-12 23:47-0700\n"
+"POT-Creation-Date: 2025-08-14 23:50-0700\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: pkg/controllers/contacts.go ../web/templates/contacts.html
@@ -78,11 +78,6 @@ msgstr "Date"
 msgid "Description (optional)"
 msgstr "Description (optional)"
 
-#: ../web/templates/activities_add.html ../web/templates/activities_edit.html
-#: ../web/templates/journal_edit.html
-msgid "(you can use"
-msgstr "(you can use"
-
 # Misc
 #: ../web/templates/activities_add.html ../web/templates/activities_edit.html
 #: ../web/templates/journal_edit.html
@@ -98,16 +93,16 @@ msgstr ")"
 msgid "Edit activity for %v %v"
 msgstr "Edit activity for %v %v"
 
+#: ../web/templates/activities_edit.html ../web/templates/contacts_edit.html
+#: ../web/templates/debts_edit.html ../web/templates/journal_edit.html
+msgid "Cancel"
+msgstr "Cancel"
+
 # Actions
 #: ../web/templates/activities_edit.html ../web/templates/contacts_edit.html
 #: ../web/templates/debts_edit.html ../web/templates/journal_edit.html
 msgid "Save changes"
 msgstr "Save changes"
-
-#: ../web/templates/activities_edit.html ../web/templates/contacts_edit.html
-#: ../web/templates/debts_edit.html ../web/templates/journal_edit.html
-msgid "Cancel"
-msgstr "Cancel"
 
 #: ../web/templates/activities_view.html
 msgid "Activity %v for %v %v"
@@ -122,9 +117,11 @@ msgstr "Date"
 msgid "No description provided."
 msgstr "No description provided."
 
-#: ../web/templates/activities_view.html ../web/templates/contacts_view.html
-msgid "Are you sure you want to delete this activity?"
-msgstr "Are you sure you want to delete this activity?"
+#: ../web/templates/activities_view.html ../web/templates/contacts.html
+#: ../web/templates/contacts_view.html ../web/templates/journal.html
+#: ../web/templates/journal_view.html
+msgid "Edit"
+msgstr "Edit"
 
 #: ../web/templates/activities_view.html ../web/templates/contacts.html
 #: ../web/templates/contacts_view.html ../web/templates/journal.html
@@ -132,19 +129,17 @@ msgstr "Are you sure you want to delete this activity?"
 msgid "Delete"
 msgstr "Delete"
 
-#: ../web/templates/activities_view.html ../web/templates/contacts.html
-#: ../web/templates/contacts_view.html ../web/templates/journal.html
-#: ../web/templates/journal_view.html
-msgid "Edit"
-msgstr "Edit"
-
-#: ../web/templates/contacts.html ../web/templates/contacts_view.html
-msgid "Are you sure you want to delete this contact?"
-msgstr "Are you sure you want to delete this contact?"
+#: ../web/templates/activities_view.html ../web/templates/contacts_view.html
+msgid "Are you sure you want to delete this activity?"
+msgstr "Are you sure you want to delete this activity?"
 
 #: ../web/templates/contacts.html
 msgid "No contacts yet."
 msgstr "No contacts yet."
+
+#: ../web/templates/contacts.html ../web/templates/contacts_view.html
+msgid "Are you sure you want to delete this contact?"
+msgstr "Are you sure you want to delete this contact?"
 
 #: ../web/templates/contacts_edit.html
 #, fuzzy
@@ -156,40 +151,20 @@ msgid "First name"
 msgstr "First name"
 
 #: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "Jean"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
 msgid "Last name"
 msgstr "Last name"
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "Doe"
-msgstr ""
 
 #: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
 msgid "Nickname (optional)"
 msgstr "Nickname (optional)"
 
 #: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "jdoe"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
 msgid "Email"
 msgstr "Email"
 
 #: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "jean@doe.com"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
 msgid "Pronouns"
 msgstr "Pronouns"
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "they/them"
-msgstr ""
 
 #: ../web/templates/contacts_edit.html
 msgid "Birthday (optional)"
@@ -203,17 +178,33 @@ msgstr "Address (optional)"
 msgid "Notes (optional)"
 msgstr "Notes (optional)"
 
+#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
+msgid "they/them"
+msgstr "they/them"
+
+#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
+msgid "jdoe"
+msgstr "jdoe"
+
+#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
+msgid "Doe"
+msgstr "Doe"
+
+#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
+msgid "Jean"
+msgstr "Jean"
+
 #: ../web/templates/contacts_view.html
 msgid "Birthday"
-msgstr ""
+msgstr "Birthday"
 
 #: ../web/templates/contacts_view.html
 msgid "Address"
-msgstr ""
+msgstr "Address"
 
 #: ../web/templates/contacts_view.html
 msgid "Notes"
-msgstr ""
+msgstr "Notes"
 
 # Debts
 #: ../web/templates/contacts_view.html
@@ -222,7 +213,7 @@ msgstr "Debts"
 
 #: ../web/templates/contacts_view.html
 msgid "Manage debts you owe to %v or %v owes you"
-msgstr ""
+msgstr "Manage debts you owe to %v or %v owes you"
 
 #: ../web/templates/contacts_view.html
 msgid "You owe %v %v %v"
@@ -232,14 +223,6 @@ msgstr "You owe %v %v %v"
 msgid "%v owes you %v %v"
 msgstr "%v owes you %v %v"
 
-#: ../web/templates/contacts_view.html
-msgid "Are you sure you want to settle this debt?"
-msgstr "Are you sure you want to settle this debt?"
-
-#: ../web/templates/contacts_view.html
-msgid "Settle debt"
-msgstr "Settle debt"
-
 # Activities
 #: ../web/templates/contacts_view.html
 msgid "Activities"
@@ -247,11 +230,19 @@ msgstr "Activities"
 
 #: ../web/templates/contacts_view.html
 msgid "No activities with %v yet."
-msgstr ""
+msgstr "No activities with %v yet."
 
 #: ../web/templates/contacts_view.html
 msgid "Delete activity"
 msgstr "Delete activity"
+
+#: ../web/templates/contacts_view.html
+msgid "Settle debt"
+msgstr "Settle debt"
+
+#: ../web/templates/contacts_view.html
+msgid "Are you sure you want to settle this debt?"
+msgstr "Are you sure you want to settle this debt?"
 
 #: ../web/templates/debts_add.html
 msgid "Add a new debt for %v %v"
@@ -270,16 +261,16 @@ msgid "Amount"
 msgstr "Amount"
 
 #: ../web/templates/debts_add.html ../web/templates/debts_edit.html
-msgid "50"
-msgstr ""
-
-#: ../web/templates/debts_add.html ../web/templates/debts_edit.html
 msgid "Currency"
 msgstr "Currency"
 
 #: ../web/templates/debts_add.html ../web/templates/debts_edit.html
 msgid "USD"
-msgstr ""
+msgstr "USD"
+
+#: ../web/templates/debts_add.html ../web/templates/debts_edit.html
+msgid "50"
+msgstr "50"
 
 #: ../web/templates/debts_edit.html
 msgid "Edit debt for %v %v"
@@ -361,14 +352,14 @@ msgstr "OK"
 msgid "Bad"
 msgstr "Bad"
 
+#: ../web/templates/journal.html
+msgid "No journal entries yet."
+msgstr "No journal entries yet."
+
 #: ../web/templates/journal.html ../web/templates/journal_view.html
 #, fuzzy
 msgid "Are you sure you want to delete this entry?"
 msgstr "Are you sure you want to delete this contact?"
-
-#: ../web/templates/journal.html
-msgid "No journal entries yet."
-msgstr "No journal entries yet."
 
 #: ../web/templates/journal_add.html ../web/templates/journal_edit.html
 msgid "How was your day?"
@@ -389,16 +380,12 @@ msgstr "Add a journal entry"
 
 #: ../web/templates/journal_edit.html
 #, fuzzy
-msgid "Edit \");"
+msgid "Edit \"%v\""
 msgstr "Edit \"%v\""
 
 #: ../web/templates/journal_view.html
 msgid "Your day was:"
 msgstr "Your day was:"
-
-#: ../web/templates/nav.html
-msgid "Senbara Forms logo"
-msgstr "Senbara Forms logo"
 
 #: ../web/templates/nav.html
 msgid "Go back"
@@ -415,29 +402,8 @@ msgid "Export your data"
 msgstr "Export your data"
 
 #: ../web/templates/nav.html
-msgid "Are you sure you want to import this user data into your account?"
-msgstr "Are you sure you want to import this user data into your account?"
-
-#: ../web/templates/nav.html
 msgid "User data"
 msgstr "User data"
-
-#: ../web/templates/nav.html
-msgid "Import user data"
-msgstr "Import user data"
-
-#: ../web/templates/nav.html
-msgid "Are you sure you want to delete your data and your account?"
-msgstr "Are you sure you want to delete your data and your account?"
-
-#: ../web/templates/nav.html
-msgid "Delete your data"
-msgstr "Delete your data"
-
-#: ../web/templates/nav.html
-#, fuzzy
-msgid "Are you sure you want to log out?"
-msgstr "Are you sure you want to settle this debt?"
 
 #: ../web/templates/nav.html
 msgid "Logout"
@@ -447,6 +413,38 @@ msgstr "Log out"
 msgid "Login"
 msgstr "Log in"
 
+#: ../web/templates/nav.html
+#, fuzzy
+msgid "Are you sure you want to log out?"
+msgstr "Are you sure you want to settle this debt?"
+
+#: ../web/templates/nav.html
+msgid "Delete your data"
+msgstr "Delete your data"
+
+#: ../web/templates/nav.html
+msgid "Are you sure you want to delete your data and your account?"
+msgstr "Are you sure you want to delete your data and your account?"
+
+#: ../web/templates/nav.html
+msgid "Import user data"
+msgstr "Import user data"
+
+#: ../web/templates/nav.html
+msgid "Are you sure you want to import this user data into your account?"
+msgstr "Are you sure you want to import this user data into your account?"
+
+#: ../web/templates/nav.html
+msgid "Senbara Forms logo"
+msgstr "Senbara Forms logo"
+
 #: ../web/templates/contacts_add.html
 msgid "Add contact"
 msgstr "Add a contact"
+
+#~ msgid "(you can use"
+#~ msgstr "(you can use"
+
+#, fuzzy
+#~ msgid ");"
+#~ msgstr ")"

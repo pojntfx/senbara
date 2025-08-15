@@ -1,11 +1,21 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
 msgid ""
 msgstr ""
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-08-14 23:52-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
-"X-Generator: xgotext\n"
 
 #: pkg/controllers/contacts.go ../web/templates/contacts.html
 #: ../web/templates/contacts_add.html
@@ -80,11 +90,6 @@ msgstr ""
 
 #: ../web/templates/activities_add.html ../web/templates/activities_edit.html
 #: ../web/templates/journal_edit.html
-msgid "(you can use"
-msgstr ""
-
-#: ../web/templates/activities_add.html ../web/templates/activities_edit.html
-#: ../web/templates/journal_edit.html
 msgid "Markdown"
 msgstr ""
 
@@ -99,12 +104,12 @@ msgstr ""
 
 #: ../web/templates/activities_edit.html ../web/templates/contacts_edit.html
 #: ../web/templates/debts_edit.html ../web/templates/journal_edit.html
-msgid "Save changes"
+msgid "Cancel"
 msgstr ""
 
 #: ../web/templates/activities_edit.html ../web/templates/contacts_edit.html
 #: ../web/templates/debts_edit.html ../web/templates/journal_edit.html
-msgid "Cancel"
+msgid "Save changes"
 msgstr ""
 
 #: ../web/templates/activities_view.html
@@ -119,8 +124,10 @@ msgstr ""
 msgid "No description provided."
 msgstr ""
 
-#: ../web/templates/activities_view.html ../web/templates/contacts_view.html
-msgid "Are you sure you want to delete this activity?"
+#: ../web/templates/activities_view.html ../web/templates/contacts.html
+#: ../web/templates/contacts_view.html ../web/templates/journal.html
+#: ../web/templates/journal_view.html
+msgid "Edit"
 msgstr ""
 
 #: ../web/templates/activities_view.html ../web/templates/contacts.html
@@ -129,18 +136,16 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: ../web/templates/activities_view.html ../web/templates/contacts.html
-#: ../web/templates/contacts_view.html ../web/templates/journal.html
-#: ../web/templates/journal_view.html
-msgid "Edit"
-msgstr ""
-
-#: ../web/templates/contacts.html ../web/templates/contacts_view.html
-msgid "Are you sure you want to delete this contact?"
+#: ../web/templates/activities_view.html ../web/templates/contacts_view.html
+msgid "Are you sure you want to delete this activity?"
 msgstr ""
 
 #: ../web/templates/contacts.html
 msgid "No contacts yet."
+msgstr ""
+
+#: ../web/templates/contacts.html ../web/templates/contacts_view.html
+msgid "Are you sure you want to delete this contact?"
 msgstr ""
 
 #: ../web/templates/contacts_edit.html
@@ -152,15 +157,7 @@ msgid "First name"
 msgstr ""
 
 #: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "Jean"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
 msgid "Last name"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "Doe"
 msgstr ""
 
 #: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
@@ -168,23 +165,11 @@ msgid "Nickname (optional)"
 msgstr ""
 
 #: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "jdoe"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
 msgid "Email"
 msgstr ""
 
 #: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "jean@doe.com"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
 msgid "Pronouns"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "they/them"
 msgstr ""
 
 #: ../web/templates/contacts_edit.html
@@ -197,6 +182,22 @@ msgstr ""
 
 #: ../web/templates/contacts_edit.html
 msgid "Notes (optional)"
+msgstr ""
+
+#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
+msgid "they/them"
+msgstr ""
+
+#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
+msgid "jdoe"
+msgstr ""
+
+#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
+msgid "Doe"
+msgstr ""
+
+#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
+msgid "Jean"
 msgstr ""
 
 #: ../web/templates/contacts_view.html
@@ -228,14 +229,6 @@ msgid "%v owes you %v %v"
 msgstr ""
 
 #: ../web/templates/contacts_view.html
-msgid "Are you sure you want to settle this debt?"
-msgstr ""
-
-#: ../web/templates/contacts_view.html
-msgid "Settle debt"
-msgstr ""
-
-#: ../web/templates/contacts_view.html
 msgid "Activities"
 msgstr ""
 
@@ -245,6 +238,14 @@ msgstr ""
 
 #: ../web/templates/contacts_view.html
 msgid "Delete activity"
+msgstr ""
+
+#: ../web/templates/contacts_view.html
+msgid "Settle debt"
+msgstr ""
+
+#: ../web/templates/contacts_view.html
+msgid "Are you sure you want to settle this debt?"
 msgstr ""
 
 #: ../web/templates/debts_add.html
@@ -264,15 +265,15 @@ msgid "Amount"
 msgstr ""
 
 #: ../web/templates/debts_add.html ../web/templates/debts_edit.html
-msgid "50"
-msgstr ""
-
-#: ../web/templates/debts_add.html ../web/templates/debts_edit.html
 msgid "Currency"
 msgstr ""
 
 #: ../web/templates/debts_add.html ../web/templates/debts_edit.html
 msgid "USD"
+msgstr ""
+
+#: ../web/templates/debts_add.html ../web/templates/debts_edit.html
+msgid "50"
 msgstr ""
 
 #: ../web/templates/debts_edit.html
@@ -349,12 +350,12 @@ msgstr ""
 msgid "Bad"
 msgstr ""
 
-#: ../web/templates/journal.html ../web/templates/journal_view.html
-msgid "Are you sure you want to delete this entry?"
-msgstr ""
-
 #: ../web/templates/journal.html
 msgid "No journal entries yet."
+msgstr ""
+
+#: ../web/templates/journal.html ../web/templates/journal_view.html
+msgid "Are you sure you want to delete this entry?"
 msgstr ""
 
 #: ../web/templates/journal_add.html ../web/templates/journal_edit.html
@@ -374,15 +375,11 @@ msgid "Add entry"
 msgstr ""
 
 #: ../web/templates/journal_edit.html
-msgid "Edit \");"
+msgid "Edit \"%v\""
 msgstr ""
 
 #: ../web/templates/journal_view.html
 msgid "Your day was:"
-msgstr ""
-
-#: ../web/templates/nav.html
-msgid "Senbara Forms logo"
 msgstr ""
 
 #: ../web/templates/nav.html
@@ -398,27 +395,7 @@ msgid "Export your data"
 msgstr ""
 
 #: ../web/templates/nav.html
-msgid "Are you sure you want to import this user data into your account?"
-msgstr ""
-
-#: ../web/templates/nav.html
 msgid "User data"
-msgstr ""
-
-#: ../web/templates/nav.html
-msgid "Import user data"
-msgstr ""
-
-#: ../web/templates/nav.html
-msgid "Are you sure you want to delete your data and your account?"
-msgstr ""
-
-#: ../web/templates/nav.html
-msgid "Delete your data"
-msgstr ""
-
-#: ../web/templates/nav.html
-msgid "Are you sure you want to log out?"
 msgstr ""
 
 #: ../web/templates/nav.html
@@ -427,6 +404,30 @@ msgstr ""
 
 #: ../web/templates/nav.html
 msgid "Login"
+msgstr ""
+
+#: ../web/templates/nav.html
+msgid "Are you sure you want to log out?"
+msgstr ""
+
+#: ../web/templates/nav.html
+msgid "Delete your data"
+msgstr ""
+
+#: ../web/templates/nav.html
+msgid "Are you sure you want to delete your data and your account?"
+msgstr ""
+
+#: ../web/templates/nav.html
+msgid "Import user data"
+msgstr ""
+
+#: ../web/templates/nav.html
+msgid "Are you sure you want to import this user data into your account?"
+msgstr ""
+
+#: ../web/templates/nav.html
+msgid "Senbara Forms logo"
 msgstr ""
 
 #: ../web/templates/contacts_add.html
