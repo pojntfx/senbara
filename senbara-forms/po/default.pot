@@ -1,435 +1,424 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-14 23:52-0700\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
+"X-Generator: xgotext\n"
 
-#: pkg/controllers/contacts.go ../web/templates/contacts.html
-#: ../web/templates/contacts_add.html
-msgid "Add a contact"
-msgstr ""
-
-#: pkg/controllers/debts.go ../web/templates/contacts_view.html
-#: ../web/templates/debts_add.html
-msgid "Add a debt"
-msgstr ""
-
-#: pkg/controllers/journal.go ../web/templates/journal.html
-#: ../web/templates/journal_add.html
-msgid "Add a journal entry"
-msgstr ""
-
-#: pkg/controllers/activities.go ../web/templates/activities_add.html
-#: ../web/templates/contacts_view.html
-msgid "Add an activity"
-msgstr ""
-
-#: pkg/controllers/contacts.go ../web/templates/contacts.html
-#: ../web/templates/index.html ../web/templates/nav.html
-msgid "Contacts"
-msgstr ""
-
-#: pkg/controllers/activities.go ../web/templates/contacts_view.html
-msgid "Edit activity"
-msgstr ""
-
-#: pkg/controllers/contacts.go
-msgid "Edit contact"
-msgstr ""
-
-#: pkg/controllers/debts.go ../web/templates/contacts_view.html
-msgid "Edit debt"
-msgstr ""
-
-#: pkg/controllers/journal.go
-msgid "Edit journal entry"
-msgstr ""
-
-#: pkg/controllers/home.go
-msgid "Home"
-msgstr ""
-
-#: pkg/controllers/journal.go ../web/templates/journal.html
-#: ../web/templates/nav.html
-msgid "Journal"
-msgstr ""
-
-#: pkg/controllers/home.go ../web/templates/404.html
-msgid "Page not found"
-msgstr ""
-
-#: ../web/templates/activities_add.html
-msgid "Add a new activity for %v %v"
-msgstr ""
-
-#: ../web/templates/activities_add.html ../web/templates/activities_edit.html
-msgid "Name"
-msgstr ""
-
-#: ../web/templates/activities_add.html ../web/templates/activities_edit.html
-msgid "Date"
-msgstr ""
-
-#: ../web/templates/activities_add.html ../web/templates/activities_edit.html
-#: ../web/templates/debts_add.html ../web/templates/debts_edit.html
-msgid "Description (optional)"
-msgstr ""
-
-#: ../web/templates/activities_add.html ../web/templates/activities_edit.html
-#: ../web/templates/journal_edit.html
-msgid "Markdown"
-msgstr ""
-
-#: ../web/templates/activities_add.html ../web/templates/activities_edit.html
-#: ../web/templates/journal_edit.html
-msgid ")"
-msgstr ""
-
-#: ../web/templates/activities_edit.html
-msgid "Edit activity for %v %v"
-msgstr ""
-
-#: ../web/templates/activities_edit.html ../web/templates/contacts_edit.html
-#: ../web/templates/debts_edit.html ../web/templates/journal_edit.html
-msgid "Cancel"
-msgstr ""
-
-#: ../web/templates/activities_edit.html ../web/templates/contacts_edit.html
-#: ../web/templates/debts_edit.html ../web/templates/journal_edit.html
-msgid "Save changes"
-msgstr ""
-
-#: ../web/templates/activities_view.html
-msgid "Activity %v for %v %v"
-msgstr ""
-
-#: ../web/templates/activities_view.html
-msgid "Date:"
-msgstr ""
-
-#: ../web/templates/activities_view.html
-msgid "No description provided."
-msgstr ""
-
-#: ../web/templates/activities_view.html ../web/templates/contacts.html
-#: ../web/templates/contacts_view.html ../web/templates/journal.html
-#: ../web/templates/journal_view.html
-msgid "Edit"
-msgstr ""
-
-#: ../web/templates/activities_view.html ../web/templates/contacts.html
-#: ../web/templates/contacts_view.html ../web/templates/journal.html
-#: ../web/templates/journal_view.html
-msgid "Delete"
-msgstr ""
-
-#: ../web/templates/activities_view.html ../web/templates/contacts_view.html
-msgid "Are you sure you want to delete this activity?"
-msgstr ""
-
-#: ../web/templates/contacts.html
-msgid "No contacts yet."
-msgstr ""
-
-#: ../web/templates/contacts.html ../web/templates/contacts_view.html
-msgid "Are you sure you want to delete this contact?"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html
-msgid "Edit %v %v"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "First name"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "Last name"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "Nickname (optional)"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "Email"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "Pronouns"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html
-msgid "Birthday (optional)"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html
-msgid "Address (optional)"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html
-msgid "Notes (optional)"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "they/them"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "jdoe"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "Doe"
-msgstr ""
-
-#: ../web/templates/contacts_edit.html ../web/templates/contacts_add.html
-msgid "Jean"
-msgstr ""
-
-#: ../web/templates/contacts_view.html
-msgid "Birthday"
-msgstr ""
-
-#: ../web/templates/contacts_view.html
-msgid "Address"
-msgstr ""
-
-#: ../web/templates/contacts_view.html
-msgid "Notes"
-msgstr ""
-
-#: ../web/templates/contacts_view.html
-msgid "Debts"
-msgstr ""
-
-#: ../web/templates/contacts_view.html
-msgid "Manage debts you owe to %v or %v owes you"
-msgstr ""
-
-#: ../web/templates/contacts_view.html
-msgid "You owe %v %v %v"
-msgstr ""
-
-#: ../web/templates/contacts_view.html
-msgid "%v owes you %v %v"
-msgstr ""
-
-#: ../web/templates/contacts_view.html
-msgid "Activities"
-msgstr ""
-
-#: ../web/templates/contacts_view.html
-msgid "No activities with %v yet."
-msgstr ""
-
-#: ../web/templates/contacts_view.html
-msgid "Delete activity"
-msgstr ""
-
-#: ../web/templates/contacts_view.html
-msgid "Settle debt"
-msgstr ""
-
-#: ../web/templates/contacts_view.html
-msgid "Are you sure you want to settle this debt?"
-msgstr ""
-
-#: ../web/templates/debts_add.html
-msgid "Add a new debt for %v %v"
-msgstr ""
-
-#: ../web/templates/debts_add.html ../web/templates/debts_edit.html
-msgid "You owe %v"
-msgstr ""
-
-#: ../web/templates/debts_add.html ../web/templates/debts_edit.html
+#: debts_add.html:32 debts_edit.html:60
 msgid "%v owes you"
 msgstr ""
 
-#: ../web/templates/debts_add.html ../web/templates/debts_edit.html
-msgid "Amount"
+#: contacts_view.html:61
+msgid "%v owes you %v %v"
 msgstr ""
 
-#: ../web/templates/debts_add.html ../web/templates/debts_edit.html
-msgid "Currency"
-msgstr ""
-
-#: ../web/templates/debts_add.html ../web/templates/debts_edit.html
-msgid "USD"
-msgstr ""
-
-#: ../web/templates/debts_add.html ../web/templates/debts_edit.html
-msgid "50"
-msgstr ""
-
-#: ../web/templates/debts_edit.html
-msgid "Edit debt for %v %v"
-msgstr ""
-
-#: ../web/templates/footer.html
-msgid "© 2025 Felicitas Pojtinger and contributors (AGPL-3.0)"
-msgstr ""
-
-#: ../web/templates/footer.html
-msgid "Code"
-msgstr ""
-
-#: ../web/templates/footer.html
-msgid "Privacy"
-msgstr ""
-
-#: ../web/templates/footer.html
-msgid "Terms of Service"
-msgstr ""
-
-#: ../web/templates/footer.html
-msgid "Imprint"
-msgstr ""
-
-#: ../web/templates/header_content.html
+#: header_content.html:5
 msgid "%v | Senbara Forms"
 msgstr ""
 
-#: ../web/templates/index.html
+#: activities_add.html:33 activities_edit.html:48 journal_edit.html:80
+msgid "(you can use"
+msgstr ""
+
+#: activities_add.html:36 activities_edit.html:51 journal_edit.html:83
+msgid ")"
+msgstr ""
+
+#: debts_add.html:37 debts_edit.html:65
+msgid "50"
+msgstr ""
+
+#: nav.html:26
+msgid "Account"
+msgstr ""
+
+#: contacts_view.html:91
+msgid "Activities"
+msgstr ""
+
+#: activities_view.html:11
+msgid "Activity %v for %v %v"
+msgstr ""
+
+#: pkg/controllers/contacts.go:90 contacts.html:11 contacts_add.html:9
+msgid "Add a contact"
+msgstr ""
+
+#: pkg/controllers/debts.go:68 contacts_view.html:45 debts_add.html:52
+msgid "Add a debt"
+msgstr ""
+
+#: pkg/controllers/journal.go:86 journal.html:11 journal_add.html:9
+msgid "Add a journal entry"
+msgstr ""
+
+#: activities_add.html:10
+msgid "Add a new activity for %v %v"
+msgstr ""
+
+#: debts_add.html:10
+msgid "Add a new debt for %v %v"
+msgstr ""
+
+#: pkg/controllers/activities.go:68 activities_add.html:42
+#: contacts_view.html:95
+msgid "Add an activity"
+msgstr ""
+
+#: contacts_add.html:39
+msgid "Add contact"
+msgstr ""
+
+#: journal_add.html:35
+msgid "Add entry"
+msgstr ""
+
+#: contacts_view.html:28
+msgid "Address"
+msgstr ""
+
+#: contacts_edit.html:48
+msgid "Address (optional)"
+msgstr ""
+
+#: debts_add.html:36 debts_edit.html:64
+msgid "Amount"
+msgstr ""
+
+#: activities_view.html:27 contacts_view.html:121
+msgid "Are you sure you want to delete this activity?"
+msgstr ""
+
+#: contacts.html:33 contacts_view.html:144
+msgid "Are you sure you want to delete this contact?"
+msgstr ""
+
+#: journal.html:40 journal_view.html:35
+msgid "Are you sure you want to delete this entry?"
+msgstr ""
+
+#: nav.html:53
+msgid "Are you sure you want to delete your data and your account?"
+msgstr ""
+
+#: nav.html:35
+msgid "Are you sure you want to import this user data into your account?"
+msgstr ""
+
+#: nav.html:60
+msgid "Are you sure you want to log out?"
+msgstr ""
+
+#: contacts_view.html:69
+msgid "Are you sure you want to settle this debt?"
+msgstr ""
+
+#: journal.html:29 journal_add.html:24 journal_edit.html:65
+#: journal_view.html:22
+msgid "Bad"
+msgstr ""
+
+#: contacts_view.html:24
+msgid "Birthday"
+msgstr ""
+
+#: contacts_edit.html:42
+msgid "Birthday (optional)"
+msgstr ""
+
+#: journal_add.html:31 journal_edit.html:80
+msgid "Body"
+msgstr ""
+
+#: activities_edit.html:62 contacts_edit.html:63 debts_edit.html:86
+#: journal_edit.html:94
+msgid "Cancel"
+msgstr ""
+
+#: footer.html:7
+msgid "Code"
+msgstr ""
+
+#: pkg/controllers/contacts.go:56 contacts.html:9 index.html:31 nav.html:22
+msgid "Contacts"
+msgstr ""
+
+#: debts_add.html:41 debts_edit.html:70
+msgid "Currency"
+msgstr ""
+
+#: activities_add.html:28 activities_edit.html:42
+msgid "Date"
+msgstr ""
+
+#: activities_view.html:16
+msgid "Date:"
+msgstr ""
+
+#: contacts_view.html:41
+msgid "Debts"
+msgstr ""
+
+#: activities_view.html:29 contacts.html:35 contacts_view.html:146
+#: journal.html:42 journal_view.html:37
+msgid "Delete"
+msgstr ""
+
+#: contacts_view.html:126
+msgid "Delete activity"
+msgstr ""
+
+#: nav.html:55
+msgid "Delete your data"
+msgstr ""
+
+#: activities_add.html:33 activities_edit.html:48 debts_add.html:47
+#: debts_edit.html:76
+msgid "Description (optional)"
+msgstr ""
+
+#: contacts_edit.html:23 contacts_add.html:20
+msgid "Doe"
+msgstr ""
+
+#: activities_view.html:34 contacts.html:38 contacts_view.html:149
+#: journal.html:45 journal_view.html:39
+msgid "Edit"
+msgstr ""
+
+#: contacts_edit.html:9
+msgid "Edit %v %v"
+msgstr ""
+
+#: journal_edit.html:9
+msgid "Edit \\\"%v\\\""
+msgstr ""
+
+#: pkg/controllers/activities.go:430 contacts_view.html:130
+msgid "Edit activity"
+msgstr ""
+
+#: activities_edit.html:10
+msgid "Edit activity for %v %v"
+msgstr ""
+
+#: pkg/controllers/contacts.go:529
+msgid "Edit contact"
+msgstr ""
+
+#: pkg/controllers/debts.go:478 contacts_view.html:78
+msgid "Edit debt"
+msgstr ""
+
+#: debts_edit.html:10
+msgid "Edit debt for %v %v"
+msgstr ""
+
+#: pkg/controllers/journal.go:284
+msgid "Edit journal entry"
+msgstr ""
+
+#: contacts_edit.html:32 contacts_add.html:29
+msgid "Email"
+msgstr ""
+
+#: nav.html:29
+msgid "Export your data"
+msgstr ""
+
+#: contacts_edit.html:16 contacts_add.html:14
+msgid "First name"
+msgstr ""
+
+#: nav.html:16
+msgid "Go back"
+msgstr ""
+
+#: journal.html:25 journal_add.html:18 journal_edit.html:33
+#: journal_view.html:18
+msgid "Great"
+msgstr ""
+
+#: pkg/controllers/home.go:63
+msgid "Home"
+msgstr ""
+
+#: journal_add.html:15 journal_edit.html:17
+msgid "How was your day?"
+msgstr ""
+
+#: nav.html:47
+msgid "Import user data"
+msgstr ""
+
+#: footer.html:12
+msgid "Imprint"
+msgstr ""
+
+#: contacts_edit.html:17 contacts_add.html:15
+msgid "Jean"
+msgstr ""
+
+#: pkg/controllers/journal.go:52 journal.html:9 nav.html:23
+msgid "Journal"
+msgstr ""
+
+#: index.html:34
+msgid "Journal entries"
+msgstr ""
+
+#: contacts_edit.html:22 contacts_add.html:19
+msgid "Last name"
+msgstr ""
+
+#: nav.html:65
+msgid "Login"
+msgstr ""
+
+#: nav.html:61
+msgid "Logout"
+msgstr ""
+
+#: contacts_view.html:52
+msgid "Manage debts you owe to %v or %v owes you"
+msgstr ""
+
+#: activities_add.html:35 activities_edit.html:50 journal_edit.html:82
+msgid "Markdown"
+msgstr ""
+
+#: activities_add.html:24 activities_edit.html:31
+msgid "Name"
+msgstr ""
+
+#: contacts_edit.html:27 contacts_add.html:24
+msgid "Nickname (optional)"
+msgstr ""
+
+#: contacts_view.html:101
+msgid "No activities with %v yet."
+msgstr ""
+
+#: contacts.html:42
+msgid "No contacts yet."
+msgstr ""
+
+#: activities_view.html:21
+msgid "No description provided."
+msgstr ""
+
+#: journal.html:49
+msgid "No journal entries yet."
+msgstr ""
+
+#: contacts_view.html:32
+msgid "Notes"
+msgstr ""
+
+#: contacts_edit.html:54
+msgid "Notes (optional)"
+msgstr ""
+
+#: journal.html:27 journal_add.html:21 journal_edit.html:49
+#: journal_view.html:20
+msgid "OK"
+msgstr ""
+
+#: pkg/controllers/home.go:101 404.html:9
+msgid "Page not found"
+msgstr ""
+
+#: footer.html:8
+msgid "Privacy"
+msgstr ""
+
+#: contacts_edit.html:37 contacts_add.html:34
+msgid "Pronouns"
+msgstr ""
+
+#: activities_edit.html:59 contacts_edit.html:60 debts_edit.html:83
+#: journal_edit.html:91
+msgid "Save changes"
+msgstr ""
+
+#: index.html:9
 msgid "Senbara Forms"
 msgstr ""
 
-#: ../web/templates/index.html
+#: nav.html:10
+msgid "Senbara Forms logo"
+msgstr ""
+
+#: contacts_view.html:74
+msgid "Settle debt"
+msgstr ""
+
+#: index.html:11
 msgid ""
 "Simple personal ERP web application built with HTML forms, OpenID Connect "
 "authentication and PostgreSQL data storage. Designed as a reference for "
 "modern JS-free Web 2.0 development with Go."
 msgstr ""
 
-#: ../web/templates/index.html
+#: index.html:17
 msgid "Statistics"
 msgstr ""
 
-#: ../web/templates/index.html
-msgid "Total contacts"
-msgstr ""
-
-#: ../web/templates/index.html
-msgid "Total journal entries"
-msgstr ""
-
-#: ../web/templates/index.html
+#: index.html:28
 msgid "Summary"
 msgstr ""
 
-#: ../web/templates/index.html
-msgid "Journal entries"
+#: footer.html:10
+msgid "Terms of Service"
 msgstr ""
 
-#: ../web/templates/journal.html ../web/templates/journal_add.html
-#: ../web/templates/journal_edit.html ../web/templates/journal_view.html
-msgid "Great"
-msgstr ""
-
-#: ../web/templates/journal.html ../web/templates/journal_add.html
-#: ../web/templates/journal_edit.html ../web/templates/journal_view.html
-msgid "OK"
-msgstr ""
-
-#: ../web/templates/journal.html ../web/templates/journal_add.html
-#: ../web/templates/journal_edit.html ../web/templates/journal_view.html
-msgid "Bad"
-msgstr ""
-
-#: ../web/templates/journal.html
-msgid "No journal entries yet."
-msgstr ""
-
-#: ../web/templates/journal.html ../web/templates/journal_view.html
-msgid "Are you sure you want to delete this entry?"
-msgstr ""
-
-#: ../web/templates/journal_add.html ../web/templates/journal_edit.html
-msgid "How was your day?"
-msgstr ""
-
-#: ../web/templates/journal_add.html ../web/templates/journal_edit.html
+#: journal_add.html:27 journal_edit.html:68
 msgid "Title"
 msgstr ""
 
-#: ../web/templates/journal_add.html ../web/templates/journal_edit.html
-msgid "Body"
+#: index.html:20
+msgid "Total contacts"
 msgstr ""
 
-#: ../web/templates/journal_add.html
-msgid "Add entry"
+#: index.html:22
+msgid "Total journal entries"
 msgstr ""
 
-#: ../web/templates/journal_edit.html
-msgid "Edit \"%v\""
+#: debts_add.html:42 debts_edit.html:71
+msgid "USD"
 msgstr ""
 
-#: ../web/templates/journal_view.html
-msgid "Your day was:"
-msgstr ""
-
-#: ../web/templates/nav.html
-msgid "Go back"
-msgstr ""
-
-#: ../web/templates/nav.html
-msgid "Account"
-msgstr ""
-
-#: ../web/templates/nav.html
-msgid "Export your data"
-msgstr ""
-
-#: ../web/templates/nav.html
+#: nav.html:37
 msgid "User data"
 msgstr ""
 
-#: ../web/templates/nav.html
-msgid "Logout"
+#: debts_add.html:27 debts_edit.html:42
+msgid "You owe %v"
 msgstr ""
 
-#: ../web/templates/nav.html
-msgid "Login"
+#: contacts_view.html:59
+msgid "You owe %v %v %v"
 msgstr ""
 
-#: ../web/templates/nav.html
-msgid "Are you sure you want to log out?"
+#: journal_view.html:16
+msgid "Your day was:"
 msgstr ""
 
-#: ../web/templates/nav.html
-msgid "Delete your data"
+#: contacts_edit.html:28 contacts_add.html:25
+msgid "jdoe"
 msgstr ""
 
-#: ../web/templates/nav.html
-msgid "Are you sure you want to delete your data and your account?"
+#: contacts_edit.html:33 contacts_add.html:30
+msgid "jean@doe.com"
 msgstr ""
 
-#: ../web/templates/nav.html
-msgid "Import user data"
+#: contacts_edit.html:38 contacts_add.html:35
+msgid "they/them"
 msgstr ""
 
-#: ../web/templates/nav.html
-msgid "Are you sure you want to import this user data into your account?"
-msgstr ""
-
-#: ../web/templates/nav.html
-msgid "Senbara Forms logo"
-msgstr ""
-
-#: ../web/templates/contacts_add.html
-msgid "Add contact"
+#: footer.html:3
+msgid "© 2025 Felicitas Pojtinger and contributors (AGPL-3.0)"
 msgstr ""

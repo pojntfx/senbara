@@ -2,7 +2,10 @@ module github.com/pojntfx/senbara/senbara-forms
 
 go 1.24.0
 
-tool github.com/leonelquinteros/gotext/cli/xgotext
+tool (
+	github.com/leonelquinteros/gotext/cli/xgotext
+	github.com/unDocUMeantIt/tgotext/cmd/tgotext
+)
 
 require (
 	github.com/leonelquinteros/gotext v1.7.2
@@ -50,9 +53,12 @@ require (
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	github.com/unDocUMeantIt/tgotext v0.0.0-20230518153123-0b2b208f7dd3 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/oauth2 v0.29.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/unDocUMeantIt/tgotext v0.0.0-20230518153123-0b2b208f7dd3 => github.com/pojntfx/tgotext v0.0.0-20250816050630-e7dbeae9d85f
