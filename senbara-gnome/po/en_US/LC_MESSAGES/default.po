@@ -3,7 +3,7 @@ msgstr "Content-Type: text/plain; charset=UTF-8\n"
 
 #: ../assets/resources/debts-create-dialog.blp:5
 msgid "Create a debt"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Create a debt"
 
 #: ../assets/resources/debts-create-dialog.blp:19
 #: ../assets/resources/window.blp:400 ../assets/resources/window.blp:931
@@ -15,29 +15,29 @@ msgstr PLACEHOLDER_TO_FILL
 #: ../cmd/senbara-gnome/main.go:2410 ../cmd/senbara-gnome/main.go:2471
 #: ../cmd/senbara-gnome/main.go:2532
 msgid "Cancel"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Cancel"
 
 #: ../assets/resources/debts-create-dialog.blp:35
 #: ../assets/resources/activities-create-dialog.blp:35
 #: ../assets/resources/contacts-create-dialog.blp:31
 msgid "Add"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Add"
 
 #: ../assets/resources/debts-create-dialog.blp:68
 #: ../assets/resources/window.blp:1001
 msgid "Amount"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Amount"
 
 #: ../assets/resources/debts-create-dialog.blp:78
 #: ../assets/resources/window.blp:1011
 msgid "Currency"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Currency"
 
 #: ../assets/resources/debts-create-dialog.blp:84
 #: ../assets/resources/window.blp:1017 ../assets/resources/window.blp:1151
 #: ../assets/resources/activities-create-dialog.blp:58
 msgid "Description (optional)"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Description (optional)"
 
 #: ../assets/resources/window.blp:8 ../assets/resources/window.blp:51
 #: ../assets/resources/window.blp:69 ../assets/resources/window.blp:153
@@ -54,7 +54,7 @@ msgstr "Senbara Forms"
 
 #: ../assets/resources/window.blp:40
 msgid "Checking configuration ..."
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Checking configuration ..."
 
 #: ../assets/resources/window.blp:70
 #: ../assets/meta/com.pojtinger.felicitas.Senbara.desktop.in:5
@@ -62,59 +62,63 @@ msgstr PLACEHOLDER_TO_FILL
 msgid ""
 "GNOME app to interact with the Senbara REST API. Designed as a reference for "
 "modern GNOME/GTK development with Go."
-msgstr PLACEHOLDER_TO_FILL
+msgstr ""
+"GNOME app to interact with the Senbara REST API. Designed as a reference for "
+"modern GNOME/GTK development with Go."
 "GNOME app to interact with the Senbara REST API. Designed as a reference for "
 "modern GNOME/GTK development with Go."
 
 #: ../assets/resources/window.blp:84
 msgid "Get started"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Get started"
 
 #: ../assets/resources/window.blp:97
 msgid "Select Senbara server"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Select Senbara server"
 
 #: ../assets/resources/window.blp:124
 msgid "Continue"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Continue"
 
 #: ../assets/resources/window.blp:135
 msgid "Where is your Senbara server?"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Where is your Senbara server?"
 
 #: ../assets/resources/window.blp:136
 msgid "Enter the configuration for the Senbara server you want to connect to."
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Enter the configuration for the Senbara server you want to connect to."
 
 #: ../assets/resources/window.blp:144
 msgid "Senbara Server URL (e.g. https://rest.senbara.p8.lu/)"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Senbara Server URL (e.g. https://rest.senbara.p8.lu/)"
 
 #: ../assets/resources/window.blp:179 ../assets/resources/window.blp:361
 msgid "Login"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Login"
 
 #: ../assets/resources/window.blp:191
 #, fuzzy
 msgid ""
 "(Preview) GNOME app to interact with the Senbara REST API. Designed as a "
 "reference for modern GNOME/GTK development with Go."
-msgstr PLACEHOLDER_TO_FILL
+msgstr ""
+"(Preview) GNOME app to interact with the Senbara REST API. Designed as a "
+"reference for modern GNOME/GTK development with Go."
 "GNOME app to interact with the Senbara REST API. Designed as a reference for "
 "modern GNOME/GTK development with Go."
 
 #: ../assets/resources/window.blp:219
 msgid "Total contacts"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Total contacts"
 
 #: ../assets/resources/window.blp:228 ../assets/resources/window.blp:274
 #: ../assets/resources/window.blp:495 ../assets/resources/window.blp:521
 msgid "0"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "0"
 
 #: ../assets/resources/window.blp:265
 msgid "Total journal entries"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Total journal entries"
 
 #: ../assets/resources/window.blp:300
 #, fuzzy
@@ -123,224 +127,227 @@ msgstr "Senbara Forms"
 
 #: ../assets/resources/window.blp:317
 msgid "Registration required"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Registration required"
 
 #: ../assets/resources/window.blp:318
 msgid ""
 "You need to manually register Senbara Forms before you can sign in to this "
 "server."
-msgstr PLACEHOLDER_TO_FILL
+msgstr ""
+"You need to manually register Senbara Forms before you can sign in to this "
+"server."
 
 #: ../assets/resources/window.blp:323
 msgid "Register"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Register"
 
 #: ../assets/resources/window.blp:334
 msgid "What's your initial access token?"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "What's your initial access token?"
 
 #: ../assets/resources/window.blp:372
 msgid "Set initial access token"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Set initial access token"
 
 #: ../assets/resources/window.blp:373
 msgid "Enter the initial access token you've received from the Senbara server."
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Enter the initial access token you've received from the Senbara server."
 
 #: ../assets/resources/window.blp:381
 msgid "Initial access token"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Initial access token"
 
 #: ../assets/resources/window.blp:390 ../assets/resources/window.blp:412
 msgid "Signing you in"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Signing you in"
 
 #: ../assets/resources/window.blp:413 ../assets/resources/window.blp:1435
 msgid "Waiting for authorization from browser ..."
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Waiting for authorization from browser ..."
 
 #: ../assets/resources/window.blp:487 ../assets/resources/window.blp:549
 msgid "Contacts"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Contacts"
 
 #: ../assets/resources/window.blp:513 ../assets/resources/window.blp:1394
 msgid "Journal"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Journal"
 
 #: ../assets/resources/window.blp:558 ../assets/resources/window.blp:633
 msgid "Add a contact"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Add a contact"
 
 #: ../assets/resources/window.blp:565
 msgid "Search"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Search"
 
 #: ../assets/resources/window.blp:574
 msgid "Search contacts"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Search contacts"
 
 #: ../assets/resources/window.blp:618 ../assets/resources/window.blp:628
 msgid "No contacts found"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "No contacts found"
 
 #: ../assets/resources/window.blp:619
 msgid "Try a different search"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Try a different search"
 
 #: ../assets/resources/window.blp:646
 msgid "Contacts could not be loaded"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Contacts could not be loaded"
 
 #: ../assets/resources/window.blp:655 ../assets/resources/window.blp:812
 #: ../assets/resources/window.blp:897 ../assets/resources/window.blp:1057
 #: ../assets/resources/window.blp:1193 ../assets/resources/window.blp:1373
 msgid "Refresh"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Refresh"
 
 #: ../assets/resources/window.blp:664 ../assets/resources/window.blp:821
 #: ../assets/resources/window.blp:906 ../assets/resources/window.blp:1066
 #: ../assets/resources/window.blp:1202 ../assets/resources/window.blp:1382
 #: ../cmd/senbara-gnome/main.go:327
 msgid "Copy details"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Copy details"
 
 #: ../assets/resources/window.blp:675
 msgid "Contact"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Contact"
 
 #: ../assets/resources/window.blp:686 ../cmd/senbara-gnome/main.go:2729
 msgid "Delete contact"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Delete contact"
 
 #: ../assets/resources/window.blp:693 ../assets/resources/window.blp:1214
 #: ../cmd/senbara-gnome/main.go:2733
 msgid "Edit contact"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Edit contact"
 
 #: ../assets/resources/window.blp:732
 msgid "Birthday"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Birthday"
 
 #: ../assets/resources/window.blp:742
 msgid "Address"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Address"
 
 #: ../assets/resources/window.blp:752
 msgid "Notes"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Notes"
 
 #: ../assets/resources/window.blp:766
 msgid "Debts"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Debts"
 
 #: ../assets/resources/window.blp:782
 msgid "Activites"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Activites"
 
 #: ../assets/resources/window.blp:803 ../assets/resources/window.blp:1364
 msgid "Contact could not be loaded"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Contact could not be loaded"
 
 #: ../assets/resources/window.blp:833
 msgid "Activity"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Activity"
 
 #: ../assets/resources/window.blp:844 ../cmd/senbara-gnome/main.go:2930
 msgid "Delete activity"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Delete activity"
 
 #: ../assets/resources/window.blp:851 ../assets/resources/window.blp:1078
 #: ../cmd/senbara-gnome/main.go:2934
 msgid "Edit activity"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Edit activity"
 
 #: ../assets/resources/window.blp:888 ../assets/resources/window.blp:1184
 msgid "Activity could not be loaded"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Activity could not be loaded"
 
 #: ../assets/resources/window.blp:918 ../cmd/senbara-gnome/main.go:2885
 msgid "Edit debt"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Edit debt"
 
 #: ../assets/resources/window.blp:947 ../assets/resources/window.blp:1107
 #: ../assets/resources/window.blp:1243
 msgid "Save"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Save"
 
 #: ../assets/resources/window.blp:1048
 msgid "Debt could not be loaded"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Debt could not be loaded"
 
 #: ../assets/resources/window.blp:1141
 #: ../assets/resources/activities-create-dialog.blp:48
 msgid "Name"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Name"
 
 #: ../assets/resources/window.blp:1145
 #: ../assets/resources/activities-create-dialog.blp:52
 msgid "Date"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Date"
 
 #: ../assets/resources/window.blp:1152
 #: ../assets/resources/activities-create-dialog.blp:59
 msgid ""
 "You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>"
-msgstr PLACEHOLDER_TO_FILL
+msgstr ""
+"You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>"
 
 #: ../assets/resources/window.blp:1277
 #: ../assets/resources/contacts-create-dialog.blp:44
 msgid "First name"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "First name"
 
 #: ../assets/resources/window.blp:1282
 #: ../assets/resources/contacts-create-dialog.blp:49
 msgid "Last name"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Last name"
 
 #: ../assets/resources/window.blp:1287
 #: ../assets/resources/contacts-create-dialog.blp:54
 msgid "Nickname (optional)"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Nickname (optional)"
 
 #: ../assets/resources/window.blp:1291
 #: ../assets/resources/contacts-create-dialog.blp:58
 msgid "Email"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Email"
 
 #: ../assets/resources/window.blp:1296
 #: ../assets/resources/contacts-create-dialog.blp:63
 msgid "Pronouns"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Pronouns"
 
 #: ../assets/resources/window.blp:1300
 msgid "Birthday (optional)"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Birthday (optional)"
 
 #: ../assets/resources/window.blp:1306
 msgid "Address (optional)"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Address (optional)"
 
 #: ../assets/resources/window.blp:1332
 msgid "Notes (optional)"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Notes (optional)"
 
 #: ../assets/resources/window.blp:1402
 msgid "Journal test 1"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Journal test 1"
 
 #: ../assets/resources/window.blp:1412 ../assets/resources/window.blp:1434
 msgid "Signing you out"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Signing you out"
 
 #: ../assets/resources/window.blp:1450
 msgid "Deregister client"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Deregister client"
 
 #: ../assets/resources/window.blp:1456 ../assets/resources/window.blp:1475
 #: ../assets/resources/window.blp:1513 ../assets/resources/window.blp:1578
 #: ../assets/resources/preferences-dialog.blp:5
 msgid "Preferences"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Preferences"
 
 #: ../assets/resources/window.blp:1461 ../assets/resources/window.blp:1504
 #: ../assets/resources/window.blp:1542 ../assets/resources/window.blp:1612
@@ -350,126 +357,126 @@ msgstr "Senbara Forms"
 
 #: ../assets/resources/window.blp:1469
 msgid "Select different Senbara server"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Select different Senbara server"
 
 #: ../assets/resources/window.blp:1480 ../assets/resources/window.blp:1518
 #: ../assets/resources/window.blp:1583
 msgid "About Senbara REST"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "About Senbara REST"
 
 #: ../assets/resources/window.blp:1483 ../assets/resources/window.blp:1521
 #: ../assets/resources/window.blp:1586
 msgid "License"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "License"
 
 #: ../assets/resources/window.blp:1488 ../assets/resources/window.blp:1526
 #: ../assets/resources/window.blp:1591
 msgid "Code"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Code"
 
 #: ../assets/resources/window.blp:1493 ../assets/resources/window.blp:1531
 #: ../assets/resources/window.blp:1596
 msgid "Privacy"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Privacy"
 
 #: ../assets/resources/window.blp:1498 ../assets/resources/window.blp:1536
 #: ../assets/resources/window.blp:1606
 msgid "Imprint"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Imprint"
 
 #: ../assets/resources/window.blp:1550
 msgid "Logout"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Logout"
 
 #: ../assets/resources/window.blp:1556
 msgid "Your data"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Your data"
 
 #: ../assets/resources/window.blp:1559
 msgid "Export"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Export"
 
 #: ../assets/resources/window.blp:1564 ../cmd/senbara-gnome/main.go:2238
 msgid "Import"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Import"
 
 #: ../assets/resources/window.blp:1569 ../cmd/senbara-gnome/main.go:2340
 #: ../cmd/senbara-gnome/main.go:2411 ../cmd/senbara-gnome/main.go:2472
 #: ../cmd/senbara-gnome/main.go:2533
 msgid "Delete"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Delete"
 
 #: ../assets/resources/window.blp:1601
 msgid "Terms of Service"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Terms of Service"
 
 #: ../assets/resources/window.blp:1619 ../assets/resources/window.blp:1631
 #: ../assets/resources/window.blp:1643
 #: ../assets/resources/activities-create-dialog.blp:90
 #: ../assets/resources/contacts-create-dialog.blp:72
 msgid "Show error"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Show error"
 
 #: ../assets/resources/window.blp:1662
 #: ../assets/resources/contacts-create-dialog.blp:84
 msgid "Not a valid email"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Not a valid email"
 
 #: ../assets/resources/activities-create-dialog.blp:5
 msgid "Create an activity"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Create an activity"
 
 #: ../assets/resources/contacts-create-dialog.blp:5
 msgid "Create a contact"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Create a contact"
 
 #: ../assets/resources/preferences-dialog.blp:9
 msgid "General"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "General"
 
 #: ../assets/resources/preferences-dialog.blp:12
 msgid "Advanced"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Advanced"
 
 #: ../assets/resources/preferences-dialog.blp:15
 msgid "Verbose"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Verbose"
 
 #: ../assets/resources/preferences-dialog.blp:16
 msgid "Whether to enable verbose logging"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Whether to enable verbose logging"
 
 #: ../cmd/senbara-gnome/main.go:1457
 msgid "Created contact"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Created contact"
 
 #: ../cmd/senbara-gnome/main.go:1530
 msgid "Created debt"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Created debt"
 
 #: ../cmd/senbara-gnome/main.go:1611
 msgid "Created activity"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Created activity"
 
 #: ../cmd/senbara-gnome/main.go:1691
 msgid "Updated activity"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Updated activity"
 
 #: ../cmd/senbara-gnome/main.go:1761
 msgid "Updated debt"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Updated debt"
 
 #: ../cmd/senbara-gnome/main.go:1864
 msgid "Updated contact"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Updated contact"
 
 #: ../cmd/senbara-gnome/main.go:2073
 msgid "Senbara REST source code"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Senbara REST source code"
 
 #: ../cmd/senbara-gnome/main.go:2105
 msgid "Downloaded code"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Downloaded code"
 
 #: ../cmd/senbara-gnome/main.go:2162 ../cmd/senbara-gnome/main.go:2205
 #, fuzzy
@@ -478,7 +485,7 @@ msgstr "Senbara Forms"
 
 #: ../cmd/senbara-gnome/main.go:2194
 msgid "Exported user data"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Exported user data"
 
 #: ../cmd/senbara-gnome/main.go:2211
 #, fuzzy
@@ -487,83 +494,83 @@ msgstr "Senbara Forms"
 
 #: ../cmd/senbara-gnome/main.go:2218
 msgid "All files"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "All files"
 
 #: ../cmd/senbara-gnome/main.go:2234
 msgid "Importing user data"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Importing user data"
 
 #: ../cmd/senbara-gnome/main.go:2235
 msgid "Are you sure you want to import this user data into your account?"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Are you sure you want to import this user data into your account?"
 
 #: ../cmd/senbara-gnome/main.go:2321
 msgid "Imported user data"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Imported user data"
 
 #: ../cmd/senbara-gnome/main.go:2336
 msgid "Deleting your data"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Deleting your data"
 
 #: ../cmd/senbara-gnome/main.go:2337
 msgid "Are you sure you want to delete your data and your account?"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Are you sure you want to delete your data and your account?"
 
 #: ../cmd/senbara-gnome/main.go:2376
 msgid "Deleted user data"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Deleted user data"
 
 #: ../cmd/senbara-gnome/main.go:2407
 msgid "Deleting a contact"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Deleting a contact"
 
 #: ../cmd/senbara-gnome/main.go:2408
 msgid "Are you sure you want to delete this contact?"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Are you sure you want to delete this contact?"
 
 #: ../cmd/senbara-gnome/main.go:2447
 msgid "Contact deleted"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Contact deleted"
 
 #: ../cmd/senbara-gnome/main.go:2468
 msgid "Settling a debt"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Settling a debt"
 
 #: ../cmd/senbara-gnome/main.go:2469
 msgid "Are you sure you want to settle this debt?"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Are you sure you want to settle this debt?"
 
 #: ../cmd/senbara-gnome/main.go:2508
 msgid "Settled debt"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Settled debt"
 
 #: ../cmd/senbara-gnome/main.go:2529
 msgid "Deleting an activity"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Deleting an activity"
 
 #: ../cmd/senbara-gnome/main.go:2530
 msgid "Are you sure you want to delete this activity?"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Are you sure you want to delete this activity?"
 
 #: ../cmd/senbara-gnome/main.go:2569
 msgid "Activity deleted"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Activity deleted"
 
 #: ../cmd/senbara-gnome/main.go:2880
 msgid "Settle debt"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Settle debt"
 
 #: ../cmd/senbara-gnome/main.go:2899
 msgid "Add a debt"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Add a debt"
 
 #: ../cmd/senbara-gnome/main.go:2951
 msgid "Add an activity"
-msgstr PLACEHOLDER_TO_FILL
+msgstr "Add an activity"
 
 #: ../cmd/senbara-gnome/main.go:3070
 msgid "No description provided."
-msgstr PLACEHOLDER_TO_FILL
+msgstr "No description provided."
 
 #: ../assets/resources/metainfo.xml.in:5
 msgid "GNOME app to interact with the Senbara REST API"
