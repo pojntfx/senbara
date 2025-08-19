@@ -6,5 +6,6 @@ use (
 	./senbara-common
 	./senbara-forms
 	./senbara-gnome
+	./senbara-gnome-puregotk
 	./senbara-rest
 )
