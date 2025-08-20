@@ -13,41 +13,41 @@ import (
 
 import "C"
 
-var gTypeLibSenbaraGtkMainApplicationWindow gobject.Type
+var gTypeSenbaraGtkMainApplicationWindow gobject.Type
 
-type libSenbaraGtkMainApplicationWindow struct {
+type senbaraGtkMainApplicationWindow struct {
 	*gtk.ApplicationWindow
 }
 
-func newLibSenbaraGtkMainApplicationWindow() *libSenbaraGtkMainApplicationWindow {
-	obj := gobject.NewObject(gTypeLibSenbaraGtkMainApplicationWindow, "application")
+func newSenbaraGtkMainApplicationWindow() *senbaraGtkMainApplicationWindow {
+	obj := gobject.NewObject(gTypeSenbaraGtkMainApplicationWindow, "application")
 
 	parent := (*gtk.ApplicationWindow)(unsafe.Pointer(obj))
 	parent.InitTemplate()
 
-	return &libSenbaraGtkMainApplicationWindow{
+	return &senbaraGtkMainApplicationWindow{
 		parent,
 	}
 }
 
-//export libsenbara_gtk_main_application_window_get_type
-func libsenbara_gtk_main_application_window_get_type() C.ulong {
-	if gTypeLibSenbaraGtkMainApplicationWindow == 0 {
-		libsenbara_gtk_init_types()
+//export senbara_gtk_main_application_window_get_type
+func senbara_gtk_main_application_window_get_type() C.ulong {
+	if gTypeSenbaraGtkMainApplicationWindow == 0 {
+		senbara_gtk_init_types()
 	}
 
-	return C.ulong(gTypeLibSenbaraGtkMainApplicationWindow)
+	return C.ulong(gTypeSenbaraGtkMainApplicationWindow)
 }
 
-//export libsenbara_gtk_main_application_window_new
-func libsenbara_gtk_main_application_window_new() unsafe.Pointer {
-	window := newLibSenbaraGtkMainApplicationWindow()
+//export senbara_gtk_main_application_window_new
+func senbara_gtk_main_application_window_new() unsafe.Pointer {
+	window := newSenbaraGtkMainApplicationWindow()
 
 	return unsafe.Pointer(window.ApplicationWindow.Ptr)
 }
 
-//export libsenbara_gtk_init_types
-func libsenbara_gtk_init_types() {
+//export senbara_gtk_init_types
+func senbara_gtk_init_types() {
 	resource, err := gio.NewResourceFromData(glib.NewBytes(resources.ResourceContents, uint(len(resources.ResourceContents))))
 	if err != nil {
 		panic(err)
@@ -62,7 +62,7 @@ func libsenbara_gtk_init_types() {
 
 		gobject.SignalNewv(
 			"button-test-clicked",
-			gTypeLibSenbaraGtkMainApplicationWindow,
+			gTypeSenbaraGtkMainApplicationWindow,
 			gobject.GSignalRunFirstValue,
 			gobject.CclosureNew(&callbackFunc, 0, &destroyData),
 			nil,
@@ -82,7 +82,7 @@ func libsenbara_gtk_init_types() {
 		var callbackSymbol gobject.Callback = func() {
 			gobject.SignalEmit(
 				(*gobject.Object)(unsafe.Pointer(ti)),
-				gobject.SignalLookup("button-test-clicked", gTypeLibSenbaraGtkMainApplicationWindow),
+				gobject.SignalLookup("button-test-clicked", gTypeSenbaraGtkMainApplicationWindow),
 				0,
 			)
 		}
@@ -90,9 +90,9 @@ func libsenbara_gtk_init_types() {
 		typeClass.BindTemplateCallbackFull("on_button_test_clicked", &callbackSymbol)
 	}
 
-	gTypeLibSenbaraGtkMainApplicationWindow = gobject.TypeRegisterStaticSimple(
+	gTypeSenbaraGtkMainApplicationWindow = gobject.TypeRegisterStaticSimple(
 		gtk.ApplicationWindowGLibType(),
-		"LibSenbaraGtkMainApplicationWindow",
+		"SenbaraGtkMainApplicationWindow",
 		1024,
 		&classInit,
 		1024,

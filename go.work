@@ -7,5 +7,6 @@ use (
 	./senbara-forms
 	./senbara-gnome
 	./senbara-gnome-puregotk
+	./libsenbara-gtk
 	./senbara-rest
 )

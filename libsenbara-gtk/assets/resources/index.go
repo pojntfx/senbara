@@ -10,7 +10,7 @@ import (
 var ResourceContents []byte
 
 var (
-	AppPath = path.Join("/com", "pojtinger", "felicitas", "libsenbaragtk")
+	AppPath = path.Join("/com", "pojtinger", "felicitas", "senbaragtk")
 
 	ResourceWindowUIPath = path.Join(AppPath, "window.ui")
 )

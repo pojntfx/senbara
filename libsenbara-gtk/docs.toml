@@ -1,0 +1,17 @@
+[library]
+    version = "0.1.0"
+    authors = "Felicitas Pojtinger"
+    license = "AGPL-3.0"
+    website_url = "https://github.com/pojntfx/senbara"
+    browse_url = "https://github.com/pojntfx/senbara"
+    description = "Example GTK library built with Go"
+    dependencies = ["GObject-2.0", "Gtk-4.0"]
+    devhelp = true
+    search_index = true
+
+[theme]
+    show_index_summary = true
+    show_class_hierarchy = true
+
+[source-location]
+    base_url = "https://github.com/pojntfx/senbara/blob/main/libsenbara-gtk"

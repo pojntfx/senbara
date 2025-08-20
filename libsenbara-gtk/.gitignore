@@ -1,2 +1,5 @@
 libsenbara-gtk.h
 *.so
+*.typelib
+*.c
+docs

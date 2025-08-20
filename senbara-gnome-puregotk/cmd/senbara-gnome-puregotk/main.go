@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"os"
 	"unsafe"
 
 	"github.com/jwijenbergh/puregotk/v4/gio"
@@ -13,12 +13,10 @@ import (
 	"github.com/pojntfx/senbara/senbara-gnome-puregotk/assets/resources"
 )
 
+import "C"
+
 var (
 	gTypeSenbaraPureGoTKMainWindow gobject.Type
-
-	buttonTestClickedSignalID uint
-
-	currentSenbaraPureGoTKMainWindow *senbaraPureGoTKMainWindow
 )
 
 type senbaraPureGoTKMainWindow struct {
@@ -38,14 +36,49 @@ func newSenbaraPureGoTKMainWindow() *senbaraPureGoTKMainWindow {
 
 func (w *senbaraPureGoTKMainWindow) emitButtonTestClicked() {
 	obj := (*gobject.Object)(unsafe.Pointer(w.ApplicationWindow))
-	gobject.SignalEmit(obj, buttonTestClickedSignalID, 0)
+	signalID := gobject.SignalLookup("button-test-clicked", gTypeSenbaraPureGoTKMainWindow)
+	gobject.SignalEmit(obj, signalID, 0)
 }
 
-func (w *senbaraPureGoTKMainWindow) ConnectButtonTestClicked(cb func()) {
-	w.ConnectSignal("button-test-clicked", &cb)
+// C exports for GObject Introspection
+
+//export senbara_pure_go_tk_main_window_get_type
+func senbara_pure_go_tk_main_window_get_type() C.ulong {
+	if gTypeSenbaraPureGoTKMainWindow == 0 {
+		senbara_init_types()
+	}
+	return C.ulong(gTypeSenbaraPureGoTKMainWindow)
 }
 
-func init() {
+//export senbara_pure_go_tk_main_window_new
+func senbara_pure_go_tk_main_window_new() unsafe.Pointer {
+	fmt.Println("Calling constructor for widget in Go")
+	window := newSenbaraPureGoTKMainWindow()
+
+	return unsafe.Pointer(window.ApplicationWindow.Ptr)
+}
+
+// //export senbara_pure_go_tk_main_window_emit_button_test_clicked
+// func senbara_pure_go_tk_main_window_emit_button_test_clicked(window unsafe.Pointer) {
+// 	// if currentSenbaraPureGoTKMainWindow != nil {
+// 	// 	currentSenbaraPureGoTKMainWindow.emitButtonTestClicked()
+// 	// }
+// }
+
+// //export senbara_pure_go_tk_main_window_connect_button_test_clicked
+// func senbara_pure_go_tk_main_window_connect_button_test_clicked(window unsafe.Pointer, callback unsafe.Pointer) {
+// 	if currentSenbaraPureGoTKMainWindow != nil {
+// 		// Note: This is a simplified callback connection
+// 		// In a real implementation, you'd need proper callback marshaling
+// 		cb := func() {
+// 			// Call the C callback function
+// 		}
+// 		currentSenbaraPureGoTKMainWindow.ConnectButtonTestClicked(cb)
+// 	}
+// }
+
+//export senbara_init_types
+func senbara_init_types() {
 	resource, err := gio.NewResourceFromData(glib.NewBytes(resources.ResourceContents, uint(len(resources.ResourceContents))))
 	if err != nil {
 		panic(err)
@@ -58,7 +91,7 @@ func init() {
 			destroyData  gobject.ClosureNotify = func(u uintptr, c *gobject.Closure) {}
 		)
 
-		buttonTestClickedSignalID = gobject.SignalNewv(
+		gobject.SignalNewv(
 			"button-test-clicked",
 			gTypeSenbaraPureGoTKMainWindow,
 			gobject.GSignalRunFirstValue,
@@ -71,19 +104,22 @@ func init() {
 			nil,
 		)
 
+	}
+
+	var instanceInit gobject.InstanceInitFunc = func(ti *gobject.TypeInstance, tc *gobject.TypeClass) {
 		typeClass := (*gtk.WidgetClass)(unsafe.Pointer(tc))
 		typeClass.SetTemplateFromResource(resources.ResourceWindowUIPath)
 
 		var callbackSymbol gobject.Callback = func() {
 			log.Println("Callback on_button_test_clicked called")
 
-			currentSenbaraPureGoTKMainWindow.emitButtonTestClicked()
+			obj := (*gobject.Object)(unsafe.Pointer(ti))
+			signalID := gobject.SignalLookup("button-test-clicked", gTypeSenbaraPureGoTKMainWindow)
+			gobject.SignalEmit(obj, signalID, 0)
 		}
 
 		typeClass.BindTemplateCallbackFull("on_button_test_clicked", &callbackSymbol)
 	}
-
-	var instanceInit gobject.InstanceInitFunc = func(ti *gobject.TypeInstance, tc *gobject.TypeClass) {}
 
 	gTypeSenbaraPureGoTKMainWindow = gobject.TypeRegisterStaticSimple(
 		gtk.ApplicationWindowGLibType(),
@@ -97,26 +133,5 @@ func init() {
 }
 
 func main() {
-	app := gtk.NewApplication(resources.AppID, gio.GApplicationFlagsNoneValue)
-	defer app.Unref()
-
-	activate := func(g gio.Application) {
-		a := (*gtk.Application)(unsafe.Pointer(&g))
-
-		window := newSenbaraPureGoTKMainWindow()
-		currentSenbaraPureGoTKMainWindow = window
-
-		window.ConnectButtonTestClicked(func() {
-			log.Println("Signal button-test-clicked received")
-		})
-
-		window.SetApplication(a)
-		window.Present()
-	}
-
-	app.ConnectActivate(&activate)
-
-	if code := app.Run(len(os.Args), os.Args); code > 0 {
-		os.Exit(code)
-	}
+	// Required for c-shared build mode
 }
