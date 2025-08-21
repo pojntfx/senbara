@@ -20,7 +20,7 @@ class SenbaraGtkExampleApp {
     this.window = SenbaraGtk.MainApplicationWindow.new();
 
     this.window.connect("button-test-clicked", () => {
-      print("Button clicked");
+      print("Test button clicked");
     });
 
     this.window.set_application(this.app);

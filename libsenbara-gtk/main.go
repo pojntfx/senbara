@@ -25,9 +25,27 @@ func newSenbaraGtkMainApplicationWindow() *senbaraGtkMainApplicationWindow {
 	parent := (*gtk.ApplicationWindow)(unsafe.Pointer(obj))
 	parent.InitTemplate()
 
-	return &senbaraGtkMainApplicationWindow{
-		parent,
+	v := &senbaraGtkMainApplicationWindow{
+		ApplicationWindow: parent,
 	}
+
+	rawButtonTest := parent.Widget.GetTemplateChild(
+		gTypeSenbaraGtkMainApplicationWindow,
+		"button_test",
+	)
+	buttonTest := (*gtk.Button)(unsafe.Pointer(rawButtonTest))
+
+	cb := func(gtk.Button) {
+		gobject.SignalEmit(
+			obj,
+			gobject.SignalLookup("button-test-clicked", gTypeSenbaraGtkMainApplicationWindow),
+			0,
+		)
+	}
+
+	buttonTest.ConnectClicked(&cb)
+
+	return v
 }
 
 //export senbara_gtk_main_application_window_get_type
@@ -79,15 +97,7 @@ func senbara_gtk_init_types() {
 		typeClass := (*gtk.WidgetClass)(unsafe.Pointer(tc))
 		typeClass.SetTemplateFromResource(resources.ResourceWindowUIPath)
 
-		var callbackSymbol gobject.Callback = func() {
-			gobject.SignalEmit(
-				(*gobject.Object)(unsafe.Pointer(ti)),
-				gobject.SignalLookup("button-test-clicked", gTypeSenbaraGtkMainApplicationWindow),
-				0,
-			)
-		}
-
-		typeClass.BindTemplateCallbackFull("on_button_test_clicked", &callbackSymbol)
+		typeClass.BindTemplateChildFull("button_test", false, 0)
 	}
 
 	gTypeSenbaraGtkMainApplicationWindow = gobject.TypeRegisterStaticSimple(
