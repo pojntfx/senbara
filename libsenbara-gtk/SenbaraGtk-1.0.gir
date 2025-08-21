@@ -10,7 +10,6 @@ and/or use gtk-doc annotations.  -->
   <include name="GObject" version="2.0"/>
   <include name="Gtk" version="4.0"/>
   <package name="gtk4"/>
-  <c:include name="main.h"/>
   <doc:format name="unknown"/>
   <namespace name="SenbaraGtk"
              version="1.0"
@@ -22,9 +21,7 @@ and/or use gtk-doc annotations.  -->
            c:type="SenbaraGtkMainApplicationWindow"
            parent="Gtk.ApplicationWindow"
            glib:type-name="SenbaraGtkMainApplicationWindow"
-           glib:get-type="senbara_gtk_main_application_window_get_type"
-           glib:type-struct="MainApplicationWindowClass">
-      <source-position filename="main.h" line="20"/>
+           glib:get-type="senbara_gtk_main_application_window_get_type">
       <implements name="Gio.ActionGroup"/>
       <implements name="Gio.ActionMap"/>
       <implements name="Gtk.Accessible"/>
@@ -37,40 +34,53 @@ and/or use gtk-doc annotations.  -->
                    c:identifier="senbara_gtk_main_application_window_new">
         <doc xml:space="preserve"
              filename="main.h"
-             line="31">Creates a new SenbaraGtkMainApplicationWindow.</doc>
-        <source-position filename="main.h" line="38"/>
+             line="22">Creates a new SenbaraGtkMainApplicationWindow.</doc>
+        <source-position filename="main.h" line="29"/>
         <return-value transfer-ownership="full">
           <doc xml:space="preserve"
                filename="main.h"
-               line="36">A new SenbaraGtkMainApplicationWindow widget</doc>
+               line="27">A new SenbaraGtkMainApplicationWindow widget</doc>
           <type name="MainApplicationWindow"
                 c:type="SenbaraGtkMainApplicationWindow*"/>
         </return-value>
       </constructor>
-      <field name="parent_instance">
-        <type name="Gtk.ApplicationWindow" c:type="GtkApplicationWindow"/>
-      </field>
+      <method name="set_test_button_sensitive"
+              c:identifier="senbara_gtk_main_application_window_set_test_button_sensitive">
+        <doc xml:space="preserve"
+             filename="main.h"
+             line="31">Sets the sensitivity of the test button in the window.</doc>
+        <source-position filename="main.h" line="38"/>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <instance-parameter name="window" transfer-ownership="none">
+            <doc xml:space="preserve"
+                 filename="main.h"
+                 line="33">a SenbaraGtkMainApplicationWindow</doc>
+            <type name="MainApplicationWindow"
+                  c:type="SenbaraGtkMainApplicationWindow*"/>
+          </instance-parameter>
+          <parameter name="sensitive" transfer-ownership="none">
+            <doc xml:space="preserve"
+                 filename="main.h"
+                 line="34">whether the test button should be sensitive</doc>
+            <type name="gboolean" c:type="gboolean"/>
+          </parameter>
+        </parameters>
+      </method>
       <glib:signal name="button-test-clicked" when="first">
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
       </glib:signal>
     </class>
-    <record name="MainApplicationWindowClass"
-            c:type="SenbaraGtkMainApplicationWindowClass"
-            glib:is-gtype-struct-for="MainApplicationWindow">
-      <source-position filename="main.h" line="20"/>
-      <field name="parent_class">
-        <type name="Gtk.ApplicationWindowClass"
-              c:type="GtkApplicationWindowClass"/>
-      </field>
-    </record>
     <function name="init_types" c:identifier="senbara_gtk_init_types">
       <doc xml:space="preserve"
            filename="main.h"
-           line="40">Initializes the senbara-gtk type system.
+           line="41">Initializes the senbara-gtk type system.
 Call this before using any senbara-gtk widgets.</doc>
-      <source-position filename="main.h" line="46"/>
+      <source-position filename="main.h" line="47"/>
       <return-value transfer-ownership="none">
         <type name="none" c:type="void"/>
       </return-value>

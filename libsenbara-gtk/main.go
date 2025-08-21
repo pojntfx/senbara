@@ -15,39 +15,6 @@ import "C"
 
 var gTypeSenbaraGtkMainApplicationWindow gobject.Type
 
-type senbaraGtkMainApplicationWindow struct {
-	*gtk.ApplicationWindow
-}
-
-func newSenbaraGtkMainApplicationWindow() *senbaraGtkMainApplicationWindow {
-	obj := gobject.NewObject(gTypeSenbaraGtkMainApplicationWindow, "application")
-
-	parent := (*gtk.ApplicationWindow)(unsafe.Pointer(obj))
-	parent.InitTemplate()
-
-	v := &senbaraGtkMainApplicationWindow{
-		ApplicationWindow: parent,
-	}
-
-	rawButtonTest := parent.Widget.GetTemplateChild(
-		gTypeSenbaraGtkMainApplicationWindow,
-		"button_test",
-	)
-	buttonTest := (*gtk.Button)(unsafe.Pointer(rawButtonTest))
-
-	cb := func(gtk.Button) {
-		gobject.SignalEmit(
-			obj,
-			gobject.SignalLookup("button-test-clicked", gTypeSenbaraGtkMainApplicationWindow),
-			0,
-		)
-	}
-
-	buttonTest.ConnectClicked(&cb)
-
-	return v
-}
-
 //export senbara_gtk_main_application_window_get_type
 func senbara_gtk_main_application_window_get_type() C.ulong {
 	if gTypeSenbaraGtkMainApplicationWindow == 0 {
@@ -57,11 +24,10 @@ func senbara_gtk_main_application_window_get_type() C.ulong {
 	return C.ulong(gTypeSenbaraGtkMainApplicationWindow)
 }
 
-//export senbara_gtk_main_application_window_new
-func senbara_gtk_main_application_window_new() unsafe.Pointer {
-	window := newSenbaraGtkMainApplicationWindow()
+type senbaraGtkMainApplicationWindow struct {
+	*gtk.ApplicationWindow
 
-	return unsafe.Pointer(window.ApplicationWindow.Ptr)
+	buttonTest *gtk.Button
 }
 
 //export senbara_gtk_init_types
@@ -107,8 +73,68 @@ func senbara_gtk_init_types() {
 		&classInit,
 		1024,
 		&instanceInit,
-		gobject.TypeNoneVal,
+		0,
 	)
+}
+
+func newSenbaraGtkMainApplicationWindow() *senbaraGtkMainApplicationWindow {
+	obj := gobject.NewObject(gTypeSenbaraGtkMainApplicationWindow, "application")
+
+	parent := (*gtk.ApplicationWindow)(unsafe.Pointer(obj))
+	parent.InitTemplate()
+
+	rawButtonTest := parent.Widget.GetTemplateChild(
+		gTypeSenbaraGtkMainApplicationWindow,
+		"button_test",
+	)
+	buttonTest := (*gtk.Button)(unsafe.Pointer(rawButtonTest))
+
+	w := &senbaraGtkMainApplicationWindow{
+		ApplicationWindow: parent,
+
+		buttonTest: buttonTest,
+	}
+
+	cb := func(gtk.Button) {
+		gobject.SignalEmit(
+			obj,
+			gobject.SignalLookup("button-test-clicked", gTypeSenbaraGtkMainApplicationWindow),
+			0,
+		)
+	}
+
+	buttonTest.ConnectClicked(&cb)
+
+	var cleanupCallback glib.DestroyNotify = func(data uintptr) {
+		obj.Unref()
+	}
+	obj.SetDataFull("go_instance", uintptr(unsafe.Pointer(w)), &cleanupCallback)
+
+	return w
+}
+
+//export senbara_gtk_main_application_window_new
+func senbara_gtk_main_application_window_new() unsafe.Pointer {
+	window := newSenbaraGtkMainApplicationWindow()
+
+	window.Object.Ref()
+
+	return unsafe.Pointer(window.Object.Ptr)
+}
+
+func (w *senbaraGtkMainApplicationWindow) setTestButtonSensitive(sensitive bool) {
+	w.buttonTest.SetSensitive(sensitive)
+}
+
+//export senbara_gtk_main_application_window_set_test_button_sensitive
+func senbara_gtk_main_application_window_set_test_button_sensitive(window unsafe.Pointer, sensitive bool) {
+	obj := gobject.ObjectNewFromInternalPtr(uintptr(window))
+
+	goInstance := obj.GetData("go_instance")
+
+	v := (*senbaraGtkMainApplicationWindow)(unsafe.Pointer(goInstance))
+
+	v.setTestButtonSensitive(sensitive)
 }
 
 func main() {}

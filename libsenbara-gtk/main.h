@@ -1,23 +1,14 @@
 #ifndef SENBARA_GTK_H
 #define SENBARA_GTK_H
 
-#include <glib-object.h>
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define SENBARA_GTK_MAIN_APPLICATION_WINDOW (senbara_gtk_main_application_window_get_type())
+#define SENBARA_GTK_MAIN_APPLICATION_WINDOW                                    \
+  (senbara_gtk_main_application_window_get_type())
 
 typedef struct _SenbaraGtkMainApplicationWindow SenbaraGtkMainApplicationWindow;
-typedef struct _SenbaraGtkMainApplicationWindowClass SenbaraGtkMainApplicationWindowClass;
-
-struct _SenbaraGtkMainApplicationWindow {
-    GtkApplicationWindow parent_instance;
-};
-
-struct _SenbaraGtkMainApplicationWindowClass {
-    GtkApplicationWindowClass parent_class;
-};
 
 /**
  * senbara_gtk_main_application_window_get_type:
@@ -35,7 +26,17 @@ GType senbara_gtk_main_application_window_get_type(void);
  *
  * Returns: (transfer full): A new SenbaraGtkMainApplicationWindow widget
  */
-SenbaraGtkMainApplicationWindow* senbara_gtk_main_application_window_new(void);
+SenbaraGtkMainApplicationWindow *senbara_gtk_main_application_window_new(void);
+
+/**
+ * senbara_gtk_main_application_window_set_test_button_sensitive:
+ * @window: a SenbaraGtkMainApplicationWindow
+ * @sensitive: whether the test button should be sensitive
+ *
+ * Sets the sensitivity of the test button in the window.
+ */
+void senbara_gtk_main_application_window_set_test_button_sensitive(
+    SenbaraGtkMainApplicationWindow *window, gboolean sensitive);
 
 /**
  * senbara_gtk_init_types:

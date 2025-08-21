@@ -19,7 +19,6 @@ SenbaraGtk-1.0.gir: libsenbara-gtk.so
 		--warn-all \
 		--identifier-prefix=SenbaraGtk \
 		--symbol-prefix=senbara_gtk \
-		--c-include="main.h" \
 		main.h
 
 SenbaraGtk-1.0.typelib: SenbaraGtk-1.0.gir
