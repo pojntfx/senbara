@@ -1,36 +1,46 @@
 #!/usr/bin/env -S gjs -m
 
-import Gtk from "gi://Gtk?version=4.0";
+import GObject from "gi://GObject";
 import Gio from "gi://Gio";
+import Gtk from "gi://Gtk?version=4.0";
 import SenbaraGtk from "gi://SenbaraGtk?version=1.0";
+import system from "system";
 
-class SenbaraGtkExampleApp {
-  constructor() {
-    this.app = new Gtk.Application({
-      application_id: "com.pojtinger.felicitas.senbaragtk.Example",
-      flags: Gio.ApplicationFlags.FLAGS_NONE,
-    });
+SenbaraGtk.init_types();
 
-    this.app.connect("activate", this._onActivate.bind(this));
+const ExampleApplication = GObject.registerClass(
+  {
+    GTypeName: "ExampleApplication",
+  },
+  class ExampleApplication extends Gtk.Application {
+    constructor() {
+      super({
+        application_id: "com.pojtinger.felicitas.senbaragtk.Example",
+        flags: Gio.ApplicationFlags.DEFAULT_FLAGS,
+      });
+    }
+
+    #window = null;
+
+    vfunc_activate() {
+      this.#window = SenbaraGtk.MainApplicationWindow.new();
+      this.#window.set_application(this);
+
+      this.#window.connect("button-test-clicked", () => {
+        console.log("Test button clicked");
+
+        this.#window.set_test_button_sensitive(false);
+        console.log("Test button disabled");
+
+        setTimeout(() => {
+          this.#window.set_test_button_sensitive(true);
+          console.log("Test button re-enabled");
+        }, 3000);
+      });
+
+      this.#window.present();
+    }
   }
+);
 
-  _onActivate() {
-    SenbaraGtk.init_types();
-
-    this.window = SenbaraGtk.MainApplicationWindow.new();
-
-    this.window.connect("button-test-clicked", () => {
-      print("Test button clicked");
-    });
-
-    this.window.set_application(this.app);
-    this.window.present();
-  }
-
-  run(argv) {
-    return this.app.run(argv);
-  }
-}
-
-const app = new SenbaraGtkExampleApp();
-app.run([]);
+new ExampleApplication().run([system.programInvocationName, ...ARGV]);
