@@ -3,6 +3,7 @@ package main
 import (
 	"unsafe"
 
+	"github.com/jwijenbergh/puregotk/v4/adw"
 	"github.com/jwijenbergh/puregotk/v4/gio"
 	"github.com/jwijenbergh/puregotk/v4/glib"
 	"github.com/jwijenbergh/puregotk/v4/gobject"
@@ -25,7 +26,7 @@ func senbara_gtk_main_application_window_get_type() C.ulong {
 }
 
 type senbaraGtkMainApplicationWindow struct {
-	*gtk.ApplicationWindow
+	*adw.ApplicationWindow
 
 	buttonTest *gtk.Button
 }
@@ -67,7 +68,7 @@ func senbara_gtk_init_types() {
 	}
 
 	gTypeSenbaraGtkMainApplicationWindow = gobject.TypeRegisterStaticSimple(
-		gtk.ApplicationWindowGLibType(),
+		adw.ApplicationWindowGLibType(),
 		"SenbaraGtkMainApplicationWindow",
 		1024,
 		&classInit,
@@ -80,7 +81,7 @@ func senbara_gtk_init_types() {
 func newSenbaraGtkMainApplicationWindow() *senbaraGtkMainApplicationWindow {
 	obj := gobject.NewObject(gTypeSenbaraGtkMainApplicationWindow, "application")
 
-	parent := (*gtk.ApplicationWindow)(unsafe.Pointer(obj))
+	parent := (*adw.ApplicationWindow)(unsafe.Pointer(obj))
 	parent.InitTemplate()
 
 	rawButtonTest := parent.Widget.GetTemplateChild(

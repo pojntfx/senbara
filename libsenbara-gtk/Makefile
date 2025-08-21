@@ -12,10 +12,12 @@ SenbaraGtk-1.0.gir: libsenbara-gtk.so
 		--nsversion=1.0 \
 		--include=GObject-2.0 \
 		--include=Gtk-4.0 \
+		--include=Adw-1 \
 		--library=senbara-gtk \
 		--library-path=. \
 		--output=$@ \
 		--pkg=gtk4 \
+		--pkg=libadwaita-1 \
 		--warn-all \
 		--identifier-prefix=SenbaraGtk \
 		--symbol-prefix=senbara_gtk \
@@ -24,7 +26,7 @@ SenbaraGtk-1.0.gir: libsenbara-gtk.so
 SenbaraGtk-1.0.typelib: SenbaraGtk-1.0.gir
 	g-ir-compiler $< -o $@
 
-docs:
+docs: SenbaraGtk-1.0.gir
 	gi-docgen generate --config docs.toml --output-dir=docs --no-namespace-dir SenbaraGtk-1.0.gir
 
 example.js:

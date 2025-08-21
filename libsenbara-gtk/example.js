@@ -1,8 +1,8 @@
 #!/usr/bin/env -S gjs -m
 
+import Adw from "gi://Adw?version=1";
 import GObject from "gi://GObject";
 import Gio from "gi://Gio";
-import Gtk from "gi://Gtk?version=4.0";
 import SenbaraGtk from "gi://SenbaraGtk?version=1.0";
 import system from "system";
 
@@ -12,7 +12,7 @@ const ExampleApplication = GObject.registerClass(
   {
     GTypeName: "ExampleApplication",
   },
-  class ExampleApplication extends Gtk.Application {
+  class ExampleApplication extends Adw.Application {
     constructor() {
       super({
         application_id: "com.pojtinger.felicitas.senbaragtk.Example",

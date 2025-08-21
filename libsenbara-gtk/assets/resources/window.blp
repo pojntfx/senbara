@@ -1,9 +1,25 @@
 using Gtk 4.0;
+using Adw 1;
 
-template $SenbaraGtkMainApplicationWindow: ApplicationWindow {
+template $SenbaraGtkMainApplicationWindow: Adw.ApplicationWindow {
     title: "senbara-gtk Main Application Window";
 
-    Button button_test {
-        label: _("Click me");
-    }
+    content: Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+            title-widget: Adw.WindowTitle {
+                title: "Senbara GTK";
+            };
+        }
+
+        content: Button button_test {
+            label: _("Click me");
+            halign: center;
+            valign: center;
+            margin-top: 12;
+            margin-bottom: 12;
+            margin-start: 12;
+            margin-end: 12;
+        };
+    };
 }
