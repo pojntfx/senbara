@@ -2,11 +2,10 @@ go 1.24.0
 
 use (
 	.
+	./libsenbara-gtk
 	./senbara-cli
 	./senbara-common
 	./senbara-forms
 	./senbara-gnome
-	./senbara-gnome-puregotk
-	./libsenbara-gtk
 	./senbara-rest
 )

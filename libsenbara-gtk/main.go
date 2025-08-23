@@ -3,6 +3,7 @@ package main
 import (
 	"unsafe"
 
+	"github.com/jwijenbergh/purego"
 	"github.com/jwijenbergh/puregotk/v4/adw"
 	"github.com/jwijenbergh/puregotk/v4/gio"
 	"github.com/jwijenbergh/puregotk/v4/glib"
@@ -14,7 +15,15 @@ import (
 
 import "C"
 
-var gTypeSenbaraGtkMainApplicationWindow gobject.Type
+var (
+	gTypeSenbaraGtkMainApplicationWindow gobject.Type
+)
+
+const (
+	dataKeyGoInstance = "go_instance"
+
+	propertyIdTestButtonSensitive = 1
+)
 
 //export senbara_gtk_main_application_window_get_type
 func senbara_gtk_main_application_window_get_type() C.ulong {
@@ -28,7 +37,8 @@ func senbara_gtk_main_application_window_get_type() C.ulong {
 type senbaraGtkMainApplicationWindow struct {
 	*adw.ApplicationWindow
 
-	buttonTest *gtk.Button
+	buttonTest   *gtk.Button
+	toastOverlay *adw.ToastOverlay
 }
 
 //export senbara_gtk_init_types
@@ -58,6 +68,40 @@ func senbara_gtk_init_types() {
 			nil,
 		)
 
+		objClass := (*gobject.ObjectClass)(unsafe.Pointer(tc))
+
+		objClass.SetProperty = purego.NewCallback(func(obj uintptr, propId uint, value uintptr, pspec uintptr) {
+			switch propId {
+			case propertyIdTestButtonSensitive:
+				var (
+					v = (*gobject.Value)(unsafe.Pointer(value))
+					w = (*senbaraGtkMainApplicationWindow)(unsafe.Pointer(gobject.ObjectNewFromInternalPtr(obj).GetData(dataKeyGoInstance)))
+				)
+
+				w.buttonTest.SetSensitive(v.GetBoolean())
+			}
+		})
+		objClass.GetProperty = purego.NewCallback(func(obj uintptr, propId uint, value uintptr, pspec uintptr) {
+			switch propId {
+			case propertyIdTestButtonSensitive:
+				var (
+					v = (*gobject.Value)(unsafe.Pointer(value))
+					w = (*senbaraGtkMainApplicationWindow)(unsafe.Pointer(gobject.ObjectNewFromInternalPtr(obj).GetData(dataKeyGoInstance)))
+				)
+
+				v.SetBoolean(w.buttonTest.IsSensitive())
+			}
+		})
+
+		pspec := gobject.NewParamSpecBoolean(
+			"test-button-sensitive",
+			"Test Button Sensitive",
+			"Whether the test button is sensitive",
+			true,
+			gobject.GParamReadwriteValue,
+		)
+
+		objClass.InstallProperty(propertyIdTestButtonSensitive, pspec)
 	}
 
 	var instanceInit gobject.InstanceInitFunc = func(ti *gobject.TypeInstance, tc *gobject.TypeClass) {
@@ -65,6 +109,7 @@ func senbara_gtk_init_types() {
 		typeClass.SetTemplateFromResource(resources.ResourceWindowUIPath)
 
 		typeClass.BindTemplateChildFull("button_test", false, 0)
+		typeClass.BindTemplateChildFull("toast_overlay", false, 0)
 	}
 
 	gTypeSenbaraGtkMainApplicationWindow = gobject.TypeRegisterStaticSimple(
@@ -90,11 +135,28 @@ func newSenbaraGtkMainApplicationWindow() *senbaraGtkMainApplicationWindow {
 	)
 	buttonTest := (*gtk.Button)(unsafe.Pointer(rawButtonTest))
 
+	rawToastOverlay := parent.Widget.GetTemplateChild(
+		gTypeSenbaraGtkMainApplicationWindow,
+		"toast_overlay",
+	)
+	toastOverlay := (*adw.ToastOverlay)(unsafe.Pointer(rawToastOverlay))
+
 	w := &senbaraGtkMainApplicationWindow{
 		ApplicationWindow: parent,
-
-		buttonTest: buttonTest,
+		buttonTest:        buttonTest,
+		toastOverlay:      toastOverlay,
 	}
+
+	var cleanupCallback glib.DestroyNotify = func(data uintptr) {
+		obj.Unref()
+	}
+	obj.SetDataFull(dataKeyGoInstance, uintptr(unsafe.Pointer(w)), &cleanupCallback)
+
+	// TODO: Fix this; while it does read the property default value correctly, we get `g_object_ref_sink: assertion 'G_IS_OBJECT (object)' failed`
+	// typeClass := gobject.TypeClassRef(gTypeSenbaraGtkMainApplicationWindow)
+	// objClass := (*gobject.ObjectClass)(unsafe.Pointer(typeClass))
+	// pspec := objClass.FindProperty("test-button-sensitive").Ref()
+	// buttonTest.SetSensitive(pspec.GetDefaultValue().GetBoolean())
 
 	cb := func(gtk.Button) {
 		gobject.SignalEmit(
@@ -105,11 +167,6 @@ func newSenbaraGtkMainApplicationWindow() *senbaraGtkMainApplicationWindow {
 	}
 
 	buttonTest.ConnectClicked(&cb)
-
-	var cleanupCallback glib.DestroyNotify = func(data uintptr) {
-		obj.Unref()
-	}
-	obj.SetDataFull("go_instance", uintptr(unsafe.Pointer(w)), &cleanupCallback)
 
 	return w
 }
@@ -123,19 +180,15 @@ func senbara_gtk_main_application_window_new() unsafe.Pointer {
 	return unsafe.Pointer(window.Object.Ptr)
 }
 
-func (w *senbaraGtkMainApplicationWindow) setTestButtonSensitive(sensitive bool) {
-	w.buttonTest.SetSensitive(sensitive)
+func (w *senbaraGtkMainApplicationWindow) showToast(message string) {
+	w.toastOverlay.AddToast(adw.NewToast(message))
 }
 
-//export senbara_gtk_main_application_window_set_test_button_sensitive
-func senbara_gtk_main_application_window_set_test_button_sensitive(window unsafe.Pointer, sensitive bool) {
-	obj := gobject.ObjectNewFromInternalPtr(uintptr(window))
+//export senbara_gtk_main_application_window_show_toast
+func senbara_gtk_main_application_window_show_toast(window unsafe.Pointer, message *C.char) {
+	w := (*senbaraGtkMainApplicationWindow)(unsafe.Pointer(gobject.ObjectNewFromInternalPtr(uintptr(window)).GetData(dataKeyGoInstance)))
 
-	goInstance := obj.GetData("go_instance")
-
-	v := (*senbaraGtkMainApplicationWindow)(unsafe.Pointer(goInstance))
-
-	v.setTestButtonSensitive(sensitive)
+	w.showToast(C.GoString(message))
 }
 
 func main() {}

@@ -29,14 +29,14 @@ GType senbara_gtk_main_application_window_get_type(void);
 SenbaraGtkMainApplicationWindow *senbara_gtk_main_application_window_new(void);
 
 /**
- * senbara_gtk_main_application_window_set_test_button_sensitive:
+ * senbara_gtk_main_application_window_show_toast:
  * @window: a SenbaraGtkMainApplicationWindow
- * @sensitive: whether the test button should be sensitive
+ * @message: the message to display in the toast
  *
- * Sets the sensitivity of the test button in the window.
+ * Shows a toast notification with the given message inside the window.
  */
-void senbara_gtk_main_application_window_set_test_button_sensitive(
-    SenbaraGtkMainApplicationWindow *window, gboolean sensitive);
+void senbara_gtk_main_application_window_show_toast(
+    SenbaraGtkMainApplicationWindow *window, const char *message);
 
 /**
  * senbara_gtk_init_types:

@@ -46,11 +46,11 @@ and/or use gtk-doc annotations.  -->
                 c:type="SenbaraGtkMainApplicationWindow*"/>
         </return-value>
       </constructor>
-      <method name="set_test_button_sensitive"
-              c:identifier="senbara_gtk_main_application_window_set_test_button_sensitive">
+      <method name="show_toast"
+              c:identifier="senbara_gtk_main_application_window_show_toast">
         <doc xml:space="preserve"
              filename="main.h"
-             line="31">Sets the sensitivity of the test button in the window.</doc>
+             line="31">Shows a toast notification with the given message inside the window.</doc>
         <source-position filename="main.h" line="38"/>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
@@ -63,14 +63,20 @@ and/or use gtk-doc annotations.  -->
             <type name="MainApplicationWindow"
                   c:type="SenbaraGtkMainApplicationWindow*"/>
           </instance-parameter>
-          <parameter name="sensitive" transfer-ownership="none">
+          <parameter name="message" transfer-ownership="none">
             <doc xml:space="preserve"
                  filename="main.h"
-                 line="34">whether the test button should be sensitive</doc>
-            <type name="gboolean" c:type="gboolean"/>
+                 line="34">the message to display in the toast</doc>
+            <type name="utf8" c:type="const char*"/>
           </parameter>
         </parameters>
       </method>
+      <property name="test-button-sensitive"
+                writable="1"
+                transfer-ownership="none"
+                default-value="FALSE">
+        <type name="gboolean" c:type="gboolean"/>
+      </property>
       <glib:signal name="button-test-clicked" when="first">
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>

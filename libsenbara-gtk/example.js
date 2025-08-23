@@ -29,12 +29,12 @@ const ExampleApplication = GObject.registerClass(
       this.#window.connect("button-test-clicked", () => {
         console.log("Test button clicked");
 
-        this.#window.set_test_button_sensitive(false);
-        console.log("Test button disabled");
+        this.#window.show_toast("Button was clicked!");
+        this.#window.test_button_sensitive = false;
 
         setTimeout(() => {
-          this.#window.set_test_button_sensitive(true);
-          console.log("Test button re-enabled");
+          this.#window.show_toast("Button re-enabled after 3 seconds");
+          this.#window.test_button_sensitive = true;
         }, 3000);
       });
 
