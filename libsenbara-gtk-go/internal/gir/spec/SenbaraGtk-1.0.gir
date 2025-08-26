@@ -74,7 +74,7 @@ and/or use gtk-doc annotations.  -->
       <property name="test-button-sensitive"
                 writable="1"
                 transfer-ownership="none"
-                default-value="FALSE">
+                default-value="TRUE">
         <type name="gboolean" c:type="gboolean"/>
       </property>
       <glib:signal name="button-test-clicked" when="first">

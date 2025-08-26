@@ -12,7 +12,7 @@ GOPATH="$tmp" goimports --srcdir . -w v4 || { rm -r "$tmp"; exit 1; }
 rm -r "$tmp"
 
 echo "formatting files..."
-go fmt "github.com/pojntfx/senbara/libsenbara-gtk-go/v4/..."
+go fmt "./v4/..."
 
 echo "running a second pass for goimports..."
 goimports -w v4
