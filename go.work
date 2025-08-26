@@ -3,6 +3,7 @@ go 1.24.0
 use (
 	.
 	./libsenbara-gtk
+	./libsenbara-gtk-go
 	./senbara-cli
 	./senbara-common
 	./senbara-forms
