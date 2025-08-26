@@ -5,6 +5,11 @@
 
 G_BEGIN_DECLS
 
+/**
+ * SenbaraGtkMainApplicationWindow:
+ *
+ * Example application window with a test button and toast notifications.
+ */
 #define SENBARA_GTK_MAIN_APPLICATION_WINDOW                                    \
   (senbara_gtk_main_application_window_get_type())
 

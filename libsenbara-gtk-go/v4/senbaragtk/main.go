@@ -26,6 +26,7 @@ func InitTypes() {
 
 }
 
+// Example application window with a test button and toast notifications.
 type MainApplicationWindow struct {
 	adw.ApplicationWindow
 }
