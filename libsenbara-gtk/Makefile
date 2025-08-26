@@ -1,5 +1,8 @@
 .PHONY: all libsenbara-gtk.so SenbaraGtk-1.0.gir SenbaraGtk-1.0.typelib docs example.js
 
+PREFIX ?= /usr
+DESTDIR ?=
+
 all: libsenbara-gtk.so SenbaraGtk-1.0.typelib docs
 
 libsenbara-gtk.so:
@@ -31,3 +34,13 @@ docs: SenbaraGtk-1.0.gir
 
 example.js:
 	LD_LIBRARY_PATH="${PWD}:${LD_LIBRARY_PATH}" GI_TYPELIB_PATH="${PWD}:${GI_TYPELIB_PATH}" ./example.js
+
+install:
+	install -D -m 755 libsenbara-gtk.so $(DESTDIR)$(PREFIX)/lib64/libsenbara-gtk.so
+	install -D -m 644 SenbaraGtk-1.0.typelib $(DESTDIR)$(PREFIX)/lib64/girepository-1.0/SenbaraGtk-1.0.typelib
+	install -D -m 644 SenbaraGtk-1.0.gir $(DESTDIR)$(PREFIX)/share/gir-1.0/SenbaraGtk-1.0.gir
+
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/lib64/libsenbara-gtk.so
+	rm -f $(DESTDIR)$(PREFIX)/lib64/girepository-1.0/SenbaraGtk-1.0.typelib
+	rm -f $(DESTDIR)$(PREFIX)/share/gir-1.0/SenbaraGtk-1.0.gir

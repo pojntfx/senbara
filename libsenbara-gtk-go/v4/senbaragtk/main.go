@@ -667,6 +667,10 @@ func (x *MainApplicationWindow) SetFocus(FocusVar *gtk.Widget) {
 }
 
 func init() {
+
+	core.SetPackageName("SENBARAGTK", "gtk4")
+
+	core.SetSharedLibrary("SENBARAGTK", "libsenbara-gtk.so")
 	lib, err := purego.Dlopen(core.GetPath("SENBARAGTK"), purego.RTLD_NOW|purego.RTLD_GLOBAL)
 	if err != nil {
 		panic(err)
