@@ -39,8 +39,12 @@ install:
 	install -D -m 755 libsenbara-gtk.so $(DESTDIR)$(PREFIX)/lib64/libsenbara-gtk.so
 	install -D -m 644 SenbaraGtk-1.0.typelib $(DESTDIR)$(PREFIX)/lib64/girepository-1.0/SenbaraGtk-1.0.typelib
 	install -D -m 644 SenbaraGtk-1.0.gir $(DESTDIR)$(PREFIX)/share/gir-1.0/SenbaraGtk-1.0.gir
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/libsenbara-gtk/
+	cp docs/* $(DESTDIR)$(PREFIX)/share/doc/libsenbara-gtk/
+	mv $(DESTDIR)$(PREFIX)/share/doc/libsenbara-gtk/docs.devhelp2 $(DESTDIR)$(PREFIX)/share/doc/libsenbara-gtk/libsenbara-gtk.devhelp2
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/lib64/libsenbara-gtk.so
 	rm -f $(DESTDIR)$(PREFIX)/lib64/girepository-1.0/SenbaraGtk-1.0.typelib
 	rm -f $(DESTDIR)$(PREFIX)/share/gir-1.0/SenbaraGtk-1.0.gir
+	rm -rf $(DESTDIR)$(PREFIX)/share/doc/libsenbara-gtk
