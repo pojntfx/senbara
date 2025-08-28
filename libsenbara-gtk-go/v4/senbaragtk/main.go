@@ -16,16 +16,6 @@ import (
 	"github.com/jwijenbergh/puregotk/v4/gtk"
 )
 
-var xInitTypes func()
-
-// Initializes the senbara-gtk type system.
-// Call this before using any senbara-gtk widgets.
-func InitTypes() {
-
-	xInitTypes()
-
-}
-
 // Example application window with a test button and toast notifications.
 type MainApplicationWindow struct {
 	adw.ApplicationWindow
@@ -40,22 +30,6 @@ func MainApplicationWindowGLibType() types.GType {
 func MainApplicationWindowNewFromInternalPtr(ptr uintptr) *MainApplicationWindow {
 	cls := &MainApplicationWindow{}
 	cls.Ptr = ptr
-	return cls
-}
-
-var xNewMainApplicationWindow func() uintptr
-
-// Creates a new SenbaraGtkMainApplicationWindow.
-func NewMainApplicationWindow() *MainApplicationWindow {
-	var cls *MainApplicationWindow
-
-	cret := xNewMainApplicationWindow()
-
-	if cret == 0 {
-		return nil
-	}
-	cls = &MainApplicationWindow{}
-	cls.Ptr = cret
 	return cls
 }
 
@@ -676,11 +650,7 @@ func init() {
 		panic(err)
 	}
 
-	core.PuregoSafeRegister(&xInitTypes, lib, "senbara_gtk_init_types")
-
 	core.PuregoSafeRegister(&xMainApplicationWindowGLibType, lib, "senbara_gtk_main_application_window_get_type")
-
-	core.PuregoSafeRegister(&xNewMainApplicationWindow, lib, "senbara_gtk_main_application_window_new")
 
 	core.PuregoSafeRegister(&xMainApplicationWindowShowToast, lib, "senbara_gtk_main_application_window_show_toast")
 

@@ -16,8 +16,6 @@ import (
 )
 
 func init() {
-	senbaragtk.InitTypes()
-
 	resource, err := gio.NewResourceFromData(glib.NewBytes(resources.ResourceContents, uint(len(resources.ResourceContents))))
 	if err != nil {
 		panic(err)

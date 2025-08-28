@@ -35,26 +35,12 @@ and/or use gtk-doc annotations.  -->
       <implements name="Gtk.Native"/>
       <implements name="Gtk.Root"/>
       <implements name="Gtk.ShortcutManager"/>
-      <constructor name="new"
-                   c:identifier="senbara_gtk_main_application_window_new">
-        <doc xml:space="preserve"
-             filename="main.h"
-             line="27">Creates a new SenbaraGtkMainApplicationWindow.</doc>
-        <source-position filename="main.h" line="34"/>
-        <return-value transfer-ownership="full">
-          <doc xml:space="preserve"
-               filename="main.h"
-               line="32">A new SenbaraGtkMainApplicationWindow widget</doc>
-          <type name="MainApplicationWindow"
-                c:type="SenbaraGtkMainApplicationWindow*"/>
-        </return-value>
-      </constructor>
       <method name="show_toast"
               c:identifier="senbara_gtk_main_application_window_show_toast">
         <doc xml:space="preserve"
              filename="main.h"
-             line="36">Shows a toast notification with the given message inside the window.</doc>
-        <source-position filename="main.h" line="43"/>
+             line="27">Shows a toast notification with the given message inside the window.</doc>
+        <source-position filename="main.h" line="34"/>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -62,14 +48,14 @@ and/or use gtk-doc annotations.  -->
           <instance-parameter name="window" transfer-ownership="none">
             <doc xml:space="preserve"
                  filename="main.h"
-                 line="38">a SenbaraGtkMainApplicationWindow</doc>
+                 line="29">a SenbaraGtkMainApplicationWindow</doc>
             <type name="MainApplicationWindow"
                   c:type="SenbaraGtkMainApplicationWindow*"/>
           </instance-parameter>
           <parameter name="message" transfer-ownership="none">
             <doc xml:space="preserve"
                  filename="main.h"
-                 line="39">the message to display in the toast</doc>
+                 line="30">the message to display in the toast</doc>
             <type name="utf8" c:type="const char*"/>
           </parameter>
         </parameters>
@@ -86,15 +72,5 @@ and/or use gtk-doc annotations.  -->
         </return-value>
       </glib:signal>
     </class>
-    <function name="init_types" c:identifier="senbara_gtk_init_types">
-      <doc xml:space="preserve"
-           filename="main.h"
-           line="46">Initializes the senbara-gtk type system.
-Call this before using any senbara-gtk widgets.</doc>
-      <source-position filename="main.h" line="52"/>
-      <return-value transfer-ownership="none">
-        <type name="none" c:type="void"/>
-      </return-value>
-    </function>
   </namespace>
 </repository>

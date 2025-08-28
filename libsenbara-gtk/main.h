@@ -25,15 +25,6 @@ typedef struct _SenbaraGtkMainApplicationWindow SenbaraGtkMainApplicationWindow;
 GType senbara_gtk_main_application_window_get_type(void);
 
 /**
- * senbara_gtk_main_application_window_new:
- *
- * Creates a new SenbaraGtkMainApplicationWindow.
- *
- * Returns: (transfer full): A new SenbaraGtkMainApplicationWindow widget
- */
-SenbaraGtkMainApplicationWindow *senbara_gtk_main_application_window_new(void);
-
-/**
  * senbara_gtk_main_application_window_show_toast:
  * @window: a SenbaraGtkMainApplicationWindow
  * @message: the message to display in the toast
@@ -42,14 +33,6 @@ SenbaraGtkMainApplicationWindow *senbara_gtk_main_application_window_new(void);
  */
 void senbara_gtk_main_application_window_show_toast(
     SenbaraGtkMainApplicationWindow *window, const char *message);
-
-/**
- * senbara_gtk_init_types:
- *
- * Initializes the senbara-gtk type system.
- * Call this before using any senbara-gtk widgets.
- */
-void senbara_gtk_init_types(void);
 
 G_END_DECLS
 

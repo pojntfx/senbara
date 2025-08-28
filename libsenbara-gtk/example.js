@@ -6,8 +6,6 @@ import Gio from "gi://Gio";
 import SenbaraGtk from "gi://SenbaraGtk?version=1.0";
 import system from "system";
 
-SenbaraGtk.init_types();
-
 const ExampleApplication = GObject.registerClass(
   {
     GTypeName: "ExampleApplication",
@@ -23,8 +21,9 @@ const ExampleApplication = GObject.registerClass(
     #window = null;
 
     vfunc_activate() {
-      this.#window = SenbaraGtk.MainApplicationWindow.new();
-      this.#window.set_application(this);
+      this.#window = new SenbaraGtk.MainApplicationWindow({
+        application: this,
+      });
 
       this.#window.connect("button-test-clicked", () => {
         console.log("Test button clicked");

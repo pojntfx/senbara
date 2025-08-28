@@ -1,6 +1,7 @@
 package main
 
 import (
+	"runtime"
 	"unsafe"
 
 	"github.com/jwijenbergh/purego"
@@ -27,10 +28,6 @@ const (
 
 //export senbara_gtk_main_application_window_get_type
 func senbara_gtk_main_application_window_get_type() C.ulong {
-	if gTypeSenbaraGtkMainApplicationWindow == 0 {
-		senbara_gtk_init_types()
-	}
-
 	return C.ulong(gTypeSenbaraGtkMainApplicationWindow)
 }
 
@@ -41,8 +38,7 @@ type senbaraGtkMainApplicationWindow struct {
 	toastOverlay *adw.ToastOverlay
 }
 
-//export senbara_gtk_init_types
-func senbara_gtk_init_types() {
+func init() {
 	resource, err := gio.NewResourceFromData(glib.NewBytes(resources.ResourceContents, uint(len(resources.ResourceContents))))
 	if err != nil {
 		panic(err)
@@ -50,10 +46,11 @@ func senbara_gtk_init_types() {
 	gio.ResourcesRegister(resource)
 
 	var classInit gobject.ClassInitFunc = func(tc *gobject.TypeClass, u uintptr) {
-		widgetClass := (*gtk.WidgetClass)(unsafe.Pointer(tc))
-		widgetClass.SetTemplateFromResource(resources.ResourceWindowUIPath)
-		widgetClass.BindTemplateChildFull("button_test", false, 0)
-		widgetClass.BindTemplateChildFull("toast_overlay", false, 0)
+		typeClass := (*gtk.WidgetClass)(unsafe.Pointer(tc))
+		typeClass.SetTemplateFromResource(resources.ResourceWindowUIPath)
+
+		typeClass.BindTemplateChildFull("button_test", false, 0)
+		typeClass.BindTemplateChildFull("toast_overlay", false, 0)
 
 		var (
 			callbackFunc gobject.Callback      = func() {}
@@ -74,6 +71,55 @@ func senbara_gtk_init_types() {
 		)
 
 		objClass := (*gobject.ObjectClass)(unsafe.Pointer(tc))
+
+		objClass.Constructed = purego.NewCallback(func(rawObj uintptr) {
+			parentObjClass := (*gobject.ObjectClass)(unsafe.Pointer(gobject.TypeClassPeek(adw.ApplicationWindowGLibType())))
+
+			var parentConstructed func(obj uintptr)
+			purego.RegisterFunc(&parentConstructed, parentObjClass.Constructed)
+			parentConstructed(rawObj)
+
+			obj := gobject.ObjectNewFromInternalPtr(rawObj)
+
+			parent := (*adw.ApplicationWindow)(unsafe.Pointer(obj))
+			parent.InitTemplate()
+
+			rawButtonTest := parent.Widget.GetTemplateChild(
+				gTypeSenbaraGtkMainApplicationWindow,
+				"button_test",
+			)
+			buttonTest := (*gtk.Button)(unsafe.Pointer(rawButtonTest))
+
+			rawToastOverlay := parent.Widget.GetTemplateChild(
+				gTypeSenbaraGtkMainApplicationWindow,
+				"toast_overlay",
+			)
+			toastOverlay := (*adw.ToastOverlay)(unsafe.Pointer(rawToastOverlay))
+
+			w := &senbaraGtkMainApplicationWindow{
+				ApplicationWindow: parent,
+				buttonTest:        buttonTest,
+				toastOverlay:      toastOverlay,
+			}
+
+			var pinner runtime.Pinner
+			pinner.Pin(w)
+
+			var cleanupCallback glib.DestroyNotify = func(data uintptr) {
+				pinner.Unpin()
+			}
+			obj.SetDataFull(dataKeyGoInstance, uintptr(unsafe.Pointer(w)), &cleanupCallback)
+
+			cb := func(gtk.Button) {
+				gobject.SignalEmit(
+					obj,
+					gobject.SignalLookup("button-test-clicked", gTypeSenbaraGtkMainApplicationWindow),
+					0,
+				)
+			}
+
+			buttonTest.ConnectClicked(&cb)
+		})
 
 		objClass.SetProperty = purego.NewCallback(func(obj uintptr, propId uint, value uintptr, pspec uintptr) {
 			switch propId {
@@ -120,67 +166,6 @@ func senbara_gtk_init_types() {
 		&instanceInit,
 		0,
 	)
-}
-
-//export senbara_gtk_main_application_window_new
-func senbara_gtk_main_application_window_new() unsafe.Pointer {
-	obj := gobject.NewObject(gTypeSenbaraGtkMainApplicationWindow, "application")
-
-	ensureInstanceData(obj)
-
-	obj.Ref()
-
-	return unsafe.Pointer(obj.Ptr)
-}
-
-func ensureInstanceData(gobj *gobject.Object) *senbaraGtkMainApplicationWindow {
-	if data := gobj.GetData(dataKeyGoInstance); data != 0 {
-		return (*senbaraGtkMainApplicationWindow)(unsafe.Pointer(data))
-	}
-
-	parent := (*adw.ApplicationWindow)(unsafe.Pointer(gobj))
-	parent.InitTemplate()
-
-	rawButtonTest := parent.Widget.GetTemplateChild(
-		gTypeSenbaraGtkMainApplicationWindow,
-		"button_test",
-	)
-	buttonTest := (*gtk.Button)(unsafe.Pointer(rawButtonTest))
-
-	rawToastOverlay := parent.Widget.GetTemplateChild(
-		gTypeSenbaraGtkMainApplicationWindow,
-		"toast_overlay",
-	)
-	toastOverlay := (*adw.ToastOverlay)(unsafe.Pointer(rawToastOverlay))
-
-	w := &senbaraGtkMainApplicationWindow{
-		ApplicationWindow: parent,
-		buttonTest:        buttonTest,
-		toastOverlay:      toastOverlay,
-	}
-
-	var cleanupCallback glib.DestroyNotify = func(data uintptr) {
-		gobj.Unref()
-	}
-	gobj.SetDataFull(dataKeyGoInstance, uintptr(unsafe.Pointer(w)), &cleanupCallback)
-
-	// TODO: Fix this; while it does read the property default value correctly, we get `g_object_ref_sink: assertion 'G_IS_OBJECT (object)' failed`
-	// typeClass := gobject.TypeClassRef(gTypeSenbaraGtkMainApplicationWindow)
-	// objClass := (*gobject.ObjectClass)(unsafe.Pointer(typeClass))
-	// pspec := objClass.FindProperty("test-button-sensitive").Ref()
-	// buttonTest.SetSensitive(pspec.GetDefaultValue().GetBoolean())
-
-	cb := func(gtk.Button) {
-		gobject.SignalEmit(
-			gobj,
-			gobject.SignalLookup("button-test-clicked", gTypeSenbaraGtkMainApplicationWindow),
-			0,
-		)
-	}
-
-	buttonTest.ConnectClicked(&cb)
-
-	return w
 }
 
 func (w *senbaraGtkMainApplicationWindow) showToast(message string) {
