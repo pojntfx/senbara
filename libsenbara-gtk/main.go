@@ -50,6 +50,11 @@ func senbara_gtk_init_types() {
 	gio.ResourcesRegister(resource)
 
 	var classInit gobject.ClassInitFunc = func(tc *gobject.TypeClass, u uintptr) {
+		widgetClass := (*gtk.WidgetClass)(unsafe.Pointer(tc))
+		widgetClass.SetTemplateFromResource(resources.ResourceWindowUIPath)
+		widgetClass.BindTemplateChildFull("button_test", false, 0)
+		widgetClass.BindTemplateChildFull("toast_overlay", false, 0)
+
 		var (
 			callbackFunc gobject.Callback      = func() {}
 			destroyData  gobject.ClosureNotify = func(u uintptr, c *gobject.Closure) {}
@@ -104,13 +109,7 @@ func senbara_gtk_init_types() {
 		objClass.InstallProperty(propertyIdTestButtonSensitive, pspec)
 	}
 
-	var instanceInit gobject.InstanceInitFunc = func(ti *gobject.TypeInstance, tc *gobject.TypeClass) {
-		typeClass := (*gtk.WidgetClass)(unsafe.Pointer(tc))
-		typeClass.SetTemplateFromResource(resources.ResourceWindowUIPath)
-
-		typeClass.BindTemplateChildFull("button_test", false, 0)
-		typeClass.BindTemplateChildFull("toast_overlay", false, 0)
-	}
+	var instanceInit gobject.InstanceInitFunc = func(ti *gobject.TypeInstance, tc *gobject.TypeClass) {}
 
 	gTypeSenbaraGtkMainApplicationWindow = gobject.TypeRegisterStaticSimple(
 		adw.ApplicationWindowGLibType(),
@@ -123,10 +122,23 @@ func senbara_gtk_init_types() {
 	)
 }
 
-func newSenbaraGtkMainApplicationWindow() *senbaraGtkMainApplicationWindow {
+//export senbara_gtk_main_application_window_new
+func senbara_gtk_main_application_window_new() unsafe.Pointer {
 	obj := gobject.NewObject(gTypeSenbaraGtkMainApplicationWindow, "application")
 
-	parent := (*adw.ApplicationWindow)(unsafe.Pointer(obj))
+	ensureInstanceData(obj)
+
+	obj.Ref()
+
+	return unsafe.Pointer(obj.Ptr)
+}
+
+func ensureInstanceData(gobj *gobject.Object) *senbaraGtkMainApplicationWindow {
+	if data := gobj.GetData(dataKeyGoInstance); data != 0 {
+		return (*senbaraGtkMainApplicationWindow)(unsafe.Pointer(data))
+	}
+
+	parent := (*adw.ApplicationWindow)(unsafe.Pointer(gobj))
 	parent.InitTemplate()
 
 	rawButtonTest := parent.Widget.GetTemplateChild(
@@ -148,9 +160,9 @@ func newSenbaraGtkMainApplicationWindow() *senbaraGtkMainApplicationWindow {
 	}
 
 	var cleanupCallback glib.DestroyNotify = func(data uintptr) {
-		obj.Unref()
+		gobj.Unref()
 	}
-	obj.SetDataFull(dataKeyGoInstance, uintptr(unsafe.Pointer(w)), &cleanupCallback)
+	gobj.SetDataFull(dataKeyGoInstance, uintptr(unsafe.Pointer(w)), &cleanupCallback)
 
 	// TODO: Fix this; while it does read the property default value correctly, we get `g_object_ref_sink: assertion 'G_IS_OBJECT (object)' failed`
 	// typeClass := gobject.TypeClassRef(gTypeSenbaraGtkMainApplicationWindow)
@@ -160,7 +172,7 @@ func newSenbaraGtkMainApplicationWindow() *senbaraGtkMainApplicationWindow {
 
 	cb := func(gtk.Button) {
 		gobject.SignalEmit(
-			obj,
+			gobj,
 			gobject.SignalLookup("button-test-clicked", gTypeSenbaraGtkMainApplicationWindow),
 			0,
 		)
@@ -169,15 +181,6 @@ func newSenbaraGtkMainApplicationWindow() *senbaraGtkMainApplicationWindow {
 	buttonTest.ConnectClicked(&cb)
 
 	return w
-}
-
-//export senbara_gtk_main_application_window_new
-func senbara_gtk_main_application_window_new() unsafe.Pointer {
-	window := newSenbaraGtkMainApplicationWindow()
-
-	window.Object.Ref()
-
-	return unsafe.Pointer(window.Object.Ptr)
 }
 
 func (w *senbaraGtkMainApplicationWindow) showToast(message string) {

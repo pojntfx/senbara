@@ -4,16 +4,25 @@ import (
 	"log"
 	"os"
 	"time"
+	"unsafe"
 
 	"github.com/jwijenbergh/puregotk/v4/adw"
 	"github.com/jwijenbergh/puregotk/v4/gio"
 	"github.com/jwijenbergh/puregotk/v4/glib"
 	"github.com/jwijenbergh/puregotk/v4/gobject"
+	"github.com/jwijenbergh/puregotk/v4/gtk"
 	"github.com/pojntfx/senbara/libsenbara-gtk-go/v4/senbaragtk"
+	"github.com/pojntfx/senbara/senbara-gtk/assets/resources"
 )
 
 func init() {
 	senbaragtk.InitTypes()
+
+	resource, err := gio.NewResourceFromData(glib.NewBytes(resources.ResourceContents, uint(len(resources.ResourceContents))))
+	if err != nil {
+		panic(err)
+	}
+	gio.ResourcesRegister(resource)
 }
 
 type ExampleApplication struct {
@@ -37,7 +46,9 @@ func NewExampleApplication() *ExampleApplication {
 }
 
 func (app *ExampleApplication) onActivate() {
-	app.window = senbaragtk.NewMainApplicationWindow()
+	b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
+
+	app.window = (*senbaragtk.MainApplicationWindow)(unsafe.Pointer(b.GetObject("main_window")))
 	app.window.SetApplication(&app.Application.Application)
 
 	cb := func(senbaragtk.MainApplicationWindow) {
