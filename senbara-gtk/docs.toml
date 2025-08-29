@@ -6,9 +6,19 @@
     browse_url = "https://github.com/pojntfx/senbara"
     repository_url = "https://github.com/pojntfx/senbara.git"
     description = "Example GTK library built with Go"
-    dependencies = ["GObject-2.0", "Gtk-4.0", "Adw-1"]
     devhelp = true
     search_index = true
+    dependencies = ["Gtk-4.0", "Adw-1"]
+
+[dependencies."Gtk—4.0"]
+    name = "Gtk"
+    description = "The GTK toolkit"
+    docs_url = "https://docs.gtk.org/gtk4/"
+
+[dependencies."Adw-1"]
+    name = "Adw"
+    description = "Building blocks for modern GNOME applications"
+    docs_url = "https://gnome.pages.gitlab.gnome.org/libadwaita/doc/1.7/"
 
 [theme]
     show_index_summary = true

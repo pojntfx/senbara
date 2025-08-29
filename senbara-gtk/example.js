@@ -3,7 +3,7 @@
 import Adw from "gi://Adw?version=1";
 import GObject from "gi://GObject";
 import Gio from "gi://Gio";
-import SenbaraGtk from "gi://SenbaraGtk?version=1.0";
+import SenbaraGtk from "gi://SenbaraGtk?version=0.1";
 import system from "system";
 
 const ExampleApplication = GObject.registerClass(
@@ -13,7 +13,7 @@ const ExampleApplication = GObject.registerClass(
   class ExampleApplication extends Adw.Application {
     constructor() {
       super({
-        application_id: "com.pojtinger.felicitas.senbaragtk.Example",
+        application_id: "com.pojtinger.felicitas.SenbaraGnomeNeo",
         flags: Gio.ApplicationFlags.DEFAULT_FLAGS,
       });
     }

@@ -1,9 +1,10 @@
-#ifndef SENBARA_GTK_H
-#define SENBARA_GTK_H
+#pragma once
 
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
+
+#define SENBARA_GTK_INSIDE
 
 /**
  * SenbaraGtkMainApplicationWindow:
@@ -34,6 +35,6 @@ GType senbara_gtk_main_application_window_get_type(void);
 void senbara_gtk_main_application_window_show_toast(
     SenbaraGtkMainApplicationWindow *window, const char *message);
 
-G_END_DECLS
+#undef SENBARA_GTK_INSIDE
 
-#endif /* SENBARA_GTK_H */
+G_END_DECLS

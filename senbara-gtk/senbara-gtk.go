@@ -11,7 +11,7 @@ import (
 	"github.com/jwijenbergh/puregotk/v4/gobject"
 	"github.com/jwijenbergh/puregotk/v4/gobject/types"
 	"github.com/jwijenbergh/puregotk/v4/gtk"
-	"github.com/pojntfx/senbara/libsenbara-gtk/assets/resources"
+	"github.com/pojntfx/senbara/senbara-gtk/assets/resources"
 )
 
 import "C"

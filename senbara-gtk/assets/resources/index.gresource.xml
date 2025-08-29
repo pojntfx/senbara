@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <gresources>
-    <gresource prefix="/com/pojtinger/felicitas/senbaragtk/Example">
-       <file>window.ui</file>
+    <gresource prefix="/com/pojtinger/felicitas/SenbaraGtk">
+        <file>window.ui</file>
     </gresource>
 </gresources>

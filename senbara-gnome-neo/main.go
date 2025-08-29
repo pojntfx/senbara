@@ -11,8 +11,8 @@ import (
 	"github.com/jwijenbergh/puregotk/v4/glib"
 	"github.com/jwijenbergh/puregotk/v4/gobject"
 	"github.com/jwijenbergh/puregotk/v4/gtk"
-	"github.com/pojntfx/senbara/libsenbara-gtk-go/v4/senbaragtk"
-	"github.com/pojntfx/senbara/senbara-gtk/assets/resources"
+	"github.com/pojntfx/senbara/senbara-gnome-neo/assets/resources"
+	"github.com/pojntfx/senbara/senbara-gtk-go/senbaragtk"
 )
 
 func init() {
@@ -29,7 +29,7 @@ type ExampleApplication struct {
 }
 
 func NewExampleApplication() *ExampleApplication {
-	app := adw.NewApplication("com.pojtinger.felicitas.senbaragtk.Example", gio.GApplicationFlagsNoneValue)
+	app := adw.NewApplication(resources.AppID, gio.GApplicationFlagsNoneValue)
 
 	exampleApp := &ExampleApplication{
 		Application: app,

@@ -1,0 +1,10 @@
+prefix=/usr
+includedir=${prefix}/include
+libdir=${prefix}/lib64
+
+Name: senbara-gtk
+Description: Example GTK library built with Go
+Version: 0.1.0
+Requires: gtk4 >= 4.17.5, libadwaita-1 >= 1.7.5
+Libs: -L${libdir} -lsenbara-gtk-0.1
+Cflags: -I${includedir}/senbara-gtk
