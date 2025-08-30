@@ -9,8 +9,8 @@ and/or use gtk-doc annotations.  -->
             xmlns:glib="http://www.gtk.org/introspection/glib/1.0">
   <include name="Adw" version="1"/>
   <include name="Gtk" version="4.0"/>
-  <package name="gtk4"/>
-  <package name="libadwaita-1"/>
+  <package name="senbara-gtk-0.1"/>
+  <c:include name="senbara-gtk.h"/>
   <doc:format name="unknown"/>
   <namespace name="SenbaraGtk"
              version="0.1"
@@ -25,7 +25,7 @@ and/or use gtk-doc annotations.  -->
            glib:get-type="senbara_gtk_main_application_window_get_type">
       <doc xml:space="preserve"
            filename="senbara-gtk.h"
-           line="9">Example application window with a test button and toast notifications.</doc>
+           line="10">Example application window with a test button and toast notifications.</doc>
       <implements name="Gio.ActionGroup"/>
       <implements name="Gio.ActionMap"/>
       <implements name="Gtk.Accessible"/>
@@ -38,8 +38,8 @@ and/or use gtk-doc annotations.  -->
               c:identifier="senbara_gtk_main_application_window_show_toast">
         <doc xml:space="preserve"
              filename="senbara-gtk.h"
-             line="28">Shows a toast notification with the given message inside the window.</doc>
-        <source-position filename="senbara-gtk.h" line="35"/>
+             line="29">Shows a toast notification with the given message inside the window.</doc>
+        <source-position filename="senbara-gtk.h" line="36"/>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -47,14 +47,14 @@ and/or use gtk-doc annotations.  -->
           <instance-parameter name="window" transfer-ownership="none">
             <doc xml:space="preserve"
                  filename="senbara-gtk.h"
-                 line="30">a SenbaraGtkMainApplicationWindow</doc>
+                 line="31">a SenbaraGtkMainApplicationWindow</doc>
             <type name="MainApplicationWindow"
                   c:type="SenbaraGtkMainApplicationWindow*"/>
           </instance-parameter>
           <parameter name="message" transfer-ownership="none">
             <doc xml:space="preserve"
                  filename="senbara-gtk.h"
-                 line="31">the message to display in the toast</doc>
+                 line="32">the message to display in the toast</doc>
             <type name="utf8" c:type="const char*"/>
           </parameter>
         </parameters>

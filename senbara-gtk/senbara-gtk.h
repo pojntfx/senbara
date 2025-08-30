@@ -5,6 +5,7 @@
 G_BEGIN_DECLS
 
 #define SENBARA_GTK_INSIDE
+#include "senbara-gtk-version.h"
 
 /**
  * SenbaraGtkMainApplicationWindow:
