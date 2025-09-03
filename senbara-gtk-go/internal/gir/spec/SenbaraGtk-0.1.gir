@@ -24,8 +24,8 @@ and/or use gtk-doc annotations.  -->
            glib:type-name="SenbaraGtkMainApplicationWindow"
            glib:get-type="senbara_gtk_main_application_window_get_type">
       <doc xml:space="preserve"
-           filename="senbara-gtk.h"
-           line="10">Example application window with a test button and toast notifications.</doc>
+           filename="src/senbara-gtk.h"
+           line="12">Example application window with a test button and toast notifications.</doc>
       <implements name="Gio.ActionGroup"/>
       <implements name="Gio.ActionMap"/>
       <implements name="Gtk.Accessible"/>
@@ -37,24 +37,24 @@ and/or use gtk-doc annotations.  -->
       <method name="show_toast"
               c:identifier="senbara_gtk_main_application_window_show_toast">
         <doc xml:space="preserve"
-             filename="senbara-gtk.h"
-             line="29">Shows a toast notification with the given message inside the window.</doc>
-        <source-position filename="senbara-gtk.h" line="36"/>
+             filename="src/senbara-gtk.h"
+             line="31">Shows a toast notification with the given message inside the window.</doc>
+        <source-position filename="src/senbara-gtk.h" line="38"/>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
         <parameters>
           <instance-parameter name="window" transfer-ownership="none">
             <doc xml:space="preserve"
-                 filename="senbara-gtk.h"
-                 line="31">a SenbaraGtkMainApplicationWindow</doc>
+                 filename="src/senbara-gtk.h"
+                 line="33">a SenbaraGtkMainApplicationWindow</doc>
             <type name="MainApplicationWindow"
                   c:type="SenbaraGtkMainApplicationWindow*"/>
           </instance-parameter>
           <parameter name="message" transfer-ownership="none">
             <doc xml:space="preserve"
-                 filename="senbara-gtk.h"
-                 line="32">the message to display in the toast</doc>
+                 filename="src/senbara-gtk.h"
+                 line="34">the message to display in the toast</doc>
             <type name="utf8" c:type="const char*"/>
           </parameter>
         </parameters>

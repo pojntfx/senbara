@@ -11,7 +11,7 @@ import (
 	"github.com/jwijenbergh/puregotk/v4/gobject"
 	"github.com/jwijenbergh/puregotk/v4/gobject/types"
 	"github.com/jwijenbergh/puregotk/v4/gtk"
-	"github.com/pojntfx/senbara/senbara-gtk/assets/resources"
+	"github.com/pojntfx/senbara/senbara-gtk/data"
 )
 
 import "C"
@@ -39,7 +39,7 @@ type senbaraGtkMainApplicationWindow struct {
 }
 
 func init() {
-	resource, err := gio.NewResourceFromData(glib.NewBytes(resources.ResourceContents, uint(len(resources.ResourceContents))))
+	resource, err := gio.NewResourceFromData(glib.NewBytes(data.ResourceContents, uint(len(data.ResourceContents))))
 	if err != nil {
 		panic(err)
 	}
@@ -47,7 +47,7 @@ func init() {
 
 	var classInit gobject.ClassInitFunc = func(tc *gobject.TypeClass, u uintptr) {
 		typeClass := (*gtk.WidgetClass)(unsafe.Pointer(tc))
-		typeClass.SetTemplateFromResource(resources.ResourceWindowUIPath)
+		typeClass.SetTemplateFromResource(data.ResourceWindowUIPath)
 
 		typeClass.BindTemplateChildFull("button_test", false, 0)
 		typeClass.BindTemplateChildFull("toast_overlay", false, 0)

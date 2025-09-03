@@ -1,11 +1,13 @@
 #pragma once
 
+#include <glib.h>
+#include <glib-object.h>
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
 #define SENBARA_GTK_INSIDE
-#include "senbara-gtk-version.h"
+# include "senbara-gtk-version.h"
 
 /**
  * SenbaraGtkMainApplicationWindow:
