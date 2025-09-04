@@ -1,6 +1,8 @@
 api_version = '0.1'
 
-senbara_gtk_source = meson.current_source_dir()
+pkg = import('pkgconfig')
+
+senbara_gtk_source = meson.current_source_dir() / meson.project_name() + '.go'
 
 senbara_gtk_headers = [
   'senbara-gtk.h',
@@ -22,11 +24,24 @@ configure_file(
 )
 
 senbara_gtk_deps = [
-  dependency('gio-2.0'),
+  dependency('gtk4'),
+  dependency('libadwaita-1', version: '>= 1.4'),
 ]
+
+senbara_gtk_resources = custom_target(
+  'senbara-gtk-resources',
+  input: gnome.compile_resources(
+    'senbara-gtk',
+    'senbara-gtk.gresource.xml',
+    gresource_bundle: true,
+  ),
+  output: 'senbara-gtk-resources.gresource',
+  command: ['cp', '@INPUT@', meson.current_source_dir() / 'senbara-gtk.gresource'],
+)
 
 senbara_gtk_archive = custom_target(
   'senbara-gtk-archive',
+  input: senbara_gtk_source,
   output: 'libsenbara-gtk-0.1.a',
   command: [
     find_program('go').full_path(),
@@ -34,7 +49,10 @@ senbara_gtk_archive = custom_target(
     '-buildmode', 'c-archive',
     '-x',
     '-o', '@OUTPUT@',
-    senbara_gtk_source,
+    '@INPUT@',
+  ],
+  depends: [
+    senbara_gtk_resources,
   ],
 )
 
@@ -48,7 +66,6 @@ senbara_gtk_lib = shared_library(
 
 install_headers(senbara_gtk_headers, subdir: 'senbara-gtk')
 
-pkg = import('pkgconfig')
 pkg.generate(
   description: 'Example GTK library built with Go',
   libraries: senbara_gtk_lib,
@@ -60,7 +77,6 @@ pkg.generate(
   install_dir: get_option('libdir') / 'pkgconfig',
 )
 
-gnome = import('gnome')
 senbara_gtk_gir = gnome.generate_gir(
   senbara_gtk_lib,
   sources: [senbara_gtk_headers],

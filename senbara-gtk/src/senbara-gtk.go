@@ -1,8 +1,11 @@
 package main
 
 import (
+	"path"
 	"runtime"
 	"unsafe"
+
+	_ "embed"
 
 	"github.com/jwijenbergh/purego"
 	"github.com/jwijenbergh/puregotk/v4/adw"
@@ -11,13 +14,19 @@ import (
 	"github.com/jwijenbergh/puregotk/v4/gobject"
 	"github.com/jwijenbergh/puregotk/v4/gobject/types"
 	"github.com/jwijenbergh/puregotk/v4/gtk"
-	"github.com/pojntfx/senbara/senbara-gtk/data"
 )
 
 import "C"
 
+//go:embed senbara-gtk.gresource
+var ResourceContents []byte
+
 var (
 	gTypeSenbaraGtkMainApplicationWindow gobject.Type
+
+	appPath = path.Join("/com", "pojtinger", "felicitas", "SenbaraGtk")
+
+	resourceWindowUIPath = path.Join(appPath, "senbara-gtk-window.ui")
 )
 
 const (
@@ -39,7 +48,7 @@ type senbaraGtkMainApplicationWindow struct {
 }
 
 func init() {
-	resource, err := gio.NewResourceFromData(glib.NewBytes(data.ResourceContents, uint(len(data.ResourceContents))))
+	resource, err := gio.NewResourceFromData(glib.NewBytes(ResourceContents, uint(len(ResourceContents))))
 	if err != nil {
 		panic(err)
 	}
@@ -47,7 +56,7 @@ func init() {
 
 	var classInit gobject.ClassInitFunc = func(tc *gobject.TypeClass, u uintptr) {
 		typeClass := (*gtk.WidgetClass)(unsafe.Pointer(tc))
-		typeClass.SetTemplateFromResource(data.ResourceWindowUIPath)
+		typeClass.SetTemplateFromResource(resourceWindowUIPath)
 
 		typeClass.BindTemplateChildFull("button_test", false, 0)
 		typeClass.BindTemplateChildFull("toast_overlay", false, 0)
