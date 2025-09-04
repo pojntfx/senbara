@@ -1,6 +1,7 @@
 api_version = '0.1'
 
 pkg = import('pkgconfig')
+gnome = import('gnome')
 
 senbara_gtk_source = meson.current_source_dir() / meson.project_name() + '.go'
 
