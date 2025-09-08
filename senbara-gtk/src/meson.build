@@ -3,6 +3,21 @@ api_version = '0.1'
 pkg = import('pkgconfig')
 gnome = import('gnome')
 
+config_go = configuration_data()
+config_go.set_quoted('PACKAGE_VERSION', meson.project_version())
+add_project_arguments(['-I' + meson.project_build_root()], language: 'c')
+
+config_go_file = custom_target(
+  'config-go',
+  input: configure_file(
+    input: meson.current_source_dir() / 'config.go.in',
+    output: 'config_rendered.go',
+    configuration: config_go,
+  ),
+  output: 'config.go',
+  command: ['cp', '@INPUT@', meson.current_source_dir() / 'config.go'],
+)
+
 senbara_gtk_source = meson.current_source_dir() / meson.project_name() + '.go'
 
 senbara_gtk_headers = [
@@ -61,7 +76,7 @@ senbara_gtk_resources = custom_target(
 senbara_gtk_archive = custom_target(
   'senbara-gtk-archive',
   input: senbara_gtk_source,
-  output: 'libsenbara-gtk-0.1.a',
+  output: 'libsenbara-gtk-' + api_version + '.a',
   command: [
     find_program('go').full_path(),
     'build',
@@ -72,6 +87,7 @@ senbara_gtk_archive = custom_target(
   ],
   depends: [
     senbara_gtk_resources,
+    config_go_file,
   ],
 )
 
