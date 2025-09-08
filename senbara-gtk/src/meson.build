@@ -29,12 +29,30 @@ senbara_gtk_deps = [
   dependency('libadwaita-1', version: '>= 1.4'),
 ]
 
+senbara_gtk_blueprints = custom_target(
+  'senbara-gtk-blueprints',
+  input: files(
+    'senbara-gtk-window.blp',
+  ),
+  output: '.',
+  command: [
+    find_program('blueprint-compiler'),
+    'batch-compile',
+    '@CURRENT_SOURCE_DIR@',
+    '@CURRENT_SOURCE_DIR@',
+    '@INPUT@',
+  ],
+)
+
 senbara_gtk_resources = custom_target(
   'senbara-gtk-resources',
   input: gnome.compile_resources(
     'senbara-gtk',
     'senbara-gtk.gresource.xml',
     gresource_bundle: true,
+    dependencies: [
+      senbara_gtk_blueprints,
+    ],
   ),
   output: 'senbara-gtk-resources.gresource',
   command: ['cp', '@INPUT@', meson.current_source_dir() / 'senbara-gtk.gresource'],
