@@ -7,4 +7,7 @@ project(
 )
 add_project_arguments(['-I' + meson.project_build_root()], language: 'c')
 
+i18n = import('i18n')
+
 subdir('src')
+subdir('po')

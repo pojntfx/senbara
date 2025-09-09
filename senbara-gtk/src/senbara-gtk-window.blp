@@ -2,14 +2,14 @@ using Gtk 4.0;
 using Adw 1;
 
 template $SenbaraGtkMainApplicationWindow: Adw.ApplicationWindow {
-    title: "senbara-gtk Main Application Window";
+    title: _("senbara-gtk Main Application Window");
 
     content: Adw.ToastOverlay toast_overlay {
         child: Adw.ToolbarView {
             [top]
             Adw.HeaderBar {
                 title-widget: Adw.WindowTitle {
-                    title: "Senbara GTK";
+                    title: _("Senbara GTK");
                 };
             }
 
