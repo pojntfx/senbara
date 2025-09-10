@@ -16,6 +16,11 @@ import (
 	"github.com/jwijenbergh/puregotk/v4/gtk"
 )
 
+/*
+#cgo pkg-config: glib-2.0
+#include <locale.h>
+#include <glib/gi18n.h>
+*/
 import "C"
 
 //go:embed senbara-gtk.gresource
@@ -48,6 +53,18 @@ type senbaraGtkMainApplicationWindow struct {
 }
 
 func init() {
+	if C.bindtextdomain(C.CString(GettextPackage), C.CString(LocaleDir)) == nil {
+		panic("failed to bind text domain")
+	}
+
+	if C.bind_textdomain_codeset(C.CString(GettextPackage), C.CString("UTF-8")) == nil {
+		panic("failed to set text domain codeset")
+	}
+
+	if C.textdomain(C.CString(GettextPackage)) == nil {
+		panic("failed to set text domain")
+	}
+
 	resource, err := gio.NewResourceFromData(glib.NewBytes(ResourceContents, uint(len(ResourceContents))))
 	if err != nil {
 		panic(err)

@@ -5,6 +5,8 @@ gnome = import('gnome')
 
 config_go = configuration_data()
 config_go.set_quoted('PACKAGE_VERSION', meson.project_version())
+config_go.set_quoted('GETTEXT_PACKAGE', 'senbara-gtk')
+config_go.set_quoted('LOCALEDIR', get_option('prefix') / get_option('localedir'))
 
 config_go_file = custom_target(
   'config-go',
