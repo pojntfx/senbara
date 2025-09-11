@@ -19,7 +19,7 @@ config_go_file = custom_target(
   command: ['cp', '@INPUT@', meson.current_source_dir() / 'config.go'],
 )
 
-senbara_gtk_source = meson.current_source_dir() 
+senbara_gtk_source = meson.current_source_dir()
 
 senbara_gtk_headers = [
   'senbara-gtk.h',
@@ -123,4 +123,27 @@ senbara_gtk_gir = gnome.generate_gir(
   identifier_prefix: 'SenbaraGtk',
   includes: ['Gtk-4.0', 'Adw-1'],
   install: true,
+)
+
+custom_target(
+  'senbara-gtk-docs',
+  input: [
+    configure_file(
+      input: meson.current_source_dir() / 'docs.toml.in',
+      output: 'docs.toml',
+      configuration: config_go,
+    ),
+    senbara_gtk_gir,
+  ],
+  output: 'senbara-gtk-' + api_version,
+  command: [
+    find_program('gi-docgen'),
+    'generate',
+    '--no-namespace-dir',
+    '--config=@INPUT0@',
+    '--output-dir=@OUTPUT@',
+    '@INPUT1@',
+  ],
+  install: true,
+  install_dir: get_option('datadir') / 'doc',
 )
