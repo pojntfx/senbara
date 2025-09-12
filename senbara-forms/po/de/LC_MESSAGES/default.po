@@ -181,7 +181,7 @@ msgstr "Benutzerdaten löschen"
 msgid "Description (optional)"
 msgstr "Beschreibung (optional)"
 
-#: contacts_edit.html:23 contacts_add.html:20
+#: contacts_add.html:20 contacts_edit.html:23
 msgid "Doe"
 msgstr "Muster"
 
@@ -222,7 +222,7 @@ msgstr "Schuld für %v %v bearbeiten"
 msgid "Edit journal entry"
 msgstr "Tagebucheintrag bearbeiten"
 
-#: contacts_edit.html:32 contacts_add.html:29
+#: contacts_add.html:29 contacts_edit.html:32
 msgid "Email"
 msgstr "E-Mail"
 
@@ -231,7 +231,7 @@ msgstr "E-Mail"
 msgid "Export your data"
 msgstr "Benutzerdaten exportieren"
 
-#: contacts_edit.html:16 contacts_add.html:14
+#: contacts_add.html:14 contacts_edit.html:16
 msgid "First name"
 msgstr "Vorname"
 
@@ -260,7 +260,7 @@ msgstr "Benutzerdaten importieren"
 msgid "Imprint"
 msgstr "Impressum"
 
-#: contacts_edit.html:17 contacts_add.html:15
+#: contacts_add.html:15 contacts_edit.html:17
 msgid "Jean"
 msgstr "Jean"
 
@@ -273,7 +273,7 @@ msgstr "Tagebuch"
 msgid "Journal entries"
 msgstr "Tagebucheinträge"
 
-#: contacts_edit.html:22 contacts_add.html:19
+#: contacts_add.html:19 contacts_edit.html:22
 msgid "Last name"
 msgstr "Nachname"
 
@@ -299,7 +299,7 @@ msgstr "Markdown"
 msgid "Name"
 msgstr "Name"
 
-#: contacts_edit.html:27 contacts_add.html:24
+#: contacts_add.html:24 contacts_edit.html:27
 msgid "Nickname (optional)"
 msgstr "Spitzname (optional)"
 
@@ -340,7 +340,7 @@ msgstr "Diese Seite konnte nicht gefunden werden"
 msgid "Privacy"
 msgstr "Datenschutzerklärung"
 
-#: contacts_edit.html:37 contacts_add.html:34
+#: contacts_add.html:34 contacts_edit.html:37
 msgid "Pronouns"
 msgstr "Pronomen"
 
@@ -416,15 +416,15 @@ msgstr "Sie schulden %v %v %v"
 msgid "Your day was:"
 msgstr "Dein Tag war:"
 
-#: contacts_edit.html:28 contacts_add.html:25
+#: contacts_add.html:25 contacts_edit.html:28
 msgid "jdoe"
 msgstr "jmuster"
 
-#: contacts_edit.html:33 contacts_add.html:30
+#: contacts_add.html:30 contacts_edit.html:33
 msgid "jean@doe.com"
 msgstr "jean@muster.de"
 
-#: contacts_edit.html:38 contacts_add.html:35
+#: contacts_add.html:35 contacts_edit.html:38
 msgid "they/them"
 msgstr "sie/ihnen"
 

@@ -180,7 +180,7 @@ msgstr ""
 msgid "Description (optional)"
 msgstr ""
 
-#: contacts_edit.html:23 contacts_add.html:20
+#: contacts_add.html:20 contacts_edit.html:23
 msgid "Doe"
 msgstr ""
 
@@ -221,7 +221,7 @@ msgstr ""
 msgid "Edit journal entry"
 msgstr ""
 
-#: contacts_edit.html:32 contacts_add.html:29
+#: contacts_add.html:29 contacts_edit.html:32
 msgid "Email"
 msgstr ""
 
@@ -229,7 +229,7 @@ msgstr ""
 msgid "Export your data"
 msgstr ""
 
-#: contacts_edit.html:16 contacts_add.html:14
+#: contacts_add.html:14 contacts_edit.html:16
 msgid "First name"
 msgstr ""
 
@@ -258,7 +258,7 @@ msgstr ""
 msgid "Imprint"
 msgstr ""
 
-#: contacts_edit.html:17 contacts_add.html:15
+#: contacts_add.html:15 contacts_edit.html:17
 msgid "Jean"
 msgstr ""
 
@@ -270,7 +270,7 @@ msgstr ""
 msgid "Journal entries"
 msgstr ""
 
-#: contacts_edit.html:22 contacts_add.html:19
+#: contacts_add.html:19 contacts_edit.html:22
 msgid "Last name"
 msgstr ""
 
@@ -294,7 +294,7 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: contacts_edit.html:27 contacts_add.html:24
+#: contacts_add.html:24 contacts_edit.html:27
 msgid "Nickname (optional)"
 msgstr ""
 
@@ -335,7 +335,7 @@ msgstr ""
 msgid "Privacy"
 msgstr ""
 
-#: contacts_edit.html:37 contacts_add.html:34
+#: contacts_add.html:34 contacts_edit.html:37
 msgid "Pronouns"
 msgstr ""
 
@@ -407,15 +407,15 @@ msgstr ""
 msgid "Your day was:"
 msgstr ""
 
-#: contacts_edit.html:28 contacts_add.html:25
+#: contacts_add.html:25 contacts_edit.html:28
 msgid "jdoe"
 msgstr ""
 
-#: contacts_edit.html:33 contacts_add.html:30
+#: contacts_add.html:30 contacts_edit.html:33
 msgid "jean@doe.com"
 msgstr ""
 
-#: contacts_edit.html:38 contacts_add.html:35
+#: contacts_add.html:35 contacts_edit.html:38
 msgid "they/them"
 msgstr ""
 

@@ -181,7 +181,7 @@ msgstr "Supprimer vos données"
 msgid "Description (optional)"
 msgstr "Description (facultatif)"
 
-#: contacts_edit.html:23 contacts_add.html:20
+#: contacts_add.html:20 contacts_edit.html:23
 msgid "Doe"
 msgstr "Lambda"
 
@@ -222,7 +222,7 @@ msgstr "Modifier la dette pour %v %v"
 msgid "Edit journal entry"
 msgstr "Modifier l'écriture de journal"
 
-#: contacts_edit.html:32 contacts_add.html:29
+#: contacts_add.html:29 contacts_edit.html:32
 msgid "Email"
 msgstr "Courriel"
 
@@ -231,7 +231,7 @@ msgstr "Courriel"
 msgid "Export your data"
 msgstr "Exporter vos données"
 
-#: contacts_edit.html:16 contacts_add.html:14
+#: contacts_add.html:14 contacts_edit.html:16
 msgid "First name"
 msgstr "Prénom"
 
@@ -260,7 +260,7 @@ msgstr "Importer les données utilisateur"
 msgid "Imprint"
 msgstr "Mentions légales"
 
-#: contacts_edit.html:17 contacts_add.html:15
+#: contacts_add.html:15 contacts_edit.html:17
 msgid "Jean"
 msgstr "Jean"
 
@@ -273,7 +273,7 @@ msgstr "Journal"
 msgid "Journal entries"
 msgstr "Écritures de journal"
 
-#: contacts_edit.html:22 contacts_add.html:19
+#: contacts_add.html:19 contacts_edit.html:22
 msgid "Last name"
 msgstr "Nom"
 
@@ -299,7 +299,7 @@ msgstr "le langage Markdown"
 msgid "Name"
 msgstr "Nom"
 
-#: contacts_edit.html:27 contacts_add.html:24
+#: contacts_add.html:24 contacts_edit.html:27
 msgid "Nickname (optional)"
 msgstr "Surnom (facultatif)"
 
@@ -340,7 +340,7 @@ msgstr "Page introuvable"
 msgid "Privacy"
 msgstr "Politique de confidentialité"
 
-#: contacts_edit.html:37 contacts_add.html:34
+#: contacts_add.html:34 contacts_edit.html:37
 msgid "Pronouns"
 msgstr "Pronoms"
 
@@ -417,15 +417,15 @@ msgstr "Vous devez à %v %v %v"
 msgid "Your day was:"
 msgstr "Votre journée était :"
 
-#: contacts_edit.html:28 contacts_add.html:25
+#: contacts_add.html:25 contacts_edit.html:28
 msgid "jdoe"
 msgstr "jlambda"
 
-#: contacts_edit.html:33 contacts_add.html:30
+#: contacts_add.html:30 contacts_edit.html:33
 msgid "jean@doe.com"
 msgstr "jean@lambda.ca"
 
-#: contacts_edit.html:38 contacts_add.html:35
+#: contacts_add.html:35 contacts_edit.html:38
 msgid "they/them"
 msgstr "iel/iels"
 

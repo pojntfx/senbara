@@ -368,8 +368,8 @@ func main() {
 			previewContactsCountLabel   = b.GetObject("preview_contacts_count_label").Cast().(*gtk.Label)
 			previewContactsCountSpinner = b.GetObject("preview_contacts_count_spinner").Cast().(*adw.Spinner)
 
-			previewJournalEntriesCountLabel   = b.GetObject("preview_journal_entries_count_label").Cast().(*gtk.Label)
-			previewJournalEntriesCountSpinner = b.GetObject("preview_journal_entries_count_spinner").Cast().(*adw.Spinner)
+			previewJournalCountLabel   = b.GetObject("preview_journal_count_label").Cast().(*gtk.Label)
+			previewJournalCountSpinner = b.GetObject("preview_journal_count_spinner").Cast().(*adw.Spinner)
 
 			oidcDcrInitialAccessTokenPortalUrl string
 
@@ -398,8 +398,8 @@ func main() {
 			homeSidebarContactsCountLabel   = b.GetObject("home_sidebar_contacts_count_label").Cast().(*gtk.Label)
 			homeSidebarContactsCountSpinner = b.GetObject("home_sidebar_contacts_count_spinner").Cast().(*adw.Spinner)
 
-			homeSidebarJournalEntriesCountLabel   = b.GetObject("home_sidebar_journal_entries_count_label").Cast().(*gtk.Label)
-			homeSidebarJournalEntriesCountSpinner = b.GetObject("home_sidebar_journal_entries_count_spinner").Cast().(*adw.Spinner)
+			homeSidebarJournalCountLabel   = b.GetObject("home_sidebar_journal_count_label").Cast().(*gtk.Label)
+			homeSidebarJournalCountSpinner = b.GetObject("home_sidebar_journal_count_spinner").Cast().(*adw.Spinner)
 
 			contactsStack       = b.GetObject("contacts_stack").Cast().(*gtk.Stack)
 			contactsListBox     = b.GetObject("contacts_list").Cast().(*gtk.ListBox)
@@ -549,6 +549,20 @@ func main() {
 			activitiesCreateDialogDateWarningButton = activitiesCreateDialogBuilder.GetObject("activities_create_dialog_date_warning_button").Cast().(*gtk.MenuButton)
 
 			activitiesCreateDialogPopoverLabel = activitiesCreateDialogBuilder.GetObject("activities_create_dialog_date_popover_label").Cast().(*gtk.Label)
+
+			journalStack       = b.GetObject("journal_stack").Cast().(*gtk.Stack)
+			journalListBox     = b.GetObject("journal_list").Cast().(*gtk.ListBox)
+			journalSearchEntry = b.GetObject("journal_searchentry").Cast().(*gtk.SearchEntry)
+
+			journalAddButton    = b.GetObject("journal_add_button").Cast().(*gtk.Button)
+			journalSearchButton = b.GetObject("journal_search_button").Cast().(*gtk.ToggleButton)
+
+			// TODO: Re-enable this once we have a journal entries create dialog
+			// journalEmptyAddButton = b.GetObject("journal_empty_add_button").Cast().(*gtk.Button)
+
+			journalErrorStatusPage        = b.GetObject("journal_error_status_page").Cast().(*adw.StatusPage)
+			journalErrorRefreshButton     = b.GetObject("journal_error_refresh_button").Cast().(*gtk.Button)
+			journalErrorCopyDetailsButton = b.GetObject("journal_error_copy_details").Cast().(*gtk.Button)
 		)
 
 		settings.Bind(resources.SettingVerboseKey, preferencesDialogVerboseSwitch.Object, "active", gio.SettingsBindDefault)
@@ -937,13 +951,13 @@ func main() {
 			homeSidebarContactsCountLabel.SetVisible(false)
 			homeSidebarContactsCountSpinner.SetVisible(true)
 
-			homeSidebarJournalEntriesCountLabel.SetVisible(false)
-			homeSidebarJournalEntriesCountSpinner.SetVisible(true)
+			homeSidebarJournalCountLabel.SetVisible(false)
+			homeSidebarJournalCountSpinner.SetVisible(true)
 		}
 
 		disableHomeSidebarLoading := func() {
-			homeSidebarJournalEntriesCountSpinner.SetVisible(false)
-			homeSidebarJournalEntriesCountLabel.SetVisible(true)
+			homeSidebarJournalCountSpinner.SetVisible(false)
+			homeSidebarJournalCountLabel.SetVisible(true)
 
 			homeSidebarContactsCountSpinner.SetVisible(false)
 			homeSidebarContactsCountLabel.SetVisible(true)
@@ -953,13 +967,13 @@ func main() {
 			previewContactsCountLabel.SetVisible(false)
 			previewContactsCountSpinner.SetVisible(true)
 
-			previewJournalEntriesCountLabel.SetVisible(false)
-			previewJournalEntriesCountSpinner.SetVisible(true)
+			previewJournalCountLabel.SetVisible(false)
+			previewJournalCountSpinner.SetVisible(true)
 		}
 
 		disablePreviewLoading := func() {
-			previewJournalEntriesCountSpinner.SetVisible(false)
-			previewJournalEntriesCountLabel.SetVisible(true)
+			previewJournalCountSpinner.SetVisible(false)
+			previewJournalCountLabel.SetVisible(true)
 
 			previewContactsCountSpinner.SetVisible(false)
 			previewContactsCountLabel.SetVisible(true)
@@ -986,24 +1000,45 @@ func main() {
 			}()
 		})
 
-		contactsListBox.SetFilterFunc(func(row *gtk.ListBoxRow) (ok bool) {
+		var (
+			journalCount        = 0
+			visibleJournalCount = 0
+		)
+
+		journalSearchEntry.ConnectSearchChanged(func() {
+			go func() {
+				journalStack.SetVisibleChildName(resources.PageJournalLoading)
+
+				visibleJournalCount = 0
+
+				journalListBox.InvalidateFilter()
+
+				if visibleJournalCount > 0 {
+					journalStack.SetVisibleChildName(resources.PageJournalList)
+				} else {
+					journalStack.SetVisibleChildName(resources.PageJournalNoResults)
+				}
+			}()
+		})
+
+		journalListBox.SetFilterFunc(func(row *gtk.ListBoxRow) (ok bool) {
 			var (
 				r = row.Cast().(*adw.ActionRow)
-				f = strings.ToLower(contactsSearchEntry.Text())
+				f = strings.ToLower(journalSearchEntry.Text())
 
 				rt = strings.ToLower(r.Title())
 				rs = strings.ToLower(r.Subtitle())
 			)
 
 			log.Debug(
-				"Filtering contact",
+				"Filtering journal entry",
 				"filter", f,
 				"title", rt,
 				"subtitle", rs,
 			)
 
 			if strings.Contains(rt, f) || strings.Contains(rs, f) {
-				visibleContactsCount++
+				visibleJournalCount++
 
 				return true
 			}
@@ -1395,6 +1430,42 @@ func main() {
 					contactsEditStack.SetVisibleChildName(resources.PageContactsEditData)
 				} else {
 					contactsEditStack.SetVisibleChildName(resources.PageContactsEditError)
+				}
+			},
+		)
+
+		handleJournalError,
+			enableJournalLoading,
+			disableJournalLoading,
+			clearJournalError := createErrAndLoadingHandlers(
+			journalErrorStatusPage,
+			journalErrorRefreshButton,
+			journalErrorCopyDetailsButton,
+
+			func() {
+				homeNavigation.ReplaceWithTags([]string{resources.PageJournal})
+			},
+
+			func() {
+				homeSidebarJournalCountLabel.SetVisible(false)
+				homeSidebarJournalCountSpinner.SetVisible(true)
+
+				journalStack.SetVisibleChildName(resources.PageJournalLoading)
+			},
+			func(err string) {
+				homeSidebarJournalCountSpinner.SetVisible(false)
+				homeSidebarJournalCountLabel.SetVisible(true)
+
+				homeSidebarJournalCountLabel.SetText(fmt.Sprintf("%v", journalCount))
+
+				if err == "" {
+					if journalCount > 0 {
+						journalStack.SetVisibleChildName(resources.PageJournalList)
+					} else {
+						journalStack.SetVisibleChildName(resources.PageJournalEmpty)
+					}
+				} else {
+					journalStack.SetVisibleChildName(resources.PageJournalError)
 				}
 			},
 		)
@@ -3267,6 +3338,106 @@ func main() {
 						contactsEditPageNotesExpander.SetExpanded(false)
 					}
 				}()
+
+			case resources.PageJournal:
+				go func() {
+					enableJournalLoading()
+					defer disableJournalLoading()
+
+					redirected, c, _, err := authorize(
+						ctx,
+
+						true,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for journal entries page", "err", err)
+
+						handleJournalError(err)
+
+						return
+					} else if redirected {
+						return
+					}
+
+					log.Debug("Listing journal entries")
+
+					res, err := c.GetJournalEntriesWithResponse(ctx)
+					if err != nil {
+						handleJournalError(err)
+
+						return
+					}
+
+					log.Debug("Got journal entries", "status", res.StatusCode())
+
+					if res.StatusCode() != http.StatusOK {
+						handleJournalError(errors.New(res.Status()))
+
+						return
+					}
+
+					defer clearJournalError()
+
+					// TODO: Re-enable this once we have a journal entries create dialog
+					// validateJournalCreateDialogForm()
+
+					journalListBox.RemoveAll()
+
+					journalCount = len(*res.JSON200)
+					if journalCount > 0 {
+						journalAddButton.SetVisible(true)
+						journalSearchButton.SetVisible(true)
+
+						for _, journalEntry := range *res.JSON200 {
+							r := adw.NewActionRow()
+
+							r.SetTitle(*journalEntry.Title)
+
+							subtitle := glib.NewDateTimeFromGo(*journalEntry.Date).Format("%x") + " | "
+							switch *journalEntry.Rating {
+							case 3:
+								subtitle += gcore.Local("Great")
+
+							case 2:
+								subtitle += gcore.Local("OK")
+
+							case 1:
+								subtitle += gcore.Local("Bad")
+							}
+							r.SetSubtitle(subtitle)
+
+							r.SetName("/journal/view?id=" + strconv.Itoa(int(*journalEntry.Id)))
+
+							menuButton := gtk.NewMenuButton()
+							menuButton.SetVAlign(gtk.AlignCenter)
+							menuButton.SetIconName("view-more-symbolic")
+							menuButton.AddCSSClass("flat")
+
+							menu := gio.NewMenu()
+
+							deleteContactMenuItem := gio.NewMenuItem(gcore.Local("Delete journal entry"), "app.deleteJournalEntry")
+							deleteContactMenuItem.SetActionAndTargetValue("app.deleteJournalEntry", glib.NewVariantInt64(*journalEntry.Id))
+							menu.AppendItem(deleteContactMenuItem)
+
+							editContactMenuItem := gio.NewMenuItem(gcore.Local("Edit journal entry"), "app.editJournalEntry")
+							editContactMenuItem.SetActionAndTargetValue("app.editJournalEntry", glib.NewVariantInt64(*journalEntry.Id))
+							menu.AppendItem(editContactMenuItem)
+
+							menuButton.SetMenuModel(menu)
+
+							r.AddSuffix(menuButton)
+
+							r.AddSuffix(gtk.NewImageFromIconName("go-next-symbolic"))
+
+							r.SetActivatable(true)
+
+							journalListBox.Append(r)
+						}
+					} else {
+						journalAddButton.SetVisible(false)
+						journalSearchButton.SetVisible(false)
+					}
+				}()
 			}
 		}
 
@@ -3532,7 +3703,7 @@ func main() {
 					}
 
 					previewContactsCountLabel.SetLabel(fmt.Sprintf("%v", *res.JSON200.ContactsCount))
-					previewJournalEntriesCountLabel.SetLabel(fmt.Sprintf("%v", *res.JSON200.JournalEntriesCount))
+					previewJournalCountLabel.SetLabel(fmt.Sprintf("%v", *res.JSON200.JournalEntriesCount))
 				}()
 
 			case resources.PageRegister:
@@ -3578,7 +3749,7 @@ func main() {
 					}
 
 					homeSidebarContactsCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.ContactsCount))
-					homeSidebarJournalEntriesCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.JournalEntriesCount))
+					homeSidebarJournalCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.JournalEntriesCount))
 
 					homeSidebarListbox.SelectRow(homeSidebarListbox.RowAtIndex(0))
 					homeNavigation.ReplaceWithTags([]string{resources.PageContacts})

@@ -181,7 +181,7 @@ msgstr "Delete your data"
 msgid "Description (optional)"
 msgstr "Description (optional)"
 
-#: contacts_edit.html:23 contacts_add.html:20
+#: contacts_add.html:20 contacts_edit.html:23
 msgid "Doe"
 msgstr "Doe"
 
@@ -222,7 +222,7 @@ msgstr "Edit debt for %v %v"
 msgid "Edit journal entry"
 msgstr "Edit journal entry"
 
-#: contacts_edit.html:32 contacts_add.html:29
+#: contacts_add.html:29 contacts_edit.html:32
 msgid "Email"
 msgstr "Email"
 
@@ -231,7 +231,7 @@ msgstr "Email"
 msgid "Export your data"
 msgstr "Export your data"
 
-#: contacts_edit.html:16 contacts_add.html:14
+#: contacts_add.html:14 contacts_edit.html:16
 msgid "First name"
 msgstr "First name"
 
@@ -260,7 +260,7 @@ msgstr "Import user data"
 msgid "Imprint"
 msgstr "Imprint"
 
-#: contacts_edit.html:17 contacts_add.html:15
+#: contacts_add.html:15 contacts_edit.html:17
 msgid "Jean"
 msgstr "Jean"
 
@@ -273,7 +273,7 @@ msgstr "Journal"
 msgid "Journal entries"
 msgstr "Journal entries"
 
-#: contacts_edit.html:22 contacts_add.html:19
+#: contacts_add.html:19 contacts_edit.html:22
 msgid "Last name"
 msgstr "Last name"
 
@@ -299,7 +299,7 @@ msgstr "Markdown"
 msgid "Name"
 msgstr "Name"
 
-#: contacts_edit.html:27 contacts_add.html:24
+#: contacts_add.html:24 contacts_edit.html:27
 msgid "Nickname (optional)"
 msgstr "Nickname (optional)"
 
@@ -340,7 +340,7 @@ msgstr "Page not found"
 msgid "Privacy"
 msgstr "Privacy"
 
-#: contacts_edit.html:37 contacts_add.html:34
+#: contacts_add.html:34 contacts_edit.html:37
 msgid "Pronouns"
 msgstr "Pronouns"
 
@@ -416,15 +416,15 @@ msgstr "You owe %v %v %v"
 msgid "Your day was:"
 msgstr "Your day was:"
 
-#: contacts_edit.html:28 contacts_add.html:25
+#: contacts_add.html:25 contacts_edit.html:28
 msgid "jdoe"
 msgstr "jdoe"
 
-#: contacts_edit.html:33 contacts_add.html:30
+#: contacts_add.html:30 contacts_edit.html:33
 msgid "jean@doe.com"
 msgstr "jean@doe.com"
 
-#: contacts_edit.html:38 contacts_add.html:35
+#: contacts_add.html:35 contacts_edit.html:38
 msgid "they/them"
 msgstr "they/them"
 
