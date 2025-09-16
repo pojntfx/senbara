@@ -342,6 +342,7 @@ func main() {
 		contactsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceContactsCreateDialogUIPath)
 		debtsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceDebtsCreateDialogUIPath)
 		activitiesCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ActivitiesDebtsCreateDialogUIPath)
+		journalsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.JournalEntriesCreateDialogUIPath)
 
 		w = b.GetObject("main_window").Cast().(*adw.Window)
 
@@ -368,8 +369,8 @@ func main() {
 			previewContactsCountLabel   = b.GetObject("preview_contacts_count_label").Cast().(*gtk.Label)
 			previewContactsCountSpinner = b.GetObject("preview_contacts_count_spinner").Cast().(*adw.Spinner)
 
-			previewJournalCountLabel   = b.GetObject("preview_journal_count_label").Cast().(*gtk.Label)
-			previewJournalCountSpinner = b.GetObject("preview_journal_count_spinner").Cast().(*adw.Spinner)
+			previewJournalCountLabel   = b.GetObject("preview_journals_count_label").Cast().(*gtk.Label)
+			previewJournalCountSpinner = b.GetObject("preview_journals_count_spinner").Cast().(*adw.Spinner)
 
 			oidcDcrInitialAccessTokenPortalUrl string
 
@@ -398,8 +399,8 @@ func main() {
 			homeSidebarContactsCountLabel   = b.GetObject("home_sidebar_contacts_count_label").Cast().(*gtk.Label)
 			homeSidebarContactsCountSpinner = b.GetObject("home_sidebar_contacts_count_spinner").Cast().(*adw.Spinner)
 
-			homeSidebarJournalCountLabel   = b.GetObject("home_sidebar_journal_count_label").Cast().(*gtk.Label)
-			homeSidebarJournalCountSpinner = b.GetObject("home_sidebar_journal_count_spinner").Cast().(*adw.Spinner)
+			homeSidebarJournalCountLabel   = b.GetObject("home_sidebar_journals_count_label").Cast().(*gtk.Label)
+			homeSidebarJournalCountSpinner = b.GetObject("home_sidebar_journals_count_spinner").Cast().(*adw.Spinner)
 
 			contactsStack       = b.GetObject("contacts_stack").Cast().(*gtk.Stack)
 			contactsListBox     = b.GetObject("contacts_list").Cast().(*gtk.ListBox)
@@ -550,19 +551,28 @@ func main() {
 
 			activitiesCreateDialogPopoverLabel = activitiesCreateDialogBuilder.GetObject("activities_create_dialog_date_popover_label").Cast().(*gtk.Label)
 
-			journalStack       = b.GetObject("journal_stack").Cast().(*gtk.Stack)
-			journalListBox     = b.GetObject("journal_list").Cast().(*gtk.ListBox)
-			journalSearchEntry = b.GetObject("journal_searchentry").Cast().(*gtk.SearchEntry)
+			journalsStack       = b.GetObject("journals_stack").Cast().(*gtk.Stack)
+			journalsListBox     = b.GetObject("journals_list").Cast().(*gtk.ListBox)
+			journalsSearchEntry = b.GetObject("journals_searchentry").Cast().(*gtk.SearchEntry)
 
-			journalAddButton    = b.GetObject("journal_add_button").Cast().(*gtk.Button)
-			journalSearchButton = b.GetObject("journal_search_button").Cast().(*gtk.ToggleButton)
+			journalsAddButton    = b.GetObject("journals_add_button").Cast().(*gtk.Button)
+			journalsSearchButton = b.GetObject("journals_search_button").Cast().(*gtk.ToggleButton)
 
-			// TODO: Re-enable this once we have a journal entries create dialog
-			// journalEmptyAddButton = b.GetObject("journal_empty_add_button").Cast().(*gtk.Button)
+			journalsEmptyAddButton = b.GetObject("journals_empty_add_button").Cast().(*gtk.Button)
 
-			journalErrorStatusPage        = b.GetObject("journal_error_status_page").Cast().(*adw.StatusPage)
-			journalErrorRefreshButton     = b.GetObject("journal_error_refresh_button").Cast().(*gtk.Button)
-			journalErrorCopyDetailsButton = b.GetObject("journal_error_copy_details").Cast().(*gtk.Button)
+			journalsErrorStatusPage        = b.GetObject("journals_error_status_page").Cast().(*adw.StatusPage)
+			journalsErrorRefreshButton     = b.GetObject("journals_error_refresh_button").Cast().(*gtk.Button)
+			journalsErrorCopyDetailsButton = b.GetObject("journals_error_copy_details").Cast().(*gtk.Button)
+
+			journalsCreateDialog = journalsCreateDialogBuilder.GetObject("journals_create_dialog").Cast().(*adw.Dialog)
+
+			journalsCreateDialogAddButton  = journalsCreateDialogBuilder.GetObject("journals_create_dialog_add_button").Cast().(*gtk.Button)
+			journalsCreateDialogAddSpinner = journalsCreateDialogBuilder.GetObject("journals_create_dialog_add_spinner").Cast().(*adw.Spinner)
+
+			journalsCreateDialogRatingToggleGroup = journalsCreateDialogBuilder.GetObject("journals_create_dialog_rating").Cast().(*adw.ToggleGroup)
+			journalsCreateDialogTitleInput        = journalsCreateDialogBuilder.GetObject("journals_create_dialog_title_input").Cast().(*adw.EntryRow)
+			journalsCreateDialogBodyExpander      = journalsCreateDialogBuilder.GetObject("journals_create_dialog_body_expander").Cast().(*adw.ExpanderRow)
+			journalsCreateDialogBodyInput         = journalsCreateDialogBuilder.GetObject("journals_create_dialog_body_input").Cast().(*gtk.TextView)
 		)
 
 		settings.Bind(resources.SettingVerboseKey, preferencesDialogVerboseSwitch.Object, "active", gio.SettingsBindDefault)
@@ -1005,26 +1015,26 @@ func main() {
 			visibleJournalCount = 0
 		)
 
-		journalSearchEntry.ConnectSearchChanged(func() {
+		journalsSearchEntry.ConnectSearchChanged(func() {
 			go func() {
-				journalStack.SetVisibleChildName(resources.PageJournalLoading)
+				journalsStack.SetVisibleChildName(resources.PageJournalsLoading)
 
 				visibleJournalCount = 0
 
-				journalListBox.InvalidateFilter()
+				journalsListBox.InvalidateFilter()
 
 				if visibleJournalCount > 0 {
-					journalStack.SetVisibleChildName(resources.PageJournalList)
+					journalsStack.SetVisibleChildName(resources.PageJournalsList)
 				} else {
-					journalStack.SetVisibleChildName(resources.PageJournalNoResults)
+					journalsStack.SetVisibleChildName(resources.PageJournalsNoResults)
 				}
 			}()
 		})
 
-		journalListBox.SetFilterFunc(func(row *gtk.ListBoxRow) (ok bool) {
+		journalsListBox.SetFilterFunc(func(row *gtk.ListBoxRow) (ok bool) {
 			var (
 				r = row.Cast().(*adw.ActionRow)
-				f = strings.ToLower(journalSearchEntry.Text())
+				f = strings.ToLower(journalsSearchEntry.Text())
 
 				rt = strings.ToLower(r.Title())
 				rs = strings.ToLower(r.Subtitle())
@@ -1228,6 +1238,39 @@ func main() {
 		contactsEditPagePronounsInput.ConnectChanged(validateContactsEditPageForm)
 
 		contactsEditPageBirthdayInput.ConnectChanged(validateContactsEditPageForm)
+
+		journalsAddButton.ConnectClicked(func() {
+			journalsCreateDialog.Present(w)
+		})
+
+		journalsEmptyAddButton.ConnectClicked(func() {
+			journalsCreateDialog.Present(w)
+		})
+
+		validateJournalsCreateDialogForm := func() {
+			if journalsCreateDialogTitleInput.Text() != "" &&
+				journalsCreateDialogBodyInput.Buffer().Text(
+					journalsCreateDialogBodyInput.Buffer().StartIter(),
+					journalsCreateDialogBodyInput.Buffer().EndIter(),
+					true,
+				) != "" {
+				journalsCreateDialogAddButton.SetSensitive(true)
+			} else {
+				journalsCreateDialogAddButton.SetSensitive(false)
+			}
+		}
+
+		journalsCreateDialogTitleInput.ConnectChanged(validateJournalsCreateDialogForm)
+		journalsCreateDialogBodyInput.Buffer().ConnectChanged(validateJournalsCreateDialogForm)
+
+		journalsCreateDialog.ConnectClosed(func() {
+			journalsCreateDialogRatingToggleGroup.SetActive(0)
+
+			journalsCreateDialogTitleInput.SetText("")
+
+			journalsCreateDialogBodyExpander.SetExpanded(true)
+			journalsCreateDialogBodyInput.Buffer().SetText("")
+		})
 
 		createErrAndLoadingHandlers := func(
 			errorStatusPage *adw.StatusPage,
@@ -1438,19 +1481,19 @@ func main() {
 			enableJournalLoading,
 			disableJournalLoading,
 			clearJournalError := createErrAndLoadingHandlers(
-			journalErrorStatusPage,
-			journalErrorRefreshButton,
-			journalErrorCopyDetailsButton,
+			journalsErrorStatusPage,
+			journalsErrorRefreshButton,
+			journalsErrorCopyDetailsButton,
 
 			func() {
-				homeNavigation.ReplaceWithTags([]string{resources.PageJournal})
+				homeNavigation.ReplaceWithTags([]string{resources.PageJournals})
 			},
 
 			func() {
 				homeSidebarJournalCountLabel.SetVisible(false)
 				homeSidebarJournalCountSpinner.SetVisible(true)
 
-				journalStack.SetVisibleChildName(resources.PageJournalLoading)
+				journalsStack.SetVisibleChildName(resources.PageJournalsLoading)
 			},
 			func(err string) {
 				homeSidebarJournalCountSpinner.SetVisible(false)
@@ -1460,12 +1503,12 @@ func main() {
 
 				if err == "" {
 					if journalCount > 0 {
-						journalStack.SetVisibleChildName(resources.PageJournalList)
+						journalsStack.SetVisibleChildName(resources.PageJournalsList)
 					} else {
-						journalStack.SetVisibleChildName(resources.PageJournalEmpty)
+						journalsStack.SetVisibleChildName(resources.PageJournalsEmpty)
 					}
 				} else {
-					journalStack.SetVisibleChildName(resources.PageJournalError)
+					journalsStack.SetVisibleChildName(resources.PageJournalsError)
 				}
 			},
 		)
@@ -1935,6 +1978,66 @@ func main() {
 				mto.AddToast(adw.NewToast(gcore.Local("Updated contact")))
 
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
+			}()
+		})
+
+		journalsCreateDialogAddButton.ConnectClicked(func() {
+			log.Info("Handling journal entry creation")
+
+			journalsCreateDialogAddButton.SetSensitive(false)
+			journalsCreateDialogAddSpinner.SetVisible(true)
+
+			go func() {
+				defer journalsCreateDialogAddSpinner.SetVisible(false)
+				defer journalsCreateDialogAddButton.SetSensitive(true)
+
+				redirected, c, _, err := authorize(
+					ctx,
+
+					false,
+				)
+				if err != nil {
+					log.Warn("Could not authorize user for create journal entry action", "err", err)
+
+					handlePanic(err)
+
+					return
+				} else if redirected {
+					return
+				}
+
+				req := api.CreateJournalEntryJSONRequestBody{
+					Body: journalsCreateDialogBodyInput.Buffer().Text(
+						journalsCreateDialogBodyInput.Buffer().StartIter(),
+						journalsCreateDialogBodyInput.Buffer().EndIter(),
+						true,
+					),
+					Rating: int32(journalsCreateDialogRatingToggleGroup.Active()) + 1, // The toggle group is zero-indexed, but the rating is one-indexed
+					Title:  journalsCreateDialogTitleInput.Text(),
+				}
+
+				log.Debug("Creating journal entry", "request", req)
+
+				res, err := c.CreateJournalEntryWithResponse(ctx, req)
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+
+				log.Debug("Created journal entry", "status", res.StatusCode())
+
+				if res.StatusCode() != http.StatusOK {
+					handlePanic(errors.New(res.Status()))
+
+					return
+				}
+
+				mto.AddToast(adw.NewToast(gcore.Local("Created journal entry")))
+
+				journalsCreateDialog.Close()
+
+				homeNavigation.ReplaceWithTags([]string{resources.PageJournals})
 			}()
 		})
 
@@ -3339,7 +3442,7 @@ func main() {
 					}
 				}()
 
-			case resources.PageJournal:
+			case resources.PageJournals:
 				go func() {
 					enableJournalLoading()
 					defer disableJournalLoading()
@@ -3378,15 +3481,14 @@ func main() {
 
 					defer clearJournalError()
 
-					// TODO: Re-enable this once we have a journal entries create dialog
-					// validateJournalCreateDialogForm()
+					validateJournalsCreateDialogForm()
 
-					journalListBox.RemoveAll()
+					journalsListBox.RemoveAll()
 
 					journalCount = len(*res.JSON200)
 					if journalCount > 0 {
-						journalAddButton.SetVisible(true)
-						journalSearchButton.SetVisible(true)
+						journalsAddButton.SetVisible(true)
+						journalsSearchButton.SetVisible(true)
 
 						for _, journalEntry := range *res.JSON200 {
 							r := adw.NewActionRow()
@@ -3406,7 +3508,7 @@ func main() {
 							}
 							r.SetSubtitle(subtitle)
 
-							r.SetName("/journal/view?id=" + strconv.Itoa(int(*journalEntry.Id)))
+							r.SetName("/journals/view?id=" + strconv.Itoa(int(*journalEntry.Id)))
 
 							menuButton := gtk.NewMenuButton()
 							menuButton.SetVAlign(gtk.AlignCenter)
@@ -3431,11 +3533,11 @@ func main() {
 
 							r.SetActivatable(true)
 
-							journalListBox.Append(r)
+							journalsListBox.Append(r)
 						}
 					} else {
-						journalAddButton.SetVisible(false)
-						journalSearchButton.SetVisible(false)
+						journalsAddButton.SetVisible(false)
+						journalsSearchButton.SetVisible(false)
 					}
 				}()
 			}

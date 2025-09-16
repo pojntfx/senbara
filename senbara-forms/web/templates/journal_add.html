@@ -28,7 +28,13 @@
         <input type="text" name="title" id="title" required autofocus />
         <br />
 
-        <label for="body">{{ $.Locale.Get "Body" }}</label>
+        <label for="body">
+          {{ $.Locale.Get "Body" }} {{ $.Locale.Get "(you can use" }}
+          <a href="https://en.wikipedia.org/wiki/Markdown" target="_blank"
+            >{{ $.Locale.Get "Markdown" }}</a
+          >{{ $.Locale.Get ")" }}<!--
+          --></label
+        >
         <textarea name="body" id="body" required rows="20"></textarea>
         <br />
 

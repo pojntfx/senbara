@@ -43,7 +43,7 @@ const (
 	PageExchangeLogout = "/exchange/logout"
 
 	PageContacts = "/contacts"
-	PageJournal  = "/journal"
+	PageJournals = "/journals"
 
 	PageContactsLoading   = "/contacts/loading"
 	PageContactsList      = "/contacts/list"
@@ -76,11 +76,11 @@ const (
 	PageContactsEditData    = "/contacts/edit/data"
 	PageContactsEditError   = "/contacts/edit/error"
 
-	PageJournalLoading   = "/journal/loading"
-	PageJournalList      = "/journal/list"
-	PageJournalNoResults = "/journal/no-results"
-	PageJournalEmpty     = "/journal/empty"
-	PageJournalError     = "/journal/error"
+	PageJournalsLoading   = "/journals/loading"
+	PageJournalsList      = "/journals/list"
+	PageJournalsNoResults = "/journals/no-results"
+	PageJournalsEmpty     = "/journals/empty"
+	PageJournalsError     = "/journals/error"
 )
 
 //go:generate sh -c "blueprint-compiler batch-compile . . *.blp && sass .:. && glib-compile-schemas . && glib-compile-resources *.gresource.xml"
@@ -99,6 +99,7 @@ var (
 	ResourceContactsCreateDialogUIPath = path.Join(AppPath, "contacts-create-dialog.ui")
 	ResourceDebtsCreateDialogUIPath    = path.Join(AppPath, "debts-create-dialog.ui")
 	ActivitiesDebtsCreateDialogUIPath  = path.Join(AppPath, "activities-create-dialog.ui")
+	JournalEntriesCreateDialogUIPath   = path.Join(AppPath, "journal-entries-create-dialog.ui")
 	ResourceGSchemasCompiledPath       = path.Join(AppPath, "gschemas.compiled")
 	ResourceMetainfoPath               = path.Join(AppPath, "metainfo.xml")
 )

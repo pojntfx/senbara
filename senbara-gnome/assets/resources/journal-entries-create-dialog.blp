@@ -1,0 +1,99 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.Dialog journals_create_dialog {
+    title: _("Create a journal entry");
+
+    Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+            show-start-title-buttons: false;
+            show-end-title-buttons: false;
+
+            [start]
+            Button {
+                label: _("Cancel");
+                action-name: 'window.close';
+            }
+
+            [end]
+            Button journals_create_dialog_add_button {
+                sensitive: false;
+
+                Box {
+                    spacing: 10;
+
+                    Adw.Spinner journals_create_dialog_add_spinner {
+                        visible: false;
+                    }
+
+                    Label {
+                        label: _("Add");
+                    }
+                }
+
+                styles [
+                    "suggested-action",
+                ]
+            }
+        }
+
+        Adw.PreferencesPage {
+            Adw.PreferencesGroup {
+                Adw.ActionRow {
+                    title: _("How was your day?");
+
+                    Adw.ToggleGroup journals_create_dialog_rating {
+                        valign: center;
+
+                        Adw.Toggle {
+                            label: _("Great");
+                        }
+
+                        Adw.Toggle {
+                            label: _("OK");
+                        }
+
+                        Adw.Toggle {
+                            label: _("Bad");
+                        }
+                    }
+                }
+            }
+
+            Adw.PreferencesGroup {
+                Adw.EntryRow journals_create_dialog_title_input {
+                    title: _("Title");
+                }
+
+                Adw.ExpanderRow journals_create_dialog_body_expander {
+                    title: _("Body");
+                    subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
+                    expanded: true;
+
+                    ScrolledWindow {
+                        height-request: 100;
+                        margin-top: 6;
+                        margin-bottom: 6;
+                        margin-start: 6;
+                        margin-end: 6;
+
+                        TextView journals_create_dialog_body_input {
+                            wrap-mode: word;
+                            left-margin: 12;
+                            right-margin: 12;
+                            top-margin: 12;
+                            bottom-margin: 12;
+                            accepts-tab: false;
+
+                            styles [
+                                "card",
+                                "monospace",
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
