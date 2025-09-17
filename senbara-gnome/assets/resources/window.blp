@@ -1515,6 +1515,91 @@ Adw.Window main_window {
                                     }
                                 }
                             }
+
+                            Adw.NavigationPage journals_view_page {
+                                title: _("Journal Entry");
+                                tag: "/journals/view";
+
+                                Adw.ToolbarView {
+                                    [top]
+                                    Adw.HeaderBar {
+                                        title-widget: Adw.WindowTitle journals_view_page_title {};
+
+                                        [end]
+                                        Button journals_view_delete_button {
+                                            icon-name: "user-trash-symbolic";
+                                            tooltip-text: _("Delete journal entry");
+                                            action-name: "app.deleteJournalEntry";
+                                        }
+
+                                        [end]
+                                        Button journals_view_edit_button {
+                                            icon-name: "document-edit-symbolic";
+                                            tooltip-text: _("Edit journal entry");
+                                            action-name: "app.editJournalEntry";
+                                        }
+                                    }
+
+                                    ScrolledWindow {
+                                        Stack journals_view_stack {
+                                            StackPage {
+                                                name: "/journals/view/loading";
+
+                                                child: Adw.Clamp {
+                                                    maximum-size: 600;
+
+                                                    Box {
+                                                        halign: center;
+
+                                                        Adw.Spinner {
+                                                            width-request: 32;
+                                                            height-request: 32;
+                                                        }
+                                                    }
+                                                };
+                                            }
+
+                                            StackPage {
+                                                name: "/journals/view/data";
+
+                                                child: WebKit.WebView journals_view_body {};
+                                            }
+
+                                            StackPage {
+                                                name: "/journals/view/error";
+
+                                                child: Adw.Clamp {
+                                                    maximum-size: 600;
+
+                                                    Adw.StatusPage journals_view_error_status_page {
+                                                        title: _("Journal entry could not be loaded");
+                                                        icon-name: "dialog-warning-symbolic";
+
+                                                        Box {
+                                                            spacing: 10;
+                                                            halign: center;
+
+                                                            Button journals_view_error_refresh_button {
+                                                                halign: center;
+                                                                label: _("Refresh");
+
+                                                                styles [
+                                                                    "suggested-action",
+                                                                ]
+                                                            }
+
+                                                            Button journals_view_error_copy_details {
+                                                                halign: center;
+                                                                label: _("Copy details");
+                                                            }
+                                                        }
+                                                    }
+                                                };
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     };
                 }

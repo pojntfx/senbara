@@ -50,6 +50,8 @@ var (
 	errMissingActivityID        = errors.New("missing activity ID")
 	errInvalidActivityID        = errors.New("invalid activity ID")
 	errDebtDoesNotExist         = errors.New("debt does not exist")
+	errMissingJournalID         = errors.New("missing journal entry ID")
+	errInvalidJournalID         = errors.New("invalid journal entry ID")
 )
 
 const (
@@ -573,6 +575,17 @@ func main() {
 			journalsCreateDialogTitleInput        = journalsCreateDialogBuilder.GetObject("journals_create_dialog_title_input").Cast().(*adw.EntryRow)
 			journalsCreateDialogBodyExpander      = journalsCreateDialogBuilder.GetObject("journals_create_dialog_body_expander").Cast().(*adw.ExpanderRow)
 			journalsCreateDialogBodyInput         = journalsCreateDialogBuilder.GetObject("journals_create_dialog_body_input").Cast().(*gtk.TextView)
+
+			journalsViewPageTitle              = b.GetObject("journals_view_page_title").Cast().(*adw.WindowTitle)
+			journalsViewStack                  = b.GetObject("journals_view_stack").Cast().(*gtk.Stack)
+			journalsViewErrorStatusPage        = b.GetObject("journals_view_error_status_page").Cast().(*adw.StatusPage)
+			journalsViewErrorRefreshButton     = b.GetObject("journals_view_error_refresh_button").Cast().(*gtk.Button)
+			journalsViewErrorCopyDetailsButton = b.GetObject("journals_view_error_copy_details").Cast().(*gtk.Button)
+
+			journalsViewEditButton   = b.GetObject("journals_view_edit_button").Cast().(*gtk.Button)
+			journalsViewDeleteButton = b.GetObject("journals_view_delete_button").Cast().(*gtk.Button)
+
+			journalsViewPageBodyWebView = b.GetObject("journals_view_body").Cast().(*webkit.WebView)
 		)
 
 		settings.Bind(resources.SettingVerboseKey, preferencesDialogVerboseSwitch.Object, "active", gio.SettingsBindDefault)
@@ -1509,6 +1522,30 @@ func main() {
 					}
 				} else {
 					journalsStack.SetVisibleChildName(resources.PageJournalsError)
+				}
+			},
+		)
+
+		handleJournalsViewError,
+			enableJournalsViewLoading,
+			disableJournalsViewLoading,
+			clearJournalsViewError := createErrAndLoadingHandlers(
+			journalsViewErrorStatusPage,
+			journalsViewErrorRefreshButton,
+			journalsViewErrorCopyDetailsButton,
+
+			func() {
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageJournalsView})
+			},
+
+			func() {
+				journalsViewStack.SetVisibleChildName(resources.PageJournalsViewLoading)
+			},
+			func(err string) {
+				if err == "" {
+					journalsViewStack.SetVisibleChildName(resources.PageJournalsViewData)
+				} else {
+					journalsViewStack.SetVisibleChildName(resources.PageJournalsViewError)
 				}
 			},
 		)
@@ -2804,6 +2841,8 @@ func main() {
 		})
 		a.AddAction(editContactAction)
 
+		var selectedJournalID = -1
+
 		md := goldmark.New(
 			goldmark.WithExtensions(extension.GFM),
 		)
@@ -3540,6 +3579,126 @@ func main() {
 						journalsSearchButton.SetVisible(false)
 					}
 				}()
+
+			case resources.PageJournalsView:
+				go func() {
+					enableJournalsViewLoading()
+					defer disableJournalsViewLoading()
+
+					redirected, c, _, err := authorize(
+						ctx,
+
+						true,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for journal entries view page", "err", err)
+
+						handleJournalsViewError(err)
+
+						return
+					} else if redirected {
+						return
+					}
+
+					log.Debug("Getting journal entry", "id", selectedJournalID)
+
+					res, err := c.GetJournalEntryWithResponse(ctx, int64(selectedJournalID))
+					if err != nil {
+						handleJournalsViewError(err)
+
+						return
+					}
+
+					log.Debug("Got journal entry", "status", res.StatusCode())
+
+					if res.StatusCode() != http.StatusOK {
+						handleJournalsViewError(errors.New(res.Status()))
+
+						return
+					}
+
+					journalsViewEditButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Id))
+					journalsViewDeleteButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Id))
+
+					journalsViewPageTitle.SetTitle(*res.JSON200.Title)
+					subtitle := glib.NewDateTimeFromGo(*res.JSON200.Date).Format("%x") + " | "
+					switch *res.JSON200.Rating {
+					case 3:
+						subtitle += gcore.Local("Great")
+
+					case 2:
+						subtitle += gcore.Local("OK")
+
+					case 1:
+						subtitle += gcore.Local("Bad")
+					}
+					journalsViewPageTitle.SetSubtitle(subtitle)
+
+					var buf bytes.Buffer
+					if err := md.Convert([]byte(*res.JSON200.Body), &buf); err != nil {
+						log.Warn("Could not render Markdown for journal entries view page", "err", err)
+
+						handleJournalsViewError(err)
+
+						return
+					}
+
+					bg := gdk.NewRGBA(0, 0, 0, 0)
+					journalsViewPageBodyWebView.SetBackgroundColor(&bg)
+
+					journalsViewPageBodyWebView.ConnectDecidePolicy(func(decision webkit.PolicyDecisioner, decisionType webkit.PolicyDecisionType) (ok bool) {
+						if decisionType == webkit.PolicyDecisionTypeNavigationAction {
+							u, err := url.Parse(decision.(*webkit.NavigationPolicyDecision).NavigationAction().Request().URI())
+							if err != nil {
+								log.Warn("Could not parse journal entry view WebView", "err", err)
+
+								handleJournalsViewError(err)
+
+								return true
+							}
+
+							openExternally := u.Scheme != "about"
+
+							log.Debug("Handling navigation in journal entry view WebView", "openExternally", openExternally, "url", u.String())
+
+							if openExternally {
+								go func() {
+									var (
+										fl = gtk.NewURILauncher(u.String())
+										cc = make(chan error)
+									)
+									fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
+										if err := fl.LaunchFinish(res); err != nil {
+											cc <- err
+
+											return
+										}
+
+										cc <- nil
+									})
+
+									if err := <-cc; err != nil {
+										handlePanic(err)
+
+										return
+									}
+								}()
+
+								return true
+							}
+
+							return false
+						}
+
+						return false
+					})
+
+					glib.IdleAdd(func() {
+						journalsViewPageBodyWebView.LoadHtml(renderedMarkdownHTMLPrefix+buf.String(), "about:blank")
+					})
+
+					defer clearJournalsViewError()
+				}()
 			}
 		}
 
@@ -3615,6 +3774,41 @@ func main() {
 				selectedActivityID = id
 
 				homeNavigation.PushByTag(resources.PageActivitiesView)
+			}
+		})
+
+		journalsListBox.ConnectRowActivated(func(row *gtk.ListBoxRow) {
+			if row != nil {
+				u, err := url.Parse(row.Cast().(*adw.ActionRow).Name())
+				if err != nil {
+					log.Warn("Could not parse journal entry row URL", "err", err)
+
+					handlePanic(err)
+
+					return
+				}
+
+				rid := u.Query().Get("id")
+				if strings.TrimSpace(rid) == "" {
+					log.Warn("Could not get ID from journal entry row URL", "err", errMissingJournalID)
+
+					handlePanic(errMissingJournalID)
+
+					return
+				}
+
+				id, err := strconv.Atoi(rid)
+				if err != nil {
+					log.Warn("Could not parse ID from journal entry row URL", "err", errInvalidJournalID)
+
+					handlePanic(errInvalidJournalID)
+
+					return
+				}
+
+				selectedJournalID = id
+
+				homeNavigation.PushByTag(resources.PageJournalsView)
 			}
 		})
 
