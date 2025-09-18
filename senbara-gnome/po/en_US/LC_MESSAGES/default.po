@@ -14,7 +14,7 @@ msgstr "Create an activity"
 #: ../assets/resources/journal-entries-create-dialog.blp:15
 #: ../cmd/senbara-gnome/main.go:2448 ../cmd/senbara-gnome/main.go:2550
 #: ../cmd/senbara-gnome/main.go:2621 ../cmd/senbara-gnome/main.go:2682
-#: ../cmd/senbara-gnome/main.go:2743
+#: ../cmd/senbara-gnome/main.go:2743 ../cmd/senbara-gnome/main.go:2804
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -303,12 +303,12 @@ msgstr "Copy details"
 msgid "Contact"
 msgstr "Contact"
 
-#: ../assets/resources/window.blp:686 ../cmd/senbara-gnome/main.go:2942
+#: ../assets/resources/window.blp:686 ../cmd/senbara-gnome/main.go:3003
 msgid "Delete contact"
 msgstr "Delete contact"
 
 #: ../assets/resources/window.blp:693 ../assets/resources/window.blp:1214
-#: ../cmd/senbara-gnome/main.go:2946
+#: ../cmd/senbara-gnome/main.go:3007
 msgid "Edit contact"
 msgstr "Edit contact"
 
@@ -340,12 +340,12 @@ msgstr "Contact could not be loaded"
 msgid "Activity"
 msgstr "Activity"
 
-#: ../assets/resources/window.blp:844 ../cmd/senbara-gnome/main.go:3143
+#: ../assets/resources/window.blp:844 ../cmd/senbara-gnome/main.go:3204
 msgid "Delete activity"
 msgstr "Delete activity"
 
 #: ../assets/resources/window.blp:851 ../assets/resources/window.blp:1078
-#: ../cmd/senbara-gnome/main.go:3147
+#: ../cmd/senbara-gnome/main.go:3208
 msgid "Edit activity"
 msgstr "Edit activity"
 
@@ -353,7 +353,7 @@ msgstr "Edit activity"
 msgid "Activity could not be loaded"
 msgstr "Activity could not be loaded"
 
-#: ../assets/resources/window.blp:918 ../cmd/senbara-gnome/main.go:3098
+#: ../assets/resources/window.blp:918 ../cmd/senbara-gnome/main.go:3159
 msgid "Edit debt"
 msgstr "Edit debt"
 
@@ -403,12 +403,12 @@ msgstr "Contacts could not be loaded"
 msgid "Journal Entry"
 msgstr "Total journal entries"
 
-#: ../assets/resources/window.blp:1531 ../cmd/senbara-gnome/main.go:3559
+#: ../assets/resources/window.blp:1531 ../cmd/senbara-gnome/main.go:3620
 #, fuzzy
 msgid "Delete journal entry"
 msgstr "Total journal entries"
 
-#: ../assets/resources/window.blp:1538 ../cmd/senbara-gnome/main.go:3563
+#: ../assets/resources/window.blp:1538 ../cmd/senbara-gnome/main.go:3624
 #, fuzzy
 msgid "Edit journal entry"
 msgstr "Total journal entries"
@@ -479,7 +479,7 @@ msgstr "Import"
 
 #: ../assets/resources/window.blp:1766 ../cmd/senbara-gnome/main.go:2551
 #: ../cmd/senbara-gnome/main.go:2622 ../cmd/senbara-gnome/main.go:2683
-#: ../cmd/senbara-gnome/main.go:2744
+#: ../cmd/senbara-gnome/main.go:2744 ../cmd/senbara-gnome/main.go:2805
 msgid "Delete"
 msgstr "Delete"
 
@@ -497,17 +497,17 @@ msgid "How was your day?"
 msgstr ""
 
 #: ../assets/resources/journal-entries-create-dialog.blp:50
-#: ../cmd/senbara-gnome/main.go:3540 ../cmd/senbara-gnome/main.go:3627
+#: ../cmd/senbara-gnome/main.go:3601 ../cmd/senbara-gnome/main.go:3688
 msgid "Great"
 msgstr ""
 
 #: ../assets/resources/journal-entries-create-dialog.blp:54
-#: ../cmd/senbara-gnome/main.go:3543 ../cmd/senbara-gnome/main.go:3630
+#: ../cmd/senbara-gnome/main.go:3604 ../cmd/senbara-gnome/main.go:3691
 msgid "OK"
 msgstr ""
 
 #: ../assets/resources/journal-entries-create-dialog.blp:58
-#: ../cmd/senbara-gnome/main.go:3546 ../cmd/senbara-gnome/main.go:3633
+#: ../cmd/senbara-gnome/main.go:3607 ../cmd/senbara-gnome/main.go:3694
 msgid "Bad"
 msgstr ""
 
@@ -634,19 +634,34 @@ msgstr "Are you sure you want to delete this activity?"
 msgid "Activity deleted"
 msgstr "Activity deleted"
 
-#: ../cmd/senbara-gnome/main.go:3093
+#: ../cmd/senbara-gnome/main.go:2801
+#, fuzzy
+msgid "Deleting a journal entry"
+msgstr "Total journal entries"
+
+#: ../cmd/senbara-gnome/main.go:2802
+#, fuzzy
+msgid "Are you sure you want to delete this journal entry?"
+msgstr "Are you sure you want to delete this contact?"
+
+#: ../cmd/senbara-gnome/main.go:2841
+#, fuzzy
+msgid "Journal entry deleted"
+msgstr "Total journal entries"
+
+#: ../cmd/senbara-gnome/main.go:3154
 msgid "Settle debt"
 msgstr "Settle debt"
 
-#: ../cmd/senbara-gnome/main.go:3112
+#: ../cmd/senbara-gnome/main.go:3173
 msgid "Add a debt"
 msgstr "Add a debt"
 
-#: ../cmd/senbara-gnome/main.go:3164
+#: ../cmd/senbara-gnome/main.go:3225
 msgid "Add an activity"
 msgstr "Add an activity"
 
-#: ../cmd/senbara-gnome/main.go:3283
+#: ../cmd/senbara-gnome/main.go:3344
 msgid "No description provided."
 msgstr "No description provided."
 

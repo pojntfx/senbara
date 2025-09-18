@@ -2787,6 +2787,67 @@ func main() {
 		})
 		a.AddAction(deleteActivityAction)
 
+		deleteJournalAction := gio.NewSimpleAction("deleteJournalEntry", glib.NewVariantType("x"))
+		deleteJournalAction.ConnectActivate(func(parameter *glib.Variant) {
+			id := parameter.Int64()
+
+			log := log.With(
+				"id", id,
+			)
+
+			log.Info("Handling delete journal entry action")
+
+			confirm := adw.NewAlertDialog(
+				gcore.Local("Deleting a journal entry"),
+				gcore.Local("Are you sure you want to delete this journal entry?"),
+			)
+			confirm.AddResponse("cancel", gcore.Local("Cancel"))
+			confirm.AddResponse("delete", gcore.Local("Delete"))
+			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
+			confirm.ConnectResponse(func(response string) {
+				if response == "delete" {
+					redirected, c, _, err := authorize(
+						ctx,
+
+						false,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for delete journal entry action", "err", err)
+
+						handlePanic(err)
+
+						return
+					} else if redirected {
+						return
+					}
+
+					log.Debug("Deleting journal entry")
+
+					res, err := c.DeleteJournalEntryWithResponse(ctx, int64(id))
+					if err != nil {
+						handlePanic(err)
+
+						return
+					}
+
+					log.Debug("Deleted journal entry", "status", res.StatusCode())
+
+					if res.StatusCode() != http.StatusOK {
+						handlePanic(errors.New(res.Status()))
+
+						return
+					}
+
+					mto.AddToast(adw.NewToast(gcore.Local("Journal entry deleted")))
+
+					homeNavigation.ReplaceWithTags([]string{resources.PageJournals})
+				}
+			})
+
+			confirm.Present(w)
+		})
+		a.AddAction(deleteJournalAction)
+
 		var selectedActivityID = -1
 
 		editActivityAction := gio.NewSimpleAction("editActivity", glib.NewVariantType("x"))
