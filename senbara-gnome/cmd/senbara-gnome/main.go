@@ -586,6 +586,20 @@ func main() {
 			journalsViewDeleteButton = b.GetObject("journals_view_delete_button").Cast().(*gtk.Button)
 
 			journalsViewPageBodyWebView = b.GetObject("journals_view_body").Cast().(*webkit.WebView)
+
+			journalsEditPageTitle              = b.GetObject("journals_edit_page_title").Cast().(*adw.WindowTitle)
+			journalsEditStack                  = b.GetObject("journals_edit_stack").Cast().(*gtk.Stack)
+			journalsEditErrorStatusPage        = b.GetObject("journals_edit_error_status_page").Cast().(*adw.StatusPage)
+			journalsEditErrorRefreshButton     = b.GetObject("journals_edit_error_refresh_button").Cast().(*gtk.Button)
+			journalsEditErrorCopyDetailsButton = b.GetObject("journals_edit_error_copy_details").Cast().(*gtk.Button)
+
+			journalsEditPageSaveButton  = b.GetObject("journals_edit_save_button").Cast().(*gtk.Button)
+			journalsEditPageSaveSpinner = b.GetObject("journals_edit_save_spinner").Cast().(*adw.Spinner)
+
+			journalsEditPageRatingToggleGroup = b.GetObject("journals_edit_page_rating").Cast().(*adw.ToggleGroup)
+			journalsEditPageTitleInput        = b.GetObject("journals_edit_page_title_input").Cast().(*adw.EntryRow)
+			journalsEditPageBodyExpander      = b.GetObject("journals_edit_page_body_expander").Cast().(*adw.ExpanderRow)
+			journalsEditPageBodyInput         = b.GetObject("journals_edit_page_body_input").Cast().(*gtk.TextView)
 		)
 
 		settings.Bind(resources.SettingVerboseKey, preferencesDialogVerboseSwitch.Object, "active", gio.SettingsBindDefault)
@@ -1285,6 +1299,22 @@ func main() {
 			journalsCreateDialogBodyInput.Buffer().SetText("")
 		})
 
+		validateJournalsEditPageForm := func() {
+			if journalsEditPageTitleInput.Text() != "" &&
+				journalsEditPageBodyInput.Buffer().Text(
+					journalsEditPageBodyInput.Buffer().StartIter(),
+					journalsEditPageBodyInput.Buffer().EndIter(),
+					true,
+				) != "" {
+				journalsEditPageSaveButton.SetSensitive(true)
+			} else {
+				journalsEditPageSaveButton.SetSensitive(false)
+			}
+		}
+
+		journalsEditPageTitleInput.ConnectChanged(validateJournalsEditPageForm)
+		journalsEditPageBodyInput.Buffer().ConnectChanged(validateJournalsEditPageForm)
+
 		createErrAndLoadingHandlers := func(
 			errorStatusPage *adw.StatusPage,
 			errorRefreshButton *gtk.Button,
@@ -1546,6 +1576,30 @@ func main() {
 					journalsViewStack.SetVisibleChildName(resources.PageJournalsViewData)
 				} else {
 					journalsViewStack.SetVisibleChildName(resources.PageJournalsViewError)
+				}
+			},
+		)
+
+		handleJournalsEditError,
+			enableJournalsEditLoading,
+			disableJournalsEditLoading,
+			clearJournalsEditError := createErrAndLoadingHandlers(
+			journalsEditErrorStatusPage,
+			journalsEditErrorRefreshButton,
+			journalsEditErrorCopyDetailsButton,
+
+			func() {
+				homeNavigation.ReplaceWithTags([]string{resources.PageJournals, resources.PageJournalsView, resources.PageJournalsEdit})
+			},
+
+			func() {
+				journalsEditStack.SetVisibleChildName(resources.PageJournalsEditLoading)
+			},
+			func(err string) {
+				if err == "" {
+					journalsEditStack.SetVisibleChildName(resources.PageJournalsEditData)
+				} else {
+					journalsEditStack.SetVisibleChildName(resources.PageJournalsEditError)
 				}
 			},
 		)
@@ -2049,7 +2103,7 @@ func main() {
 						journalsCreateDialogBodyInput.Buffer().EndIter(),
 						true,
 					),
-					Rating: int32(journalsCreateDialogRatingToggleGroup.Active()) + 1, // The toggle group is zero-indexed, but the rating is one-indexed
+					Rating: int32(3 - journalsCreateDialogRatingToggleGroup.Active()), // The toggle group is zero-indexed, but the rating is one-indexed
 					Title:  journalsCreateDialogTitleInput.Text(),
 				}
 
@@ -2075,6 +2129,70 @@ func main() {
 				journalsCreateDialog.Close()
 
 				homeNavigation.ReplaceWithTags([]string{resources.PageJournals})
+			}()
+		})
+
+		journalsEditPageSaveButton.ConnectClicked(func() {
+			id := journalsEditPageSaveButton.ActionTargetValue().Int64()
+
+			log := log.With(
+				"id", id,
+			)
+
+			log.Info("Handling journal entry update")
+
+			journalsEditPageSaveButton.SetSensitive(false)
+			journalsEditPageSaveSpinner.SetVisible(true)
+
+			go func() {
+				defer journalsEditPageSaveSpinner.SetVisible(false)
+				defer journalsEditPageSaveButton.SetSensitive(true)
+
+				redirected, c, _, err := authorize(
+					ctx,
+
+					false,
+				)
+				if err != nil {
+					log.Warn("Could not authorize user for update journal entry action", "err", err)
+
+					handlePanic(err)
+
+					return
+				} else if redirected {
+					return
+				}
+
+				req := api.UpdateJournalEntryJSONRequestBody{
+					Body: journalsEditPageBodyInput.Buffer().Text(
+						journalsEditPageBodyInput.Buffer().StartIter(),
+						journalsEditPageBodyInput.Buffer().EndIter(),
+						true,
+					),
+					Rating: int32((3 - journalsEditPageRatingToggleGroup.Active())), // The toggle group is zero-indexed, but the rating is one-indexed
+					Title:  journalsEditPageTitleInput.Text(),
+				}
+
+				log.Debug("Creating journal entry", "request", req)
+
+				res, err := c.UpdateJournalEntryWithResponse(ctx, id, req)
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+
+				log.Debug("Updated journal entry", "status", res.StatusCode())
+
+				if res.StatusCode() != http.StatusOK {
+					handlePanic(errors.New(res.Status()))
+
+					return
+				}
+
+				mto.AddToast(adw.NewToast(gcore.Local("Updated journal entry")))
+
+				homeNavigation.ReplaceWithTags([]string{resources.PageJournals, resources.PageJournalsView})
 			}()
 		})
 
@@ -2903,6 +3021,22 @@ func main() {
 		a.AddAction(editContactAction)
 
 		var selectedJournalID = -1
+
+		editJournalAction := gio.NewSimpleAction("editJournalEntry", glib.NewVariantType("x"))
+		editJournalAction.ConnectActivate(func(parameter *glib.Variant) {
+			id := parameter.Int64()
+
+			log := log.With(
+				"id", id,
+			)
+
+			log.Info("Handling edit journal entry action")
+
+			selectedJournalID = int(id)
+
+			homeNavigation.PushByTag(resources.PageJournalsEdit)
+		})
+		a.AddAction(editJournalAction)
 
 		md := goldmark.New(
 			goldmark.WithExtensions(extension.GFM),
@@ -3759,6 +3893,57 @@ func main() {
 					})
 
 					defer clearJournalsViewError()
+				}()
+
+			case resources.PageJournalsEdit:
+				go func() {
+					enableJournalsEditLoading()
+					defer disableJournalsEditLoading()
+
+					redirected, c, _, err := authorize(
+						ctx,
+
+						true,
+					)
+					if err != nil {
+						log.Warn("Could not authorize user for journal entry edit page", "err", err)
+
+						handleJournalsEditError(err)
+
+						return
+					} else if redirected {
+						return
+					}
+
+					log.Debug("Getting journal entry", "id", selectedJournalID)
+
+					res, err := c.GetJournalEntryWithResponse(ctx, int64(selectedJournalID))
+					if err != nil {
+						handleJournalsEditError(err)
+
+						return
+					}
+
+					log.Debug("Got journal entry", "status", res.StatusCode())
+
+					if res.StatusCode() != http.StatusOK {
+						handleJournalsEditError(errors.New(res.Status()))
+
+						return
+					}
+
+					defer clearJournalsEditError()
+
+					journalsEditPageSaveButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Id))
+
+					journalsEditPageTitle.SetSubtitle(*res.JSON200.Title)
+
+					journalsEditPageRatingToggleGroup.SetActive(3 - uint(*res.JSON200.Rating)) // The toggle group is zero-indexed, but the rating is one-indexed
+
+					journalsEditPageTitleInput.SetText(*res.JSON200.Title)
+
+					journalsEditPageBodyExpander.SetExpanded(true)
+					journalsEditPageBodyInput.Buffer().SetText(*res.JSON200.Body)
 				}()
 			}
 		}

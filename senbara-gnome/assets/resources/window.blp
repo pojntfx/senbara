@@ -1600,6 +1600,159 @@ Adw.Window main_window {
                                     }
                                 }
                             }
+
+                            Adw.NavigationPage journals_edit_page {
+                                title: _("Edit journal entry");
+                                tag: "/journals/edit";
+                                can-pop: false;
+
+                                Adw.ToolbarView {
+                                    [top]
+                                    Adw.HeaderBar {
+                                        title-widget: Adw.WindowTitle journals_edit_page_title {
+                                            title: bind journals_edit_page.title;
+                                        };
+
+                                        [start]
+                                        Button {
+                                            label: _("Cancel");
+                                            action-name: "navigation.pop";
+                                        }
+
+                                        [end]
+                                        Button journals_edit_save_button {
+                                            sensitive: false;
+
+                                            Box {
+                                                spacing: 10;
+
+                                                Adw.Spinner journals_edit_save_spinner {
+                                                    visible: false;
+                                                }
+
+                                                Label {
+                                                    label: _("Save");
+                                                }
+                                            }
+
+                                            styles [
+                                                "suggested-action",
+                                            ]
+                                        }
+                                    }
+
+                                    ScrolledWindow {
+                                        Adw.Clamp {
+                                            maximum-size: 600;
+
+                                            Stack journals_edit_stack {
+                                                StackPage {
+                                                    name: "/journals/edit/loading";
+
+                                                    child: Box {
+                                                        halign: center;
+
+                                                        Adw.Spinner {
+                                                            width-request: 32;
+                                                            height-request: 32;
+                                                        }
+                                                    };
+                                                }
+
+                                                StackPage {
+                                                    name: "/journals/edit/data";
+
+                                                    child: Adw.PreferencesPage {
+                                                        Adw.PreferencesGroup {
+                                                            Adw.ActionRow {
+                                                                title: _("How was your day?");
+
+                                                                Adw.ToggleGroup journals_edit_page_rating {
+                                                                    valign: center;
+
+                                                                    Adw.Toggle {
+                                                                        label: _("Great");
+                                                                    }
+
+                                                                    Adw.Toggle {
+                                                                        label: _("OK");
+                                                                    }
+
+                                                                    Adw.Toggle {
+                                                                        label: _("Bad");
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+
+                                                        Adw.PreferencesGroup {
+                                                            Adw.EntryRow journals_edit_page_title_input {
+                                                                title: _("Title");
+                                                            }
+
+                                                            Adw.ExpanderRow journals_edit_page_body_expander {
+                                                                title: _("Body");
+                                                                subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
+                                                                expanded: true;
+
+                                                                ScrolledWindow {
+                                                                    height-request: 100;
+                                                                    margin-top: 6;
+                                                                    margin-bottom: 6;
+                                                                    margin-start: 6;
+                                                                    margin-end: 6;
+
+                                                                    TextView journals_edit_page_body_input {
+                                                                        wrap-mode: word;
+                                                                        left-margin: 12;
+                                                                        right-margin: 12;
+                                                                        top-margin: 12;
+                                                                        bottom-margin: 12;
+                                                                        accepts-tab: false;
+
+                                                                        styles [
+                                                                            "card",
+                                                                            "monospace",
+                                                                        ]
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    };
+                                                }
+
+                                                StackPage {
+                                                    name: "/journals/edit/error";
+
+                                                    child: Adw.StatusPage journals_edit_error_status_page {
+                                                        title: _("Journal entry could not be loaded");
+                                                        icon-name: "dialog-warning-symbolic";
+
+                                                        Box {
+                                                            spacing: 10;
+                                                            halign: center;
+
+                                                            Button journals_edit_error_refresh_button {
+                                                                halign: center;
+                                                                label: _("Refresh");
+
+                                                                styles [
+                                                                    "suggested-action",
+                                                                ]
+                                                            }
+
+                                                            Button journals_edit_error_copy_details {
+                                                                halign: center;
+                                                                label: _("Copy details");
+                                                            }
+                                                        }
+                                                    };
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     };
                 }

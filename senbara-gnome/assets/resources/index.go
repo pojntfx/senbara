@@ -86,6 +86,11 @@ const (
 	PageJournalsViewLoading = "/journals/view/loading"
 	PageJournalsViewData    = "/journals/view/data"
 	PageJournalsViewError   = "/journals/view/error"
+
+	PageJournalsEdit        = "/journals/edit"
+	PageJournalsEditLoading = "/journals/edit/loading"
+	PageJournalsEditData    = "/journals/edit/data"
+	PageJournalsEditError   = "/journals/edit/error"
 )
 
 //go:generate sh -c "blueprint-compiler batch-compile . . *.blp && sass .:. && glib-compile-schemas . && glib-compile-resources *.gresource.xml"
