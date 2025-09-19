@@ -81,7 +81,8 @@ Adw.ApplicationWindow main_window {
                                 }
 
                                 Label {
-                                    label: _("Get started");
+                                    label: _("_Get started");
+                                    use-underline: true;
                                 }
                             }
 
@@ -121,7 +122,8 @@ Adw.ApplicationWindow main_window {
                                 }
 
                                 Label {
-                                    label: _("Continue");
+                                    label: _("_Continue");
+                                    use-underline: true;
                                 }
                             }
 
@@ -141,7 +143,8 @@ Adw.ApplicationWindow main_window {
 
                             Adw.PreferencesGroup {
                                 Adw.EntryRow config_server_url_input {
-                                    title: _("Senbara Server URL (e.g. https://rest.senbara.p8.lu/)");
+                                    title: _("_Senbara Server URL (e.g. https://rest.senbara.p8.lu/)");
+                                    use-underline: true;
                                 }
                             }
                         }
@@ -176,7 +179,8 @@ Adw.ApplicationWindow main_window {
                                 }
 
                                 Label {
-                                    label: _("Login");
+                                    label: _("_Login");
+                                    use-underline: true;
                                 }
                             }
 
@@ -320,7 +324,8 @@ Adw.ApplicationWindow main_window {
 
                         Button register_register_button {
                             halign: center;
-                            label: _("Register");
+                            label: _("_Register");
+                            use-underline: true;
 
                             styles [
                                 "suggested-action",
@@ -358,7 +363,8 @@ Adw.ApplicationWindow main_window {
                                 }
 
                                 Label {
-                                    label: _("Login");
+                                    label: _("_Login");
+                                    use-underline: true;
                                 }
                             }
 
@@ -397,7 +403,8 @@ Adw.ApplicationWindow main_window {
 
                         [start]
                         Button exchange_login_cancel_button {
-                            label: _("Cancel");
+                            label: _("_Cancel");
+                            use-underline: true;
                         }
 
                         [end]
@@ -484,7 +491,8 @@ Adw.ApplicationWindow main_window {
                                     selection-mode: single;
 
                                     Adw.ActionRow {
-                                        title: _("Contacts");
+                                        title: _("C_ontacts");
+                                        use-underline: true;
                                         icon-name: "address-book-symbolic";
                                         name: "/contacts";
                                         activatable: true;
@@ -510,7 +518,8 @@ Adw.ApplicationWindow main_window {
                                     }
 
                                     Adw.ActionRow {
-                                        title: _("Journal");
+                                        title: _("_Journal");
+                                        use-underline: true;
                                         icon-name: "open-book-symbolic";
                                         name: "/journals";
                                         activatable: true;
@@ -630,7 +639,8 @@ Adw.ApplicationWindow main_window {
 
                                                     Button contacts_empty_add_button {
                                                         halign: center;
-                                                        label: _("Add a contact");
+                                                        label: _("_Add a contact");
+                                                        use-underline: true;
 
                                                         styles [
                                                             "suggested-action",
@@ -652,7 +662,8 @@ Adw.ApplicationWindow main_window {
 
                                                         Button contacts_error_refresh_button {
                                                             halign: center;
-                                                            label: _("Refresh");
+                                                            label: _("_Refresh");
+                                                            use-underline: true;
 
                                                             styles [
                                                                 "suggested-action",
@@ -661,7 +672,8 @@ Adw.ApplicationWindow main_window {
 
                                                         Button contacts_error_copy_details {
                                                             halign: center;
-                                                            label: _("Copy details");
+                                                            label: _("_Copy details");
+                                                            use-underline: true;
                                                         }
                                                     }
                                                 };
@@ -809,7 +821,8 @@ Adw.ApplicationWindow main_window {
 
                                                             Button contacts_view_error_refresh_button {
                                                                 halign: center;
-                                                                label: _("Refresh");
+                                                                label: _("_Refresh");
+                                                                use-underline: true;
 
                                                                 styles [
                                                                     "suggested-action",
@@ -818,7 +831,8 @@ Adw.ApplicationWindow main_window {
 
                                                             Button contacts_view_error_copy_details {
                                                                 halign: center;
-                                                                label: _("Copy details");
+                                                                label: _("_Copy details");
+                                                                use-underline: true;
                                                             }
                                                         }
                                                     };
@@ -894,7 +908,8 @@ Adw.ApplicationWindow main_window {
 
                                                             Button activities_view_error_refresh_button {
                                                                 halign: center;
-                                                                label: _("Refresh");
+                                                                label: _("_Refresh");
+                                                                use-underline: true;
 
                                                                 styles [
                                                                     "suggested-action",
@@ -903,7 +918,8 @@ Adw.ApplicationWindow main_window {
 
                                                             Button activities_view_error_copy_details {
                                                                 halign: center;
-                                                                label: _("Copy details");
+                                                                label: _("_Copy details");
+                                                                use-underline: true;
                                                             }
                                                         }
                                                     }
@@ -928,7 +944,8 @@ Adw.ApplicationWindow main_window {
 
                                         [start]
                                         Button {
-                                            label: _("Cancel");
+                                            label: _("_Cancel");
+                                            use-underline: true;
                                             action-name: "navigation.pop";
                                         }
 
@@ -944,7 +961,8 @@ Adw.ApplicationWindow main_window {
                                                 }
 
                                                 Label {
-                                                    label: _("Save");
+                                                    label: _("_Save");
+                                                    use-underline: true;
                                                 }
                                             }
 
@@ -998,7 +1016,8 @@ Adw.ApplicationWindow main_window {
 
                                                         Adw.PreferencesGroup {
                                                             Adw.SpinRow debts_edit_page_amount_input {
-                                                                title: _("Amount");
+                                                                title: _("_Amount");
+                                                                use-underline: true;
 
                                                                 adjustment: Gtk.Adjustment {
                                                                     lower: 0;
@@ -1008,13 +1027,15 @@ Adw.ApplicationWindow main_window {
                                                             }
 
                                                             Adw.EntryRow debts_edit_page_currency_input {
-                                                                title: _("Currency");
+                                                                title: _("C_urrency");
+                                                                use-underline: true;
                                                             }
                                                         }
 
                                                         Adw.PreferencesGroup {
                                                             Adw.ExpanderRow debts_edit_page_description_expander {
-                                                                title: _("Description (optional)");
+                                                                title: _("_Description (optional)");
+                                                                use-underline: true;
 
                                                                 ScrolledWindow {
                                                                     height-request: 100;
@@ -1054,7 +1075,8 @@ Adw.ApplicationWindow main_window {
 
                                                             Button debts_edit_error_refresh_button {
                                                                 halign: center;
-                                                                label: _("Refresh");
+                                                                label: _("_Refresh");
+                                                                use-underline: true;
 
                                                                 styles [
                                                                     "suggested-action",
@@ -1063,7 +1085,8 @@ Adw.ApplicationWindow main_window {
 
                                                             Button debts_edit_error_copy_details {
                                                                 halign: center;
-                                                                label: _("Copy details");
+                                                                label: _("_Copy details");
+                                                                use-underline: true;
                                                             }
                                                         }
                                                     };
@@ -1088,7 +1111,8 @@ Adw.ApplicationWindow main_window {
 
                                         [start]
                                         Button {
-                                            label: _("Cancel");
+                                            label: _("_Cancel");
+                                            use-underline: true;
                                             action-name: "navigation.pop";
                                         }
 
@@ -1104,7 +1128,8 @@ Adw.ApplicationWindow main_window {
                                                 }
 
                                                 Label {
-                                                    label: _("Save");
+                                                    label: _("_Save");
+                                                    use-underline: true;
                                                 }
                                             }
 
@@ -1138,17 +1163,20 @@ Adw.ApplicationWindow main_window {
                                                     child: Adw.PreferencesPage {
                                                         Adw.PreferencesGroup {
                                                             Adw.EntryRow activities_edit_page_name_input {
-                                                                title: _("Name");
+                                                                title: _("_Name");
+                                                                use-underline: true;
                                                             }
 
                                                             Adw.EntryRow activities_edit_page_date_input {
-                                                                title: _("Date");
+                                                                title: _("_Date");
+                                                                use-underline: true;
                                                             }
                                                         }
 
                                                         Adw.PreferencesGroup {
                                                             Adw.ExpanderRow activities_edit_page_description_expander {
-                                                                title: _("Description (optional)");
+                                                                title: _("D_escription (optional)");
+                                                                use-underline: true;
                                                                 subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
 
                                                                 ScrolledWindow {
@@ -1190,7 +1218,8 @@ Adw.ApplicationWindow main_window {
 
                                                             Button activities_edit_error_refresh_button {
                                                                 halign: center;
-                                                                label: _("Refresh");
+                                                                label: _("_Refresh");
+                                                                use-underline: true;
 
                                                                 styles [
                                                                     "suggested-action",
@@ -1199,7 +1228,8 @@ Adw.ApplicationWindow main_window {
 
                                                             Button activities_edit_error_copy_details {
                                                                 halign: center;
-                                                                label: _("Copy details");
+                                                                label: _("_Copy details");
+                                                                use-underline: true;
                                                             }
                                                         }
                                                     };
@@ -1224,7 +1254,8 @@ Adw.ApplicationWindow main_window {
 
                                         [start]
                                         Button {
-                                            label: _("Cancel");
+                                            label: _("_Cancel");
+                                            use-underline: true;
                                             action-name: "navigation.pop";
                                         }
 
@@ -1240,7 +1271,8 @@ Adw.ApplicationWindow main_window {
                                                 }
 
                                                 Label {
-                                                    label: _("Save");
+                                                    label: _("_Save");
+                                                    use-underline: true;
                                                 }
                                             }
 
@@ -1274,36 +1306,43 @@ Adw.ApplicationWindow main_window {
                                                     child: Adw.PreferencesPage {
                                                         Adw.PreferencesGroup {
                                                             Adw.EntryRow contacts_edit_page_first_name_input {
-                                                                title: _("First name");
+                                                                title: _("_First name");
+                                                                use-underline: true;
                                                                 input-purpose: name;
                                                             }
 
                                                             Adw.EntryRow contacts_edit_page_last_name_input {
-                                                                title: _("Last name");
+                                                                title: _("_Last name");
+                                                                use-underline: true;
                                                                 input-purpose: name;
                                                             }
 
                                                             Adw.EntryRow contacts_edit_page_nickname_input {
-                                                                title: _("Nickname (optional)");
+                                                                title: _("_Nickname (optional)");
+                                                                use-underline: true;
                                                             }
 
                                                             Adw.EntryRow contacts_edit_page_email_input {
-                                                                title: _("Email");
+                                                                title: _("_Email");
+                                                                use-underline: true;
                                                                 input-purpose: email;
                                                             }
 
                                                             Adw.EntryRow contacts_edit_page_pronouns_input {
-                                                                title: _("Pronouns");
+                                                                title: _("_Pronouns");
+                                                                use-underline: true;
                                                             }
 
                                                             Adw.EntryRow contacts_edit_page_birthday_input {
-                                                                title: _("Birthday (optional)");
+                                                                title: _("_Birthday (optional)");
+                                                                use-underline: true;
                                                             }
                                                         }
 
                                                         Adw.PreferencesGroup {
                                                             Adw.ExpanderRow contacts_edit_page_address_expander {
-                                                                title: _("Address (optional)");
+                                                                title: _("A_ddress (optional)");
+                                                                use-underline: true;
 
                                                                 ScrolledWindow {
                                                                     height-request: 100;
@@ -1329,7 +1368,8 @@ Adw.ApplicationWindow main_window {
                                                             }
 
                                                             Adw.ExpanderRow contacts_edit_page_notes_expander {
-                                                                title: _("Notes (optional)");
+                                                                title: _("N_otes (optional)");
+                                                                use-underline: true;
 
                                                                 ScrolledWindow {
                                                                     height-request: 100;
@@ -1370,7 +1410,8 @@ Adw.ApplicationWindow main_window {
 
                                                             Button contacts_edit_error_refresh_button {
                                                                 halign: center;
-                                                                label: _("Refresh");
+                                                                label: _("_Refresh");
+                                                                use-underline: true;
 
                                                                 styles [
                                                                     "suggested-action",
@@ -1379,7 +1420,8 @@ Adw.ApplicationWindow main_window {
 
                                                             Button contacts_edit_error_copy_details {
                                                                 halign: center;
-                                                                label: _("Copy details");
+                                                                label: _("_Copy details");
+                                                                use-underline: true;
                                                             }
                                                         }
                                                     };
@@ -1475,7 +1517,8 @@ Adw.ApplicationWindow main_window {
 
                                                     Button journals_empty_add_button {
                                                         halign: center;
-                                                        label: _("Add a journal entry");
+                                                        label: _("_Add a journal entry");
+                                                        use-underline: true;
 
                                                         styles [
                                                             "suggested-action",
@@ -1497,7 +1540,8 @@ Adw.ApplicationWindow main_window {
 
                                                         Button journals_error_refresh_button {
                                                             halign: center;
-                                                            label: _("Refresh");
+                                                            label: _("_Refresh");
+                                                            use-underline: true;
 
                                                             styles [
                                                                 "suggested-action",
@@ -1506,7 +1550,8 @@ Adw.ApplicationWindow main_window {
 
                                                         Button journals_error_copy_details {
                                                             halign: center;
-                                                            label: _("Copy details");
+                                                            label: _("_Copy details");
+                                                            use-underline: true;
                                                         }
                                                     }
                                                 };
@@ -1581,7 +1626,8 @@ Adw.ApplicationWindow main_window {
 
                                                             Button journals_view_error_refresh_button {
                                                                 halign: center;
-                                                                label: _("Refresh");
+                                                                label: _("_Refresh");
+                                                                use-underline: true;
 
                                                                 styles [
                                                                     "suggested-action",
@@ -1590,7 +1636,8 @@ Adw.ApplicationWindow main_window {
 
                                                             Button journals_view_error_copy_details {
                                                                 halign: center;
-                                                                label: _("Copy details");
+                                                                label: _("_Copy details");
+                                                                use-underline: true;
                                                             }
                                                         }
                                                     }
@@ -1615,7 +1662,8 @@ Adw.ApplicationWindow main_window {
 
                                         [start]
                                         Button {
-                                            label: _("Cancel");
+                                            label: _("_Cancel");
+                                            use-underline: true;
                                             action-name: "navigation.pop";
                                         }
 
@@ -1631,7 +1679,8 @@ Adw.ApplicationWindow main_window {
                                                 }
 
                                                 Label {
-                                                    label: _("Save");
+                                                    label: _("_Save");
+                                                    use-underline: true;
                                                 }
                                             }
 
@@ -1665,21 +1714,25 @@ Adw.ApplicationWindow main_window {
                                                     child: Adw.PreferencesPage {
                                                         Adw.PreferencesGroup {
                                                             Adw.ActionRow {
-                                                                title: _("How was your day?");
+                                                                title: _("_How was your day?");
+                                                                use-underline: true;
 
                                                                 Adw.ToggleGroup journals_edit_page_rating {
                                                                     valign: center;
 
                                                                     Adw.Toggle {
-                                                                        label: _("Great");
+                                                                        label: _("_Great");
+                                                                        use-underline: true;
                                                                     }
 
                                                                     Adw.Toggle {
-                                                                        label: _("OK");
+                                                                        label: _("_OK");
+                                                                        use-underline: true;
                                                                     }
 
                                                                     Adw.Toggle {
-                                                                        label: _("Bad");
+                                                                        label: _("B_ad");
+                                                                        use-underline: true;
                                                                     }
                                                                 }
                                                             }
@@ -1687,11 +1740,13 @@ Adw.ApplicationWindow main_window {
 
                                                         Adw.PreferencesGroup {
                                                             Adw.EntryRow journals_edit_page_title_input {
-                                                                title: _("Title");
+                                                                title: _("_Title");
+                                                                use-underline: true;
                                                             }
 
                                                             Adw.ExpanderRow journals_edit_page_body_expander {
-                                                                title: _("Body");
+                                                                title: _("_Body");
+                                                                use-underline: true;
                                                                 subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
                                                                 expanded: true;
 
@@ -1734,7 +1789,8 @@ Adw.ApplicationWindow main_window {
 
                                                             Button journals_edit_error_refresh_button {
                                                                 halign: center;
-                                                                label: _("Refresh");
+                                                                label: _("_Refresh");
+                                                                use-underline: true;
 
                                                                 styles [
                                                                     "suggested-action",
@@ -1743,7 +1799,8 @@ Adw.ApplicationWindow main_window {
 
                                                             Button journals_edit_error_copy_details {
                                                                 halign: center;
-                                                                label: _("Copy details");
+                                                                label: _("_Copy details");
+                                                                use-underline: true;
                                                             }
                                                         }
                                                     };
@@ -1769,7 +1826,8 @@ Adw.ApplicationWindow main_window {
 
                         [start]
                         Button exchange_logout_cancel_button {
-                            label: _("Cancel");
+                            label: _("_Cancel");
+                            use-underline: true;
                         }
 
                         [end]
@@ -1805,6 +1863,11 @@ menu server_setup_menu {
         item {
             label: _("Preferences");
             action: "app.openPreferences";
+        }
+
+        item {
+            label: _("_Keyboard shortcuts");
+            action: "win.show-help-overlay";
         }
 
         item {

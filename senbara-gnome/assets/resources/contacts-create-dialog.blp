@@ -12,7 +12,8 @@ Adw.Dialog contacts_create_dialog {
 
             [start]
             Button {
-                label: _("Cancel");
+                label: _("_Cancel");
+                use-underline: true;
                 action-name: 'window.close';
             }
 
@@ -28,7 +29,8 @@ Adw.Dialog contacts_create_dialog {
                     }
 
                     Label {
-                        label: _("Add");
+                        label: _("_Add");
+                        use-underline: true;
                     }
                 }
 
@@ -41,26 +43,32 @@ Adw.Dialog contacts_create_dialog {
         Adw.PreferencesPage {
             Adw.PreferencesGroup {
                 Adw.EntryRow contacts_create_dialog_first_name_input {
-                    title: _("First name");
+                    title: _("_First name");
+                    use-underline: true;
                     input-purpose: name;
+                    can-focus: true;
                 }
 
                 Adw.EntryRow contacts_create_dialog_last_name_input {
-                    title: _("Last name");
+                    title: _("_Last name");
+                    use-underline: true;
                     input-purpose: name;
                 }
 
                 Adw.EntryRow contacts_create_dialog_nickname_input {
-                    title: _("Nickname (optional)");
+                    title: _("_Nickname (optional)");
+                    use-underline: true;
                 }
 
                 Adw.EntryRow contacts_create_dialog_email_input {
-                    title: _("Email");
+                    title: _("_Email");
+                    use-underline: true;
                     input-purpose: email;
                 }
 
                 Adw.EntryRow contacts_create_dialog_pronouns_input {
-                    title: _("Pronouns");
+                    title: _("_Pronouns");
+                    use-underline: true;
                 }
             }
         }

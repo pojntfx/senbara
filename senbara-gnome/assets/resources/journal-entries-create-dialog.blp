@@ -12,7 +12,8 @@ Adw.Dialog journals_create_dialog {
 
             [start]
             Button {
-                label: _("Cancel");
+                label: _("_Cancel");
+                use-underline: true;
                 action-name: 'window.close';
             }
 
@@ -28,7 +29,8 @@ Adw.Dialog journals_create_dialog {
                     }
 
                     Label {
-                        label: _("Add");
+                        label: _("_Add");
+                        use-underline: true;
                     }
                 }
 
@@ -41,21 +43,25 @@ Adw.Dialog journals_create_dialog {
         Adw.PreferencesPage {
             Adw.PreferencesGroup {
                 Adw.ActionRow {
-                    title: _("How was your day?");
+                    title: _("_How was your day?");
+                    use-underline: true;
 
                     Adw.ToggleGroup journals_create_dialog_rating {
                         valign: center;
 
                         Adw.Toggle {
-                            label: _("Great");
+                            label: _("_Great");
+                            use-underline: true;
                         }
 
                         Adw.Toggle {
-                            label: _("OK");
+                            label: _("_OK");
+                            use-underline: true;
                         }
 
                         Adw.Toggle {
-                            label: _("Bad");
+                            label: _("B_ad");
+                            use-underline: true;
                         }
                     }
                 }
@@ -63,11 +69,14 @@ Adw.Dialog journals_create_dialog {
 
             Adw.PreferencesGroup {
                 Adw.EntryRow journals_create_dialog_title_input {
-                    title: _("Title");
+                    title: _("_Title");
+                    use-underline: true;
+                    can-focus: true;
                 }
 
                 Adw.ExpanderRow journals_create_dialog_body_expander {
-                    title: _("Body");
+                    title: _("_Body");
+                    use-underline: true;
                     subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
                     expanded: true;
 

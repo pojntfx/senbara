@@ -16,7 +16,8 @@ Adw.Dialog activities_create_dialog {
 
             [start]
             Button {
-                label: _("Cancel");
+                label: _("_Cancel");
+                use-underline: true;
                 action-name: 'window.close';
             }
 
@@ -32,7 +33,8 @@ Adw.Dialog activities_create_dialog {
                     }
 
                     Label {
-                        label: _("Add");
+                        label: _("_Add");
+                        use-underline: true;
                     }
                 }
 
@@ -45,17 +47,21 @@ Adw.Dialog activities_create_dialog {
         Adw.PreferencesPage {
             Adw.PreferencesGroup {
                 Adw.EntryRow activities_create_dialog_name_input {
-                    title: _("Name");
+                    title: _("_Name");
+                    use-underline: true;
+                    can-focus: true;
                 }
 
                 Adw.EntryRow activities_create_dialog_date_input {
-                    title: _("Date");
+                    title: _("_Date");
+                    use-underline: true;
                 }
             }
 
             Adw.PreferencesGroup {
                 Adw.ExpanderRow activities_create_dialog_description_expander {
-                    title: _("Description (optional)");
+                    title: _("D_escription (optional)");
+                    use-underline: true;
                     subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
 
                     ScrolledWindow {

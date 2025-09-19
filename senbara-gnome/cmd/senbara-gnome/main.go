@@ -3398,8 +3398,10 @@ func main() {
 
 					debtsCreateDialogTitle.SetSubtitle(*res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName)
 
-					debtsCreateDialogYouOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("You owe %v", *res.JSON200.Entry.FirstName)))
-					debtsCreateDialogTheyOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("%v owes you", *res.JSON200.Entry.FirstName)))
+					debtsCreateDialogYouOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("_You owe %v", *res.JSON200.Entry.FirstName)))
+					debtsCreateDialogYouOweActionRow.SetUseUnderline(true)
+					debtsCreateDialogTheyOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("%v ow_es you", *res.JSON200.Entry.FirstName)))
+					debtsCreateDialogTheyOweActionRow.SetUseUnderline(true)
 
 					contactsViewDebtsListBox.RemoveAll()
 
@@ -3445,7 +3447,8 @@ func main() {
 
 					addDebtButton := adw.NewButtonRow()
 					addDebtButton.SetStartIconName("list-add-symbolic")
-					addDebtButton.SetTitle(gcore.Local("Add a debt"))
+					addDebtButton.SetTitle(gcore.Local("Add a _debt"))
+					addDebtButton.SetUseUnderline(true)
 
 					addDebtButton.ConnectActivated(func() {
 						debtsCreateDialog.Present(w)
@@ -3498,7 +3501,8 @@ func main() {
 
 					addActivityButton := adw.NewButtonRow()
 					addActivityButton.SetStartIconName("list-add-symbolic")
-					addActivityButton.SetTitle(gcore.Local("Add an activity"))
+					addActivityButton.SetTitle(gcore.Local("Add an ac_tivity"))
+					addActivityButton.SetUseUnderline(true)
 
 					addActivityButton.ConnectActivated(func() {
 						activitiesCreateDialog.Present(w)
@@ -3735,8 +3739,10 @@ func main() {
 
 					debtsEditPageTitle.SetSubtitle(*res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName)
 
-					debtsEditPageYouOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("You owe %v", *res.JSON200.Entry.FirstName)))
-					debtsEditPageTheyOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("%v owes you", *res.JSON200.Entry.FirstName)))
+					debtsEditPageYouOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("_You owe %v", *res.JSON200.Entry.FirstName)))
+					debtsEditPageYouOweActionRow.SetUseUnderline(true)
+					debtsEditPageTheyOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("%v ow_es you", *res.JSON200.Entry.FirstName)))
+					debtsEditPageTheyOweActionRow.SetUseUnderline(true)
 
 					debtsEditPageYouOweRadio.SetActive(*debt.Amount < 0)
 					debtsEditPageAmountInput.SetValue(math.Abs(float64(*debt.Amount)))
