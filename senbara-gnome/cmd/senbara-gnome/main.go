@@ -1091,10 +1091,12 @@ func main() {
 
 		contactsAddButton.ConnectClicked(func() {
 			contactsCreateDialog.Present(w)
+			contactsCreateDialogFirstNameInput.GrabFocus()
 		})
 
 		contactsEmptyAddButton.ConnectClicked(func() {
 			contactsCreateDialog.Present(w)
+			contactsCreateDialogFirstNameInput.GrabFocus()
 		})
 
 		validateContactsCreateDialogForm := func() {
@@ -1274,10 +1276,12 @@ func main() {
 
 		journalsAddButton.ConnectClicked(func() {
 			journalsCreateDialog.Present(w)
+			journalsCreateDialogTitleInput.GrabFocus()
 		})
 
 		journalsEmptyAddButton.ConnectClicked(func() {
 			journalsCreateDialog.Present(w)
+			journalsCreateDialogTitleInput.GrabFocus()
 		})
 
 		validateJournalsCreateDialogForm := func() {
@@ -1472,6 +1476,7 @@ func main() {
 			func(err string) {
 				if err == "" {
 					activitiesEditStack.SetVisibleChildName(resources.PageActivitiesEditData)
+					activitiesEditPageNameInput.GrabFocus()
 				} else {
 					activitiesEditStack.SetVisibleChildName(resources.PageActivitiesEditError)
 				}
@@ -1496,6 +1501,7 @@ func main() {
 			func(err string) {
 				if err == "" {
 					debtsEditStack.SetVisibleChildName(resources.PageDebtsEditData)
+					debtsEditPageAmountInput.GrabFocus()
 				} else {
 					debtsEditStack.SetVisibleChildName(resources.PageDebtsEditError)
 				}
@@ -1520,6 +1526,7 @@ func main() {
 			func(err string) {
 				if err == "" {
 					contactsEditStack.SetVisibleChildName(resources.PageContactsEditData)
+					contactsEditPageFirstNameInput.GrabFocus()
 				} else {
 					contactsEditStack.SetVisibleChildName(resources.PageContactsEditError)
 				}
@@ -1604,6 +1611,7 @@ func main() {
 			func(err string) {
 				if err == "" {
 					journalsEditStack.SetVisibleChildName(resources.PageJournalsEditData)
+					journalsEditPageTitleInput.GrabFocus()
 				} else {
 					journalsEditStack.SetVisibleChildName(resources.PageJournalsEditError)
 				}
@@ -3441,6 +3449,7 @@ func main() {
 
 					addDebtButton.ConnectActivated(func() {
 						debtsCreateDialog.Present(w)
+						debtsCreateDialogAmountInput.GrabFocus()
 					})
 
 					contactsViewDebtsListBox.Append(addDebtButton)
@@ -3493,6 +3502,7 @@ func main() {
 
 					addActivityButton.ConnectActivated(func() {
 						activitiesCreateDialog.Present(w)
+						activitiesCreateDialogNameInput.GrabFocus()
 					})
 
 					addActivityButton.SetActivatable(true)
