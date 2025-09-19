@@ -4334,6 +4334,7 @@ func main() {
 			case resources.PageConfigServerURL:
 				configServerURLContinueButton.SetSensitive(false)
 				configServerURLContinueSpinner.SetVisible(true)
+				configServerURLInput.GrabFocus()
 
 				go func() {
 					defer configServerURLContinueSpinner.SetVisible(false)
