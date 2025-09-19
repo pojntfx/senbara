@@ -156,7 +156,7 @@ func main() {
 	a := adw.NewApplication(resources.AppID, gio.ApplicationHandlesOpen)
 
 	var (
-		w       *adw.Window
+		w       *adw.ApplicationWindow
 		nv      *adw.NavigationView
 		mto     *adw.ToastOverlay
 		authner *authn.Authner
@@ -341,12 +341,13 @@ func main() {
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
 
 		preferencesDialogBuilder := gtk.NewBuilderFromResource(resources.ResourcePreferencesDialogUIPath)
+		helpOverlayBuilder := gtk.NewBuilderFromResource(resources.ResourceHelpOverviewUIPath)
 		contactsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceContactsCreateDialogUIPath)
 		debtsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceDebtsCreateDialogUIPath)
 		activitiesCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ActivitiesDebtsCreateDialogUIPath)
 		journalsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.JournalEntriesCreateDialogUIPath)
 
-		w = b.GetObject("main_window").Cast().(*adw.Window)
+		w = b.GetObject("main_window").Cast().(*adw.ApplicationWindow)
 
 		nv = b.GetObject("main_navigation").Cast().(*adw.NavigationView)
 
@@ -355,6 +356,8 @@ func main() {
 		var (
 			preferencesDialog              = preferencesDialogBuilder.GetObject("preferences_dialog").Cast().(*adw.PreferencesDialog)
 			preferencesDialogVerboseSwitch = preferencesDialogBuilder.GetObject("preferences_dialog_verbose_switch").Cast().(*gtk.Switch)
+
+			helpOverlayShortcutsWindow = helpOverlayBuilder.GetObject("help_overlay").Cast().(*gtk.ShortcutsWindow)
 
 			welcomeGetStartedButton  = b.GetObject("welcome_get_started_button").Cast().(*gtk.Button)
 			welcomeGetStartedSpinner = b.GetObject("welcome_get_started_spinner").Cast().(*adw.Spinner)
@@ -677,6 +680,9 @@ func main() {
 
 			return nil
 		}
+
+		w.SetHelpOverlay(helpOverlayShortcutsWindow)
+		a.SetAccelsForAction("win.show-help-overlay", []string{`<Primary>question`})
 
 		openPreferencesAction := gio.NewSimpleAction("openPreferences", nil)
 		openPreferencesAction.ConnectActivate(func(parameter *glib.Variant) {
@@ -2716,6 +2722,13 @@ func main() {
 		})
 		a.AddAction(aboutAction)
 
+		quitAction := gio.NewSimpleAction("quit", nil)
+		quitAction.ConnectActivate(func(parameter *glib.Variant) {
+			a.Quit()
+		})
+		a.SetAccelsForAction("app.quit", []string{`<Primary>q`})
+		a.AddAction(quitAction)
+
 		copyErrorToClipboardAction := gio.NewSimpleAction("copyErrorToClipboard", nil)
 		copyErrorToClipboardAction.ConnectActivate(func(parameter *glib.Variant) {
 			w.Clipboard().SetText(rawError)
@@ -3037,6 +3050,126 @@ func main() {
 			homeNavigation.PushByTag(resources.PageJournalsEdit)
 		})
 		a.AddAction(editJournalAction)
+
+		createItemAction := gio.NewSimpleAction("createItem", nil)
+		createItemAction.ConnectActivate(func(parameter *glib.Variant) {
+			var (
+				tag = homeNavigation.VisiblePage().Tag()
+				log = log.With("tag", tag)
+			)
+
+			log.Info("Handling create item action")
+
+			switch tag {
+			case resources.PageContacts:
+				contactsCreateDialog.Present(w)
+				contactsCreateDialogFirstNameInput.GrabFocus()
+
+			case resources.PageJournals:
+				journalsCreateDialog.Present(w)
+				journalsCreateDialogTitleInput.GrabFocus()
+			}
+		})
+		a.AddAction(createItemAction)
+		a.SetAccelsForAction("app.createItem", []string{`<Primary>n`})
+
+		searchListAction := gio.NewSimpleAction("searchList", nil)
+		searchListAction.ConnectActivate(func(parameter *glib.Variant) {
+			var (
+				tag = homeNavigation.VisiblePage().Tag()
+				log = log.With("tag", tag)
+			)
+
+			log.Info("Handling search list action")
+
+			switch tag {
+			case resources.PageContacts:
+				contactsSearchButton.SetActive(!contactsSearchButton.Active())
+
+			case resources.PageJournals:
+				journalsSearchButton.SetActive(!journalsSearchButton.Active())
+			}
+		})
+		a.AddAction(searchListAction)
+		a.SetAccelsForAction("app.searchList", []string{`<Primary>f`})
+
+		editItemAction := gio.NewSimpleAction("editItem", nil)
+		editItemAction.ConnectActivate(func(parameter *glib.Variant) {
+			var (
+				tag = homeNavigation.VisiblePage().Tag()
+				log = log.With("tag", tag)
+			)
+
+			log.Info("Handling edit item action")
+
+			switch tag {
+			case resources.PageContactsView:
+				if selectedContactID != -1 {
+					editContactAction.Activate(glib.NewVariantInt64(int64(selectedContactID)))
+				}
+
+			case resources.PageActivitiesView:
+				if selectedActivityID != -1 {
+					editActivityAction.Activate(glib.NewVariantInt64(int64(selectedActivityID)))
+				}
+
+			case resources.PageJournalsView:
+				if selectedJournalID != -1 {
+					editJournalAction.Activate(glib.NewVariantInt64(int64(selectedJournalID)))
+				}
+			}
+		})
+		a.AddAction(editItemAction)
+		a.SetAccelsForAction("app.editItem", []string{`<Primary>e`})
+
+		deleteItemAction := gio.NewSimpleAction("deleteItem", nil)
+		deleteItemAction.ConnectActivate(func(parameter *glib.Variant) {
+			var (
+				tag = homeNavigation.VisiblePage().Tag()
+				log = log.With("tag", tag)
+			)
+
+			log.Info("Handling delete item action")
+
+			switch tag {
+			case resources.PageContactsView:
+				if selectedContactID != -1 {
+					deleteContactAction.Activate(glib.NewVariantInt64(int64(selectedContactID)))
+				}
+
+			case resources.PageActivitiesView:
+				if selectedActivityID != -1 {
+					deleteActivityAction.Activate(glib.NewVariantInt64(int64(selectedActivityID)))
+				}
+
+			case resources.PageJournalsView:
+				if selectedJournalID != -1 {
+					deleteJournalAction.Activate(glib.NewVariantInt64(int64(selectedJournalID)))
+				}
+			}
+		})
+		a.AddAction(deleteItemAction)
+		a.SetAccelsForAction("app.deleteItem", []string{`<Primary>Delete`})
+
+		navigateToContactsAction := gio.NewSimpleAction("navigateToContacts", nil)
+		navigateToContactsAction.ConnectActivate(func(parameter *glib.Variant) {
+			log.Info("Handling navigate to contacts action")
+
+			homeSidebarListbox.SelectRow(homeSidebarListbox.RowAtIndex(0))
+			homeNavigation.ReplaceWithTags([]string{resources.PageContacts})
+		})
+		a.AddAction(navigateToContactsAction)
+		a.SetAccelsForAction("app.navigateToContacts", []string{`<Alt>1`})
+
+		navigateToJournalAction := gio.NewSimpleAction("navigateToJournal", nil)
+		navigateToJournalAction.ConnectActivate(func(parameter *glib.Variant) {
+			log.Info("Handling navigate to journal action")
+
+			homeSidebarListbox.SelectRow(homeSidebarListbox.RowAtIndex(1))
+			homeNavigation.ReplaceWithTags([]string{resources.PageJournals})
+		})
+		a.AddAction(navigateToJournalAction)
+		a.SetAccelsForAction("app.navigateToJournal", []string{`<Alt>2`})
 
 		md := goldmark.New(
 			goldmark.WithExtensions(extension.GFM),

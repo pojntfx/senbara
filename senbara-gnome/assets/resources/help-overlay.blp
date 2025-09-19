@@ -1,0 +1,76 @@
+using Gtk 4.0;
+
+ShortcutsWindow help_overlay {
+  modal: true;
+
+  ShortcutsSection {
+    section-name: "shortcuts";
+    max-height: 10;
+
+    ShortcutsGroup {
+      title: _("General");
+
+      ShortcutsShortcut {
+        title: _("Open menu");
+        accelerator: "F10";
+      }
+
+      ShortcutsShortcut {
+        title: _("Show shortcuts");
+        action-name: "win.show-help-overlay";
+      }
+
+      ShortcutsShortcut {
+        title: _("Quit");
+        action-name: "app.quit";
+      }
+
+      ShortcutsShortcut {
+        title: _("Show preferences");
+        action-name: "app.openPreferences";
+      }
+    }
+
+    ShortcutsGroup {
+      title: _("Navigation");
+
+      ShortcutsShortcut {
+        title: _("Navigate to contacts");
+        action-name: "app.navigateToContacts";
+      }
+
+      ShortcutsShortcut {
+        title: _("Navigate to journal");
+        action-name: "app.navigateToJournal";
+      }
+    }
+
+    ShortcutsGroup {
+      title: _("Lists");
+
+      ShortcutsShortcut {
+        title: _("Search in current list");
+        action-name: "app.searchList";
+      }
+
+      ShortcutsShortcut {
+        title: _("Create new item in current list");
+        action-name: "app.createItem";
+      }
+    }
+
+    ShortcutsGroup {
+      title: _("Items");
+
+      ShortcutsShortcut {
+        title: _("Edit current item");
+        action-name: "app.editItem";
+      }
+
+      ShortcutsShortcut {
+        title: _("Delete current item");
+        action-name: "app.deleteItem";
+      }
+    }
+  }
+}

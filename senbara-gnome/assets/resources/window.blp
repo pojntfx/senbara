@@ -2,7 +2,7 @@ using Gtk 4.0;
 using Adw 1;
 using WebKit 6.0;
 
-Adw.Window main_window {
+Adw.ApplicationWindow main_window {
     default-width: 960;
     default-height: 540;
     title: _("Senbara Forms");
@@ -1820,34 +1820,39 @@ menu preview_menu {
         action: "app.selectDifferentServer";
     }
 
+    submenu {
+        label: _("About this Senbara server");
+
+        item {
+            label: _("License");
+            action: "app.license";
+        }
+
+        item {
+            label: _("Code");
+            action: "app.code";
+        }
+
+        item {
+            label: _("Privacy");
+            action: "app.privacy";
+        }
+
+        item {
+            label: _("Imprint");
+            action: "app.imprint";
+        }
+    }
+
     section {
         item {
             label: _("Preferences");
             action: "app.openPreferences";
         }
 
-        submenu {
-            label: _("About Senbara REST");
-
-            item {
-                label: _("License");
-                action: "app.license";
-            }
-
-            item {
-                label: _("Code");
-                action: "app.code";
-            }
-
-            item {
-                label: _("Privacy");
-                action: "app.privacy";
-            }
-
-            item {
-                label: _("Imprint");
-                action: "app.imprint";
-            }
+        item {
+            label: _("_Keyboard shortcuts");
+            action: "win.show-help-overlay";
         }
 
         item {
@@ -1858,34 +1863,39 @@ menu preview_menu {
 }
 
 menu auth_setup_menu {
+    submenu {
+        label: _("About this Senbara server");
+
+        item {
+            label: _("License");
+            action: "app.license";
+        }
+
+        item {
+            label: _("Code");
+            action: "app.code";
+        }
+
+        item {
+            label: _("Privacy");
+            action: "app.privacy";
+        }
+
+        item {
+            label: _("Imprint");
+            action: "app.imprint";
+        }
+    }
+
     section {
         item {
             label: _("Preferences");
             action: "app.openPreferences";
         }
 
-        submenu {
-            label: _("About Senbara REST");
-
-            item {
-                label: _("License");
-                action: "app.license";
-            }
-
-            item {
-                label: _("Code");
-                action: "app.code";
-            }
-
-            item {
-                label: _("Privacy");
-                action: "app.privacy";
-            }
-
-            item {
-                label: _("Imprint");
-                action: "app.imprint";
-            }
+        item {
+            label: _("_Keyboard shortcuts");
+            action: "win.show-help-overlay";
         }
 
         item {
@@ -1924,13 +1934,8 @@ menu home_user_menu {
 }
 
 menu home_menu {
-    item {
-        label: _("Preferences");
-        action: "app.openPreferences";
-    }
-
     submenu {
-        label: _("About Senbara REST");
+        label: _("About this Senbara server");
 
         item {
             label: _("License");
@@ -1958,9 +1963,21 @@ menu home_menu {
         }
     }
 
-    item {
-        label: _("About Senbara Forms");
-        action: "app.about";
+    section {
+        item {
+            label: _("Preferences");
+            action: "app.openPreferences";
+        }
+
+        item {
+            label: _("_Keyboard shortcuts");
+            action: "win.show-help-overlay";
+        }
+
+        item {
+            label: _("About Senbara Forms");
+            action: "app.about";
+        }
     }
 }
 
