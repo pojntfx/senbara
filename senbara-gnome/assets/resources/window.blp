@@ -274,7 +274,7 @@ Adw.ApplicationWindow main_window {
                                         ]
                                     }
 
-                                    Label preview_journals_count_label {
+                                    Label preview_journal_entries_count_label {
                                         label: _("0");
                                         halign: center;
                                         valign: center;
@@ -285,7 +285,7 @@ Adw.ApplicationWindow main_window {
                                         ]
                                     }
 
-                                    Adw.Spinner preview_journals_count_spinner {
+                                    Adw.Spinner preview_journal_entries_count_spinner {
                                         width-request: 37;
                                         height-request: 37;
                                     }
@@ -526,7 +526,7 @@ Adw.ApplicationWindow main_window {
 
                                         [suffix]
                                         Box {
-                                            Gtk.Label home_sidebar_journals_count_label {
+                                            Gtk.Label home_sidebar_journal_entries_count_label {
                                                 label: _("0");
                                                 valign: center;
                                                 visible: false;
@@ -536,7 +536,7 @@ Adw.ApplicationWindow main_window {
                                                 ]
                                             }
 
-                                            Adw.Spinner home_sidebar_journals_count_spinner {}
+                                            Adw.Spinner home_sidebar_journal_entries_count_spinner {}
                                         }
 
                                         styles [
@@ -1436,28 +1436,28 @@ Adw.ApplicationWindow main_window {
                                 title: _("Journal");
                                 tag: "/journal";
 
-                                Adw.ToolbarView journals_toolbarview {
+                                Adw.ToolbarView journal_entries_toolbarview {
                                     [top]
                                     Adw.HeaderBar {
                                         [start]
-                                        Button journals_add_button {
+                                        Button journal_entries_add_button {
                                             icon-name: "list-add-symbolic";
                                             tooltip-text: _("Add a journal entry");
                                         }
 
                                         [start]
-                                        ToggleButton journals_search_button {
-                                            active: bind journals_searchbar.search-mode-enabled bidirectional;
+                                        ToggleButton journal_entries_search_button {
+                                            active: bind journal_entries_searchbar.search-mode-enabled bidirectional;
                                             icon-name: "system-search-symbolic";
                                             tooltip-text: _("Search");
                                         }
                                     }
 
                                     [top]
-                                    SearchBar journals_searchbar {
-                                        key-capture-widget: journals_toolbarview;
+                                    SearchBar journal_entries_searchbar {
+                                        key-capture-widget: journal_entries_toolbarview;
 
-                                        SearchEntry journals_searchentry {
+                                        SearchEntry journal_entries_searchentry {
                                             placeholder-text: _("Search journal entries");
                                             max-width-chars: 28;
                                             search-delay: 100;
@@ -1467,7 +1467,7 @@ Adw.ApplicationWindow main_window {
                                     Adw.Clamp {
                                         maximum-size: 600;
 
-                                        Stack journals_stack {
+                                        Stack journal_entries_stack {
                                             StackPage {
                                                 name: "/journal/loading";
 
@@ -1484,7 +1484,7 @@ Adw.ApplicationWindow main_window {
                                             StackPage {
                                                 name: "/journal/list";
 
-                                                child: Gtk.ListBox journals_list {
+                                                child: Gtk.ListBox journal_entries_list {
                                                     selection-mode: browse;
                                                     valign: start;
                                                     margin-top: 24;
@@ -1515,7 +1515,7 @@ Adw.ApplicationWindow main_window {
                                                     title: _("No journal entries found");
                                                     icon-name: "open-book-symbolic";
 
-                                                    Button journals_empty_add_button {
+                                                    Button journal_entries_empty_add_button {
                                                         halign: center;
                                                         label: _("_Add a journal entry");
                                                         use-underline: true;
@@ -1530,7 +1530,7 @@ Adw.ApplicationWindow main_window {
                                             StackPage {
                                                 name: "/journal/error";
 
-                                                child: Adw.StatusPage journals_error_status_page {
+                                                child: Adw.StatusPage journal_entries_error_status_page {
                                                     title: _("Journal entries could not be loaded");
                                                     icon-name: "dialog-warning-symbolic";
 
@@ -1538,7 +1538,7 @@ Adw.ApplicationWindow main_window {
                                                         spacing: 10;
                                                         halign: center;
 
-                                                        Button journals_error_refresh_button {
+                                                        Button journal_entries_error_refresh_button {
                                                             halign: center;
                                                             label: _("_Refresh");
                                                             use-underline: true;
@@ -1548,7 +1548,7 @@ Adw.ApplicationWindow main_window {
                                                             ]
                                                         }
 
-                                                        Button journals_error_copy_details {
+                                                        Button journal_entries_error_copy_details {
                                                             halign: center;
                                                             label: _("_Copy details");
                                                             use-underline: true;
@@ -1561,24 +1561,24 @@ Adw.ApplicationWindow main_window {
                                 }
                             }
 
-                            Adw.NavigationPage journals_view_page {
+                            Adw.NavigationPage journal_entries_view_page {
                                 title: _("Journal Entry");
                                 tag: "/journal/view";
 
                                 Adw.ToolbarView {
                                     [top]
                                     Adw.HeaderBar {
-                                        title-widget: Adw.WindowTitle journals_view_page_title {};
+                                        title-widget: Adw.WindowTitle journal_entries_view_page_title {};
 
                                         [end]
-                                        Button journals_view_delete_button {
+                                        Button journal_entries_view_delete_button {
                                             icon-name: "user-trash-symbolic";
                                             tooltip-text: _("Delete journal entry");
                                             action-name: "app.deleteJournalEntry";
                                         }
 
                                         [end]
-                                        Button journals_view_edit_button {
+                                        Button journal_entries_view_edit_button {
                                             icon-name: "document-edit-symbolic";
                                             tooltip-text: _("Edit journal entry");
                                             action-name: "app.editJournalEntry";
@@ -1586,7 +1586,7 @@ Adw.ApplicationWindow main_window {
                                     }
 
                                     ScrolledWindow {
-                                        Stack journals_view_stack {
+                                        Stack journal_entries_view_stack {
                                             StackPage {
                                                 name: "/journal/view/loading";
 
@@ -1607,7 +1607,7 @@ Adw.ApplicationWindow main_window {
                                             StackPage {
                                                 name: "/journal/view/data";
 
-                                                child: WebKit.WebView journals_view_body {};
+                                                child: WebKit.WebView journal_entries_view_body {};
                                             }
 
                                             StackPage {
@@ -1616,7 +1616,7 @@ Adw.ApplicationWindow main_window {
                                                 child: Adw.Clamp {
                                                     maximum-size: 600;
 
-                                                    Adw.StatusPage journals_view_error_status_page {
+                                                    Adw.StatusPage journal_entries_view_error_status_page {
                                                         title: _("Journal entry could not be loaded");
                                                         icon-name: "dialog-warning-symbolic";
 
@@ -1624,7 +1624,7 @@ Adw.ApplicationWindow main_window {
                                                             spacing: 10;
                                                             halign: center;
 
-                                                            Button journals_view_error_refresh_button {
+                                                            Button journal_entries_view_error_refresh_button {
                                                                 halign: center;
                                                                 label: _("_Refresh");
                                                                 use-underline: true;
@@ -1634,7 +1634,7 @@ Adw.ApplicationWindow main_window {
                                                                 ]
                                                             }
 
-                                                            Button journals_view_error_copy_details {
+                                                            Button journal_entries_view_error_copy_details {
                                                                 halign: center;
                                                                 label: _("_Copy details");
                                                                 use-underline: true;
@@ -1648,7 +1648,7 @@ Adw.ApplicationWindow main_window {
                                 }
                             }
 
-                            Adw.NavigationPage journals_edit_page {
+                            Adw.NavigationPage journal_entries_edit_page {
                                 title: _("Edit journal entry");
                                 tag: "/journal/edit";
                                 can-pop: false;
@@ -1656,8 +1656,8 @@ Adw.ApplicationWindow main_window {
                                 Adw.ToolbarView {
                                     [top]
                                     Adw.HeaderBar {
-                                        title-widget: Adw.WindowTitle journals_edit_page_title {
-                                            title: bind journals_edit_page.title;
+                                        title-widget: Adw.WindowTitle journal_entries_edit_page_title {
+                                            title: bind journal_entries_edit_page.title;
                                         };
 
                                         [start]
@@ -1668,13 +1668,13 @@ Adw.ApplicationWindow main_window {
                                         }
 
                                         [end]
-                                        Button journals_edit_save_button {
+                                        Button journal_entries_edit_save_button {
                                             sensitive: false;
 
                                             Box {
                                                 spacing: 10;
 
-                                                Adw.Spinner journals_edit_save_spinner {
+                                                Adw.Spinner journal_entries_edit_save_spinner {
                                                     visible: false;
                                                 }
 
@@ -1694,7 +1694,7 @@ Adw.ApplicationWindow main_window {
                                         Adw.Clamp {
                                             maximum-size: 600;
 
-                                            Stack journals_edit_stack {
+                                            Stack journal_entries_edit_stack {
                                                 StackPage {
                                                     name: "/journal/edit/loading";
 
@@ -1717,7 +1717,7 @@ Adw.ApplicationWindow main_window {
                                                                 title: _("_How was your day?");
                                                                 use-underline: true;
 
-                                                                Adw.ToggleGroup journals_edit_page_rating {
+                                                                Adw.ToggleGroup journal_entries_edit_page_rating {
                                                                     valign: center;
 
                                                                     Adw.Toggle {
@@ -1739,12 +1739,12 @@ Adw.ApplicationWindow main_window {
                                                         }
 
                                                         Adw.PreferencesGroup {
-                                                            Adw.EntryRow journals_edit_page_title_input {
+                                                            Adw.EntryRow journal_entries_edit_page_title_input {
                                                                 title: _("_Title");
                                                                 use-underline: true;
                                                             }
 
-                                                            Adw.ExpanderRow journals_edit_page_body_expander {
+                                                            Adw.ExpanderRow journal_entries_edit_page_body_expander {
                                                                 title: _("_Body");
                                                                 use-underline: true;
                                                                 subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
@@ -1757,7 +1757,7 @@ Adw.ApplicationWindow main_window {
                                                                     margin-start: 6;
                                                                     margin-end: 6;
 
-                                                                    TextView journals_edit_page_body_input {
+                                                                    TextView journal_entries_edit_page_body_input {
                                                                         wrap-mode: word;
                                                                         left-margin: 12;
                                                                         right-margin: 12;
@@ -1779,7 +1779,7 @@ Adw.ApplicationWindow main_window {
                                                 StackPage {
                                                     name: "/journal/edit/error";
 
-                                                    child: Adw.StatusPage journals_edit_error_status_page {
+                                                    child: Adw.StatusPage journal_entries_edit_error_status_page {
                                                         title: _("Journal entry could not be loaded");
                                                         icon-name: "dialog-warning-symbolic";
 
@@ -1787,7 +1787,7 @@ Adw.ApplicationWindow main_window {
                                                             spacing: 10;
                                                             halign: center;
 
-                                                            Button journals_edit_error_refresh_button {
+                                                            Button journal_entries_edit_error_refresh_button {
                                                                 halign: center;
                                                                 label: _("_Refresh");
                                                                 use-underline: true;
@@ -1797,7 +1797,7 @@ Adw.ApplicationWindow main_window {
                                                                 ]
                                                             }
 
-                                                            Button journals_edit_error_copy_details {
+                                                            Button journal_entries_edit_error_copy_details {
                                                                 halign: center;
                                                                 label: _("_Copy details");
                                                                 use-underline: true;

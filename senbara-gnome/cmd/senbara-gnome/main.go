@@ -50,8 +50,8 @@ var (
 	errMissingActivityID        = errors.New("missing activity ID")
 	errInvalidActivityID        = errors.New("invalid activity ID")
 	errDebtDoesNotExist         = errors.New("debt does not exist")
-	errMissingJournalID         = errors.New("missing journal entry ID")
-	errInvalidJournalID         = errors.New("invalid journal entry ID")
+	errMissingJournalEntryID    = errors.New("missing journal entry ID")
+	errInvalidJournaEntrylID    = errors.New("invalid journal entry ID")
 )
 
 const (
@@ -345,7 +345,7 @@ func main() {
 		contactsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceContactsCreateDialogUIPath)
 		debtsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceDebtsCreateDialogUIPath)
 		activitiesCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ActivitiesDebtsCreateDialogUIPath)
-		journalsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.JournalEntriesCreateDialogUIPath)
+		journalEntriesCreateDialogBuilder := gtk.NewBuilderFromResource(resources.JournalEntriesCreateDialogUIPath)
 
 		w = b.GetObject("main_window").Cast().(*adw.ApplicationWindow)
 
@@ -374,8 +374,8 @@ func main() {
 			previewContactsCountLabel   = b.GetObject("preview_contacts_count_label").Cast().(*gtk.Label)
 			previewContactsCountSpinner = b.GetObject("preview_contacts_count_spinner").Cast().(*adw.Spinner)
 
-			previewJournalCountLabel   = b.GetObject("preview_journals_count_label").Cast().(*gtk.Label)
-			previewJournalCountSpinner = b.GetObject("preview_journals_count_spinner").Cast().(*adw.Spinner)
+			previewJournalEntriesCountLabel   = b.GetObject("preview_journal_entries_count_label").Cast().(*gtk.Label)
+			previewJournalEntriesCountSpinner = b.GetObject("preview_journal_entries_count_spinner").Cast().(*adw.Spinner)
 
 			oidcDcrInitialAccessTokenPortalUrl string
 
@@ -404,8 +404,8 @@ func main() {
 			homeSidebarContactsCountLabel   = b.GetObject("home_sidebar_contacts_count_label").Cast().(*gtk.Label)
 			homeSidebarContactsCountSpinner = b.GetObject("home_sidebar_contacts_count_spinner").Cast().(*adw.Spinner)
 
-			homeSidebarJournalCountLabel   = b.GetObject("home_sidebar_journals_count_label").Cast().(*gtk.Label)
-			homeSidebarJournalCountSpinner = b.GetObject("home_sidebar_journals_count_spinner").Cast().(*adw.Spinner)
+			homeSidebarJournalEntriesCountLabel   = b.GetObject("home_sidebar_journal_entries_count_label").Cast().(*gtk.Label)
+			homeSidebarJournalEntriesCountSpinner = b.GetObject("home_sidebar_journal_entries_count_spinner").Cast().(*adw.Spinner)
 
 			contactsStack       = b.GetObject("contacts_stack").Cast().(*gtk.Stack)
 			contactsListBox     = b.GetObject("contacts_list").Cast().(*gtk.ListBox)
@@ -556,53 +556,53 @@ func main() {
 
 			activitiesCreateDialogPopoverLabel = activitiesCreateDialogBuilder.GetObject("activities_create_dialog_date_popover_label").Cast().(*gtk.Label)
 
-			journalsStack       = b.GetObject("journals_stack").Cast().(*gtk.Stack)
-			journalsListBox     = b.GetObject("journals_list").Cast().(*gtk.ListBox)
-			journalsSearchEntry = b.GetObject("journals_searchentry").Cast().(*gtk.SearchEntry)
+			journalEntriesStack       = b.GetObject("journal_entries_stack").Cast().(*gtk.Stack)
+			journalEntriesListBox     = b.GetObject("journal_entries_list").Cast().(*gtk.ListBox)
+			journalEntriesSearchEntry = b.GetObject("journal_entries_searchentry").Cast().(*gtk.SearchEntry)
 
-			journalsAddButton    = b.GetObject("journals_add_button").Cast().(*gtk.Button)
-			journalsSearchButton = b.GetObject("journals_search_button").Cast().(*gtk.ToggleButton)
+			journalEntriesAddButton    = b.GetObject("journal_entries_add_button").Cast().(*gtk.Button)
+			journalEntriesSearchButton = b.GetObject("journal_entries_search_button").Cast().(*gtk.ToggleButton)
 
-			journalsEmptyAddButton = b.GetObject("journals_empty_add_button").Cast().(*gtk.Button)
+			journalEntriesEmptyAddButton = b.GetObject("journal_entries_empty_add_button").Cast().(*gtk.Button)
 
-			journalsErrorStatusPage        = b.GetObject("journals_error_status_page").Cast().(*adw.StatusPage)
-			journalsErrorRefreshButton     = b.GetObject("journals_error_refresh_button").Cast().(*gtk.Button)
-			journalsErrorCopyDetailsButton = b.GetObject("journals_error_copy_details").Cast().(*gtk.Button)
+			journalEntriesErrorStatusPage        = b.GetObject("journal_entries_error_status_page").Cast().(*adw.StatusPage)
+			journalEntriesErrorRefreshButton     = b.GetObject("journal_entries_error_refresh_button").Cast().(*gtk.Button)
+			journalEntriesErrorCopyDetailsButton = b.GetObject("journal_entries_error_copy_details").Cast().(*gtk.Button)
 
-			journalsCreateDialog = journalsCreateDialogBuilder.GetObject("journals_create_dialog").Cast().(*adw.Dialog)
+			journalEntriesCreateDialog = journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog").Cast().(*adw.Dialog)
 
-			journalsCreateDialogAddButton  = journalsCreateDialogBuilder.GetObject("journals_create_dialog_add_button").Cast().(*gtk.Button)
-			journalsCreateDialogAddSpinner = journalsCreateDialogBuilder.GetObject("journals_create_dialog_add_spinner").Cast().(*adw.Spinner)
+			journalEntriesCreateDialogAddButton  = journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_add_button").Cast().(*gtk.Button)
+			journalEntriesCreateDialogAddSpinner = journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_add_spinner").Cast().(*adw.Spinner)
 
-			journalsCreateDialogRatingToggleGroup = journalsCreateDialogBuilder.GetObject("journals_create_dialog_rating").Cast().(*adw.ToggleGroup)
-			journalsCreateDialogTitleInput        = journalsCreateDialogBuilder.GetObject("journals_create_dialog_title_input").Cast().(*adw.EntryRow)
-			journalsCreateDialogBodyExpander      = journalsCreateDialogBuilder.GetObject("journals_create_dialog_body_expander").Cast().(*adw.ExpanderRow)
-			journalsCreateDialogBodyInput         = journalsCreateDialogBuilder.GetObject("journals_create_dialog_body_input").Cast().(*gtk.TextView)
+			journalEntriesCreateDialogRatingToggleGroup = journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_rating").Cast().(*adw.ToggleGroup)
+			journalEntriesCreateDialogTitleInput        = journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_title_input").Cast().(*adw.EntryRow)
+			journalEntriesCreateDialogBodyExpander      = journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_body_expander").Cast().(*adw.ExpanderRow)
+			journalEntriesCreateDialogBodyInput         = journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_body_input").Cast().(*gtk.TextView)
 
-			journalsViewPageTitle              = b.GetObject("journals_view_page_title").Cast().(*adw.WindowTitle)
-			journalsViewStack                  = b.GetObject("journals_view_stack").Cast().(*gtk.Stack)
-			journalsViewErrorStatusPage        = b.GetObject("journals_view_error_status_page").Cast().(*adw.StatusPage)
-			journalsViewErrorRefreshButton     = b.GetObject("journals_view_error_refresh_button").Cast().(*gtk.Button)
-			journalsViewErrorCopyDetailsButton = b.GetObject("journals_view_error_copy_details").Cast().(*gtk.Button)
+			journalEntriesViewPageTitle              = b.GetObject("journal_entries_view_page_title").Cast().(*adw.WindowTitle)
+			journalEntriesViewStack                  = b.GetObject("journal_entries_view_stack").Cast().(*gtk.Stack)
+			journalEntriesViewErrorStatusPage        = b.GetObject("journal_entries_view_error_status_page").Cast().(*adw.StatusPage)
+			journalEntriesViewErrorRefreshButton     = b.GetObject("journal_entries_view_error_refresh_button").Cast().(*gtk.Button)
+			journalEntriesViewErrorCopyDetailsButton = b.GetObject("journal_entries_view_error_copy_details").Cast().(*gtk.Button)
 
-			journalsViewEditButton   = b.GetObject("journals_view_edit_button").Cast().(*gtk.Button)
-			journalsViewDeleteButton = b.GetObject("journals_view_delete_button").Cast().(*gtk.Button)
+			journalEntriesViewEditButton   = b.GetObject("journal_entries_view_edit_button").Cast().(*gtk.Button)
+			journalEntriesViewDeleteButton = b.GetObject("journal_entries_view_delete_button").Cast().(*gtk.Button)
 
-			journalsViewPageBodyWebView = b.GetObject("journals_view_body").Cast().(*webkit.WebView)
+			journalEntriesViewPageBodyWebView = b.GetObject("journal_entries_view_body").Cast().(*webkit.WebView)
 
-			journalsEditPageTitle              = b.GetObject("journals_edit_page_title").Cast().(*adw.WindowTitle)
-			journalsEditStack                  = b.GetObject("journals_edit_stack").Cast().(*gtk.Stack)
-			journalsEditErrorStatusPage        = b.GetObject("journals_edit_error_status_page").Cast().(*adw.StatusPage)
-			journalsEditErrorRefreshButton     = b.GetObject("journals_edit_error_refresh_button").Cast().(*gtk.Button)
-			journalsEditErrorCopyDetailsButton = b.GetObject("journals_edit_error_copy_details").Cast().(*gtk.Button)
+			journalEntriesEditPageTitle              = b.GetObject("journal_entries_edit_page_title").Cast().(*adw.WindowTitle)
+			journalEntriesEditStack                  = b.GetObject("journal_entries_edit_stack").Cast().(*gtk.Stack)
+			journalEntriesEditErrorStatusPage        = b.GetObject("journal_entries_edit_error_status_page").Cast().(*adw.StatusPage)
+			journalEntriesEditErrorRefreshButton     = b.GetObject("journal_entries_edit_error_refresh_button").Cast().(*gtk.Button)
+			journalEntriesEditErrorCopyDetailsButton = b.GetObject("journal_entries_edit_error_copy_details").Cast().(*gtk.Button)
 
-			journalsEditPageSaveButton  = b.GetObject("journals_edit_save_button").Cast().(*gtk.Button)
-			journalsEditPageSaveSpinner = b.GetObject("journals_edit_save_spinner").Cast().(*adw.Spinner)
+			journalEntriesEditPageSaveButton  = b.GetObject("journal_entries_edit_save_button").Cast().(*gtk.Button)
+			journalEntriesEditPageSaveSpinner = b.GetObject("journal_entries_edit_save_spinner").Cast().(*adw.Spinner)
 
-			journalsEditPageRatingToggleGroup = b.GetObject("journals_edit_page_rating").Cast().(*adw.ToggleGroup)
-			journalsEditPageTitleInput        = b.GetObject("journals_edit_page_title_input").Cast().(*adw.EntryRow)
-			journalsEditPageBodyExpander      = b.GetObject("journals_edit_page_body_expander").Cast().(*adw.ExpanderRow)
-			journalsEditPageBodyInput         = b.GetObject("journals_edit_page_body_input").Cast().(*gtk.TextView)
+			journalEntriesEditPageRatingToggleGroup = b.GetObject("journal_entries_edit_page_rating").Cast().(*adw.ToggleGroup)
+			journalEntriesEditPageTitleInput        = b.GetObject("journal_entries_edit_page_title_input").Cast().(*adw.EntryRow)
+			journalEntriesEditPageBodyExpander      = b.GetObject("journal_entries_edit_page_body_expander").Cast().(*adw.ExpanderRow)
+			journalEntriesEditPageBodyInput         = b.GetObject("journal_entries_edit_page_body_input").Cast().(*gtk.TextView)
 		)
 
 		settings.Bind(resources.SettingVerboseKey, preferencesDialogVerboseSwitch.Object, "active", gio.SettingsBindDefault)
@@ -994,13 +994,13 @@ func main() {
 			homeSidebarContactsCountLabel.SetVisible(false)
 			homeSidebarContactsCountSpinner.SetVisible(true)
 
-			homeSidebarJournalCountLabel.SetVisible(false)
-			homeSidebarJournalCountSpinner.SetVisible(true)
+			homeSidebarJournalEntriesCountLabel.SetVisible(false)
+			homeSidebarJournalEntriesCountSpinner.SetVisible(true)
 		}
 
 		disableHomeSidebarLoading := func() {
-			homeSidebarJournalCountSpinner.SetVisible(false)
-			homeSidebarJournalCountLabel.SetVisible(true)
+			homeSidebarJournalEntriesCountSpinner.SetVisible(false)
+			homeSidebarJournalEntriesCountLabel.SetVisible(true)
 
 			homeSidebarContactsCountSpinner.SetVisible(false)
 			homeSidebarContactsCountLabel.SetVisible(true)
@@ -1010,13 +1010,13 @@ func main() {
 			previewContactsCountLabel.SetVisible(false)
 			previewContactsCountSpinner.SetVisible(true)
 
-			previewJournalCountLabel.SetVisible(false)
-			previewJournalCountSpinner.SetVisible(true)
+			previewJournalEntriesCountLabel.SetVisible(false)
+			previewJournalEntriesCountSpinner.SetVisible(true)
 		}
 
 		disablePreviewLoading := func() {
-			previewJournalCountSpinner.SetVisible(false)
-			previewJournalCountLabel.SetVisible(true)
+			previewJournalEntriesCountSpinner.SetVisible(false)
+			previewJournalEntriesCountLabel.SetVisible(true)
 
 			previewContactsCountSpinner.SetVisible(false)
 			previewContactsCountLabel.SetVisible(true)
@@ -1044,30 +1044,30 @@ func main() {
 		})
 
 		var (
-			journalCount        = 0
-			visibleJournalCount = 0
+			journalEntriesCount        = 0
+			visibleJournalEntriesCount = 0
 		)
 
-		journalsSearchEntry.ConnectSearchChanged(func() {
+		journalEntriesSearchEntry.ConnectSearchChanged(func() {
 			go func() {
-				journalsStack.SetVisibleChildName(resources.PageJournalEntriesLoading)
+				journalEntriesStack.SetVisibleChildName(resources.PageJournalEntriesLoading)
 
-				visibleJournalCount = 0
+				visibleJournalEntriesCount = 0
 
-				journalsListBox.InvalidateFilter()
+				journalEntriesListBox.InvalidateFilter()
 
-				if visibleJournalCount > 0 {
-					journalsStack.SetVisibleChildName(resources.PageJournalEntriesList)
+				if visibleJournalEntriesCount > 0 {
+					journalEntriesStack.SetVisibleChildName(resources.PageJournalEntriesList)
 				} else {
-					journalsStack.SetVisibleChildName(resources.PageJournalEntriesNoResults)
+					journalEntriesStack.SetVisibleChildName(resources.PageJournalEntriesNoResults)
 				}
 			}()
 		})
 
-		journalsListBox.SetFilterFunc(func(row *gtk.ListBoxRow) (ok bool) {
+		journalEntriesListBox.SetFilterFunc(func(row *gtk.ListBoxRow) (ok bool) {
 			var (
 				r = row.Cast().(*adw.ActionRow)
-				f = strings.ToLower(journalsSearchEntry.Text())
+				f = strings.ToLower(journalEntriesSearchEntry.Text())
 
 				rt = strings.ToLower(r.Title())
 				rs = strings.ToLower(r.Subtitle())
@@ -1081,7 +1081,7 @@ func main() {
 			)
 
 			if strings.Contains(rt, f) || strings.Contains(rs, f) {
-				visibleJournalCount++
+				visibleJournalEntriesCount++
 
 				return true
 			}
@@ -1274,56 +1274,56 @@ func main() {
 
 		contactsEditPageBirthdayInput.ConnectChanged(validateContactsEditPageForm)
 
-		journalsAddButton.ConnectClicked(func() {
-			journalsCreateDialog.Present(w)
-			journalsCreateDialogTitleInput.GrabFocus()
+		journalEntriesAddButton.ConnectClicked(func() {
+			journalEntriesCreateDialog.Present(w)
+			journalEntriesCreateDialogTitleInput.GrabFocus()
 		})
 
-		journalsEmptyAddButton.ConnectClicked(func() {
-			journalsCreateDialog.Present(w)
-			journalsCreateDialogTitleInput.GrabFocus()
+		journalEntriesEmptyAddButton.ConnectClicked(func() {
+			journalEntriesCreateDialog.Present(w)
+			journalEntriesCreateDialogTitleInput.GrabFocus()
 		})
 
-		validateJournalsCreateDialogForm := func() {
-			if journalsCreateDialogTitleInput.Text() != "" &&
-				journalsCreateDialogBodyInput.Buffer().Text(
-					journalsCreateDialogBodyInput.Buffer().StartIter(),
-					journalsCreateDialogBodyInput.Buffer().EndIter(),
+		validateJournalEntriesCreateDialogForm := func() {
+			if journalEntriesCreateDialogTitleInput.Text() != "" &&
+				journalEntriesCreateDialogBodyInput.Buffer().Text(
+					journalEntriesCreateDialogBodyInput.Buffer().StartIter(),
+					journalEntriesCreateDialogBodyInput.Buffer().EndIter(),
 					true,
 				) != "" {
-				journalsCreateDialogAddButton.SetSensitive(true)
+				journalEntriesCreateDialogAddButton.SetSensitive(true)
 			} else {
-				journalsCreateDialogAddButton.SetSensitive(false)
+				journalEntriesCreateDialogAddButton.SetSensitive(false)
 			}
 		}
 
-		journalsCreateDialogTitleInput.ConnectChanged(validateJournalsCreateDialogForm)
-		journalsCreateDialogBodyInput.Buffer().ConnectChanged(validateJournalsCreateDialogForm)
+		journalEntriesCreateDialogTitleInput.ConnectChanged(validateJournalEntriesCreateDialogForm)
+		journalEntriesCreateDialogBodyInput.Buffer().ConnectChanged(validateJournalEntriesCreateDialogForm)
 
-		journalsCreateDialog.ConnectClosed(func() {
-			journalsCreateDialogRatingToggleGroup.SetActive(0)
+		journalEntriesCreateDialog.ConnectClosed(func() {
+			journalEntriesCreateDialogRatingToggleGroup.SetActive(0)
 
-			journalsCreateDialogTitleInput.SetText("")
+			journalEntriesCreateDialogTitleInput.SetText("")
 
-			journalsCreateDialogBodyExpander.SetExpanded(true)
-			journalsCreateDialogBodyInput.Buffer().SetText("")
+			journalEntriesCreateDialogBodyExpander.SetExpanded(true)
+			journalEntriesCreateDialogBodyInput.Buffer().SetText("")
 		})
 
-		validateJournalsEditPageForm := func() {
-			if journalsEditPageTitleInput.Text() != "" &&
-				journalsEditPageBodyInput.Buffer().Text(
-					journalsEditPageBodyInput.Buffer().StartIter(),
-					journalsEditPageBodyInput.Buffer().EndIter(),
+		validateJournalEntriesEditPageForm := func() {
+			if journalEntriesEditPageTitleInput.Text() != "" &&
+				journalEntriesEditPageBodyInput.Buffer().Text(
+					journalEntriesEditPageBodyInput.Buffer().StartIter(),
+					journalEntriesEditPageBodyInput.Buffer().EndIter(),
 					true,
 				) != "" {
-				journalsEditPageSaveButton.SetSensitive(true)
+				journalEntriesEditPageSaveButton.SetSensitive(true)
 			} else {
-				journalsEditPageSaveButton.SetSensitive(false)
+				journalEntriesEditPageSaveButton.SetSensitive(false)
 			}
 		}
 
-		journalsEditPageTitleInput.ConnectChanged(validateJournalsEditPageForm)
-		journalsEditPageBodyInput.Buffer().ConnectChanged(validateJournalsEditPageForm)
+		journalEntriesEditPageTitleInput.ConnectChanged(validateJournalEntriesEditPageForm)
+		journalEntriesEditPageBodyInput.Buffer().ConnectChanged(validateJournalEntriesEditPageForm)
 
 		createErrAndLoadingHandlers := func(
 			errorStatusPage *adw.StatusPage,
@@ -1533,87 +1533,87 @@ func main() {
 			},
 		)
 
-		handleJournalError,
-			enableJournalLoading,
-			disableJournalLoading,
-			clearJournalError := createErrAndLoadingHandlers(
-			journalsErrorStatusPage,
-			journalsErrorRefreshButton,
-			journalsErrorCopyDetailsButton,
+		handleJournalEntriesError,
+			enableJournalEntriesLoading,
+			disableJournalEntriesLoading,
+			clearJournalEntriesError := createErrAndLoadingHandlers(
+			journalEntriesErrorStatusPage,
+			journalEntriesErrorRefreshButton,
+			journalEntriesErrorCopyDetailsButton,
 
 			func() {
 				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries})
 			},
 
 			func() {
-				homeSidebarJournalCountLabel.SetVisible(false)
-				homeSidebarJournalCountSpinner.SetVisible(true)
+				homeSidebarJournalEntriesCountLabel.SetVisible(false)
+				homeSidebarJournalEntriesCountSpinner.SetVisible(true)
 
-				journalsStack.SetVisibleChildName(resources.PageJournalEntriesLoading)
+				journalEntriesStack.SetVisibleChildName(resources.PageJournalEntriesLoading)
 			},
 			func(err string) {
-				homeSidebarJournalCountSpinner.SetVisible(false)
-				homeSidebarJournalCountLabel.SetVisible(true)
+				homeSidebarJournalEntriesCountSpinner.SetVisible(false)
+				homeSidebarJournalEntriesCountLabel.SetVisible(true)
 
-				homeSidebarJournalCountLabel.SetText(fmt.Sprintf("%v", journalCount))
+				homeSidebarJournalEntriesCountLabel.SetText(fmt.Sprintf("%v", journalEntriesCount))
 
 				if err == "" {
-					if journalCount > 0 {
-						journalsStack.SetVisibleChildName(resources.PageJournalEntriesList)
+					if journalEntriesCount > 0 {
+						journalEntriesStack.SetVisibleChildName(resources.PageJournalEntriesList)
 					} else {
-						journalsStack.SetVisibleChildName(resources.PageJournalEntriesEmpty)
+						journalEntriesStack.SetVisibleChildName(resources.PageJournalEntriesEmpty)
 					}
 				} else {
-					journalsStack.SetVisibleChildName(resources.PageJournalEntriesError)
+					journalEntriesStack.SetVisibleChildName(resources.PageJournalEntriesError)
 				}
 			},
 		)
 
-		handleJournalsViewError,
-			enableJournalsViewLoading,
-			disableJournalsViewLoading,
-			clearJournalsViewError := createErrAndLoadingHandlers(
-			journalsViewErrorStatusPage,
-			journalsViewErrorRefreshButton,
-			journalsViewErrorCopyDetailsButton,
+		handleJournalEntriesViewError,
+			enableJournalEntriesViewLoading,
+			disableJournalEntriesViewLoading,
+			clearJournalEntriesViewError := createErrAndLoadingHandlers(
+			journalEntriesViewErrorStatusPage,
+			journalEntriesViewErrorRefreshButton,
+			journalEntriesViewErrorCopyDetailsButton,
 
 			func() {
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageJournalEntriesView})
 			},
 
 			func() {
-				journalsViewStack.SetVisibleChildName(resources.PageJournalEntriesViewLoading)
+				journalEntriesViewStack.SetVisibleChildName(resources.PageJournalEntriesViewLoading)
 			},
 			func(err string) {
 				if err == "" {
-					journalsViewStack.SetVisibleChildName(resources.PageJournalEntriesViewData)
+					journalEntriesViewStack.SetVisibleChildName(resources.PageJournalEntriesViewData)
 				} else {
-					journalsViewStack.SetVisibleChildName(resources.PageJournalEntriesViewError)
+					journalEntriesViewStack.SetVisibleChildName(resources.PageJournalEntriesViewError)
 				}
 			},
 		)
 
-		handleJournalsEditError,
-			enableJournalsEditLoading,
-			disableJournalsEditLoading,
-			clearJournalsEditError := createErrAndLoadingHandlers(
-			journalsEditErrorStatusPage,
-			journalsEditErrorRefreshButton,
-			journalsEditErrorCopyDetailsButton,
+		handleJournalEntriesEditError,
+			enableJournalEntriesEditLoading,
+			disableJournalEntriesEditLoading,
+			clearJournalEntriesEditError := createErrAndLoadingHandlers(
+			journalEntriesEditErrorStatusPage,
+			journalEntriesEditErrorRefreshButton,
+			journalEntriesEditErrorCopyDetailsButton,
 
 			func() {
 				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries, resources.PageJournalEntriesView, resources.PageJournalEntriesEdit})
 			},
 
 			func() {
-				journalsEditStack.SetVisibleChildName(resources.PageJournalEntriesEditLoading)
+				journalEntriesEditStack.SetVisibleChildName(resources.PageJournalEntriesEditLoading)
 			},
 			func(err string) {
 				if err == "" {
-					journalsEditStack.SetVisibleChildName(resources.PageJournalEntriesEditData)
-					journalsEditPageTitleInput.GrabFocus()
+					journalEntriesEditStack.SetVisibleChildName(resources.PageJournalEntriesEditData)
+					journalEntriesEditPageTitleInput.GrabFocus()
 				} else {
-					journalsEditStack.SetVisibleChildName(resources.PageJournalEntriesEditError)
+					journalEntriesEditStack.SetVisibleChildName(resources.PageJournalEntriesEditError)
 				}
 			},
 		)
@@ -2086,15 +2086,15 @@ func main() {
 			}()
 		})
 
-		journalsCreateDialogAddButton.ConnectClicked(func() {
+		journalEntriesCreateDialogAddButton.ConnectClicked(func() {
 			log.Info("Handling journal entry creation")
 
-			journalsCreateDialogAddButton.SetSensitive(false)
-			journalsCreateDialogAddSpinner.SetVisible(true)
+			journalEntriesCreateDialogAddButton.SetSensitive(false)
+			journalEntriesCreateDialogAddSpinner.SetVisible(true)
 
 			go func() {
-				defer journalsCreateDialogAddSpinner.SetVisible(false)
-				defer journalsCreateDialogAddButton.SetSensitive(true)
+				defer journalEntriesCreateDialogAddSpinner.SetVisible(false)
+				defer journalEntriesCreateDialogAddButton.SetSensitive(true)
 
 				redirected, c, _, err := authorize(
 					ctx,
@@ -2112,13 +2112,13 @@ func main() {
 				}
 
 				req := api.CreateJournalEntryJSONRequestBody{
-					Body: journalsCreateDialogBodyInput.Buffer().Text(
-						journalsCreateDialogBodyInput.Buffer().StartIter(),
-						journalsCreateDialogBodyInput.Buffer().EndIter(),
+					Body: journalEntriesCreateDialogBodyInput.Buffer().Text(
+						journalEntriesCreateDialogBodyInput.Buffer().StartIter(),
+						journalEntriesCreateDialogBodyInput.Buffer().EndIter(),
 						true,
 					),
-					Rating: int32(3 - journalsCreateDialogRatingToggleGroup.Active()), // The toggle group is zero-indexed, but the rating is one-indexed
-					Title:  journalsCreateDialogTitleInput.Text(),
+					Rating: int32(3 - journalEntriesCreateDialogRatingToggleGroup.Active()), // The toggle group is zero-indexed, but the rating is one-indexed
+					Title:  journalEntriesCreateDialogTitleInput.Text(),
 				}
 
 				log.Debug("Creating journal entry", "request", req)
@@ -2140,14 +2140,14 @@ func main() {
 
 				mto.AddToast(adw.NewToast(gcore.Local("Created journal entry")))
 
-				journalsCreateDialog.Close()
+				journalEntriesCreateDialog.Close()
 
 				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries})
 			}()
 		})
 
-		journalsEditPageSaveButton.ConnectClicked(func() {
-			id := journalsEditPageSaveButton.ActionTargetValue().Int64()
+		journalEntriesEditPageSaveButton.ConnectClicked(func() {
+			id := journalEntriesEditPageSaveButton.ActionTargetValue().Int64()
 
 			log := log.With(
 				"id", id,
@@ -2155,12 +2155,12 @@ func main() {
 
 			log.Info("Handling journal entry update")
 
-			journalsEditPageSaveButton.SetSensitive(false)
-			journalsEditPageSaveSpinner.SetVisible(true)
+			journalEntriesEditPageSaveButton.SetSensitive(false)
+			journalEntriesEditPageSaveSpinner.SetVisible(true)
 
 			go func() {
-				defer journalsEditPageSaveSpinner.SetVisible(false)
-				defer journalsEditPageSaveButton.SetSensitive(true)
+				defer journalEntriesEditPageSaveSpinner.SetVisible(false)
+				defer journalEntriesEditPageSaveButton.SetSensitive(true)
 
 				redirected, c, _, err := authorize(
 					ctx,
@@ -2178,13 +2178,13 @@ func main() {
 				}
 
 				req := api.UpdateJournalEntryJSONRequestBody{
-					Body: journalsEditPageBodyInput.Buffer().Text(
-						journalsEditPageBodyInput.Buffer().StartIter(),
-						journalsEditPageBodyInput.Buffer().EndIter(),
+					Body: journalEntriesEditPageBodyInput.Buffer().Text(
+						journalEntriesEditPageBodyInput.Buffer().StartIter(),
+						journalEntriesEditPageBodyInput.Buffer().EndIter(),
 						true,
 					),
-					Rating: int32((3 - journalsEditPageRatingToggleGroup.Active())), // The toggle group is zero-indexed, but the rating is one-indexed
-					Title:  journalsEditPageTitleInput.Text(),
+					Rating: int32((3 - journalEntriesEditPageRatingToggleGroup.Active())), // The toggle group is zero-indexed, but the rating is one-indexed
+					Title:  journalEntriesEditPageTitleInput.Text(),
 				}
 
 				log.Debug("Creating journal entry", "request", req)
@@ -2926,8 +2926,8 @@ func main() {
 		})
 		a.AddAction(deleteActivityAction)
 
-		deleteJournalAction := gio.NewSimpleAction("deleteJournalEntry", glib.NewVariantType("x"))
-		deleteJournalAction.ConnectActivate(func(parameter *glib.Variant) {
+		deleteJournalEntryAction := gio.NewSimpleAction("deleteJournalEntry", glib.NewVariantType("x"))
+		deleteJournalEntryAction.ConnectActivate(func(parameter *glib.Variant) {
 			id := parameter.Int64()
 
 			log := log.With(
@@ -2985,7 +2985,7 @@ func main() {
 
 			confirm.Present(w)
 		})
-		a.AddAction(deleteJournalAction)
+		a.AddAction(deleteJournalEntryAction)
 
 		var selectedActivityID = -1
 
@@ -3041,10 +3041,10 @@ func main() {
 		})
 		a.AddAction(editContactAction)
 
-		var selectedJournalID = -1
+		var selectedJournalEntryID = -1
 
-		editJournalAction := gio.NewSimpleAction("editJournalEntry", glib.NewVariantType("x"))
-		editJournalAction.ConnectActivate(func(parameter *glib.Variant) {
+		editJournalEntryAction := gio.NewSimpleAction("editJournalEntry", glib.NewVariantType("x"))
+		editJournalEntryAction.ConnectActivate(func(parameter *glib.Variant) {
 			id := parameter.Int64()
 
 			log := log.With(
@@ -3053,11 +3053,11 @@ func main() {
 
 			log.Info("Handling edit journal entry action")
 
-			selectedJournalID = int(id)
+			selectedJournalEntryID = int(id)
 
 			homeNavigation.PushByTag(resources.PageJournalEntriesEdit)
 		})
-		a.AddAction(editJournalAction)
+		a.AddAction(editJournalEntryAction)
 
 		createItemAction := gio.NewSimpleAction("createItem", nil)
 		createItemAction.ConnectActivate(func(parameter *glib.Variant) {
@@ -3074,8 +3074,8 @@ func main() {
 				contactsCreateDialogFirstNameInput.GrabFocus()
 
 			case resources.PageJournalEntries:
-				journalsCreateDialog.Present(w)
-				journalsCreateDialogTitleInput.GrabFocus()
+				journalEntriesCreateDialog.Present(w)
+				journalEntriesCreateDialogTitleInput.GrabFocus()
 			}
 		})
 		a.AddAction(createItemAction)
@@ -3095,7 +3095,7 @@ func main() {
 				contactsSearchButton.SetActive(!contactsSearchButton.Active())
 
 			case resources.PageJournalEntries:
-				journalsSearchButton.SetActive(!journalsSearchButton.Active())
+				journalEntriesSearchButton.SetActive(!journalEntriesSearchButton.Active())
 			}
 		})
 		a.AddAction(searchListAction)
@@ -3122,8 +3122,8 @@ func main() {
 				}
 
 			case resources.PageJournalEntriesView:
-				if selectedJournalID != -1 {
-					editJournalAction.Activate(glib.NewVariantInt64(int64(selectedJournalID)))
+				if selectedJournalEntryID != -1 {
+					editJournalEntryAction.Activate(glib.NewVariantInt64(int64(selectedJournalEntryID)))
 				}
 			}
 		})
@@ -3151,8 +3151,8 @@ func main() {
 				}
 
 			case resources.PageJournalEntriesView:
-				if selectedJournalID != -1 {
-					deleteJournalAction.Activate(glib.NewVariantInt64(int64(selectedJournalID)))
+				if selectedJournalEntryID != -1 {
+					deleteJournalEntryAction.Activate(glib.NewVariantInt64(int64(selectedJournalEntryID)))
 				}
 			}
 		})
@@ -3833,8 +3833,8 @@ func main() {
 
 			case resources.PageJournalEntries:
 				go func() {
-					enableJournalLoading()
-					defer disableJournalLoading()
+					enableJournalEntriesLoading()
+					defer disableJournalEntriesLoading()
 
 					redirected, c, _, err := authorize(
 						ctx,
@@ -3844,7 +3844,7 @@ func main() {
 					if err != nil {
 						log.Warn("Could not authorize user for journal entries page", "err", err)
 
-						handleJournalError(err)
+						handleJournalEntriesError(err)
 
 						return
 					} else if redirected {
@@ -3855,7 +3855,7 @@ func main() {
 
 					res, err := c.GetJournalEntriesWithResponse(ctx)
 					if err != nil {
-						handleJournalError(err)
+						handleJournalEntriesError(err)
 
 						return
 					}
@@ -3863,21 +3863,21 @@ func main() {
 					log.Debug("Got journal entries", "status", res.StatusCode())
 
 					if res.StatusCode() != http.StatusOK {
-						handleJournalError(errors.New(res.Status()))
+						handleJournalEntriesError(errors.New(res.Status()))
 
 						return
 					}
 
-					defer clearJournalError()
+					defer clearJournalEntriesError()
 
-					validateJournalsCreateDialogForm()
+					validateJournalEntriesCreateDialogForm()
 
-					journalsListBox.RemoveAll()
+					journalEntriesListBox.RemoveAll()
 
-					journalCount = len(*res.JSON200)
-					if journalCount > 0 {
-						journalsAddButton.SetVisible(true)
-						journalsSearchButton.SetVisible(true)
+					journalEntriesCount = len(*res.JSON200)
+					if journalEntriesCount > 0 {
+						journalEntriesAddButton.SetVisible(true)
+						journalEntriesSearchButton.SetVisible(true)
 
 						for _, journalEntry := range *res.JSON200 {
 							r := adw.NewActionRow()
@@ -3922,18 +3922,18 @@ func main() {
 
 							r.SetActivatable(true)
 
-							journalsListBox.Append(r)
+							journalEntriesListBox.Append(r)
 						}
 					} else {
-						journalsAddButton.SetVisible(false)
-						journalsSearchButton.SetVisible(false)
+						journalEntriesAddButton.SetVisible(false)
+						journalEntriesSearchButton.SetVisible(false)
 					}
 				}()
 
 			case resources.PageJournalEntriesView:
 				go func() {
-					enableJournalsViewLoading()
-					defer disableJournalsViewLoading()
+					enableJournalEntriesViewLoading()
+					defer disableJournalEntriesViewLoading()
 
 					redirected, c, _, err := authorize(
 						ctx,
@@ -3943,18 +3943,18 @@ func main() {
 					if err != nil {
 						log.Warn("Could not authorize user for journal entries view page", "err", err)
 
-						handleJournalsViewError(err)
+						handleJournalEntriesViewError(err)
 
 						return
 					} else if redirected {
 						return
 					}
 
-					log.Debug("Getting journal entry", "id", selectedJournalID)
+					log.Debug("Getting journal entry", "id", selectedJournalEntryID)
 
-					res, err := c.GetJournalEntryWithResponse(ctx, int64(selectedJournalID))
+					res, err := c.GetJournalEntryWithResponse(ctx, int64(selectedJournalEntryID))
 					if err != nil {
-						handleJournalsViewError(err)
+						handleJournalEntriesViewError(err)
 
 						return
 					}
@@ -3962,15 +3962,15 @@ func main() {
 					log.Debug("Got journal entry", "status", res.StatusCode())
 
 					if res.StatusCode() != http.StatusOK {
-						handleJournalsViewError(errors.New(res.Status()))
+						handleJournalEntriesViewError(errors.New(res.Status()))
 
 						return
 					}
 
-					journalsViewEditButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Id))
-					journalsViewDeleteButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Id))
+					journalEntriesViewEditButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Id))
+					journalEntriesViewDeleteButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Id))
 
-					journalsViewPageTitle.SetTitle(*res.JSON200.Title)
+					journalEntriesViewPageTitle.SetTitle(*res.JSON200.Title)
 					subtitle := glib.NewDateTimeFromGo(*res.JSON200.Date).Format("%x") + " | "
 					switch *res.JSON200.Rating {
 					case 3:
@@ -3982,27 +3982,27 @@ func main() {
 					case 1:
 						subtitle += gcore.Local("Bad")
 					}
-					journalsViewPageTitle.SetSubtitle(subtitle)
+					journalEntriesViewPageTitle.SetSubtitle(subtitle)
 
 					var buf bytes.Buffer
 					if err := md.Convert([]byte(*res.JSON200.Body), &buf); err != nil {
 						log.Warn("Could not render Markdown for journal entries view page", "err", err)
 
-						handleJournalsViewError(err)
+						handleJournalEntriesViewError(err)
 
 						return
 					}
 
 					bg := gdk.NewRGBA(0, 0, 0, 0)
-					journalsViewPageBodyWebView.SetBackgroundColor(&bg)
+					journalEntriesViewPageBodyWebView.SetBackgroundColor(&bg)
 
-					journalsViewPageBodyWebView.ConnectDecidePolicy(func(decision webkit.PolicyDecisioner, decisionType webkit.PolicyDecisionType) (ok bool) {
+					journalEntriesViewPageBodyWebView.ConnectDecidePolicy(func(decision webkit.PolicyDecisioner, decisionType webkit.PolicyDecisionType) (ok bool) {
 						if decisionType == webkit.PolicyDecisionTypeNavigationAction {
 							u, err := url.Parse(decision.(*webkit.NavigationPolicyDecision).NavigationAction().Request().URI())
 							if err != nil {
 								log.Warn("Could not parse journal entry view WebView", "err", err)
 
-								handleJournalsViewError(err)
+								handleJournalEntriesViewError(err)
 
 								return true
 							}
@@ -4044,16 +4044,16 @@ func main() {
 					})
 
 					glib.IdleAdd(func() {
-						journalsViewPageBodyWebView.LoadHtml(renderedMarkdownHTMLPrefix+buf.String(), "about:blank")
+						journalEntriesViewPageBodyWebView.LoadHtml(renderedMarkdownHTMLPrefix+buf.String(), "about:blank")
 					})
 
-					defer clearJournalsViewError()
+					defer clearJournalEntriesViewError()
 				}()
 
 			case resources.PageJournalEntriesEdit:
 				go func() {
-					enableJournalsEditLoading()
-					defer disableJournalsEditLoading()
+					enableJournalEntriesEditLoading()
+					defer disableJournalEntriesEditLoading()
 
 					redirected, c, _, err := authorize(
 						ctx,
@@ -4063,18 +4063,18 @@ func main() {
 					if err != nil {
 						log.Warn("Could not authorize user for journal entry edit page", "err", err)
 
-						handleJournalsEditError(err)
+						handleJournalEntriesEditError(err)
 
 						return
 					} else if redirected {
 						return
 					}
 
-					log.Debug("Getting journal entry", "id", selectedJournalID)
+					log.Debug("Getting journal entry", "id", selectedJournalEntryID)
 
-					res, err := c.GetJournalEntryWithResponse(ctx, int64(selectedJournalID))
+					res, err := c.GetJournalEntryWithResponse(ctx, int64(selectedJournalEntryID))
 					if err != nil {
-						handleJournalsEditError(err)
+						handleJournalEntriesEditError(err)
 
 						return
 					}
@@ -4082,23 +4082,23 @@ func main() {
 					log.Debug("Got journal entry", "status", res.StatusCode())
 
 					if res.StatusCode() != http.StatusOK {
-						handleJournalsEditError(errors.New(res.Status()))
+						handleJournalEntriesEditError(errors.New(res.Status()))
 
 						return
 					}
 
-					defer clearJournalsEditError()
+					defer clearJournalEntriesEditError()
 
-					journalsEditPageSaveButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Id))
+					journalEntriesEditPageSaveButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Id))
 
-					journalsEditPageTitle.SetSubtitle(*res.JSON200.Title)
+					journalEntriesEditPageTitle.SetSubtitle(*res.JSON200.Title)
 
-					journalsEditPageRatingToggleGroup.SetActive(3 - uint(*res.JSON200.Rating)) // The toggle group is zero-indexed, but the rating is one-indexed
+					journalEntriesEditPageRatingToggleGroup.SetActive(3 - uint(*res.JSON200.Rating)) // The toggle group is zero-indexed, but the rating is one-indexed
 
-					journalsEditPageTitleInput.SetText(*res.JSON200.Title)
+					journalEntriesEditPageTitleInput.SetText(*res.JSON200.Title)
 
-					journalsEditPageBodyExpander.SetExpanded(true)
-					journalsEditPageBodyInput.Buffer().SetText(*res.JSON200.Body)
+					journalEntriesEditPageBodyExpander.SetExpanded(true)
+					journalEntriesEditPageBodyInput.Buffer().SetText(*res.JSON200.Body)
 				}()
 			}
 		}
@@ -4178,7 +4178,7 @@ func main() {
 			}
 		})
 
-		journalsListBox.ConnectRowActivated(func(row *gtk.ListBoxRow) {
+		journalEntriesListBox.ConnectRowActivated(func(row *gtk.ListBoxRow) {
 			if row != nil {
 				u, err := url.Parse(row.Cast().(*adw.ActionRow).Name())
 				if err != nil {
@@ -4191,23 +4191,23 @@ func main() {
 
 				rid := u.Query().Get("id")
 				if strings.TrimSpace(rid) == "" {
-					log.Warn("Could not get ID from journal entry row URL", "err", errMissingJournalID)
+					log.Warn("Could not get ID from journal entry row URL", "err", errMissingJournalEntryID)
 
-					handlePanic(errMissingJournalID)
+					handlePanic(errMissingJournalEntryID)
 
 					return
 				}
 
 				id, err := strconv.Atoi(rid)
 				if err != nil {
-					log.Warn("Could not parse ID from journal entry row URL", "err", errInvalidJournalID)
+					log.Warn("Could not parse ID from journal entry row URL", "err", errInvalidJournaEntrylID)
 
-					handlePanic(errInvalidJournalID)
+					handlePanic(errInvalidJournaEntrylID)
 
 					return
 				}
 
-				selectedJournalID = id
+				selectedJournalEntryID = id
 
 				homeNavigation.PushByTag(resources.PageJournalEntriesView)
 			}
@@ -4401,7 +4401,7 @@ func main() {
 					}
 
 					previewContactsCountLabel.SetLabel(fmt.Sprintf("%v", *res.JSON200.ContactsCount))
-					previewJournalCountLabel.SetLabel(fmt.Sprintf("%v", *res.JSON200.JournalEntriesCount))
+					previewJournalEntriesCountLabel.SetLabel(fmt.Sprintf("%v", *res.JSON200.JournalEntriesCount))
 				}()
 
 			case resources.PageRegister:
@@ -4447,7 +4447,7 @@ func main() {
 					}
 
 					homeSidebarContactsCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.ContactsCount))
-					homeSidebarJournalCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.JournalEntriesCount))
+					homeSidebarJournalEntriesCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.JournalEntriesCount))
 
 					contactsRow := homeSidebarListbox.RowAtIndex(0)
 					contactsRow.GrabFocus()

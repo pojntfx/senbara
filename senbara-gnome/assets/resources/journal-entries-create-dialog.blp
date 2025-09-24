@@ -1,7 +1,7 @@
 using Gtk 4.0;
 using Adw 1;
 
-Adw.Dialog journals_create_dialog {
+Adw.Dialog journal_entries_create_dialog {
     title: _("Create a journal entry");
 
     Adw.ToolbarView {
@@ -18,13 +18,13 @@ Adw.Dialog journals_create_dialog {
             }
 
             [end]
-            Button journals_create_dialog_add_button {
+            Button journal_entries_create_dialog_add_button {
                 sensitive: false;
 
                 Box {
                     spacing: 10;
 
-                    Adw.Spinner journals_create_dialog_add_spinner {
+                    Adw.Spinner journal_entries_create_dialog_add_spinner {
                         visible: false;
                     }
 
@@ -46,7 +46,7 @@ Adw.Dialog journals_create_dialog {
                     title: _("_How was your day?");
                     use-underline: true;
 
-                    Adw.ToggleGroup journals_create_dialog_rating {
+                    Adw.ToggleGroup journal_entries_create_dialog_rating {
                         valign: center;
 
                         Adw.Toggle {
@@ -68,13 +68,13 @@ Adw.Dialog journals_create_dialog {
             }
 
             Adw.PreferencesGroup {
-                Adw.EntryRow journals_create_dialog_title_input {
+                Adw.EntryRow journal_entries_create_dialog_title_input {
                     title: _("_Title");
                     use-underline: true;
                     can-focus: true;
                 }
 
-                Adw.ExpanderRow journals_create_dialog_body_expander {
+                Adw.ExpanderRow journal_entries_create_dialog_body_expander {
                     title: _("_Body");
                     use-underline: true;
                     subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
@@ -87,7 +87,7 @@ Adw.Dialog journals_create_dialog {
                         margin-start: 6;
                         margin-end: 6;
 
-                        TextView journals_create_dialog_body_input {
+                        TextView journal_entries_create_dialog_body_input {
                             wrap-mode: word;
                             left-margin: 12;
                             right-margin: 12;
