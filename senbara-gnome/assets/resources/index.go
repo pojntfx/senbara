@@ -42,8 +42,8 @@ const (
 	PageExchangeLogin  = "/exchange/login"
 	PageExchangeLogout = "/exchange/logout"
 
-	PageContacts = "/contacts"
-	PageJournals = "/journals"
+	PageContacts       = "/contacts"
+	PageJournalEntries = "/journal"
 
 	PageContactsLoading   = "/contacts/loading"
 	PageContactsList      = "/contacts/list"
@@ -76,21 +76,21 @@ const (
 	PageContactsEditData    = "/contacts/edit/data"
 	PageContactsEditError   = "/contacts/edit/error"
 
-	PageJournalsLoading   = "/journals/loading"
-	PageJournalsList      = "/journals/list"
-	PageJournalsNoResults = "/journals/no-results"
-	PageJournalsEmpty     = "/journals/empty"
-	PageJournalsError     = "/journals/error"
+	PageJournalEntriesLoading   = "/journal/loading"
+	PageJournalEntriesList      = "/journal/list"
+	PageJournalEntriesNoResults = "/journal/no-results"
+	PageJournalEntriesEmpty     = "/journal/empty"
+	PageJournalEntriesError     = "/journal/error"
 
-	PageJournalsView        = "/journals/view"
-	PageJournalsViewLoading = "/journals/view/loading"
-	PageJournalsViewData    = "/journals/view/data"
-	PageJournalsViewError   = "/journals/view/error"
+	PageJournalEntriesView        = "/journal/view"
+	PageJournalEntriesViewLoading = "/journal/view/loading"
+	PageJournalEntriesViewData    = "/journal/view/data"
+	PageJournalEntriesViewError   = "/journal/view/error"
 
-	PageJournalsEdit        = "/journals/edit"
-	PageJournalsEditLoading = "/journals/edit/loading"
-	PageJournalsEditData    = "/journals/edit/data"
-	PageJournalsEditError   = "/journals/edit/error"
+	PageJournalEntriesEdit        = "/journal/edit"
+	PageJournalEntriesEditLoading = "/journal/edit/loading"
+	PageJournalEntriesEditData    = "/journal/edit/data"
+	PageJournalEntriesEditError   = "/journal/edit/error"
 )
 
 //go:generate sh -c "blueprint-compiler batch-compile . . *.blp && sass .:. && glib-compile-schemas . && glib-compile-resources *.gresource.xml"

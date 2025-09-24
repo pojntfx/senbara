@@ -1050,16 +1050,16 @@ func main() {
 
 		journalsSearchEntry.ConnectSearchChanged(func() {
 			go func() {
-				journalsStack.SetVisibleChildName(resources.PageJournalsLoading)
+				journalsStack.SetVisibleChildName(resources.PageJournalEntriesLoading)
 
 				visibleJournalCount = 0
 
 				journalsListBox.InvalidateFilter()
 
 				if visibleJournalCount > 0 {
-					journalsStack.SetVisibleChildName(resources.PageJournalsList)
+					journalsStack.SetVisibleChildName(resources.PageJournalEntriesList)
 				} else {
-					journalsStack.SetVisibleChildName(resources.PageJournalsNoResults)
+					journalsStack.SetVisibleChildName(resources.PageJournalEntriesNoResults)
 				}
 			}()
 		})
@@ -1542,14 +1542,14 @@ func main() {
 			journalsErrorCopyDetailsButton,
 
 			func() {
-				homeNavigation.ReplaceWithTags([]string{resources.PageJournals})
+				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries})
 			},
 
 			func() {
 				homeSidebarJournalCountLabel.SetVisible(false)
 				homeSidebarJournalCountSpinner.SetVisible(true)
 
-				journalsStack.SetVisibleChildName(resources.PageJournalsLoading)
+				journalsStack.SetVisibleChildName(resources.PageJournalEntriesLoading)
 			},
 			func(err string) {
 				homeSidebarJournalCountSpinner.SetVisible(false)
@@ -1559,12 +1559,12 @@ func main() {
 
 				if err == "" {
 					if journalCount > 0 {
-						journalsStack.SetVisibleChildName(resources.PageJournalsList)
+						journalsStack.SetVisibleChildName(resources.PageJournalEntriesList)
 					} else {
-						journalsStack.SetVisibleChildName(resources.PageJournalsEmpty)
+						journalsStack.SetVisibleChildName(resources.PageJournalEntriesEmpty)
 					}
 				} else {
-					journalsStack.SetVisibleChildName(resources.PageJournalsError)
+					journalsStack.SetVisibleChildName(resources.PageJournalEntriesError)
 				}
 			},
 		)
@@ -1578,17 +1578,17 @@ func main() {
 			journalsViewErrorCopyDetailsButton,
 
 			func() {
-				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageJournalsView})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageJournalEntriesView})
 			},
 
 			func() {
-				journalsViewStack.SetVisibleChildName(resources.PageJournalsViewLoading)
+				journalsViewStack.SetVisibleChildName(resources.PageJournalEntriesViewLoading)
 			},
 			func(err string) {
 				if err == "" {
-					journalsViewStack.SetVisibleChildName(resources.PageJournalsViewData)
+					journalsViewStack.SetVisibleChildName(resources.PageJournalEntriesViewData)
 				} else {
-					journalsViewStack.SetVisibleChildName(resources.PageJournalsViewError)
+					journalsViewStack.SetVisibleChildName(resources.PageJournalEntriesViewError)
 				}
 			},
 		)
@@ -1602,18 +1602,18 @@ func main() {
 			journalsEditErrorCopyDetailsButton,
 
 			func() {
-				homeNavigation.ReplaceWithTags([]string{resources.PageJournals, resources.PageJournalsView, resources.PageJournalsEdit})
+				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries, resources.PageJournalEntriesView, resources.PageJournalEntriesEdit})
 			},
 
 			func() {
-				journalsEditStack.SetVisibleChildName(resources.PageJournalsEditLoading)
+				journalsEditStack.SetVisibleChildName(resources.PageJournalEntriesEditLoading)
 			},
 			func(err string) {
 				if err == "" {
-					journalsEditStack.SetVisibleChildName(resources.PageJournalsEditData)
+					journalsEditStack.SetVisibleChildName(resources.PageJournalEntriesEditData)
 					journalsEditPageTitleInput.GrabFocus()
 				} else {
-					journalsEditStack.SetVisibleChildName(resources.PageJournalsEditError)
+					journalsEditStack.SetVisibleChildName(resources.PageJournalEntriesEditError)
 				}
 			},
 		)
@@ -2142,7 +2142,7 @@ func main() {
 
 				journalsCreateDialog.Close()
 
-				homeNavigation.ReplaceWithTags([]string{resources.PageJournals})
+				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries})
 			}()
 		})
 
@@ -2206,7 +2206,7 @@ func main() {
 
 				mto.AddToast(adw.NewToast(gcore.Local("Updated journal entry")))
 
-				homeNavigation.ReplaceWithTags([]string{resources.PageJournals, resources.PageJournalsView})
+				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries, resources.PageJournalEntriesView})
 			}()
 		})
 
@@ -2979,7 +2979,7 @@ func main() {
 
 					mto.AddToast(adw.NewToast(gcore.Local("Journal entry deleted")))
 
-					homeNavigation.ReplaceWithTags([]string{resources.PageJournals})
+					homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries})
 				}
 			})
 
@@ -3055,7 +3055,7 @@ func main() {
 
 			selectedJournalID = int(id)
 
-			homeNavigation.PushByTag(resources.PageJournalsEdit)
+			homeNavigation.PushByTag(resources.PageJournalEntriesEdit)
 		})
 		a.AddAction(editJournalAction)
 
@@ -3073,7 +3073,7 @@ func main() {
 				contactsCreateDialog.Present(w)
 				contactsCreateDialogFirstNameInput.GrabFocus()
 
-			case resources.PageJournals:
+			case resources.PageJournalEntries:
 				journalsCreateDialog.Present(w)
 				journalsCreateDialogTitleInput.GrabFocus()
 			}
@@ -3094,7 +3094,7 @@ func main() {
 			case resources.PageContacts:
 				contactsSearchButton.SetActive(!contactsSearchButton.Active())
 
-			case resources.PageJournals:
+			case resources.PageJournalEntries:
 				journalsSearchButton.SetActive(!journalsSearchButton.Active())
 			}
 		})
@@ -3121,7 +3121,7 @@ func main() {
 					editActivityAction.Activate(glib.NewVariantInt64(int64(selectedActivityID)))
 				}
 
-			case resources.PageJournalsView:
+			case resources.PageJournalEntriesView:
 				if selectedJournalID != -1 {
 					editJournalAction.Activate(glib.NewVariantInt64(int64(selectedJournalID)))
 				}
@@ -3150,7 +3150,7 @@ func main() {
 					deleteActivityAction.Activate(glib.NewVariantInt64(int64(selectedActivityID)))
 				}
 
-			case resources.PageJournalsView:
+			case resources.PageJournalEntriesView:
 				if selectedJournalID != -1 {
 					deleteJournalAction.Activate(glib.NewVariantInt64(int64(selectedJournalID)))
 				}
@@ -3163,7 +3163,10 @@ func main() {
 		navigateToContactsAction.ConnectActivate(func(parameter *glib.Variant) {
 			log.Info("Handling navigate to contacts action")
 
-			homeSidebarListbox.SelectRow(homeSidebarListbox.RowAtIndex(0))
+			contactsRow := homeSidebarListbox.RowAtIndex(0)
+			contactsRow.GrabFocus()
+			homeSidebarListbox.SelectRow(contactsRow)
+
 			homeNavigation.ReplaceWithTags([]string{resources.PageContacts})
 		})
 		a.AddAction(navigateToContactsAction)
@@ -3173,8 +3176,11 @@ func main() {
 		navigateToJournalAction.ConnectActivate(func(parameter *glib.Variant) {
 			log.Info("Handling navigate to journal action")
 
-			homeSidebarListbox.SelectRow(homeSidebarListbox.RowAtIndex(1))
-			homeNavigation.ReplaceWithTags([]string{resources.PageJournals})
+			journalEntriesRow := homeSidebarListbox.RowAtIndex(1)
+			journalEntriesRow.GrabFocus()
+			homeSidebarListbox.SelectRow(journalEntriesRow)
+
+			homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries})
 		})
 		a.AddAction(navigateToJournalAction)
 		a.SetAccelsForAction("app.navigateToJournal", []string{`<Alt>2`})
@@ -3825,7 +3831,7 @@ func main() {
 					}
 				}()
 
-			case resources.PageJournals:
+			case resources.PageJournalEntries:
 				go func() {
 					enableJournalLoading()
 					defer disableJournalLoading()
@@ -3891,7 +3897,7 @@ func main() {
 							}
 							r.SetSubtitle(subtitle)
 
-							r.SetName("/journals/view?id=" + strconv.Itoa(int(*journalEntry.Id)))
+							r.SetName("/journal/view?id=" + strconv.Itoa(int(*journalEntry.Id)))
 
 							menuButton := gtk.NewMenuButton()
 							menuButton.SetVAlign(gtk.AlignCenter)
@@ -3924,7 +3930,7 @@ func main() {
 					}
 				}()
 
-			case resources.PageJournalsView:
+			case resources.PageJournalEntriesView:
 				go func() {
 					enableJournalsViewLoading()
 					defer disableJournalsViewLoading()
@@ -4044,7 +4050,7 @@ func main() {
 					defer clearJournalsViewError()
 				}()
 
-			case resources.PageJournalsEdit:
+			case resources.PageJournalEntriesEdit:
 				go func() {
 					enableJournalsEditLoading()
 					defer disableJournalsEditLoading()
@@ -4203,7 +4209,7 @@ func main() {
 
 				selectedJournalID = id
 
-				homeNavigation.PushByTag(resources.PageJournalsView)
+				homeNavigation.PushByTag(resources.PageJournalEntriesView)
 			}
 		})
 
@@ -4443,7 +4449,10 @@ func main() {
 					homeSidebarContactsCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.ContactsCount))
 					homeSidebarJournalCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.JournalEntriesCount))
 
-					homeSidebarListbox.SelectRow(homeSidebarListbox.RowAtIndex(0))
+					contactsRow := homeSidebarListbox.RowAtIndex(0)
+					contactsRow.GrabFocus()
+					homeSidebarListbox.SelectRow(contactsRow)
+
 					homeNavigation.ReplaceWithTags([]string{resources.PageContacts})
 				}()
 			}

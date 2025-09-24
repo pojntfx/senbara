@@ -297,12 +297,12 @@ msgstr ""
 msgid "Contact"
 msgstr ""
 
-#: ../assets/resources/window.blp:698 ../cmd/senbara-gnome/main.go:3278
+#: ../assets/resources/window.blp:698 ../cmd/senbara-gnome/main.go:3284
 msgid "Delete contact"
 msgstr ""
 
 #: ../assets/resources/window.blp:705 ../assets/resources/window.blp:1244
-#: ../cmd/senbara-gnome/main.go:3282
+#: ../cmd/senbara-gnome/main.go:3288
 msgid "Edit contact"
 msgstr ""
 
@@ -334,12 +334,12 @@ msgstr ""
 msgid "Activity"
 msgstr ""
 
-#: ../assets/resources/window.blp:858 ../cmd/senbara-gnome/main.go:3483
+#: ../assets/resources/window.blp:858 ../cmd/senbara-gnome/main.go:3489
 msgid "Delete activity"
 msgstr ""
 
 #: ../assets/resources/window.blp:865 ../assets/resources/window.blp:1101
-#: ../cmd/senbara-gnome/main.go:3487
+#: ../cmd/senbara-gnome/main.go:3493
 msgid "Edit activity"
 msgstr ""
 
@@ -347,7 +347,7 @@ msgstr ""
 msgid "Activity could not be loaded"
 msgstr ""
 
-#: ../assets/resources/window.blp:934 ../cmd/senbara-gnome/main.go:3436
+#: ../assets/resources/window.blp:934 ../cmd/senbara-gnome/main.go:3442
 msgid "Edit debt"
 msgstr ""
 
@@ -400,12 +400,12 @@ msgstr ""
 msgid "Journal Entry"
 msgstr ""
 
-#: ../assets/resources/window.blp:1576 ../cmd/senbara-gnome/main.go:3903
+#: ../assets/resources/window.blp:1576 ../cmd/senbara-gnome/main.go:3909
 msgid "Delete journal entry"
 msgstr ""
 
 #: ../assets/resources/window.blp:1583 ../assets/resources/window.blp:1652
-#: ../cmd/senbara-gnome/main.go:3907
+#: ../cmd/senbara-gnome/main.go:3913
 msgid "Edit journal entry"
 msgstr ""
 
@@ -430,7 +430,7 @@ msgstr ""
 
 #: ../assets/resources/window.blp:1734
 #: ../assets/resources/journal-entries-create-dialog.blp:63
-msgid "B_ad"
+msgid "Ba_d"
 msgstr ""
 
 #: ../assets/resources/window.blp:1743
@@ -710,31 +710,31 @@ msgstr ""
 msgid "Journal entry deleted"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3431
+#: ../cmd/senbara-gnome/main.go:3437
 msgid "Settle debt"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3450
+#: ../cmd/senbara-gnome/main.go:3456
 msgid "Add a _debt"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3504
+#: ../cmd/senbara-gnome/main.go:3510
 msgid "Add an ac_tivity"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3625
+#: ../cmd/senbara-gnome/main.go:3631
 msgid "No description provided."
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3884 ../cmd/senbara-gnome/main.go:3971
+#: ../cmd/senbara-gnome/main.go:3890 ../cmd/senbara-gnome/main.go:3977
 msgid "Great"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3887 ../cmd/senbara-gnome/main.go:3974
+#: ../cmd/senbara-gnome/main.go:3893 ../cmd/senbara-gnome/main.go:3980
 msgid "OK"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3890 ../cmd/senbara-gnome/main.go:3977
+#: ../cmd/senbara-gnome/main.go:3896 ../cmd/senbara-gnome/main.go:3983
 msgid "Bad"
 msgstr ""
 

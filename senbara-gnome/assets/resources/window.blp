@@ -521,7 +521,7 @@ Adw.ApplicationWindow main_window {
                                         title: _("_Journal");
                                         use-underline: true;
                                         icon-name: "open-book-symbolic";
-                                        name: "/journals";
+                                        name: "/journal";
                                         activatable: true;
 
                                         [suffix]
@@ -1434,7 +1434,7 @@ Adw.ApplicationWindow main_window {
 
                             Adw.NavigationPage {
                                 title: _("Journal");
-                                tag: "/journals";
+                                tag: "/journal";
 
                                 Adw.ToolbarView journals_toolbarview {
                                     [top]
@@ -1469,7 +1469,7 @@ Adw.ApplicationWindow main_window {
 
                                         Stack journals_stack {
                                             StackPage {
-                                                name: "/journals/loading";
+                                                name: "/journal/loading";
 
                                                 child: Box {
                                                     halign: center;
@@ -1482,7 +1482,7 @@ Adw.ApplicationWindow main_window {
                                             }
 
                                             StackPage {
-                                                name: "/journals/list";
+                                                name: "/journal/list";
 
                                                 child: Gtk.ListBox journals_list {
                                                     selection-mode: browse;
@@ -1499,7 +1499,7 @@ Adw.ApplicationWindow main_window {
                                             }
 
                                             StackPage {
-                                                name: "/journals/no-results";
+                                                name: "/journal/no-results";
 
                                                 child: Adw.StatusPage {
                                                     title: _("No journal entries found");
@@ -1509,7 +1509,7 @@ Adw.ApplicationWindow main_window {
                                             }
 
                                             StackPage {
-                                                name: "/journals/empty";
+                                                name: "/journal/empty";
 
                                                 child: Adw.StatusPage {
                                                     title: _("No journal entries found");
@@ -1528,7 +1528,7 @@ Adw.ApplicationWindow main_window {
                                             }
 
                                             StackPage {
-                                                name: "/journals/error";
+                                                name: "/journal/error";
 
                                                 child: Adw.StatusPage journals_error_status_page {
                                                     title: _("Journal entries could not be loaded");
@@ -1563,7 +1563,7 @@ Adw.ApplicationWindow main_window {
 
                             Adw.NavigationPage journals_view_page {
                                 title: _("Journal Entry");
-                                tag: "/journals/view";
+                                tag: "/journal/view";
 
                                 Adw.ToolbarView {
                                     [top]
@@ -1588,7 +1588,7 @@ Adw.ApplicationWindow main_window {
                                     ScrolledWindow {
                                         Stack journals_view_stack {
                                             StackPage {
-                                                name: "/journals/view/loading";
+                                                name: "/journal/view/loading";
 
                                                 child: Adw.Clamp {
                                                     maximum-size: 600;
@@ -1605,13 +1605,13 @@ Adw.ApplicationWindow main_window {
                                             }
 
                                             StackPage {
-                                                name: "/journals/view/data";
+                                                name: "/journal/view/data";
 
                                                 child: WebKit.WebView journals_view_body {};
                                             }
 
                                             StackPage {
-                                                name: "/journals/view/error";
+                                                name: "/journal/view/error";
 
                                                 child: Adw.Clamp {
                                                     maximum-size: 600;
@@ -1650,7 +1650,7 @@ Adw.ApplicationWindow main_window {
 
                             Adw.NavigationPage journals_edit_page {
                                 title: _("Edit journal entry");
-                                tag: "/journals/edit";
+                                tag: "/journal/edit";
                                 can-pop: false;
 
                                 Adw.ToolbarView {
@@ -1696,7 +1696,7 @@ Adw.ApplicationWindow main_window {
 
                                             Stack journals_edit_stack {
                                                 StackPage {
-                                                    name: "/journals/edit/loading";
+                                                    name: "/journal/edit/loading";
 
                                                     child: Box {
                                                         halign: center;
@@ -1709,7 +1709,7 @@ Adw.ApplicationWindow main_window {
                                                 }
 
                                                 StackPage {
-                                                    name: "/journals/edit/data";
+                                                    name: "/journal/edit/data";
 
                                                     child: Adw.PreferencesPage {
                                                         Adw.PreferencesGroup {
@@ -1731,7 +1731,7 @@ Adw.ApplicationWindow main_window {
                                                                     }
 
                                                                     Adw.Toggle {
-                                                                        label: _("B_ad");
+                                                                        label: _("Ba_d");
                                                                         use-underline: true;
                                                                     }
                                                                 }
@@ -1777,7 +1777,7 @@ Adw.ApplicationWindow main_window {
                                                 }
 
                                                 StackPage {
-                                                    name: "/journals/edit/error";
+                                                    name: "/journal/edit/error";
 
                                                     child: Adw.StatusPage journals_edit_error_status_page {
                                                         title: _("Journal entry could not be loaded");

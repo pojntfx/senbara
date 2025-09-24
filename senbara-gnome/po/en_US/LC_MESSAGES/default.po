@@ -311,12 +311,12 @@ msgstr "Copy details"
 msgid "Contact"
 msgstr "Contact"
 
-#: ../assets/resources/window.blp:698 ../cmd/senbara-gnome/main.go:3278
+#: ../assets/resources/window.blp:698 ../cmd/senbara-gnome/main.go:3284
 msgid "Delete contact"
 msgstr "Delete contact"
 
 #: ../assets/resources/window.blp:705 ../assets/resources/window.blp:1244
-#: ../cmd/senbara-gnome/main.go:3282
+#: ../cmd/senbara-gnome/main.go:3288
 msgid "Edit contact"
 msgstr "Edit contact"
 
@@ -348,12 +348,12 @@ msgstr "Contact could not be loaded"
 msgid "Activity"
 msgstr "Activity"
 
-#: ../assets/resources/window.blp:858 ../cmd/senbara-gnome/main.go:3483
+#: ../assets/resources/window.blp:858 ../cmd/senbara-gnome/main.go:3489
 msgid "Delete activity"
 msgstr "Delete activity"
 
 #: ../assets/resources/window.blp:865 ../assets/resources/window.blp:1101
-#: ../cmd/senbara-gnome/main.go:3487
+#: ../cmd/senbara-gnome/main.go:3493
 msgid "Edit activity"
 msgstr "Edit activity"
 
@@ -361,7 +361,7 @@ msgstr "Edit activity"
 msgid "Activity could not be loaded"
 msgstr "Activity could not be loaded"
 
-#: ../assets/resources/window.blp:934 ../cmd/senbara-gnome/main.go:3436
+#: ../assets/resources/window.blp:934 ../cmd/senbara-gnome/main.go:3442
 msgid "Edit debt"
 msgstr "Edit debt"
 
@@ -414,12 +414,12 @@ msgstr "Contacts could not be loaded"
 msgid "Journal Entry"
 msgstr "Total journal entries"
 
-#: ../assets/resources/window.blp:1576 ../cmd/senbara-gnome/main.go:3903
+#: ../assets/resources/window.blp:1576 ../cmd/senbara-gnome/main.go:3909
 msgid "Delete journal entry"
 msgstr "Total journal entries"
 
 #: ../assets/resources/window.blp:1583 ../assets/resources/window.blp:1652
-#: ../cmd/senbara-gnome/main.go:3907
+#: ../cmd/senbara-gnome/main.go:3913
 msgid "Edit journal entry"
 msgstr "Total journal entries"
 
@@ -444,7 +444,7 @@ msgstr ""
 
 #: ../assets/resources/window.blp:1734
 #: ../assets/resources/journal-entries-create-dialog.blp:63
-msgid "B_ad"
+msgid "Ba_d"
 msgstr ""
 
 #: ../assets/resources/window.blp:1743
@@ -724,31 +724,31 @@ msgstr "Are you sure you want to delete this contact?"
 msgid "Journal entry deleted"
 msgstr "Total journal entries"
 
-#: ../cmd/senbara-gnome/main.go:3431
+#: ../cmd/senbara-gnome/main.go:3437
 msgid "Settle debt"
 msgstr "Settle debt"
 
-#: ../cmd/senbara-gnome/main.go:3450
+#: ../cmd/senbara-gnome/main.go:3456
 msgid "Add a _debt"
 msgstr "Add a debt"
 
-#: ../cmd/senbara-gnome/main.go:3504
+#: ../cmd/senbara-gnome/main.go:3510
 msgid "Add an ac_tivity"
 msgstr "Add an activity"
 
-#: ../cmd/senbara-gnome/main.go:3625
+#: ../cmd/senbara-gnome/main.go:3631
 msgid "No description provided."
 msgstr "No description provided."
 
-#: ../cmd/senbara-gnome/main.go:3884 ../cmd/senbara-gnome/main.go:3971
+#: ../cmd/senbara-gnome/main.go:3890 ../cmd/senbara-gnome/main.go:3977
 msgid "Great"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3887 ../cmd/senbara-gnome/main.go:3974
+#: ../cmd/senbara-gnome/main.go:3893 ../cmd/senbara-gnome/main.go:3980
 msgid "OK"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3890 ../cmd/senbara-gnome/main.go:3977
+#: ../cmd/senbara-gnome/main.go:3896 ../cmd/senbara-gnome/main.go:3983
 msgid "Bad"
 msgstr ""
 
