@@ -2540,6 +2540,50 @@ func main() {
 		})
 		a.AddAction(exportUserDataAction)
 
+		refreshSidebarWithLatestSummary := func() bool {
+			enableHomeSidebarLoading()
+			defer disableHomeSidebarLoading()
+
+			redirected, c, _, err := authorize(
+				ctx,
+
+				true,
+			)
+			if err != nil {
+				log.Warn("Could not authorize user for home page", "err", err)
+
+				handlePanic(err)
+
+				return false
+			} else if redirected {
+				return false
+			}
+
+			settings.SetBoolean(resources.SettingAnonymousMode, false)
+
+			log.Debug("Getting summary")
+
+			res, err := c.GetSummaryWithResponse(ctx)
+			if err != nil {
+				handlePanic(err)
+
+				return false
+			}
+
+			log.Debug("Got summary", "status", res.StatusCode())
+
+			if res.StatusCode() != http.StatusOK {
+				handlePanic(errors.New(res.Status()))
+
+				return false
+			}
+
+			homeSidebarContactsCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.ContactsCount))
+			homeSidebarJournalEntriesCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.JournalEntriesCount))
+
+			return true
+		}
+
 		importUserDataAction := gio.NewSimpleAction("importUserData", nil)
 		importUserDataAction.ConnectActivate(func(parameter *glib.Variant) {
 			log.Info("Handling import user data action")
@@ -2662,6 +2706,19 @@ func main() {
 							}
 
 							mto.AddToast(adw.NewToast(gcore.Local("Imported user data")))
+
+							var (
+								navigationStack      = homeNavigation.NavigationStack()
+								navigationStackPages = []string{}
+							)
+							for i := range navigationStack.NItems() {
+								navigationStackPages = append(navigationStackPages, navigationStack.Item(i).Cast().(*adw.NavigationPage).Tag())
+							}
+							homeNavigation.ReplaceWithTags(navigationStackPages)
+
+							go func() {
+								_ = refreshSidebarWithLatestSummary()
+							}()
 						}()
 					}
 				})
@@ -4409,45 +4466,9 @@ func main() {
 
 			case resources.PageHome:
 				go func() {
-					enableHomeSidebarLoading()
-					defer disableHomeSidebarLoading()
-
-					redirected, c, _, err := authorize(
-						ctx,
-
-						true,
-					)
-					if err != nil {
-						log.Warn("Could not authorize user for home page", "err", err)
-
-						handlePanic(err)
-
-						return
-					} else if redirected {
+					if ok := refreshSidebarWithLatestSummary(); !ok {
 						return
 					}
-
-					settings.SetBoolean(resources.SettingAnonymousMode, false)
-
-					log.Debug("Getting summary")
-
-					res, err := c.GetSummaryWithResponse(ctx)
-					if err != nil {
-						handlePanic(err)
-
-						return
-					}
-
-					log.Debug("Got summary", "status", res.StatusCode())
-
-					if res.StatusCode() != http.StatusOK {
-						handlePanic(errors.New(res.Status()))
-
-						return
-					}
-
-					homeSidebarContactsCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.ContactsCount))
-					homeSidebarJournalEntriesCountLabel.SetText(fmt.Sprintf("%v", *res.JSON200.JournalEntriesCount))
 
 					contactsRow := homeSidebarListbox.RowAtIndex(0)
 					contactsRow.GrabFocus()
