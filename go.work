@@ -2,7 +2,7 @@ go 1.24.0
 
 use (
 	.
-	// ./senbara-gtk // Disabled for now until we can remove the go replace directives for purego
+	./senbara-gtk
 	// ./senbara-gtk-go // Disabled for now until we can remove the go replace directives for purego
 	./senbara-cli
 	./senbara-common

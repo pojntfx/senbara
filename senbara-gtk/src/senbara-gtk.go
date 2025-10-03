@@ -7,7 +7,6 @@ import (
 
 	_ "embed"
 
-	"github.com/jwijenbergh/purego"
 	"github.com/jwijenbergh/puregotk/v4/adw"
 	"github.com/jwijenbergh/puregotk/v4/gio"
 	"github.com/jwijenbergh/puregotk/v4/glib"
@@ -98,16 +97,12 @@ func init() {
 
 		objClass := (*gobject.ObjectClass)(unsafe.Pointer(tc))
 
-		objClass.Constructed = purego.NewCallback(func(rawObj uintptr) {
+		objClass.SetCallbackConstructed(func(o *gobject.Object) {
 			parentObjClass := (*gobject.ObjectClass)(unsafe.Pointer(gobject.TypeClassPeek(adw.ApplicationWindowGLibType())))
 
-			var parentConstructed func(obj uintptr)
-			purego.RegisterFunc(&parentConstructed, parentObjClass.Constructed)
-			parentConstructed(rawObj)
+			parentObjClass.GetCallbackConstructed()(o)
 
-			obj := gobject.ObjectNewFromInternalPtr(rawObj)
-
-			parent := (*adw.ApplicationWindow)(unsafe.Pointer(obj))
+			parent := (*adw.ApplicationWindow)(unsafe.Pointer(o))
 			parent.InitTemplate()
 
 			rawButtonTest := parent.Widget.GetTemplateChild(
@@ -134,11 +129,11 @@ func init() {
 			var cleanupCallback glib.DestroyNotify = func(data uintptr) {
 				pinner.Unpin()
 			}
-			obj.SetDataFull(dataKeyGoInstance, uintptr(unsafe.Pointer(w)), &cleanupCallback)
+			o.SetDataFull(dataKeyGoInstance, uintptr(unsafe.Pointer(w)), &cleanupCallback)
 
 			cb := func(gtk.Button) {
 				gobject.SignalEmit(
-					obj,
+					o,
 					gobject.SignalLookup("button-test-clicked", gTypeSenbaraGtkMainApplicationWindow),
 					0,
 				)
@@ -147,24 +142,19 @@ func init() {
 			buttonTest.ConnectClicked(&cb)
 		})
 
-		objClass.SetProperty = purego.NewCallback(func(obj uintptr, propId uint, value uintptr, pspec uintptr) {
-			switch propId {
+		objClass.SetCallbackSetProperty(func(o *gobject.Object, u uint, v *gobject.Value, ps *gobject.ParamSpec) {
+			switch u {
 			case propertyIdTestButtonSensitive:
-				var (
-					v = (*gobject.Value)(unsafe.Pointer(value))
-					w = (*senbaraGtkMainApplicationWindow)(unsafe.Pointer(gobject.ObjectNewFromInternalPtr(obj).GetData(dataKeyGoInstance)))
-				)
+				w := (*senbaraGtkMainApplicationWindow)(unsafe.Pointer(o.GetData(dataKeyGoInstance)))
 
 				w.buttonTest.SetSensitive(v.GetBoolean())
 			}
 		})
-		objClass.GetProperty = purego.NewCallback(func(obj uintptr, propId uint, value uintptr, pspec uintptr) {
-			switch propId {
+
+		objClass.SetCallbackGetProperty(func(o *gobject.Object, u uint, v *gobject.Value, ps *gobject.ParamSpec) {
+			switch u {
 			case propertyIdTestButtonSensitive:
-				var (
-					v = (*gobject.Value)(unsafe.Pointer(value))
-					w = (*senbaraGtkMainApplicationWindow)(unsafe.Pointer(gobject.ObjectNewFromInternalPtr(obj).GetData(dataKeyGoInstance)))
-				)
+				w := (*senbaraGtkMainApplicationWindow)(unsafe.Pointer(o.GetData(dataKeyGoInstance)))
 
 				v.SetBoolean(w.buttonTest.IsSensitive())
 			}
