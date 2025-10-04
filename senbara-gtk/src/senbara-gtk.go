@@ -77,16 +77,11 @@ func init() {
 		typeClass.BindTemplateChildFull("button_test", false, 0)
 		typeClass.BindTemplateChildFull("toast_overlay", false, 0)
 
-		var (
-			callbackFunc gobject.Callback      = func() {}
-			destroyData  gobject.ClosureNotify = func(u uintptr, c *gobject.Closure) {}
-		)
-
 		gobject.SignalNewv(
 			"button-test-clicked",
 			gTypeSenbaraGtkMainApplicationWindow,
 			gobject.GSignalRunFirstValue,
-			gobject.CclosureNew(&callbackFunc, 0, &destroyData),
+			nil,
 			nil,
 			0,
 			nil,
@@ -98,29 +93,31 @@ func init() {
 		objClass := (*gobject.ObjectClass)(unsafe.Pointer(tc))
 
 		objClass.SetCallbackConstructed(func(o *gobject.Object) {
-			parentObjClass := (*gobject.ObjectClass)(unsafe.Pointer(gobject.TypeClassPeek(adw.ApplicationWindowGLibType())))
+			parentObjClass := (*gobject.ObjectClass)(unsafe.Pointer(tc.PeekParent()))
 
 			parentObjClass.GetCallbackConstructed()(o)
 
-			parent := (*adw.ApplicationWindow)(unsafe.Pointer(o))
+			var parent adw.ApplicationWindow
+			o.Cast(&parent)
+
 			parent.InitTemplate()
 
-			rawButtonTest := parent.Widget.GetTemplateChild(
+			var buttonTest gtk.Button
+			parent.Widget.GetTemplateChild(
 				gTypeSenbaraGtkMainApplicationWindow,
 				"button_test",
-			)
-			buttonTest := (*gtk.Button)(unsafe.Pointer(rawButtonTest))
+			).Cast(&buttonTest)
 
-			rawToastOverlay := parent.Widget.GetTemplateChild(
+			var toastOverlay adw.ToastOverlay
+			parent.Widget.GetTemplateChild(
 				gTypeSenbaraGtkMainApplicationWindow,
 				"toast_overlay",
-			)
-			toastOverlay := (*adw.ToastOverlay)(unsafe.Pointer(rawToastOverlay))
+			).Cast(&toastOverlay)
 
 			w := &senbaraGtkMainApplicationWindow{
-				ApplicationWindow: parent,
-				buttonTest:        buttonTest,
-				toastOverlay:      toastOverlay,
+				ApplicationWindow: &parent,
+				buttonTest:        &buttonTest,
+				toastOverlay:      &toastOverlay,
 			}
 
 			var pinner runtime.Pinner
@@ -171,14 +168,17 @@ func init() {
 		objClass.InstallProperty(propertyIdTestButtonSensitive, pspec)
 	}
 
+	var parentQuery gobject.TypeQuery
+	gobject.NewTypeQuery(adw.ApplicationWindowGLibType(), &parentQuery)
+
 	var instanceInit gobject.InstanceInitFunc = func(ti *gobject.TypeInstance, tc *gobject.TypeClass) {}
 
 	gTypeSenbaraGtkMainApplicationWindow = gobject.TypeRegisterStaticSimple(
 		adw.ApplicationWindowGLibType(),
 		"SenbaraGtkMainApplicationWindow",
-		1024,
+		parentQuery.ClassSize,
 		&classInit,
-		1024,
+		parentQuery.InstanceSize+uint(unsafe.Sizeof(senbaraGtkMainApplicationWindow{}))+uint(unsafe.Sizeof(&senbaraGtkMainApplicationWindow{})),
 		&instanceInit,
 		0,
 	)

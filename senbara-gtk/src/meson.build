@@ -22,7 +22,6 @@ config_go_file = custom_target(
 senbara_gtk_source_dir = meson.current_source_dir()
 
 senbara_gtk_source_go_files = files(
-  'config.go',
   'senbara-gtk.go',
 )
 
