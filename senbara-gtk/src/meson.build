@@ -19,7 +19,12 @@ config_go_file = custom_target(
   command: ['cp', '@INPUT@', meson.current_source_dir() / 'config.go'],
 )
 
-senbara_gtk_source = meson.current_source_dir()
+senbara_gtk_source_dir = meson.current_source_dir()
+
+senbara_gtk_source_go_files = files(
+  'config.go',
+  'senbara-gtk.go',
+)
 
 senbara_gtk_headers = [
   'senbara-gtk.h',
@@ -76,6 +81,7 @@ senbara_gtk_resources = custom_target(
 
 senbara_gtk_archive = custom_target(
   'senbara-gtk-archive',
+  input: senbara_gtk_source_go_files,
   output: 'libsenbara-gtk-' + api_version + '.a',
   command: [
     find_program('go').full_path(),
@@ -83,7 +89,7 @@ senbara_gtk_archive = custom_target(
     '-buildmode', 'c-archive',
     '-x',
     '-o', '@OUTPUT@',
-    senbara_gtk_source,
+    senbara_gtk_source_dir,
   ],
   depends: [
     senbara_gtk_resources,
