@@ -1,2 +1,4 @@
-github.com/pojntfx/senbara/senbara-gtk-go v0.0.0-20250826075235-cbb2c7573805 h1:qm3eL8EMJIf+0kUHcgLIkm7dyewD27+1TDgkx7gmvAg=
-github.com/pojntfx/senbara/senbara-gtk-go v0.0.0-20250826075235-cbb2c7573805/go.mod h1:kjjpLcz3tCkRH52ml3igoIYqkKDtQRT7JEc0aWWWrC4=
+github.com/jwijenbergh/purego v0.0.0-20250812133547-b5852df1402b h1:Dg66YlzjqLhOReaQb1a/Fhcm7zTYyrmiyAqSd6TLUVA=
+github.com/jwijenbergh/purego v0.0.0-20250812133547-b5852df1402b/go.mod h1:amE5lVGstyh2GTEIHFEbgJHmoMD0llIuapnzIlZx7Fc=
+github.com/pojntfx/puregotk v0.0.0-20251004063801-242962164ebe h1:wmwSfgEPnSS2/FKmyZDEaQ6ZCobszFb7nB8qbv0Y4yY=
+github.com/pojntfx/puregotk v0.0.0-20251004063801-242962164ebe/go.mod h1:9FUAoCJsQgot2Zt6tvy1ZrviyMe71bNhWhwo3z36XQY=

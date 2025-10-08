@@ -55,7 +55,14 @@ func main() {
 	p.First()
 
 	// Create the template
-	gotemp, err := template.New("go").Funcs(template.FuncMap{"conv": util.ConvertArgs, "convc": util.ConvertArgsComma}).ParseFiles(filepath.Join(puregotk, "templates/go"))
+	gotemp, err := template.New("go").Funcs(template.FuncMap{
+		"conv":     util.ConvertArgs,
+		"convc":    util.ConvertArgsComma,
+		"convcb":   util.ConvertCallbackArgs,
+		"convcd":   util.ConvertArgsCommaDeref,
+		"convd":    util.ConvertArgsDeref,
+		"convcbne": util.ConvertCallbackArgsNoErr,
+	}).ParseFiles(filepath.Join(puregotk, "templates/go"))
 	if err != nil {
 		panic(err)
 	}
