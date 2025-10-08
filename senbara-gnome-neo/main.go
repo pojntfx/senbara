@@ -1,9 +1,8 @@
 package main
 
 import (
-	"log"
 	"os"
-	"time"
+	"runtime"
 	"unsafe"
 
 	"github.com/jwijenbergh/puregotk/v4/adw"
@@ -11,78 +10,83 @@ import (
 	"github.com/jwijenbergh/puregotk/v4/glib"
 	"github.com/jwijenbergh/puregotk/v4/gobject"
 	"github.com/jwijenbergh/puregotk/v4/gtk"
-	"github.com/pojntfx/senbara/senbara-gnome-neo/assets/resources"
-	"github.com/pojntfx/senbara/senbara-gtk-go/senbaragtk"
 )
 
+var (
+	gTypeExampleApplication gobject.Type
+)
+
+const (
+	dataKeyGoInstance = "go_instance"
+)
+
+type exampleApplication struct {
+	adw.Application
+}
+
 func init() {
-	resource, err := gio.NewResourceFromData(glib.NewBytes(resources.ResourceContents, uint(len(resources.ResourceContents))))
-	if err != nil {
-		panic(err)
-	}
-	gio.ResourcesRegister(resource)
-}
+	var classInit gobject.ClassInitFunc = func(tc *gobject.TypeClass, u uintptr) {
+		objClass := (*gobject.ObjectClass)(unsafe.Pointer(tc))
 
-type ExampleApplication struct {
-	*adw.Application
-	window *senbaragtk.MainApplicationWindow
-}
+		objClass.SetCallbackConstructed(func(o *gobject.Object) {
+			parentObjClass := (*gobject.ObjectClass)(unsafe.Pointer(tc.PeekParent()))
 
-func NewExampleApplication() *ExampleApplication {
-	app := adw.NewApplication(resources.AppID, gio.GApplicationFlagsNoneValue)
+			parentObjClass.GetCallbackConstructed()(o)
 
-	exampleApp := &ExampleApplication{
-		Application: app,
-	}
+			var parent adw.Application
+			o.Cast(&parent)
 
-	activateCallback := func(gio.Application) {
-		exampleApp.onActivate()
-	}
-	app.ConnectActivate(&activateCallback)
-
-	return exampleApp
-}
-
-func (app *ExampleApplication) onActivate() {
-	b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
-
-	app.window = (*senbaragtk.MainApplicationWindow)(unsafe.Pointer(b.GetObject("main_window")))
-	app.window.SetApplication(&app.Application.Application)
-
-	cb := func(senbaragtk.MainApplicationWindow) {
-		log.Println("Test button clicked")
-
-		app.window.ShowToast("Button was clicked!")
-
-		var value gobject.Value
-		value.Init(gobject.TypeBooleanVal)
-		value.SetBoolean(false)
-		app.window.SetProperty("test-button-sensitive", &value)
-		value.Unset()
-
-		go func() {
-			time.Sleep(3 * time.Second)
-
-			var idleFunc glib.SourceFunc = func(uintptr) bool {
-				app.window.ShowToast("Button re-enabled after 3 seconds")
-
-				var value gobject.Value
-				value.Init(gobject.TypeBooleanVal)
-				value.SetBoolean(true)
-				app.window.SetProperty("test-button-sensitive", &value)
-				value.Unset()
-
-				return false
+			w := &exampleApplication{
+				Application: parent,
 			}
-			glib.IdleAdd(&idleFunc, 0)
-		}()
+
+			var pinner runtime.Pinner
+			pinner.Pin(w)
+
+			var cleanupCallback glib.DestroyNotify = func(data uintptr) {
+				pinner.Unpin()
+			}
+			o.SetDataFull(dataKeyGoInstance, uintptr(unsafe.Pointer(w)), &cleanupCallback)
+		})
+
+		adwApplicationClass := (*gio.ApplicationClass)(unsafe.Pointer(tc))
+
+		adwApplicationClass.SetCallbackActivate(func(a *gio.Application) {
+			var app gtk.Application
+			a.Cast(&app)
+
+			window := adw.NewApplicationWindow(&app)
+
+			// TODO: Use senbaragtk.MainApplicationWindow here
+
+			window.Present()
+		})
 	}
 
-	app.window.ConnectButtonTestClicked(&cb)
+	var instanceInit gobject.InstanceInitFunc = func(ti *gobject.TypeInstance, tc *gobject.TypeClass) {}
 
-	app.window.Present()
+	var parentQuery gobject.TypeQuery
+	gobject.NewTypeQuery(adw.ApplicationGLibType(), &parentQuery)
+
+	gTypeExampleApplication = gobject.TypeRegisterStaticSimple(
+		parentQuery.Type,
+		"ExampleApplication",
+		parentQuery.ClassSize,
+		&classInit,
+		1024, // TODO: Calculate correct size here
+		&instanceInit,
+		0,
+	)
 }
 
 func main() {
-	os.Exit(NewExampleApplication().Run(len(os.Args), os.Args))
+	obj := gobject.NewObject(gTypeExampleApplication,
+		"application_id", "com.pojtinger.felicitas.SenbaraGnomeNeo", // TODO: Do this by overwriting the constructor above instead
+		"flags", gio.GApplicationFlagsNoneValue,
+	)
+
+	var app exampleApplication
+	obj.Cast(&app)
+
+	os.Exit(app.Run(len(os.Args), os.Args))
 }

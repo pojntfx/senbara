@@ -45,7 +45,7 @@ func senbara_gtk_main_application_window_get_type() C.ulong {
 }
 
 type senbaraGtkMainApplicationWindow struct {
-	*adw.ApplicationWindow
+	adw.ApplicationWindow
 
 	buttonTest   *gtk.Button
 	toastOverlay *adw.ToastOverlay
@@ -115,7 +115,7 @@ func init() {
 			).Cast(&toastOverlay)
 
 			w := &senbaraGtkMainApplicationWindow{
-				ApplicationWindow: &parent,
+				ApplicationWindow: parent,
 				buttonTest:        &buttonTest,
 				toastOverlay:      &toastOverlay,
 			}
@@ -168,13 +168,13 @@ func init() {
 		objClass.InstallProperty(propertyIdTestButtonSensitive, pspec)
 	}
 
+	var instanceInit gobject.InstanceInitFunc = func(ti *gobject.TypeInstance, tc *gobject.TypeClass) {}
+
 	var parentQuery gobject.TypeQuery
 	gobject.NewTypeQuery(adw.ApplicationWindowGLibType(), &parentQuery)
 
-	var instanceInit gobject.InstanceInitFunc = func(ti *gobject.TypeInstance, tc *gobject.TypeClass) {}
-
 	gTypeSenbaraGtkMainApplicationWindow = gobject.TypeRegisterStaticSimple(
-		adw.ApplicationWindowGLibType(),
+		parentQuery.Type,
 		"SenbaraGtkMainApplicationWindow",
 		parentQuery.ClassSize,
 		&classInit,
