@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"runtime"
+	"time"
 	"unsafe"
 
 	"github.com/jwijenbergh/puregotk/v4/adw"
@@ -23,6 +25,7 @@ const (
 
 type exampleApplication struct {
 	adw.Application
+	window *senbaragtk.MainApplicationWindow
 }
 
 func init() {
@@ -50,9 +53,11 @@ func init() {
 			o.SetDataFull(dataKeyGoInstance, uintptr(unsafe.Pointer(w)), &cleanupCallback)
 		})
 
-		adwApplicationClass := (*gio.ApplicationClass)(unsafe.Pointer(tc))
+		applicationClass := (*gio.ApplicationClass)(unsafe.Pointer(tc))
 
-		adwApplicationClass.OverrideActivate(func(a *gio.Application) {
+		applicationClass.OverrideActivate(func(a *gio.Application) {
+			exampleApp := (*exampleApplication)(unsafe.Pointer(a.GetData(dataKeyGoInstance)))
+
 			var app gtk.Application
 			a.Cast(&app)
 
@@ -63,9 +68,30 @@ func init() {
 			var window senbaragtk.MainApplicationWindow
 			obj.Cast(&window)
 
-			window.SetApplication(&app)
+			exampleApp.window = &window
 
-			window.Present()
+			var cb func(senbaragtk.MainApplicationWindow) = func(w senbaragtk.MainApplicationWindow) {
+				fmt.Println("Test button clicked")
+
+				exampleApp.window.ShowToast("Button was clicked!")
+
+				var v gobject.Value
+				v.Init(gobject.TypeBooleanVal)
+				v.SetBoolean(false)
+				exampleApp.window.SetProperty("test-button-sensitive", &v)
+
+				time.AfterFunc(time.Second*3, func() {
+					exampleApp.window.ShowToast("Button re-enabled after 3 seconds")
+
+					var v gobject.Value
+					v.Init(gobject.TypeBooleanVal)
+					v.SetBoolean(true)
+					exampleApp.window.SetProperty("test-button-sensitive", &v)
+				})
+			}
+			exampleApp.window.ConnectButtonTestClicked(&cb)
+
+			exampleApp.window.Present()
 		})
 	}
 
@@ -87,7 +113,7 @@ func init() {
 
 func main() {
 	obj := gobject.NewObject(gTypeExampleApplication,
-		"application_id", "com.pojtinger.felicitas.SenbaraGnomeNeo", // TODO: Do this by overwriting the constructor above instead
+		"application_id", "com.pojtinger.felicitas.SenbaraGnomeNeo", // TODO: Do this by overwriting the constructor above & doing the super() equivalent instead
 		"flags", gio.GApplicationFlagsNoneValue,
 	)
 
