@@ -92,10 +92,10 @@ func init() {
 
 		objClass := (*gobject.ObjectClass)(unsafe.Pointer(tc))
 
-		objClass.SetCallbackConstructed(func(o *gobject.Object) {
+		objClass.OverrideConstructed(func(o *gobject.Object) {
 			parentObjClass := (*gobject.ObjectClass)(unsafe.Pointer(tc.PeekParent()))
 
-			parentObjClass.GetCallbackConstructed()(o)
+			parentObjClass.GetConstructed()(o)
 
 			var parent adw.ApplicationWindow
 			o.Cast(&parent)
@@ -139,7 +139,7 @@ func init() {
 			buttonTest.ConnectClicked(&cb)
 		})
 
-		objClass.SetCallbackSetProperty(func(o *gobject.Object, u uint, v *gobject.Value, ps *gobject.ParamSpec) {
+		objClass.OverrideSetProperty(func(o *gobject.Object, u uint, v *gobject.Value, ps *gobject.ParamSpec) {
 			switch u {
 			case propertyIdTestButtonSensitive:
 				w := (*senbaraGtkMainApplicationWindow)(unsafe.Pointer(o.GetData(dataKeyGoInstance)))
@@ -148,7 +148,7 @@ func init() {
 			}
 		})
 
-		objClass.SetCallbackGetProperty(func(o *gobject.Object, u uint, v *gobject.Value, ps *gobject.ParamSpec) {
+		objClass.OverrideGetProperty(func(o *gobject.Object, u uint, v *gobject.Value, ps *gobject.ParamSpec) {
 			switch u {
 			case propertyIdTestButtonSensitive:
 				w := (*senbaraGtkMainApplicationWindow)(unsafe.Pointer(o.GetData(dataKeyGoInstance)))

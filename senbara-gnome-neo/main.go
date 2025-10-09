@@ -10,6 +10,7 @@ import (
 	"github.com/jwijenbergh/puregotk/v4/glib"
 	"github.com/jwijenbergh/puregotk/v4/gobject"
 	"github.com/jwijenbergh/puregotk/v4/gtk"
+	"github.com/pojntfx/senbara/senbara-gtk-go/senbaragtk"
 )
 
 var (
@@ -28,10 +29,10 @@ func init() {
 	var classInit gobject.ClassInitFunc = func(tc *gobject.TypeClass, u uintptr) {
 		objClass := (*gobject.ObjectClass)(unsafe.Pointer(tc))
 
-		objClass.SetCallbackConstructed(func(o *gobject.Object) {
+		objClass.OverrideConstructed(func(o *gobject.Object) {
 			parentObjClass := (*gobject.ObjectClass)(unsafe.Pointer(tc.PeekParent()))
 
-			parentObjClass.GetCallbackConstructed()(o)
+			parentObjClass.GetConstructed()(o)
 
 			var parent adw.Application
 			o.Cast(&parent)
@@ -51,13 +52,18 @@ func init() {
 
 		adwApplicationClass := (*gio.ApplicationClass)(unsafe.Pointer(tc))
 
-		adwApplicationClass.SetCallbackActivate(func(a *gio.Application) {
+		adwApplicationClass.OverrideActivate(func(a *gio.Application) {
 			var app gtk.Application
 			a.Cast(&app)
 
-			window := adw.NewApplicationWindow(&app)
+			obj := gobject.NewObject(senbaragtk.MainApplicationWindowGLibType(),
+				"application", app,
+			)
 
-			// TODO: Use senbaragtk.MainApplicationWindow here
+			var window senbaragtk.MainApplicationWindow
+			obj.Cast(&window)
+
+			window.SetApplication(&app)
 
 			window.Present()
 		})
