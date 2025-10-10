@@ -74,19 +74,11 @@ func init() {
 				fmt.Println("Test button clicked")
 
 				exampleApp.window.ShowToast("Button was clicked!")
-
-				var v gobject.Value
-				v.Init(gobject.TypeBooleanVal)
-				v.SetBoolean(false)
-				exampleApp.window.SetProperty("test-button-sensitive", &v)
+				exampleApp.window.SetPropertyTestButtonSensitive(false)
 
 				time.AfterFunc(time.Second*3, func() {
 					exampleApp.window.ShowToast("Button re-enabled after 3 seconds")
-
-					var v gobject.Value
-					v.Init(gobject.TypeBooleanVal)
-					v.SetBoolean(true)
-					exampleApp.window.SetProperty("test-button-sensitive", &v)
+					exampleApp.window.SetPropertyTestButtonSensitive(true)
 				})
 			}
 			exampleApp.window.ConnectButtonTestClicked(&cb)

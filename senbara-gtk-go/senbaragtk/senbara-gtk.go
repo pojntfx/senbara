@@ -53,6 +53,19 @@ func (c *MainApplicationWindow) SetGoPointer(ptr uintptr) {
 	c.Ptr = ptr
 }
 
+func (x *MainApplicationWindow) SetPropertyTestButtonSensitive(value bool) {
+	var v gobject.Value
+	v.Init(gobject.TypeBooleanVal)
+	v.SetBoolean(value)
+	x.SetProperty("test-button-sensitive", &v)
+}
+
+func (x *MainApplicationWindow) GetPropertyTestButtonSensitive() bool {
+	var v gobject.Value
+	x.GetProperty("test-button-sensitive", &v)
+	return v.GetBoolean()
+}
+
 func (x *MainApplicationWindow) ConnectButtonTestClicked(cb *func(MainApplicationWindow)) uint32 {
 	cbPtr := uintptr(unsafe.Pointer(cb))
 	if cbRefPtr, ok := glib.GetCallback(cbPtr); ok {

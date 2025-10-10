@@ -3,7 +3,7 @@ module github.com/pojntfx/senbara/senbara-gnome-neo
 go 1.24.0
 
 replace (
-	github.com/jwijenbergh/puregotk v0.0.0-20250812133623-7203178b5172 => github.com/pojntfx/puregotk v0.0.0-20251009044016-417c19274d31
+	github.com/jwijenbergh/puregotk v0.0.0-20250812133623-7203178b5172 => github.com/pojntfx/puregotk v0.0.0-20251010035220-e37986fba065
 	github.com/pojntfx/senbara/senbara-gtk-go v0.0.0-20250826075235-cbb2c7573805 => ../senbara-gtk-go
 )
 
