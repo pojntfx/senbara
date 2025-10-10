@@ -105,7 +105,7 @@ func init() {
 		"ExampleApplication",
 		parentQuery.ClassSize,
 		&classInit,
-		1024, // TODO: Calculate correct size here
+		parentQuery.InstanceSize+uint(unsafe.Sizeof(exampleApplication{}))+uint(unsafe.Sizeof(&exampleApplication{}))+uint(unsafe.Sizeof(&senbaragtk.MainApplicationWindow{})),
 		&instanceInit,
 		0,
 	)
@@ -113,7 +113,7 @@ func init() {
 
 func main() {
 	obj := gobject.NewObject(gTypeExampleApplication,
-		"application_id", "com.pojtinger.felicitas.SenbaraGnomeNeo", // TODO: Do this by overwriting the constructor above & doing the super() equivalent instead
+		"application_id", "com.pojtinger.felicitas.SenbaraGnomeNeo",
 		"flags", gio.GApplicationFlagsNoneValue,
 	)
 
