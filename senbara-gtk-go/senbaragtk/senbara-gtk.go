@@ -53,6 +53,7 @@ func (c *MainApplicationWindow) SetGoPointer(ptr uintptr) {
 	c.Ptr = ptr
 }
 
+// SetPropertyTestButtonSensitive sets the "test-button-sensitive" property.
 func (x *MainApplicationWindow) SetPropertyTestButtonSensitive(value bool) {
 	var v gobject.Value
 	v.Init(gobject.TypeBooleanVal)
@@ -60,6 +61,7 @@ func (x *MainApplicationWindow) SetPropertyTestButtonSensitive(value bool) {
 	x.SetProperty("test-button-sensitive", &v)
 }
 
+// GetPropertyTestButtonSensitive gets the "test-button-sensitive" property.
 func (x *MainApplicationWindow) GetPropertyTestButtonSensitive() bool {
 	var v gobject.Value
 	x.GetProperty("test-button-sensitive", &v)

@@ -199,6 +199,8 @@ github.com/pkg/sftp v1.13.7/go.mod h1:KMKI0t3T6hfA+lTR/ssZdunHo+uwq7ghoN09/FSu3D
 github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10/go.mod h1:t/avpk3KcrXxUnYOhZhMXJlSEyie6gQbtLq5NM3loB8=
 github.com/pojntfx/puregotk v0.0.0-20251009044016-417c19274d31 h1:aTLkBlf2AqI1ivMmW4QfB4quHoPqZNulf1HZJyTRyfQ=
 github.com/pojntfx/puregotk v0.0.0-20251009044016-417c19274d31/go.mod h1:9FUAoCJsQgot2Zt6tvy1ZrviyMe71bNhWhwo3z36XQY=
+github.com/pojntfx/puregotk v0.0.0-20251011060225-c87603a2de88 h1:CTePTUkBwoL1NIRUrPNx5DuSSRB/3ZG9kIKgC0v5vNQ=
+github.com/pojntfx/puregotk v0.0.0-20251011060225-c87603a2de88/go.mod h1:9FUAoCJsQgot2Zt6tvy1ZrviyMe71bNhWhwo3z36XQY=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
 github.com/prometheus/procfs v0.0.0-20190425082905-87a4384529e0/go.mod h1:TjEm7ze935MbeOT/UhFTIMYKhuLP4wbCsTZCD3I8kEA=
 github.com/prometheus/procfs v0.12.0/go.mod h1:pcuDEFsWDnvcgNzo4EEweacyhjeA9Zk3cnaOZAZEfOo=
