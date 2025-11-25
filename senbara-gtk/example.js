@@ -13,7 +13,7 @@ const ExampleApplication = GObject.registerClass(
   class ExampleApplication extends Adw.Application {
     constructor() {
       super({
-        application_id: "com.pojtinger.felicitas.SenbaraGnomeNeo",
+        application_id: "com.pojtinger.felicitas.SenbaraGtkExample",
         flags: Gio.ApplicationFlags.DEFAULT_FLAGS,
       });
     }
