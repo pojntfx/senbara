@@ -2,9 +2,9 @@ module github.com/pojntfx/senbara/senbara-gtk-go
 
 go 1.24.0
 
-replace github.com/jwijenbergh/puregotk v0.0.0-20250812133623-7203178b5172 => github.com/pojntfx/puregotk v0.0.0-20251011062924-170bec63e7cb
-
 require (
-	github.com/jwijenbergh/purego v0.0.0-20250812133547-b5852df1402b
-	github.com/jwijenbergh/puregotk v0.0.0-20250812133623-7203178b5172
+	github.com/jwijenbergh/purego v0.0.0-20251017112123-b71757b9ba42
+	github.com/jwijenbergh/puregotk v0.0.0-20251022075221-eae1610c7d83
 )
+
+replace github.com/jwijenbergh/puregotk => github.com/pojntfx/puregotk v0.0.0-20251125051126-73ef36c6a49c

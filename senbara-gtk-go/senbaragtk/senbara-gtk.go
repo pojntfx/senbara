@@ -87,36 +87,36 @@ func (x *MainApplicationWindow) ConnectButtonTestClicked(cb *func(MainApplicatio
 	return gobject.SignalConnect(x.GoPointer(), "button-test-clicked", cbRefPtr)
 }
 
-// Emits the #GActionGroup::action-added signal on @action_group.
+// Emits the [signal@Gio.ActionGroup::action-added] signal on @action_group.
 //
-// This function should only be called by #GActionGroup implementations.
+// This function should only be called by [type@Gio.ActionGroup] implementations.
 func (x *MainApplicationWindow) ActionAdded(ActionNameVar string) {
 
 	gio.XGActionGroupActionAdded(x.GoPointer(), ActionNameVar)
 
 }
 
-// Emits the #GActionGroup::action-enabled-changed signal on @action_group.
+// Emits the [signal@Gio.ActionGroup::action-enabled-changed] signal on @action_group.
 //
-// This function should only be called by #GActionGroup implementations.
+// This function should only be called by [type@Gio.ActionGroup] implementations.
 func (x *MainApplicationWindow) ActionEnabledChanged(ActionNameVar string, EnabledVar bool) {
 
 	gio.XGActionGroupActionEnabledChanged(x.GoPointer(), ActionNameVar, EnabledVar)
 
 }
 
-// Emits the #GActionGroup::action-removed signal on @action_group.
+// Emits the [signal@Gio.ActionGroup::action-removed] signal on @action_group.
 //
-// This function should only be called by #GActionGroup implementations.
+// This function should only be called by [type@Gio.ActionGroup] implementations.
 func (x *MainApplicationWindow) ActionRemoved(ActionNameVar string) {
 
 	gio.XGActionGroupActionRemoved(x.GoPointer(), ActionNameVar)
 
 }
 
-// Emits the #GActionGroup::action-state-changed signal on @action_group.
+// Emits the [signal@Gio.ActionGroup::action-state-changed] signal on @action_group.
 //
-// This function should only be called by #GActionGroup implementations.
+// This function should only be called by [type@Gio.ActionGroup] implementations.
 func (x *MainApplicationWindow) ActionStateChanged(ActionNameVar string, StateVar *glib.Variant) {
 
 	gio.XGActionGroupActionStateChanged(x.GoPointer(), ActionNameVar, StateVar)
@@ -127,35 +127,35 @@ func (x *MainApplicationWindow) ActionStateChanged(ActionNameVar string, StateVa
 //
 // If the action is expecting a parameter, then the correct type of
 // parameter must be given as @parameter.  If the action is expecting no
-// parameters then @parameter must be %NULL.  See
-// g_action_group_get_action_parameter_type().
+// parameters then @parameter must be `NULL`.  See
+// [method@Gio.ActionGroup.get_action_parameter_type].
 //
-// If the #GActionGroup implementation supports asynchronous remote
+// If the [type@Gio.ActionGroup] implementation supports asynchronous remote
 // activation over D-Bus, this call may return before the relevant
 // D-Bus traffic has been sent, or any replies have been received. In
 // order to block on such asynchronous activation calls,
-// g_dbus_connection_flush() should be called prior to the code, which
+// [method@Gio.DBusConnection.flush] should be called prior to the code, which
 // depends on the result of the action activation. Without flushing
 // the D-Bus connection, there is no guarantee that the action would
 // have been activated.
 //
 // The following code which runs in a remote app instance, shows an
-// example of a "quit" action being activated on the primary app
-// instance over D-Bus. Here g_dbus_connection_flush() is called
-// before `exit()`. Without g_dbus_connection_flush(), the "quit" action
+// example of a ‘quit’ action being activated on the primary app
+// instance over D-Bus. Here [method@Gio.DBusConnection.flush] is called
+// before `exit()`. Without `g_dbus_connection_flush()`, the ‘quit’ action
 // may fail to be activated on the primary instance.
 //
-// |[&lt;!-- language="C" --&gt;
-// // call "quit" action on primary instance
+// ```c
+// // call ‘quit’ action on primary instance
 // g_action_group_activate_action (G_ACTION_GROUP (app), "quit", NULL);
 //
 // // make sure the action is activated now
-// g_dbus_connection_flush (...);
+// g_dbus_connection_flush (…);
 //
-// g_debug ("application has been terminated. exiting.");
+// g_debug ("Application has been terminated. Exiting.");
 //
 // exit (0);
-// ]|
+// ```
 func (x *MainApplicationWindow) ActivateAction(ActionNameVar string, ParameterVar *glib.Variant) {
 
 	gio.XGActionGroupActivateAction(x.GoPointer(), ActionNameVar, ParameterVar)
@@ -166,11 +166,11 @@ func (x *MainApplicationWindow) ActivateAction(ActionNameVar string, ParameterVa
 // changed to @value.
 //
 // The action must be stateful and @value must be of the correct type.
-// See g_action_group_get_action_state_type().
+// See [method@Gio.ActionGroup.get_action_state_type].
 //
 // This call merely requests a change.  The action may refuse to change
 // its state or may change its state to something other than @value.
-// See g_action_group_get_action_state_hint().
+// See [method@Gio.ActionGroup.get_action_state_hint].
 //
 // If the @value GVariant is floating, it is consumed.
 func (x *MainApplicationWindow) ChangeActionState(ActionNameVar string, ValueVar *glib.Variant) {
@@ -192,12 +192,12 @@ func (x *MainApplicationWindow) GetActionEnabled(ActionNameVar string) bool {
 // Queries the type of the parameter that must be given when activating
 // the named action within @action_group.
 //
-// When activating the action using g_action_group_activate_action(),
-// the #GVariant given to that function must be of the type returned
+// When activating the action using [method@Gio.ActionGroup.activate_action],
+// the [type@GLib.Variant] given to that function must be of the type returned
 // by this function.
 //
-// In the case that this function returns %NULL, you must not give any
-// #GVariant, but %NULL instead.
+// In the case that this function returns `NULL`, you must not give any
+// [type@GLib.Variant], but `NULL` instead.
 //
 // The parameter type of a particular action will never change but it is
 // possible for an action to be removed and for a new action to be added
@@ -210,12 +210,12 @@ func (x *MainApplicationWindow) GetActionParameterType(ActionNameVar string) *gl
 
 // Queries the current state of the named action within @action_group.
 //
-// If the action is not stateful then %NULL will be returned.  If the
+// If the action is not stateful then `NULL` will be returned.  If the
 // action is stateful then the type of the return value is the type
-// given by g_action_group_get_action_state_type().
+// given by [method@Gio.ActionGroup.get_action_state_type].
 //
-// The return value (if non-%NULL) should be freed with
-// g_variant_unref() when it is no longer required.
+// The return value (if non-`NULL`) should be freed with
+// [method@GLib.Variant.unref] when it is no longer required.
 func (x *MainApplicationWindow) GetActionState(ActionNameVar string) *glib.Variant {
 
 	cret := gio.XGActionGroupGetActionState(x.GoPointer(), ActionNameVar)
@@ -225,12 +225,12 @@ func (x *MainApplicationWindow) GetActionState(ActionNameVar string) *glib.Varia
 // Requests a hint about the valid range of values for the state of the
 // named action within @action_group.
 //
-// If %NULL is returned it either means that the action is not stateful
+// If `NULL` is returned it either means that the action is not stateful
 // or that there is no hint about the valid range of values for the
 // state of the action.
 //
-// If a #GVariant array is returned then each item in the array is a
-// possible value for the state.  If a #GVariant pair (ie: two-tuple) is
+// If a [type@GLib.Variant] array is returned then each item in the array is a
+// possible value for the state.  If a [type@GLib.Variant] pair (ie: two-tuple) is
 // returned then the tuple specifies the inclusive lower and upper bound
 // of valid values for the state.
 //
@@ -238,8 +238,8 @@ func (x *MainApplicationWindow) GetActionState(ActionNameVar string) *glib.Varia
 // have a state value outside of the hinted range and setting a value
 // within the range may fail.
 //
-// The return value (if non-%NULL) should be freed with
-// g_variant_unref() when it is no longer required.
+// The return value (if non-`NULL`) should be freed with
+// [method@GLib.Variant.unref] when it is no longer required.
 func (x *MainApplicationWindow) GetActionStateHint(ActionNameVar string) *glib.Variant {
 
 	cret := gio.XGActionGroupGetActionStateHint(x.GoPointer(), ActionNameVar)
@@ -250,14 +250,14 @@ func (x *MainApplicationWindow) GetActionStateHint(ActionNameVar string) *glib.V
 // @action_group.
 //
 // If the action is stateful then this function returns the
-// #GVariantType of the state.  All calls to
-// g_action_group_change_action_state() must give a #GVariant of this
-// type and g_action_group_get_action_state() will return a #GVariant
+// [type@GLib.VariantType] of the state.  All calls to
+// [method@Gio.ActionGroup.change_action_state] must give a [type@GLib.Variant] of this
+// type and [method@Gio.ActionGroup.get_action_state] will return a [type@GLib.Variant]
 // of the same type.
 //
-// If the action is not stateful then this function will return %NULL.
-// In that case, g_action_group_get_action_state() will return %NULL
-// and you must not call g_action_group_change_action_state().
+// If the action is not stateful then this function will return `NULL`.
+// In that case, [method@Gio.ActionGroup.get_action_state] will return `NULL`
+// and you must not call [method@Gio.ActionGroup.change_action_state].
 //
 // The state type of a particular action will never change but it is
 // possible for an action to be removed and for a new action to be added
@@ -277,7 +277,7 @@ func (x *MainApplicationWindow) HasAction(ActionNameVar string) bool {
 
 // Lists the actions contained within @action_group.
 //
-// The caller is responsible for freeing the list with g_strfreev() when
+// The caller is responsible for freeing the list with [func@GLib.strfreev] when
 // it is no longer required.
 func (x *MainApplicationWindow) ListActions() []string {
 
@@ -288,18 +288,18 @@ func (x *MainApplicationWindow) ListActions() []string {
 // Queries all aspects of the named action within an @action_group.
 //
 // This function acquires the information available from
-// g_action_group_has_action(), g_action_group_get_action_enabled(),
-// g_action_group_get_action_parameter_type(),
-// g_action_group_get_action_state_type(),
-// g_action_group_get_action_state_hint() and
-// g_action_group_get_action_state() with a single function call.
+// [method@Gio.ActionGroup.has_action], [method@Gio.ActionGroup.get_action_enabled],
+// [method@Gio.ActionGroup.get_action_parameter_type],
+// [method@Gio.ActionGroup.get_action_state_type],
+// [method@Gio.ActionGroup.get_action_state_hint] and
+// [method@Gio.ActionGroup.get_action_state] with a single function call.
 //
 // This provides two main benefits.
 //
 // The first is the improvement in efficiency that comes with not having
 // to perform repeated lookups of the action in order to discover
 // different things about it.  The second is that implementing
-// #GActionGroup can now be done by only overriding this one virtual
+// [type@Gio.ActionGroup] can now be done by only overriding this one virtual
 // function.
 //
 // The interface provides a default implementation of this function that
@@ -308,9 +308,9 @@ func (x *MainApplicationWindow) ListActions() []string {
 // those functions that call this function.  All implementations,
 // therefore, must override either this function or all of the others.
 //
-// If the action exists, %TRUE is returned and any of the requested
-// fields (as indicated by having a non-%NULL reference passed in) are
-// filled.  If the action doesn't exist, %FALSE is returned and the
+// If the action exists, `TRUE` is returned and any of the requested
+// fields (as indicated by having a non-`NULL` reference passed in) are
+// filled.  If the action doesn’t exist, `FALSE` is returned and the
 // fields may or may not have been modified.
 func (x *MainApplicationWindow) QueryAction(ActionNameVar string, EnabledVar bool, ParameterTypeVar **glib.VariantType, StateTypeVar **glib.VariantType, StateHintVar **glib.Variant, StateVar **glib.Variant) bool {
 
@@ -330,12 +330,12 @@ func (x *MainApplicationWindow) AddAction(ActionVar gio.Action) {
 
 }
 
-// A convenience function for creating multiple #GSimpleAction instances
-// and adding them to a #GActionMap.
+// A convenience function for creating multiple [class@Gio.SimpleAction]
+// instances and adding them to a [iface@Gio.ActionMap].
 //
-// Each action is constructed as per one #GActionEntry.
+// Each action is constructed as per one [struct@Gio.ActionEntry].
 //
-// |[&lt;!-- language="C" --&gt;
+// ```c
 // static void
 // activate_quit (GSimpleAction *simple,
 //
@@ -372,7 +372,7 @@ func (x *MainApplicationWindow) AddAction(ActionVar gio.Action) {
 //	  return G_ACTION_GROUP (group);
 //	}
 //
-// ]|
+// ```
 func (x *MainApplicationWindow) AddActionEntries(EntriesVar []gio.ActionEntry, NEntriesVar int, UserDataVar uintptr) {
 
 	gio.XGActionMapAddActionEntries(x.GoPointer(), EntriesVar, NEntriesVar, UserDataVar)
@@ -381,7 +381,7 @@ func (x *MainApplicationWindow) AddActionEntries(EntriesVar []gio.ActionEntry, N
 
 // Looks up the action with the name @action_name in @action_map.
 //
-// If no such action exists, returns %NULL.
+// If no such action exists, returns `NULL`.
 func (x *MainApplicationWindow) LookupAction(ActionNameVar string) *gio.ActionBase {
 	var cls *gio.ActionBase
 
@@ -405,31 +405,193 @@ func (x *MainApplicationWindow) RemoveAction(ActionNameVar string) {
 
 }
 
-// Retrieves the `GtkAccessibleRole` for the given `GtkAccessible`.
+// Remove actions from a [iface@Gio.ActionMap]. This is meant as the reverse of
+// [method@Gio.ActionMap.add_action_entries].
+//
+// ```c
+//
+//	static const GActionEntry entries[] = {
+//	    { "quit",         activate_quit              },
+//	    { "print-string", activate_print_string, "s" }
+//	};
+//
+// void
+// add_actions (GActionMap *map)
+//
+//	{
+//	  g_action_map_add_action_entries (map, entries, G_N_ELEMENTS (entries), NULL);
+//	}
+//
+// void
+// remove_actions (GActionMap *map)
+//
+//	{
+//	  g_action_map_remove_action_entries (map, entries, G_N_ELEMENTS (entries));
+//	}
+//
+// ```
+func (x *MainApplicationWindow) RemoveActionEntries(EntriesVar []gio.ActionEntry, NEntriesVar int) {
+
+	gio.XGActionMapRemoveActionEntries(x.GoPointer(), EntriesVar, NEntriesVar)
+
+}
+
+// Requests the user's screen reader to announce the given message.
+//
+// This kind of notification is useful for messages that
+// either have only a visual representation or that are not
+// exposed visually at all, e.g. a notification about a
+// successful operation.
+//
+// Also, by using this API, you can ensure that the message
+// does not interrupts the user's current screen reader output.
+func (x *MainApplicationWindow) Announce(MessageVar string, PriorityVar gtk.AccessibleAnnouncementPriority) {
+
+	gtk.XGtkAccessibleAnnounce(x.GoPointer(), MessageVar, PriorityVar)
+
+}
+
+// Retrieves the accessible parent for an accessible object.
+//
+// This function returns `NULL` for top level widgets.
+func (x *MainApplicationWindow) GetAccessibleParent() *gtk.AccessibleBase {
+	var cls *gtk.AccessibleBase
+
+	cret := gtk.XGtkAccessibleGetAccessibleParent(x.GoPointer())
+
+	if cret == 0 {
+		return nil
+	}
+	cls = &gtk.AccessibleBase{}
+	cls.Ptr = cret
+	return cls
+}
+
+// Retrieves the accessible role of an accessible object.
 func (x *MainApplicationWindow) GetAccessibleRole() gtk.AccessibleRole {
 
 	cret := gtk.XGtkAccessibleGetAccessibleRole(x.GoPointer())
 	return cret
 }
 
-// Resets the accessible @property to its default value.
+// Retrieves the implementation for the given accessible object.
+func (x *MainApplicationWindow) GetAtContext() *gtk.ATContext {
+	var cls *gtk.ATContext
+
+	cret := gtk.XGtkAccessibleGetAtContext(x.GoPointer())
+
+	if cret == 0 {
+		return nil
+	}
+	cls = &gtk.ATContext{}
+	cls.Ptr = cret
+	return cls
+}
+
+// Queries the coordinates and dimensions of this accessible
+//
+// This functionality can be overridden by `GtkAccessible`
+// implementations, e.g. to get the bounds from an ignored
+// child widget.
+func (x *MainApplicationWindow) GetBounds(XVar int, YVar int, WidthVar int, HeightVar int) bool {
+
+	cret := gtk.XGtkAccessibleGetBounds(x.GoPointer(), XVar, YVar, WidthVar, HeightVar)
+	return cret
+}
+
+// Retrieves the first accessible child of an accessible object.
+func (x *MainApplicationWindow) GetFirstAccessibleChild() *gtk.AccessibleBase {
+	var cls *gtk.AccessibleBase
+
+	cret := gtk.XGtkAccessibleGetFirstAccessibleChild(x.GoPointer())
+
+	if cret == 0 {
+		return nil
+	}
+	cls = &gtk.AccessibleBase{}
+	cls.Ptr = cret
+	return cls
+}
+
+// Retrieves the next accessible sibling of an accessible object
+func (x *MainApplicationWindow) GetNextAccessibleSibling() *gtk.AccessibleBase {
+	var cls *gtk.AccessibleBase
+
+	cret := gtk.XGtkAccessibleGetNextAccessibleSibling(x.GoPointer())
+
+	if cret == 0 {
+		return nil
+	}
+	cls = &gtk.AccessibleBase{}
+	cls.Ptr = cret
+	return cls
+}
+
+// Queries a platform state, such as focus.
+//
+// This functionality can be overridden by `GtkAccessible`
+// implementations, e.g. to get platform state from an ignored
+// child widget, as is the case for `GtkText` wrappers.
+func (x *MainApplicationWindow) GetPlatformState(StateVar gtk.AccessiblePlatformState) bool {
+
+	cret := gtk.XGtkAccessibleGetPlatformState(x.GoPointer(), StateVar)
+	return cret
+}
+
+// Resets the accessible property to its default value.
 func (x *MainApplicationWindow) ResetProperty(PropertyVar gtk.AccessibleProperty) {
 
 	gtk.XGtkAccessibleResetProperty(x.GoPointer(), PropertyVar)
 
 }
 
-// Resets the accessible @relation to its default value.
+// Resets the accessible relation to its default value.
 func (x *MainApplicationWindow) ResetRelation(RelationVar gtk.AccessibleRelation) {
 
 	gtk.XGtkAccessibleResetRelation(x.GoPointer(), RelationVar)
 
 }
 
-// Resets the accessible @state to its default value.
+// Resets the accessible state to its default value.
 func (x *MainApplicationWindow) ResetState(StateVar gtk.AccessibleState) {
 
 	gtk.XGtkAccessibleResetState(x.GoPointer(), StateVar)
+
+}
+
+// Sets the parent and sibling of an accessible object.
+//
+// This function is meant to be used by accessible implementations that are
+// not part of the widget hierarchy, and but act as a logical bridge between
+// widgets. For instance, if a widget creates an object that holds metadata
+// for each child, and you want that object to implement the `GtkAccessible`
+// interface, you will use this function to ensure that the parent of each
+// child widget is the metadata object, and the parent of each metadata
+// object is the container widget.
+func (x *MainApplicationWindow) SetAccessibleParent(ParentVar gtk.Accessible, NextSiblingVar gtk.Accessible) {
+
+	gtk.XGtkAccessibleSetAccessibleParent(x.GoPointer(), ParentVar.GoPointer(), NextSiblingVar.GoPointer())
+
+}
+
+// Updates the next accessible sibling.
+//
+// That might be useful when a new child of a custom accessible
+// is created, and it needs to be linked to a previous child.
+func (x *MainApplicationWindow) UpdateNextAccessibleSibling(NewSiblingVar gtk.Accessible) {
+
+	gtk.XGtkAccessibleUpdateNextAccessibleSibling(x.GoPointer(), NewSiblingVar.GoPointer())
+
+}
+
+// Informs ATs that the platform state has changed.
+//
+// This function should be used by `GtkAccessible` implementations that
+// have a platform state but are not widgets. Widgets handle platform
+// states automatically.
+func (x *MainApplicationWindow) UpdatePlatformState(StateVar gtk.AccessiblePlatformState) {
+
+	gtk.XGtkAccessibleUpdatePlatformState(x.GoPointer(), StateVar)
 
 }
 
@@ -475,7 +637,7 @@ func (x *MainApplicationWindow) UpdatePropertyValue(NPropertiesVar int, Properti
 // relation change must be communicated to assistive technologies.
 //
 // If the [enum@Gtk.AccessibleRelation] requires a list of references,
-// you should pass each reference individually, followed by %NULL, e.g.
+// you should pass each reference individually, followed by `NULL`, e.g.
 //
 // ```c
 // gtk_accessible_update_relation (accessible,
@@ -505,13 +667,17 @@ func (x *MainApplicationWindow) UpdateRelationValue(NRelationsVar int, Relations
 
 }
 
-// Updates a list of accessible states. See the [enum@Gtk.AccessibleState]
-// documentation for the value types of accessible states.
+// Updates a list of accessible states.
 //
-// This function should be called by `GtkWidget` types whenever an accessible
-// state change must be communicated to assistive technologies.
+// See the [enum@Gtk.AccessibleState] documentation for the
+// value types of accessible states.
+//
+// This function should be called by `GtkWidget` types whenever
+// an accessible state change must be communicated to assistive
+// technologies.
 //
 // Example:
+//
 // ```c
 // value = GTK_ACCESSIBLE_TRISTATE_MIXED;
 // gtk_accessible_update_state (GTK_ACCESSIBLE (check_button),
@@ -541,7 +707,7 @@ func (x *MainApplicationWindow) UpdateStateValue(NStatesVar int, StatesVar []gtk
 // Gets the ID of the @buildable object.
 //
 // `GtkBuilder` sets the name based on the ID attribute
-// of the &lt;object&gt; tag used to construct the @buildable.
+// of the `&lt;object&gt;` tag used to construct the @buildable.
 func (x *MainApplicationWindow) GetBuildableId() string {
 
 	cret := gtk.XGtkBuildableGetBuildableId(x.GoPointer())
@@ -656,17 +822,19 @@ func (x *MainApplicationWindow) SetFocus(FocusVar *gtk.Widget) {
 }
 
 func init() {
-
 	core.SetPackageName("SENBARAGTK", "senbara-gtk-0.1")
-
-	core.SetSharedLibrary("SENBARAGTK", "libsenbara-gtk-0.1.so")
-	lib, err := purego.Dlopen(core.GetPath("SENBARAGTK"), purego.RTLD_NOW|purego.RTLD_GLOBAL)
-	if err != nil {
-		panic(err)
+	core.SetSharedLibraries("SENBARAGTK", []string{"libsenbara-gtk-0.1.so"})
+	var libs []uintptr
+	for _, libPath := range core.GetPaths("SENBARAGTK") {
+		lib, err := purego.Dlopen(libPath, purego.RTLD_NOW|purego.RTLD_GLOBAL)
+		if err != nil {
+			panic(err)
+		}
+		libs = append(libs, lib)
 	}
 
-	core.PuregoSafeRegister(&xMainApplicationWindowGLibType, lib, "senbara_gtk_main_application_window_get_type")
+	core.PuregoSafeRegister(&xMainApplicationWindowGLibType, libs, "senbara_gtk_main_application_window_get_type")
 
-	core.PuregoSafeRegister(&xMainApplicationWindowShowToast, lib, "senbara_gtk_main_application_window_show_toast")
+	core.PuregoSafeRegister(&xMainApplicationWindowShowToast, libs, "senbara_gtk_main_application_window_show_toast")
 
 }

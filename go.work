@@ -1,11 +1,11 @@
-go 1.24.0
+go 1.25.0
 
 use (
 	.
 	./senbara-cli
 	./senbara-common
 	./senbara-forms
-	./senbara-gnome
+	// ./senbara-gnome
 	./senbara-gnome-neo
 	./senbara-gtk
 	./senbara-gtk-go

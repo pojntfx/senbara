@@ -62,8 +62,10 @@ func main() {
 		"convcd":   util.ConvertArgsCommaDeref,
 		"convd":    util.ConvertArgsDeref,
 		"convcbne": util.ConvertCallbackArgsNoErr,
-		"valueset": util.PropertyValueSet,
-		"valueget": util.PropertyValueGet,
+		"propsset": util.PropertyScalarSet,
+		"propsget": util.PropertyScalarGet,
+		"propvset": util.PropertyVectorSet,
+		"propvget": util.PropertyVectorGet,
 	}).ParseFiles(filepath.Join(puregotk, "templates/go"))
 	if err != nil {
 		panic(err)
