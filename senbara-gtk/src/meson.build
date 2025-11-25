@@ -2,6 +2,7 @@ api_version = '0.1'
 
 pkg = import('pkgconfig')
 gnome = import('gnome')
+fs = import('fs')
 
 config_go = configuration_data()
 config_go.set_quoted('PACKAGE_VERSION', meson.project_version())
@@ -78,8 +79,28 @@ senbara_gtk_resources = custom_target(
   command: ['cp', '@INPUT@', meson.current_source_dir() / 'senbara-gtk.gresource'],
 )
 
+senbara_gtk_lib_overwrite = custom_target(
+  'senbara-gtk-lib-overwrite',
+  build_always_stale: true, # Go caches internally
+  input: senbara_gtk_source_go_files,
+  output: 'libsenbara-gtk-overwrite-' + api_version + '.so',
+  command: [
+    find_program('go').full_path(),
+    'build',
+    '-buildmode', 'c-shared',
+    '-x',
+    '-o', '@OUTPUT@',
+    senbara_gtk_source_dir,
+  ],
+  depends: [
+    senbara_gtk_resources,
+    config_go_file,
+  ],
+)
+
 senbara_gtk_archive = custom_target(
   'senbara-gtk-archive',
+  build_always_stale: true, # Go caches internally
   input: senbara_gtk_source_go_files,
   output: 'libsenbara-gtk-' + api_version + '.a',
   command: [
@@ -93,6 +114,7 @@ senbara_gtk_archive = custom_target(
   depends: [
     senbara_gtk_resources,
     config_go_file,
+    senbara_gtk_lib_overwrite,
   ],
 )
 
@@ -102,6 +124,13 @@ senbara_gtk_lib = shared_library(
   link_whole: [senbara_gtk_archive],
   dependencies: senbara_gtk_deps,
   install: true,
+)
+
+# We overwrite the manually linked senbara_gtk_lib with senbara_gtk_lib_overwrite here since the manually linked library built with `c-archive` can not be used by another Go program without a `morestack` crash
+meson.add_install_script(
+  'install',
+  senbara_gtk_lib_overwrite,
+  get_option('prefix') / get_option('libdir') / fs.name(senbara_gtk_lib.full_path()),
 )
 
 install_headers(senbara_gtk_headers, subdir: 'senbara-gtk')
