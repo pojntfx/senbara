@@ -1,17 +1,23 @@
 module github.com/pojntfx/senbara/senbara-gnome-neo
 
-go 1.24.0
+go 1.25.0
+
+tool github.com/dennwc/flatpak-go-mod
+
+require (
+	github.com/jwijenbergh/puregotk v0.0.0-20251022075221-eae1610c7d83
+	github.com/pojntfx/go-gettext v0.1.2
+	github.com/pojntfx/senbara/senbara-gtk-go v0.0.0-20251125083721-e474d86bebcc
+)
+
+require (
+	github.com/dennwc/flatpak-go-mod v0.1.1-0.20250809093520-ddf8d84264aa // indirect
+	github.com/goccy/go-yaml v1.18.0 // indirect
+	github.com/jwijenbergh/purego v0.0.0-20251017112123-b71757b9ba42 // indirect
+	golang.org/x/mod v0.27.0 // indirect
+)
 
 replace (
 	github.com/jwijenbergh/puregotk v0.0.0-20250812133623-7203178b5172 => ../../puregotk
 	github.com/pojntfx/senbara/senbara-gtk-go v0.0.0-20250826075235-cbb2c7573805 => ../senbara-gtk-go
 )
-
-require (
-	github.com/jwijenbergh/puregotk v0.0.0-20251022075221-eae1610c7d83
-	github.com/pojntfx/senbara/senbara-gtk-go v0.0.0-20251011063231-959fe0be4948
-)
-
-require github.com/jwijenbergh/purego v0.0.0-20251017112123-b71757b9ba42 // indirect
-
-replace github.com/jwijenbergh/puregotk => github.com/pojntfx/puregotk v0.0.0-20251125051126-73ef36c6a49c
