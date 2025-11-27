@@ -16,4 +16,7 @@ require (
 	golang.org/x/mod v0.27.0 // indirect
 )
 
-replace github.com/jwijenbergh/puregotk => github.com/pojntfx/puregotk v0.0.0-20251127054829-d0e087e37740
+replace (
+	github.com/dennwc/flatpak-go-mod => github.com/pojntfx/flatpak-go-mod v0.0.0-20251127072310-2c8c326608da
+	github.com/jwijenbergh/puregotk => github.com/pojntfx/puregotk v0.0.0-20251127054829-d0e087e37740
+)
