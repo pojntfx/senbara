@@ -18,6 +18,6 @@ require (
 )
 
 replace (
-	github.com/jwijenbergh/puregotk v0.0.0-20250812133623-7203178b5172 => ../../puregotk
+	github.com/jwijenbergh/puregotk => github.com/pojntfx/puregotk v0.0.0-20251127054829-d0e087e37740
 	github.com/pojntfx/senbara/senbara-gtk-go v0.0.0-20250826075235-cbb2c7573805 => ../senbara-gtk-go
 )
