@@ -261,6 +261,8 @@ github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsK
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/sftp v1.13.7/go.mod h1:KMKI0t3T6hfA+lTR/ssZdunHo+uwq7ghoN09/FSu3DY=
 github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10/go.mod h1:t/avpk3KcrXxUnYOhZhMXJlSEyie6gQbtLq5NM3loB8=
+github.com/pojntfx/go-gettext v0.2.0 h1:Nw3Hyy0Fef3pOuvYYPZESmbOT+IdnYjqx9/ywFo46GU=
+github.com/pojntfx/go-gettext v0.2.0/go.mod h1:eGt2r0JKvlPZjiz+GqEDtg92//F30LEV/IB0h42bk40=
 github.com/pojntfx/puregotk v0.0.0-20251009044016-417c19274d31 h1:aTLkBlf2AqI1ivMmW4QfB4quHoPqZNulf1HZJyTRyfQ=
 github.com/pojntfx/puregotk v0.0.0-20251009044016-417c19274d31/go.mod h1:9FUAoCJsQgot2Zt6tvy1ZrviyMe71bNhWhwo3z36XQY=
 github.com/pojntfx/puregotk v0.0.0-20251011060225-c87603a2de88/go.mod h1:9FUAoCJsQgot2Zt6tvy1ZrviyMe71bNhWhwo3z36XQY=

@@ -63,7 +63,7 @@ senbara_gnome_neo_resources = custom_target(
     command: [
         'cp',
         '@INPUT@',
-        meson.current_source_dir() / 'senbara-gnome-neo.gresourc',
+        meson.current_source_dir() / 'senbara-gnome-neo.gresource',
     ],
 )
 

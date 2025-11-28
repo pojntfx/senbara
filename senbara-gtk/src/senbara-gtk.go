@@ -48,7 +48,7 @@ type senbaraGtkMainApplicationWindow struct {
 }
 
 func init() {
-	if err := i18n.InitI18n(GettextPackage, LocaleDir); err != nil {
+	if err := i18n.BindI18n(GettextPackage, LocaleDir); err != nil {
 		panic(err)
 	}
 

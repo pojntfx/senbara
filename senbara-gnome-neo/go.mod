@@ -6,7 +6,7 @@ tool github.com/dennwc/flatpak-go-mod
 
 require (
 	github.com/jwijenbergh/puregotk v0.0.0-20251022075221-eae1610c7d83
-	github.com/pojntfx/go-gettext v0.1.2
+	github.com/pojntfx/go-gettext v0.2.0
 	github.com/pojntfx/senbara/senbara-gtk-go v0.0.0-20251125083721-e474d86bebcc
 )
 

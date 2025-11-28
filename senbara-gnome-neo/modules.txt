@@ -36,7 +36,7 @@ github.com/jwijenbergh/puregotk/v4/graphene
 github.com/jwijenbergh/puregotk/v4/gsk
 github.com/jwijenbergh/puregotk/v4/gtk
 github.com/jwijenbergh/puregotk/v4/pango
-# github.com/pojntfx/go-gettext v0.1.2
+# github.com/pojntfx/go-gettext v0.2.0
 ## explicit; go 1.25.0
 github.com/pojntfx/go-gettext/pkg/i18n
 # github.com/pojntfx/senbara/senbara-gtk-go v0.0.0-20251125083721-e474d86bebcc
