@@ -21,10 +21,10 @@
   },
   {
     "dest": "vendor/github.com/dennwc/flatpak-go-mod",
-    "sha256": "d5e87312b6f450de38a6cd0b0ec6965c29dac12707eee96d564e1fafbc5aa817",
+    "sha256": "6e03ab0507858ecf873ae22fbddaa87788ac97df8d533fe742cf79bd57861a1f",
     "strip-components": 3,
     "type": "archive",
-    "url": "https://proxy.golang.org/github.com/pojntfx/flatpak-go-mod/@v/v0.0.0-20251127072310-2c8c326608da.zip"
+    "url": "https://proxy.golang.org/github.com/dennwc/flatpak-go-mod/@v/v0.1.1-0.20251127123506-956509dd96ba.zip"
   },
   {
     "dest": "vendor/github.com/goccy/go-yaml",
@@ -42,9 +42,9 @@
   },
   {
     "dest": "vendor/golang.org/x/mod",
-    "sha256": "19fb241d46e4397d3193b5fa899e2a9d62bb5d1c41f73d09d29c17c3c0d3953c",
+    "sha256": "dffdae50c0a7903e522053e8e9880069ed1854446326f954cf903f713678c3a2",
     "strip-components": 3,
     "type": "archive",
-    "url": "https://proxy.golang.org/golang.org/x/mod/@v/v0.27.0.zip"
+    "url": "https://proxy.golang.org/golang.org/x/mod/@v/v0.30.0.zip"
   }
 ]
