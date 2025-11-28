@@ -1,1 +1,1 @@
-i18n.gettext('senbara-gtk', preset: 'glib')
+i18n.gettext('senbara-gnome-neo', preset: 'glib', args: ['--keyword=L'])

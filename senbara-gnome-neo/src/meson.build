@@ -40,7 +40,7 @@ senbara_gnome_neo_deps = [
 
 senbara_gnome_neo_blueprints = custom_target(
     'senbara-gnome-neo-blueprints',
-    input: files('senbara-gnome-neo-window.blp'),
+    input: files('main-window.blp'),
     output: '.',
     command: [
         find_program('blueprint-compiler'),
@@ -63,7 +63,7 @@ senbara_gnome_neo_resources = custom_target(
     command: [
         'cp',
         '@INPUT@',
-        meson.current_source_dir() / 'senbara-gnome-neo.gresource',
+        meson.current_source_dir() / 'senbara-gnome-neo.gresourc',
     ],
 )
 
