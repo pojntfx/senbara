@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: senbara-gnome-neo\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-10 23:07+0200\n"
+"POT-Creation-Date: 2025-11-28 22:35-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,22 +15,22 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/main_window.go:91
-msgid "Button was clicked!"
-msgstr "Button wurde geklickt!"
-
-#: src/main_window.go:95
-msgid "Button re-enabled after 3 seconds"
-msgstr "Button nach 3 Sekunden wieder aktiviert"
-
-#: src/main-window.ui:10
+#: src/window.blp:7 src/window.ui:10
 msgid "senbara-gnome-neo Main Application Window"
 msgstr "senbara-gnome-neo Hauptanwendungsfenster"
 
-#: src/main-window.ui:17
+#: src/window.blp:13 src/window.ui:17
 msgid "Senbara GNOME Neo"
 msgstr "Senbara GNOME Neo"
 
-#: src/main-window.ui:24
+#: src/window.blp:18 src/window.ui:24
 msgid "Open senbara-gtk example window"
 msgstr "senbara-gtk Beispielfenster öffnen"
+
+#: src/window.go:91
+msgid "Button was clicked!"
+msgstr "Button wurde geklickt!"
+
+#: src/window.go:95
+msgid "Button re-enabled after 3 seconds"
+msgstr "Button nach 3 Sekunden wieder aktiviert"

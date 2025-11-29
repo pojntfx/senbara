@@ -24,7 +24,7 @@ senbara_gtk_source_dir = meson.current_source_dir()
 
 senbara_gtk_source_go_files = files('senbara-gtk.go')
 
-senbara_gtk_headers = ['senbara-gtk.h']
+senbara_gtk_headers = ['senbara-gtk.h', 'window.h']
 
 version_split = meson.project_version().split('.')
 version_conf = configuration_data()
@@ -48,7 +48,7 @@ senbara_gtk_deps = [
 
 senbara_gtk_blueprints = custom_target(
     'senbara-gtk-blueprints',
-    input: files('senbara-gtk-window.blp'),
+    input: files('window.blp'),
     output: '.',
     command: [
         find_program('blueprint-compiler'),

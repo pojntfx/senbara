@@ -1,4 +1,7 @@
 # List of source files containing translatable strings.
 # Please keep this file sorted alphabetically.
-src/main_window.go
-src/main-window.ui
+src/constants.go
+src/main.go
+src/window.blp
+src/window.go
+src/window.ui

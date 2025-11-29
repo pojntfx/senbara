@@ -111,7 +111,7 @@ func init() {
 
 	gTypeWindow = gobject.TypeRegisterStaticSimple(
 		windowParentQuery.Type,
-		"Window",
+		"SenbaraGnomeWindow",
 		windowParentQuery.ClassSize,
 		&windowClassInit,
 		windowParentQuery.InstanceSize+uint(unsafe.Sizeof(Window{}))+uint(unsafe.Sizeof(&Window{}))+uint(unsafe.Sizeof(&gtk.Button{})),
