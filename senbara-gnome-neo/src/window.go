@@ -91,7 +91,15 @@ func init() {
 					senbaraWindow.ShowToast(L("Button was clicked!"))
 					senbaraWindow.SetPropertyTestButtonSensitive(false)
 
-					time.AfterFunc(time.Second*3, func() {
+					var timer *time.Timer
+					onDestroy := func(gtk.Widget) {
+						if timer != nil {
+							timer.Stop()
+						}
+					}
+					senbaraWindow.ConnectDestroy(&onDestroy)
+
+					timer = time.AfterFunc(time.Second*3, func() {
 						senbaraWindow.ShowToast(L("Button re-enabled after 3 seconds"))
 						senbaraWindow.SetPropertyTestButtonSensitive(true)
 					})
