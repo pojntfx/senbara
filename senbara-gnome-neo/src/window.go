@@ -15,25 +15,25 @@ import (
 )
 
 var (
-	gTypeMainWindow gobject.Type
+	gTypeWindow gobject.Type
 )
 
-type MainWindow struct {
+type Window struct {
 	adw.ApplicationWindow
 
 	buttonTest *gtk.Button
 }
 
-func NewMainWindow(FirstPropertyNameVar string, varArgs ...interface{}) MainWindow {
-	obj := gobject.NewObject(gTypeMainWindow, FirstPropertyNameVar, varArgs...)
+func NewWindow(FirstPropertyNameVar string, varArgs ...interface{}) Window {
+	obj := gobject.NewObject(gTypeWindow, FirstPropertyNameVar, varArgs...)
 
-	var v MainWindow
+	var v Window
 	obj.Cast(&v)
 
 	return v
 }
 
-func (w *MainWindow) SetButtonTestSensitive(sensitive bool) {
+func (w *Window) SetButtonTestSensitive(sensitive bool) {
 	w.buttonTest.SetSensitive(sensitive)
 }
 
@@ -57,11 +57,11 @@ func init() {
 
 			var buttonTest gtk.Button
 			parent.Widget.GetTemplateChild(
-				gTypeMainWindow,
+				gTypeWindow,
 				"button_test",
 			).Cast(&buttonTest)
 
-			w := &MainWindow{
+			w := &Window{
 				ApplicationWindow: parent,
 
 				buttonTest: &buttonTest,
@@ -109,12 +109,12 @@ func init() {
 	var windowParentQuery gobject.TypeQuery
 	gobject.NewTypeQuery(adw.ApplicationWindowGLibType(), &windowParentQuery)
 
-	gTypeMainWindow = gobject.TypeRegisterStaticSimple(
+	gTypeWindow = gobject.TypeRegisterStaticSimple(
 		windowParentQuery.Type,
-		"MainWindow",
+		"Window",
 		windowParentQuery.ClassSize,
 		&windowClassInit,
-		windowParentQuery.InstanceSize+uint(unsafe.Sizeof(MainWindow{}))+uint(unsafe.Sizeof(&MainWindow{}))+uint(unsafe.Sizeof(&gtk.Button{})),
+		windowParentQuery.InstanceSize+uint(unsafe.Sizeof(Window{}))+uint(unsafe.Sizeof(&Window{}))+uint(unsafe.Sizeof(&gtk.Button{})),
 		&windowInstanceInit,
 		0,
 	)

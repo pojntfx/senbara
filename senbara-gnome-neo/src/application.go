@@ -18,7 +18,7 @@ var (
 type Application struct {
 	adw.Application
 
-	window *MainWindow
+	window *Window
 }
 
 func NewApplication(FirstPropertyNameVar string, varArgs ...interface{}) Application {
@@ -68,9 +68,9 @@ func init() {
 			var app gtk.Application
 			a.Cast(&app)
 
-			obj := NewMainWindow("application", app)
+			obj := NewWindow("application", app)
 
-			senbaraApp.window = (*MainWindow)(unsafe.Pointer(obj.GetData(dataKeyGoInstance)))
+			senbaraApp.window = (*Window)(unsafe.Pointer(obj.GetData(dataKeyGoInstance)))
 
 			senbaraApp.Application.AddWindow(&senbaraApp.window.ApplicationWindow.Window)
 			senbaraApp.window.ApplicationWindow.Present()

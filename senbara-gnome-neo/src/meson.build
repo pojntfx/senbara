@@ -1,8 +1,3 @@
-api_version = '0.1'
-
-pkg = import('pkgconfig')
-fs = import('fs')
-
 config_go = configuration_data()
 config_go.set_quoted('PACKAGE_VERSION', meson.project_version())
 config_go.set_quoted('GETTEXT_PACKAGE', 'senbara-gnome-neo')
@@ -21,16 +16,7 @@ config_go_file = custom_target(
 
 senbara_gnome_neo_source_dir = meson.current_source_dir()
 
-senbara_gnome_neo_source_go_files = files('senbara-gnome-neo.go')
-
-senbara_gnome_neo_headers = ['senbara-gnome-neo.h']
-
-version_split = meson.project_version().split('.')
-version_conf = configuration_data()
-version_conf.set('VERSION', meson.project_version())
-version_conf.set('MAJOR_VERSION', version_split[0])
-version_conf.set('MINOR_VERSION', version_split[1])
-version_conf.set('MICRO_VERSION', version_split[2])
+senbara_gnome_neo_source_go_files = files('main.go')
 
 senbara_gnome_neo_deps = [
     dependency('gtk4'),
@@ -40,7 +26,7 @@ senbara_gnome_neo_deps = [
 
 senbara_gnome_neo_blueprints = custom_target(
     'senbara-gnome-neo-blueprints',
-    input: files('main-window.blp'),
+    input: files('window.blp'),
     output: '.',
     command: [
         find_program('blueprint-compiler'),
@@ -67,8 +53,8 @@ senbara_gnome_neo_resources = custom_target(
     ],
 )
 
-senbara_gnome_neo_bin = custom_target(
-    'senbara-gnome-neo-lib-overwrite',
+custom_target(
+    'senbara-gnome-neo',
     build_always_stale: true,  # Go caches internally
     input: senbara_gnome_neo_source_go_files,
     output: 'senbara-gnome-neo',

@@ -10,11 +10,11 @@ const (
 	AppVersion = "0.1.0"
 )
 
-//go:embed index.gresource
+//go:embed senbara-gnome-neo.gresource
 var ResourceContents []byte
 
 var (
 	AppPath = path.Join("/com", "pojtinger", "felicitas", "SenbaraGnomeNeo")
 
-	ResourceWindowUIPath = path.Join(AppPath, "main-window.ui")
+	ResourceWindowUIPath = path.Join(AppPath, "window.ui")
 )
