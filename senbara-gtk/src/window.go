@@ -88,7 +88,7 @@ func init() {
 			}
 			o.SetDataFull(dataKeyGoInstance, uintptr(unsafe.Pointer(w)), &cleanupCallback)
 
-			cb := func(gtk.Button) {
+			onButtonTestClicked := func(gtk.Button) {
 				gobject.SignalEmit(
 					o,
 					gobject.SignalLookup("button-test-clicked", gTypeSenbaraGtkMainApplicationWindow),
@@ -96,7 +96,7 @@ func init() {
 				)
 			}
 
-			buttonTest.ConnectClicked(&cb)
+			buttonTest.ConnectClicked(&onButtonTestClicked)
 		})
 
 		objClass.OverrideSetProperty(func(o *gobject.Object, u uint, v *gobject.Value, ps *gobject.ParamSpec) {

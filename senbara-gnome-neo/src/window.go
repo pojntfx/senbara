@@ -75,7 +75,7 @@ func init() {
 			}
 			o.SetDataFull(dataKeyGoInstance, uintptr(unsafe.Pointer(w)), &cleanupCallback)
 
-			var cb func(gtk.Button) = func(gtk.Button) {
+			onButtonTestClicked := func(gtk.Button) {
 				fmt.Println("senbara-gnome-neo test button clicked, opening senbara-gtk window")
 
 				obj := gobject.NewObject(senbaragtk.MainApplicationWindowGLibType(),
@@ -85,7 +85,7 @@ func init() {
 				var senbaraWindow senbaragtk.MainApplicationWindow
 				obj.Cast(&senbaraWindow)
 
-				var senbaraButtonCb func(senbaragtk.MainApplicationWindow) = func(sw senbaragtk.MainApplicationWindow) {
+				onSenbaraButtonTestClicked := func(sw senbaragtk.MainApplicationWindow) {
 					fmt.Println("senbara-gtk test button clicked")
 
 					senbaraWindow.ShowToast(L("Button was clicked!"))
@@ -96,11 +96,11 @@ func init() {
 						senbaraWindow.SetPropertyTestButtonSensitive(true)
 					})
 				}
-				senbaraWindow.ConnectButtonTestClicked(&senbaraButtonCb)
+				senbaraWindow.ConnectButtonTestClicked(&onSenbaraButtonTestClicked)
 
 				senbaraWindow.Present()
 			}
-			buttonTest.ConnectClicked(&cb)
+			buttonTest.ConnectClicked(&onButtonTestClicked)
 		})
 	}
 
