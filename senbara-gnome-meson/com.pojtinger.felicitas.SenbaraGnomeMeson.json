@@ -21,13 +21,21 @@
       "buildsystem": "meson",
       "sources": [
         { "type": "dir", "path": "../senbara-gtk-meson/" },
-        "senbara-gtk-meson.go.mod.json"
+        "senbaragtkmeson.go.mod.json"
       ]
     },
     {
       "name": "senbara-gnome-meson",
       "buildsystem": "meson",
-      "sources": [{ "type": "dir", "path": "." }, "go.mod.json"]
+      "sources": [
+        { "type": "dir", "path": "." },
+        {
+          "type": "dir",
+          "path": "../senbara-gtk-go-meson",
+          "dest": "vendor/github.com/pojntfx/senbara/senbara-gtk-go-meson"
+        },
+        "go.mod.json"
+      ]
     }
   ]
 }

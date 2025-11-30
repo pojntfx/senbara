@@ -11,7 +11,7 @@ import (
 	"github.com/jwijenbergh/puregotk/v4/gobject"
 	"github.com/jwijenbergh/puregotk/v4/gtk"
 	. "github.com/pojntfx/go-gettext/pkg/i18n"
-	"github.com/pojntfx/senbara/senbara-gtk-go-meson/senbaragtk"
+	"github.com/pojntfx/senbara/senbara-gtk-go-meson/senbaragtkmeson"
 )
 
 var (
@@ -78,14 +78,14 @@ func init() {
 			onButtonTestClicked := func(gtk.Button) {
 				fmt.Println("senbara-gnome-meson test button clicked, opening senbara-gtk-meson window")
 
-				obj := gobject.NewObject(senbaragtk.MainApplicationWindowGLibType(),
+				obj := gobject.NewObject(senbaragtkmeson.MainApplicationWindowGLibType(),
 					"application", parent.GetApplication(),
 				)
 
-				var senbaraWindow senbaragtk.MainApplicationWindow
+				var senbaraWindow senbaragtkmeson.MainApplicationWindow
 				obj.Cast(&senbaraWindow)
 
-				onSenbaraButtonTestClicked := func(sw senbaragtk.MainApplicationWindow) {
+				onSenbaraButtonTestClicked := func(sw senbaragtkmeson.MainApplicationWindow) {
 					fmt.Println("senbara-gtk test button clicked")
 
 					senbaraWindow.ShowToast(L("Button was clicked!"))

@@ -1,6 +1,6 @@
 package main
 
-//go:generate sh -c "if [ -z \"$FLATPAK_ID\" ]; then cd .. && GOWORK=off go tool github.com/dennwc/flatpak-go-mod --json . && GOWORK=off go tool github.com/dennwc/flatpak-go-mod --json --module-name senbaragtk ../senbara-gtk-meson; fi"
+//go:generate sh -c "if [ -z \"$FLATPAK_ID\" ]; then cd .. && GOWORK=off go tool github.com/dennwc/flatpak-go-mod --json . && GOWORK=off go tool github.com/dennwc/flatpak-go-mod --json --module-name senbaragtkmeson ../senbara-gtk-meson; fi"
 
 import (
 	"os"

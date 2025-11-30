@@ -2,7 +2,7 @@
   {
     "dest": "vendor",
     "dest-filename": "modules.txt",
-    "path": "senbaragtk.modules.txt",
+    "path": "senbaragtkmeson.modules.txt",
     "type": "file"
   },
   {
