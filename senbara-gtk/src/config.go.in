@@ -1,7 +1,0 @@
-package main
-
-const (
-	PackageVersion = @PACKAGE_VERSION@
-	GettextPackage = @GETTEXT_PACKAGE@
-	LocaleDir      = @LOCALEDIR@
-)

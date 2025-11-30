@@ -6,8 +6,8 @@ use (
 	./senbara-common
 	./senbara-forms
 	// ./senbara-gnome
-	./senbara-gnome-neo
-	./senbara-gtk
-	./senbara-gtk-go
+	./senbara-gnome-meson
+	./senbara-gtk-go-meson
+	./senbara-gtk-meson
 	./senbara-rest
 )

@@ -1,6 +1,0 @@
-# List of source files containing translatable strings.
-# Please keep this file sorted alphabetically.
-src/constants.go
-src/senbara-gtk.go
-src/window.blp
-src/window.go
