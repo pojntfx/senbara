@@ -7,7 +7,7 @@ tool github.com/dennwc/flatpak-go-mod
 require (
 	github.com/jwijenbergh/puregotk v0.0.0-20251201161753-28ec1479c381
 	github.com/pojntfx/go-gettext v0.2.0
-	github.com/pojntfx/senbara/senbara-gtk-go-meson v0.0.0-20251125083721-e474d86bebcc
+	github.com/pojntfx/senbara/senbara-gtk-go-meson v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -17,4 +17,4 @@ require (
 	golang.org/x/mod v0.30.0 // indirect
 )
 
-replace github.com/pojntfx/senbara/senbara-gtk-go-meson v0.0.0-20251125083721-e474d86bebcc => ../senbara-gtk-go-meson
+replace github.com/pojntfx/senbara/senbara-gtk-go-meson v0.0.0-00010101000000-000000000000 => ../senbara-gtk-go-meson
