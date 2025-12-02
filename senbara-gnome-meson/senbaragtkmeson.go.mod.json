@@ -7,10 +7,10 @@
   },
   {
     "dest": "vendor/github.com/jwijenbergh/puregotk",
-    "sha256": "383162c6a820ce21e884630763209775896def4955335d684d831a38d4186fb9",
+    "sha256": "2f386c11285dba4ba7bd57f22ba1ac16e93d0fb5a7cc6c4aaae5f6d957867af4",
     "strip-components": 3,
     "type": "archive",
-    "url": "https://proxy.golang.org/github.com/pojntfx/puregotk/@v/v0.0.0-20251127054829-d0e087e37740.zip"
+    "url": "https://proxy.golang.org/github.com/jwijenbergh/puregotk/@v/v0.0.0-20251201161753-28ec1479c381.zip"
   },
   {
     "dest": "vendor/github.com/pojntfx/go-gettext",
