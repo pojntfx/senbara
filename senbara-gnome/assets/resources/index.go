@@ -4,6 +4,9 @@ import (
 	_ "embed"
 	"path"
 	"strings"
+
+	"github.com/jwijenbergh/puregotk/v4/gio"
+	"github.com/jwijenbergh/puregotk/v4/glib"
 )
 
 //go:generate sh -c "find ../../po -name '*.po' | sed 's|^\\../../po/||; s|\\.po$||' > ../../po/LINGUAS"
@@ -97,6 +100,9 @@ const (
 //go:embed index.gresource
 var ResourceContents []byte
 
+//go:embed gschemas.compiled
+var Schema []byte
+
 var (
 	AppPath = path.Join("/com", "pojtinger", "felicitas", "Senbara")
 
@@ -114,3 +120,11 @@ var (
 	ResourceGSchemasCompiledPath       = path.Join(AppPath, "gschemas.compiled")
 	ResourceMetainfoPath               = path.Join(AppPath, "metainfo.xml")
 )
+
+func init() {
+	gresources, err := gio.NewResourceFromData(glib.NewBytes(ResourceContents, uint(len(ResourceContents))))
+	if err != nil {
+		panic(err)
+	}
+	gio.ResourcesRegister(gresources)
+}

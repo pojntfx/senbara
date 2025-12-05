@@ -22,16 +22,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/diamondburned/gotk4-adwaita/pkg/adw"
-	"github.com/diamondburned/gotk4-webkitgtk/pkg/webkit/v6"
-	gcore "github.com/diamondburned/gotk4/pkg/core/glib"
-	"github.com/diamondburned/gotk4/pkg/gdk/v4"
-	"github.com/diamondburned/gotk4/pkg/gio/v2"
-	"github.com/diamondburned/gotk4/pkg/glib/v2"
-	"github.com/diamondburned/gotk4/pkg/gtk/v4"
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/jwijenbergh/puregotk/v4/adw"
+	"github.com/jwijenbergh/puregotk/v4/gio"
+	"github.com/jwijenbergh/puregotk/v4/glib"
+	"github.com/jwijenbergh/puregotk/v4/gtk"
 	"github.com/oapi-codegen/oapi-codegen/v2/pkg/securityprovider"
 	"github.com/oapi-codegen/runtime/types"
+	. "github.com/pojntfx/go-gettext/pkg/i18n"
 	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
 	"github.com/pojntfx/senbara/senbara-gnome/po"
@@ -75,6 +73,10 @@ type userData struct {
 	LogoutURL string
 }
 
+const gettextPackage = "default"
+
+var LocaleDir = "/usr/share/locale"
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -84,6 +86,7 @@ func main() {
 		Level: level,
 	}))
 
+	// Self-extract locale files for i18n
 	i18t, err := os.MkdirTemp("", "")
 	if err != nil {
 		panic(err)
@@ -124,26 +127,18 @@ func main() {
 		panic(err)
 	}
 
-	gcore.InitI18n("default", i18t)
-
-	r, err := gio.NewResourceFromData(glib.NewBytesWithGo(resources.ResourceContents))
-	if err != nil {
+	if err := InitI18n(gettextPackage, i18t); err != nil {
 		panic(err)
 	}
-	gio.ResourcesRegister(r)
 
+	// Self-extract GSettings schema
 	st, err := os.MkdirTemp("", "")
 	if err != nil {
 		panic(err)
 	}
 	defer os.RemoveAll(st)
 
-	sc, err := r.LookupData(resources.ResourceGSchemasCompiledPath, gio.ResourceLookupFlagsNone)
-	if err != nil {
-		panic(err)
-	}
-
-	if err := os.WriteFile(filepath.Join(st, path.Base(resources.ResourceGSchemasCompiledPath)), sc.Data(), os.ModePerm); err != nil {
+	if err := os.WriteFile(filepath.Join(st, path.Base(resources.ResourceGSchemasCompiledPath)), resources.Schema, os.ModePerm); err != nil {
 		panic(err)
 	}
 
@@ -153,7 +148,7 @@ func main() {
 
 	settings := gio.NewSettings(resources.AppID)
 
-	a := adw.NewApplication(resources.AppID, gio.ApplicationHandlesOpen)
+	a := adw.NewApplication(resources.AppID, gio.GApplicationHandlesOpenValue)
 
 	var (
 		w       *adw.ApplicationWindow
@@ -177,7 +172,7 @@ func main() {
 	) {
 		log := log.With(
 			"loginIfSignedOut", loginIfSignedOut,
-			"path", nv.VisiblePage().Tag(),
+			"path", nv.GetVisiblePage().GetTag(),
 		)
 
 		log.Debug("Handling user auth")
@@ -213,8 +208,8 @@ func main() {
 
 			loginIfSignedOut,
 
-			nv.VisiblePage().Tag(),
-			nv.VisiblePage().Tag(),
+			nv.GetVisiblePage().GetTag(),
+			nv.GetVisiblePage().GetTag(),
 
 			refreshToken,
 			idToken,
@@ -253,23 +248,9 @@ func main() {
 		}
 
 		if redirected {
-			nv.ReplaceWithTags([]string{resources.PageExchangeLogin})
+			nv.ReplaceWithTags([]string{resources.PageExchangeLogin}, 1)
 
-			var (
-				fl = gtk.NewURILauncher(nextURL)
-				cc = make(chan error)
-			)
-			fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
-				if err := fl.LaunchFinish(res); err != nil {
-					cc <- err
-
-					return
-				}
-
-				cc <- nil
-			})
-
-			if err := <-cc; err != nil {
+			if _, err := gio.AppInfoLaunchDefaultForUri(nextURL, nil); err != nil {
 				log.Debug("Could not open nextURL", "error", err)
 
 				return false, nil, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
@@ -302,7 +283,7 @@ func main() {
 		}
 
 		client, err = api.NewClientWithResponses(
-			settings.String(resources.SettingServerURLKey),
+			settings.GetString(resources.SettingServerURLKey),
 			opts...,
 		)
 		if err != nil {
@@ -317,7 +298,7 @@ func main() {
 	var rawError string
 	handlePanic := func(err error) {
 		rawError = err.Error()
-		i18nErr := gcore.Local(rawError)
+		i18nErr := L(rawError)
 
 		log.Error(
 			"An unexpected error occured, showing error message to user",
@@ -326,13 +307,13 @@ func main() {
 		)
 
 		toast := adw.NewToast(i18nErr)
-		toast.SetButtonLabel(gcore.Local("Copy details"))
+		toast.SetButtonLabel(L("Copy details"))
 		toast.SetActionName("app.copyErrorToClipboard")
 
 		mto.AddToast(toast)
 	}
 
-	a.ConnectActivate(func() {
+	activateCallback := func(_ gio.Application) {
 		aboutDialog := adw.NewAboutDialogFromAppdata(resources.ResourceMetainfoPath, resources.AppVersion)
 		aboutDialog.SetDevelopers(resources.AppDevelopers)
 		aboutDialog.SetArtists(resources.AppArtists)
@@ -460,7 +441,7 @@ func main() {
 			activitiesViewEditButton   = b.GetObject("activities_view_edit_button").Cast().(*gtk.Button)
 			activitiesViewDeleteButton = b.GetObject("activities_view_delete_button").Cast().(*gtk.Button)
 
-			activitiesViewPageBodyWebView = b.GetObject("activities_view_body").Cast().(*webkit.WebView)
+			activitiesViewPageBodyWebView = b.GetObject("activities_view_body").Cast().(*gtk.Label)
 
 			activitiesEditPageTitle              = b.GetObject("activities_edit_page_title").Cast().(*adw.WindowTitle)
 			activitiesEditStack                  = b.GetObject("activities_edit_stack").Cast().(*gtk.Stack)
@@ -588,7 +569,7 @@ func main() {
 			journalEntriesViewEditButton   = b.GetObject("journal_entries_view_edit_button").Cast().(*gtk.Button)
 			journalEntriesViewDeleteButton = b.GetObject("journal_entries_view_delete_button").Cast().(*gtk.Button)
 
-			journalEntriesViewPageBodyWebView = b.GetObject("journal_entries_view_body").Cast().(*webkit.WebView)
+			journalEntriesViewPageBodyWebView = b.GetObject("journal_entries_view_body").Cast().(*gtk.Label)
 
 			journalEntriesEditPageTitle              = b.GetObject("journal_entries_edit_page_title").Cast().(*adw.WindowTitle)
 			journalEntriesEditStack                  = b.GetObject("journal_entries_edit_stack").Cast().(*gtk.Stack)
@@ -605,7 +586,7 @@ func main() {
 			journalEntriesEditPageBodyInput         = b.GetObject("journal_entries_edit_page_body_input").Cast().(*gtk.TextView)
 		)
 
-		settings.Bind(resources.SettingVerboseKey, preferencesDialogVerboseSwitch.Object, "active", gio.SettingsBindDefault)
+		settings.Bind(resources.SettingVerboseKey, preferencesDialogVerboseSwitch.Object, "active", gio.GSettingsBindDefaultValue)
 
 		setValidationSuffixVisible := func(input *adw.EntryRow, suffix *gtk.MenuButton, visible bool) {
 			if visible && suffix.Parent() == nil {
@@ -621,10 +602,10 @@ func main() {
 			nv.PushByTag(resources.PageConfigServerURL)
 		})
 
-		settings.Bind(resources.SettingServerURLKey, configServerURLInput.Object, "text", gio.SettingsBindDefault)
+		settings.Bind(resources.SettingServerURLKey, configServerURLInput.Object, "text", gio.GSettingsBindDefaultValue)
 
 		updateConfigServerURLContinueButtonSensitive := func() {
-			if len(settings.String(resources.SettingServerURLKey)) > 0 {
+			if len(settings.GetString(resources.SettingServerURLKey)) > 0 {
 				configServerURLContinueButton.SetSensitive(true)
 			} else {
 				configServerURLContinueButton.SetSensitive(false)
@@ -636,16 +617,16 @@ func main() {
 		}
 
 		invalidDateLabel := fmt.Sprintf("Not a valid date (format: %v)", glib.NewDateTimeFromGo(time.Date(2006, 1, 2, 0, 0, 0, 0, time.UTC)).Format("%x"))
-		activitiesCreateDialogPopoverLabel.SetLabel(gcore.Local(invalidDateLabel))
-		activitiesEditPagePopoverLabel.SetLabel(gcore.Local(invalidDateLabel))
-		contactsEditPagePopoverLabel.SetLabel(gcore.Local(invalidDateLabel))
+		activitiesCreateDialogPopoverLabel.SetLabel(L(invalidDateLabel))
+		activitiesEditPagePopoverLabel.SetLabel(L(invalidDateLabel))
+		contactsEditPagePopoverLabel.SetLabel(L(invalidDateLabel))
 
 		var deregistrationLock sync.Mutex
 		deregisterOIDCClient := func() error {
 			deregistrationLock.Lock()
 			defer deregistrationLock.Unlock()
 
-			if registrationClientURI := settings.String(resources.SettingRegistrationClientURIKey); registrationClientURI != "" {
+			if registrationClientURI := settings.GetString(resources.SettingRegistrationClientURIKey); registrationClientURI != "" {
 				registrationAccessToken, err := keyring.Get(resources.AppID, resources.SecretRegistrationAccessToken)
 				if err != nil {
 					return err
@@ -694,7 +675,7 @@ func main() {
 		deregisterClientAction := gio.NewSimpleAction("deregisterClient", nil)
 
 		updateDeregisterClientActionEnabled := func() {
-			deregisterClientAction.SetEnabled(settings.String(resources.SettingOIDCClientIDKey) != "")
+			deregisterClientAction.SetEnabled(settings.GetString(resources.SettingOIDCClientIDKey) != "")
 		}
 
 		deregisterClientAction.ConnectActivate(func(parameter *glib.Variant) {
@@ -723,7 +704,7 @@ func main() {
 		settings.ConnectChanged(func(key string) {
 			switch key {
 			case resources.SettingVerboseKey:
-				if settings.Boolean(resources.SettingVerboseKey) {
+				if settings.GetBoolean(resources.SettingVerboseKey) {
 					level.Set(slog.LevelDebug)
 				} else {
 					level.Set(slog.LevelInfo)
@@ -750,7 +731,7 @@ func main() {
 
 		checkSenbaraServerConfiguration := func() error {
 			var (
-				serverURL = settings.String(resources.SettingServerURLKey)
+				serverURL = settings.GetString(resources.SettingServerURLKey)
 			)
 
 			client, err := api.NewClientWithResponses(serverURL)
@@ -790,7 +771,7 @@ func main() {
 				return err
 			}
 
-			oidcClientID := settings.String(resources.SettingOIDCClientIDKey)
+			oidcClientID := settings.GetString(resources.SettingOIDCClientIDKey)
 			if oidcClientID == "" && registerClient {
 				c, err := authn.RegisterOIDCClient(
 					ctx,
@@ -896,21 +877,7 @@ func main() {
 
 		registerRegisterButton.ConnectClicked(func() {
 			go func() {
-				var (
-					fl = gtk.NewURILauncher(oidcDcrInitialAccessTokenPortalUrl)
-					cc = make(chan error)
-				)
-				fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
-					if err := fl.LaunchFinish(res); err != nil {
-						cc <- err
-
-						return
-					}
-
-					cc <- nil
-				})
-
-				if err := <-cc; err != nil {
+				if _, err := gio.AppInfoLaunchDefaultForUri(oidcDcrInitialAccessTokenPortalUrl, nil); err != nil {
 					handlePanic(err)
 
 					return
@@ -954,16 +921,16 @@ func main() {
 
 		selectDifferentServerAction := gio.NewSimpleAction("selectDifferentServer", nil)
 		selectDifferentServerAction.ConnectActivate(func(parameter *glib.Variant) {
-			nv.ReplaceWithTags([]string{resources.PageWelcome})
+			nv.ReplaceWithTags([]string{resources.PageWelcome}, 1)
 		})
 		a.AddAction(selectDifferentServerAction)
 
 		exchangeLoginCancelButton.ConnectClicked(func() {
-			nv.ReplaceWithTags([]string{resources.PageWelcome})
+			nv.ReplaceWithTags([]string{resources.PageWelcome}, 1)
 		})
 
 		exchangeLogoutCancelButton.ConnectClicked(func() {
-			nv.ReplaceWithTags([]string{resources.PageHome})
+			nv.ReplaceWithTags([]string{resources.PageHome}, 1)
 		})
 
 		enableHomeUserMenuLoading := func() {
@@ -1343,7 +1310,7 @@ func main() {
 			var rawErr string
 			handleError = func(err error) {
 				rawErr = err.Error()
-				i18nErr := gcore.Local(rawErr)
+				i18nErr := L(rawErr)
 
 				log.Error(
 					"An unexpected error occured, showing error message to user",
@@ -1383,7 +1350,7 @@ func main() {
 			contactsErrorCopyDetailsButton,
 
 			func() {
-				homeNavigation.ReplaceWithTags([]string{resources.PageContacts})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts}, 1)
 			},
 
 			func() {
@@ -1419,7 +1386,7 @@ func main() {
 			contactsViewErrorCopyDetailsButton,
 
 			func() {
-				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView}, 2)
 			},
 
 			func() {
@@ -1443,7 +1410,7 @@ func main() {
 			activitiesViewErrorCopyDetailsButton,
 
 			func() {
-				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageActivitiesView})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageActivitiesView}, 3)
 			},
 
 			func() {
@@ -1467,7 +1434,7 @@ func main() {
 			activitiesEditErrorCopyDetailsButton,
 
 			func() {
-				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageActivitiesView, resources.PageActivitiesEdit})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageActivitiesView, resources.PageActivitiesEdit}, 4)
 			},
 
 			func() {
@@ -1492,7 +1459,7 @@ func main() {
 			debtsEditErrorCopyDetailsButton,
 
 			func() {
-				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageDebtsEdit})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageDebtsEdit}, 3)
 			},
 
 			func() {
@@ -1517,7 +1484,7 @@ func main() {
 			contactsEditErrorCopyDetailsButton,
 
 			func() {
-				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageContactsEdit})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageContactsEdit}, 3)
 			},
 
 			func() {
@@ -1542,7 +1509,7 @@ func main() {
 			journalEntriesErrorCopyDetailsButton,
 
 			func() {
-				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries})
+				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries}, 1)
 			},
 
 			func() {
@@ -1578,7 +1545,7 @@ func main() {
 			journalEntriesViewErrorCopyDetailsButton,
 
 			func() {
-				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageJournalEntriesView})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageJournalEntriesView}, 3)
 			},
 
 			func() {
@@ -1602,7 +1569,7 @@ func main() {
 			journalEntriesEditErrorCopyDetailsButton,
 
 			func() {
-				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries, resources.PageJournalEntriesView, resources.PageJournalEntriesEdit})
+				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries, resources.PageJournalEntriesView, resources.PageJournalEntriesEdit}, 3)
 			},
 
 			func() {
@@ -1673,11 +1640,11 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(gcore.Local("Created contact")))
+				mto.AddToast(adw.NewToast(L("Created contact")))
 
 				contactsCreateDialog.Close()
 
-				homeNavigation.ReplaceWithTags([]string{resources.PageContacts})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts}, 1)
 			}()
 		})
 
@@ -1746,11 +1713,11 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(gcore.Local("Created debt")))
+				mto.AddToast(adw.NewToast(L("Created debt")))
 
 				debtsCreateDialog.Close()
 
-				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView}, 2)
 			}()
 		})
 
@@ -1827,11 +1794,11 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(gcore.Local("Created activity")))
+				mto.AddToast(adw.NewToast(L("Created activity")))
 
 				activitiesCreateDialog.Close()
 
-				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView}, 2)
 			}()
 		})
 
@@ -1907,9 +1874,9 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(gcore.Local("Updated activity")))
+				mto.AddToast(adw.NewToast(L("Updated activity")))
 
-				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageActivitiesView})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageActivitiesView}, 3)
 			}()
 		})
 
@@ -1977,9 +1944,9 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(gcore.Local("Updated debt")))
+				mto.AddToast(adw.NewToast(L("Updated debt")))
 
-				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView}, 2)
 			}()
 		})
 
@@ -2080,9 +2047,9 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(gcore.Local("Updated contact")))
+				mto.AddToast(adw.NewToast(L("Updated contact")))
 
-				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
+				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView}, 2)
 			}()
 		})
 
@@ -2138,11 +2105,11 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(gcore.Local("Created journal entry")))
+				mto.AddToast(adw.NewToast(L("Created journal entry")))
 
 				journalEntriesCreateDialog.Close()
 
-				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries})
+				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries}, 1)
 			}()
 		})
 
@@ -2204,32 +2171,18 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(gcore.Local("Updated journal entry")))
+				mto.AddToast(adw.NewToast(L("Updated journal entry")))
 
-				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries, resources.PageJournalEntriesView})
+				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries, resources.PageJournalEntriesView}, 2)
 			}()
 		})
 
 		logoutAction := gio.NewSimpleAction("logout", nil)
 		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
-			nv.ReplaceWithTags([]string{resources.PageExchangeLogout})
+			nv.ReplaceWithTags([]string{resources.PageExchangeLogout}, 1)
 
 			go func() {
-				var (
-					fl = gtk.NewURILauncher(u.LogoutURL)
-					cc = make(chan error)
-				)
-				fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
-					if err := fl.LaunchFinish(res); err != nil {
-						cc <- err
-
-						return
-					}
-
-					cc <- nil
-				})
-
-				if err := <-cc; err != nil {
+				if _, err := gio.AppInfoLaunchDefaultForUri(u.LogoutURL, nil); err != nil {
 					handlePanic(err)
 
 					return
@@ -2243,21 +2196,7 @@ func main() {
 			log.Info("Handling getting license action", "url", spec.Info.License.URL)
 
 			go func() {
-				var (
-					fl = gtk.NewURILauncher(spec.Info.License.URL)
-					cc = make(chan error)
-				)
-				fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
-					if err := fl.LaunchFinish(res); err != nil {
-						cc <- err
-
-						return
-					}
-
-					cc <- nil
-				})
-
-				if err := <-cc; err != nil {
+				if _, err := gio.AppInfoLaunchDefaultForUri(spec.Info.License.URL, nil); err != nil {
 					handlePanic(err)
 
 					return
@@ -2283,21 +2222,7 @@ func main() {
 			log.Info("Handling getting privacy action", "url", privacyURL)
 
 			go func() {
-				var (
-					fl = gtk.NewURILauncher(privacyURL)
-					cc = make(chan error)
-				)
-				fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
-					if err := fl.LaunchFinish(res); err != nil {
-						cc <- err
-
-						return
-					}
-
-					cc <- nil
-				})
-
-				if err := <-cc; err != nil {
+				if _, err := gio.AppInfoLaunchDefaultForUri(privacyURL, nil); err != nil {
 					handlePanic(err)
 
 					return
@@ -2311,21 +2236,7 @@ func main() {
 			log.Info("Handling getting terms of service action", "url", spec.Info.TermsOfService)
 
 			go func() {
-				var (
-					fl = gtk.NewURILauncher(spec.Info.TermsOfService)
-					cc = make(chan error)
-				)
-				fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
-					if err := fl.LaunchFinish(res); err != nil {
-						cc <- err
-
-						return
-					}
-
-					cc <- nil
-				})
-
-				if err := <-cc; err != nil {
+				if _, err := gio.AppInfoLaunchDefaultForUri(spec.Info.TermsOfService, nil); err != nil {
 					handlePanic(err)
 
 					return
@@ -2339,21 +2250,7 @@ func main() {
 			log.Info("Handling getting imprint action", "url", spec.Info.Contact.URL)
 
 			go func() {
-				var (
-					fl = gtk.NewURILauncher(spec.Info.Contact.URL)
-					cc = make(chan error)
-				)
-				fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
-					if err := fl.LaunchFinish(res); err != nil {
-						cc <- err
-
-						return
-					}
-
-					cc <- nil
-				})
-
-				if err := <-cc; err != nil {
+				if _, err := gio.AppInfoLaunchDefaultForUri(spec.Info.Contact.URL, nil); err != nil {
 					handlePanic(err)
 
 					return
@@ -2413,7 +2310,7 @@ func main() {
 			log.Debug("Writing code to file")
 
 			fd := gtk.NewFileDialog()
-			fd.SetTitle(gcore.Local("Senbara REST source code"))
+			fd.SetTitle(L("Senbara REST source code"))
 			fd.SetInitialName("code.tar.gz")
 			fd.Save(ctx, &w.Window, func(r gio.AsyncResulter) {
 				go func() {
@@ -2445,7 +2342,7 @@ func main() {
 
 					log.Debug("Downloaded code", "status", res.StatusCode)
 
-					mto.AddToast(adw.NewToast(gcore.Local("Downloaded code")))
+					mto.AddToast(adw.NewToast(L("Downloaded code")))
 				}()
 			})
 		})
@@ -2502,7 +2399,7 @@ func main() {
 			log.Debug("Writing user data to file")
 
 			fd := gtk.NewFileDialog()
-			fd.SetTitle(gcore.Local("Senbara Forms userdata"))
+			fd.SetTitle(L("Senbara Forms userdata"))
 			fd.SetInitialName("userdata.jsonl")
 			fd.Save(ctx, &w.Window, func(r gio.AsyncResulter) {
 				go func() {
@@ -2534,7 +2431,7 @@ func main() {
 
 					log.Debug("Exported user data", "status", res.StatusCode)
 
-					mto.AddToast(adw.NewToast(gcore.Local("Exported user data")))
+					mto.AddToast(adw.NewToast(L("Exported user data")))
 				}()
 			})
 		})
@@ -2589,20 +2486,20 @@ func main() {
 			log.Info("Handling import user data action")
 
 			fd := gtk.NewFileDialog()
-			fd.SetTitle(gcore.Local("Senbara Forms userdata"))
+			fd.SetTitle(L("Senbara Forms userdata"))
 
 			ls := gio.NewListStore(glib.TypeObject)
 
 			{
 				fi := gtk.NewFileFilter()
-				fi.SetName(gcore.Local("Senbara Forms userdata files"))
+				fi.SetName(L("Senbara Forms userdata files"))
 				fi.AddPattern("*.jsonl")
 				ls.Append(fi.Object)
 			}
 
 			{
 				fi := gtk.NewFileFilter()
-				fi.SetName(gcore.Local("All files"))
+				fi.SetName(L("All files"))
 				fi.AddPattern("*")
 				ls.Append(fi.Object)
 			}
@@ -2618,11 +2515,11 @@ func main() {
 				}
 
 				confirm := adw.NewAlertDialog(
-					gcore.Local("Importing user data"),
-					gcore.Local("Are you sure you want to import this user data into your account?"),
+					L("Importing user data"),
+					L("Are you sure you want to import this user data into your account?"),
 				)
-				confirm.AddResponse("cancel", gcore.Local("Cancel"))
-				confirm.AddResponse("import", gcore.Local("Import"))
+				confirm.AddResponse("cancel", L("Cancel"))
+				confirm.AddResponse("import", L("Import"))
 				confirm.SetResponseAppearance("import", adw.ResponseSuggested)
 				confirm.ConnectResponse(func(response string) {
 					if response == "import" {
@@ -2705,14 +2602,14 @@ func main() {
 								return
 							}
 
-							mto.AddToast(adw.NewToast(gcore.Local("Imported user data")))
+							mto.AddToast(adw.NewToast(L("Imported user data")))
 
 							var (
 								navigationStack      = homeNavigation.NavigationStack()
 								navigationStackPages = []string{}
 							)
 							for i := range navigationStack.NItems() {
-								navigationStackPages = append(navigationStackPages, navigationStack.Item(i).Cast().(*adw.NavigationPage).Tag())
+								navigationStackPages = append(navigationStackPages, navigationStack.Item(i).Cast().(*adw.NavigationPage).GetTag())
 							}
 							homeNavigation.ReplaceWithTags(navigationStackPages)
 
@@ -2733,11 +2630,11 @@ func main() {
 			log.Info("Handling delete user data action")
 
 			confirm := adw.NewAlertDialog(
-				gcore.Local("Deleting your data"),
-				gcore.Local("Are you sure you want to delete your data and your account?"),
+				L("Deleting your data"),
+				L("Are you sure you want to delete your data and your account?"),
 			)
-			confirm.AddResponse("cancel", gcore.Local("Cancel"))
-			confirm.AddResponse("delete", gcore.Local("Delete"))
+			confirm.AddResponse("cancel", L("Cancel"))
+			confirm.AddResponse("delete", L("Delete"))
 			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
 			confirm.ConnectResponse(func(response string) {
 				if response == "delete" {
@@ -2773,7 +2670,7 @@ func main() {
 						return
 					}
 
-					mto.AddToast(adw.NewToast(gcore.Local("Deleted user data")))
+					mto.AddToast(adw.NewToast(L("Deleted user data")))
 				}
 			})
 
@@ -2811,11 +2708,11 @@ func main() {
 			log.Info("Handling delete contact action")
 
 			confirm := adw.NewAlertDialog(
-				gcore.Local("Deleting a contact"),
-				gcore.Local("Are you sure you want to delete this contact?"),
+				L("Deleting a contact"),
+				L("Are you sure you want to delete this contact?"),
 			)
-			confirm.AddResponse("cancel", gcore.Local("Cancel"))
-			confirm.AddResponse("delete", gcore.Local("Delete"))
+			confirm.AddResponse("cancel", L("Cancel"))
+			confirm.AddResponse("delete", L("Delete"))
 			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
 			confirm.ConnectResponse(func(response string) {
 				if response == "delete" {
@@ -2851,9 +2748,9 @@ func main() {
 						return
 					}
 
-					mto.AddToast(adw.NewToast(gcore.Local("Contact deleted")))
+					mto.AddToast(adw.NewToast(L("Contact deleted")))
 
-					homeNavigation.ReplaceWithTags([]string{resources.PageContacts})
+					homeNavigation.ReplaceWithTags([]string{resources.PageContacts}, 1)
 				}
 			})
 
@@ -2872,11 +2769,11 @@ func main() {
 			log.Info("Handling settle debt action")
 
 			confirm := adw.NewAlertDialog(
-				gcore.Local("Settling a debt"),
-				gcore.Local("Are you sure you want to settle this debt?"),
+				L("Settling a debt"),
+				L("Are you sure you want to settle this debt?"),
 			)
-			confirm.AddResponse("cancel", gcore.Local("Cancel"))
-			confirm.AddResponse("delete", gcore.Local("Delete"))
+			confirm.AddResponse("cancel", L("Cancel"))
+			confirm.AddResponse("delete", L("Delete"))
 			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
 			confirm.ConnectResponse(func(response string) {
 				if response == "delete" {
@@ -2912,9 +2809,9 @@ func main() {
 						return
 					}
 
-					mto.AddToast(adw.NewToast(gcore.Local("Settled debt")))
+					mto.AddToast(adw.NewToast(L("Settled debt")))
 
-					homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
+					homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView}, 2)
 				}
 			})
 
@@ -2933,11 +2830,11 @@ func main() {
 			log.Info("Handling delete activity action")
 
 			confirm := adw.NewAlertDialog(
-				gcore.Local("Deleting an activity"),
-				gcore.Local("Are you sure you want to delete this activity?"),
+				L("Deleting an activity"),
+				L("Are you sure you want to delete this activity?"),
 			)
-			confirm.AddResponse("cancel", gcore.Local("Cancel"))
-			confirm.AddResponse("delete", gcore.Local("Delete"))
+			confirm.AddResponse("cancel", L("Cancel"))
+			confirm.AddResponse("delete", L("Delete"))
 			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
 			confirm.ConnectResponse(func(response string) {
 				if response == "delete" {
@@ -2973,9 +2870,9 @@ func main() {
 						return
 					}
 
-					mto.AddToast(adw.NewToast(gcore.Local("Activity deleted")))
+					mto.AddToast(adw.NewToast(L("Activity deleted")))
 
-					homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView})
+					homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView}, 2)
 				}
 			})
 
@@ -2994,11 +2891,11 @@ func main() {
 			log.Info("Handling delete journal entry action")
 
 			confirm := adw.NewAlertDialog(
-				gcore.Local("Deleting a journal entry"),
-				gcore.Local("Are you sure you want to delete this journal entry?"),
+				L("Deleting a journal entry"),
+				L("Are you sure you want to delete this journal entry?"),
 			)
-			confirm.AddResponse("cancel", gcore.Local("Cancel"))
-			confirm.AddResponse("delete", gcore.Local("Delete"))
+			confirm.AddResponse("cancel", L("Cancel"))
+			confirm.AddResponse("delete", L("Delete"))
 			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
 			confirm.ConnectResponse(func(response string) {
 				if response == "delete" {
@@ -3034,9 +2931,9 @@ func main() {
 						return
 					}
 
-					mto.AddToast(adw.NewToast(gcore.Local("Journal entry deleted")))
+					mto.AddToast(adw.NewToast(L("Journal entry deleted")))
 
-					homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries})
+					homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries}, 1)
 				}
 			})
 
@@ -3119,7 +3016,7 @@ func main() {
 		createItemAction := gio.NewSimpleAction("createItem", nil)
 		createItemAction.ConnectActivate(func(parameter *glib.Variant) {
 			var (
-				tag = homeNavigation.VisiblePage().Tag()
+				tag = homeNavigation.GetVisiblePage().GetTag()
 				log = log.With("tag", tag)
 			)
 
@@ -3141,7 +3038,7 @@ func main() {
 		searchListAction := gio.NewSimpleAction("searchList", nil)
 		searchListAction.ConnectActivate(func(parameter *glib.Variant) {
 			var (
-				tag = homeNavigation.VisiblePage().Tag()
+				tag = homeNavigation.GetVisiblePage().GetTag()
 				log = log.With("tag", tag)
 			)
 
@@ -3161,7 +3058,7 @@ func main() {
 		editItemAction := gio.NewSimpleAction("editItem", nil)
 		editItemAction.ConnectActivate(func(parameter *glib.Variant) {
 			var (
-				tag = homeNavigation.VisiblePage().Tag()
+				tag = homeNavigation.GetVisiblePage().GetTag()
 				log = log.With("tag", tag)
 			)
 
@@ -3190,7 +3087,7 @@ func main() {
 		deleteItemAction := gio.NewSimpleAction("deleteItem", nil)
 		deleteItemAction.ConnectActivate(func(parameter *glib.Variant) {
 			var (
-				tag = homeNavigation.VisiblePage().Tag()
+				tag = homeNavigation.GetVisiblePage().GetTag()
 				log = log.With("tag", tag)
 			)
 
@@ -3224,7 +3121,7 @@ func main() {
 			contactsRow.GrabFocus()
 			homeSidebarListbox.SelectRow(contactsRow)
 
-			homeNavigation.ReplaceWithTags([]string{resources.PageContacts})
+			homeNavigation.ReplaceWithTags([]string{resources.PageContacts}, 1)
 		})
 		a.AddAction(navigateToContactsAction)
 		a.SetAccelsForAction("app.navigateToContacts", []string{`<Alt>1`})
@@ -3237,7 +3134,7 @@ func main() {
 			journalEntriesRow.GrabFocus()
 			homeSidebarListbox.SelectRow(journalEntriesRow)
 
-			homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries})
+			homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries}, 1)
 		})
 		a.AddAction(navigateToJournalAction)
 		a.SetAccelsForAction("app.navigateToJournal", []string{`<Alt>2`})
@@ -3248,13 +3145,13 @@ func main() {
 
 		handleHomeNavigation := func() {
 			var (
-				tag = homeNavigation.VisiblePage().Tag()
+				tag = homeNavigation.GetVisiblePage().GetTag()
 				log = log.With("tag", tag)
 			)
 
 			log.Info("Handling page")
 
-			homeContentPage.SetTitle(homeNavigation.VisiblePage().Title())
+			homeContentPage.SetTitle(homeNavigation.GetVisiblePage().Title())
 
 			homeSplitView.SetShowContent(true)
 
@@ -3338,11 +3235,11 @@ func main() {
 
 							menu := gio.NewMenu()
 
-							deleteContactMenuItem := gio.NewMenuItem(gcore.Local("Delete contact"), "app.deleteContact")
+							deleteContactMenuItem := gio.NewMenuItem(L("Delete contact"), "app.deleteContact")
 							deleteContactMenuItem.SetActionAndTargetValue("app.deleteContact", glib.NewVariantInt64(*contact.Id))
 							menu.AppendItem(deleteContactMenuItem)
 
-							editContactMenuItem := gio.NewMenuItem(gcore.Local("Edit contact"), "app.editContact")
+							editContactMenuItem := gio.NewMenuItem(L("Edit contact"), "app.editContact")
 							editContactMenuItem.SetActionAndTargetValue("app.editContact", glib.NewVariantInt64(*contact.Id))
 							menu.AppendItem(editContactMenuItem)
 
@@ -3461,9 +3358,9 @@ func main() {
 
 					debtsCreateDialogTitle.SetSubtitle(*res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName)
 
-					debtsCreateDialogYouOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("_You owe %v", *res.JSON200.Entry.FirstName)))
+					debtsCreateDialogYouOweActionRow.SetTitle(L(fmt.Sprintf("_You owe %v", *res.JSON200.Entry.FirstName)))
 					debtsCreateDialogYouOweActionRow.SetUseUnderline(true)
-					debtsCreateDialogTheyOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("%v ow_es you", *res.JSON200.Entry.FirstName)))
+					debtsCreateDialogTheyOweActionRow.SetTitle(L(fmt.Sprintf("%v ow_es you", *res.JSON200.Entry.FirstName)))
 					debtsCreateDialogTheyOweActionRow.SetUseUnderline(true)
 
 					contactsViewDebtsListBox.RemoveAll()
@@ -3473,9 +3370,9 @@ func main() {
 
 						subtitle := ""
 						if *debt.Amount <= 0.0 {
-							subtitle = gcore.Local(fmt.Sprintf("You owe %v %v %v", *res.JSON200.Entry.FirstName, math.Abs(float64(*debt.Amount)), *debt.Currency))
+							subtitle = L(fmt.Sprintf("You owe %v %v %v", *res.JSON200.Entry.FirstName, math.Abs(float64(*debt.Amount)), *debt.Currency))
 						} else {
-							subtitle = gcore.Local(fmt.Sprintf("%v owes you %v %v", *res.JSON200.Entry.FirstName, math.Abs(float64(*debt.Amount)), *debt.Currency))
+							subtitle = L(fmt.Sprintf("%v owes you %v %v", *res.JSON200.Entry.FirstName, math.Abs(float64(*debt.Amount)), *debt.Currency))
 						}
 
 						r.SetTitle(subtitle)
@@ -3491,12 +3388,12 @@ func main() {
 
 						menu := gio.NewMenu()
 
-						settleDebtMenuItem := gio.NewMenuItem(gcore.Local("Settle debt"), "app.settleDebt")
+						settleDebtMenuItem := gio.NewMenuItem(L("Settle debt"), "app.settleDebt")
 						settleDebtMenuItem.SetActionAndTargetValue("app.settleDebt", glib.NewVariantInt64(*debt.Id))
 
 						menu.AppendItem(settleDebtMenuItem)
 
-						editDebtMenuItem := gio.NewMenuItem(gcore.Local("Edit debt"), "app.editDebt")
+						editDebtMenuItem := gio.NewMenuItem(L("Edit debt"), "app.editDebt")
 						editDebtMenuItem.SetActionAndTargetValue("app.editDebt", glib.NewVariantInt64(*debt.Id))
 
 						menu.AppendItem(editDebtMenuItem)
@@ -3510,7 +3407,7 @@ func main() {
 
 					addDebtButton := adw.NewButtonRow()
 					addDebtButton.SetStartIconName("list-add-symbolic")
-					addDebtButton.SetTitle(gcore.Local("Add a _debt"))
+					addDebtButton.SetTitle(L("Add a _debt"))
 					addDebtButton.SetUseUnderline(true)
 
 					addDebtButton.ConnectActivated(func() {
@@ -3543,11 +3440,11 @@ func main() {
 
 						menu := gio.NewMenu()
 
-						deleteActivityMenuItem := gio.NewMenuItem(gcore.Local("Delete activity"), "app.deleteActivity")
+						deleteActivityMenuItem := gio.NewMenuItem(L("Delete activity"), "app.deleteActivity")
 						deleteActivityMenuItem.SetActionAndTargetValue("app.deleteActivity", glib.NewVariantInt64(*activity.Id))
 						menu.AppendItem(deleteActivityMenuItem)
 
-						editActivityMenuItem := gio.NewMenuItem(gcore.Local("Edit activity"), "app.editActivity")
+						editActivityMenuItem := gio.NewMenuItem(L("Edit activity"), "app.editActivity")
 						editActivityMenuItem.SetActionAndTargetValue("app.editActivity", glib.NewVariantInt64(*activity.Id))
 						menu.AppendItem(editActivityMenuItem)
 
@@ -3564,7 +3461,7 @@ func main() {
 
 					addActivityButton := adw.NewButtonRow()
 					addActivityButton.SetStartIconName("list-add-symbolic")
-					addActivityButton.SetTitle(gcore.Local("Add an ac_tivity"))
+					addActivityButton.SetTitle(L("Add an ac_tivity"))
 					addActivityButton.SetUseUnderline(true)
 
 					addActivityButton.ConnectActivated(func() {
@@ -3629,63 +3526,14 @@ func main() {
 						return
 					}
 
-					bg := gdk.NewRGBA(0, 0, 0, 0)
-					activitiesViewPageBodyWebView.SetBackgroundColor(&bg)
-
-					activitiesViewPageBodyWebView.ConnectDecidePolicy(func(decision webkit.PolicyDecisioner, decisionType webkit.PolicyDecisionType) (ok bool) {
-						if decisionType == webkit.PolicyDecisionTypeNavigationAction {
-							u, err := url.Parse(decision.(*webkit.NavigationPolicyDecision).NavigationAction().Request().URI())
-							if err != nil {
-								log.Warn("Could not parse activity view WebView", "err", err)
-
-								handleActivitiesViewError(err)
-
-								return true
-							}
-
-							openExternally := u.Scheme != "about"
-
-							log.Debug("Handling navigation in activity view WebView", "openExternally", openExternally, "url", u.String())
-
-							if openExternally {
-								go func() {
-									var (
-										fl = gtk.NewURILauncher(u.String())
-										cc = make(chan error)
-									)
-									fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
-										if err := fl.LaunchFinish(res); err != nil {
-											cc <- err
-
-											return
-										}
-
-										cc <- nil
-									})
-
-									if err := <-cc; err != nil {
-										handlePanic(err)
-
-										return
-									}
-								}()
-
-								return true
-							}
-
-							return false
-						}
-
-						return false
-					})
-
+					// TODO: Replace with WebView once puregotk has WebKit bindings
 					if description := *res.JSON200.Description; description != "" {
 						glib.IdleAdd(func() {
-							activitiesViewPageBodyWebView.LoadHtml(renderedMarkdownHTMLPrefix+buf.String(), "about:blank")
+							activitiesViewPageBodyWebView.SetLabel(buf.String())
 						})
 					} else {
 						glib.IdleAdd(func() {
-							activitiesViewPageBodyWebView.LoadHtml(renderedMarkdownHTMLPrefix+gcore.Local("No description provided."), "about:blank")
+							activitiesViewPageBodyWebView.SetLabel(L("No description provided."))
 						})
 					}
 
@@ -3802,9 +3650,9 @@ func main() {
 
 					debtsEditPageTitle.SetSubtitle(*res.JSON200.Entry.FirstName + " " + *res.JSON200.Entry.LastName)
 
-					debtsEditPageYouOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("_You owe %v", *res.JSON200.Entry.FirstName)))
+					debtsEditPageYouOweActionRow.SetTitle(L(fmt.Sprintf("_You owe %v", *res.JSON200.Entry.FirstName)))
 					debtsEditPageYouOweActionRow.SetUseUnderline(true)
-					debtsEditPageTheyOweActionRow.SetTitle(gcore.Local(fmt.Sprintf("%v ow_es you", *res.JSON200.Entry.FirstName)))
+					debtsEditPageTheyOweActionRow.SetTitle(L(fmt.Sprintf("%v ow_es you", *res.JSON200.Entry.FirstName)))
 					debtsEditPageTheyOweActionRow.SetUseUnderline(true)
 
 					debtsEditPageYouOweRadio.SetActive(*debt.Amount < 0)
@@ -3944,13 +3792,13 @@ func main() {
 							subtitle := glib.NewDateTimeFromGo(*journalEntry.Date).Format("%x") + " | "
 							switch *journalEntry.Rating {
 							case 3:
-								subtitle += gcore.Local("Great")
+								subtitle += L("Great")
 
 							case 2:
-								subtitle += gcore.Local("OK")
+								subtitle += L("OK")
 
 							case 1:
-								subtitle += gcore.Local("Bad")
+								subtitle += L("Bad")
 							}
 							r.SetSubtitle(subtitle)
 
@@ -3963,11 +3811,11 @@ func main() {
 
 							menu := gio.NewMenu()
 
-							deleteContactMenuItem := gio.NewMenuItem(gcore.Local("Delete journal entry"), "app.deleteJournalEntry")
+							deleteContactMenuItem := gio.NewMenuItem(L("Delete journal entry"), "app.deleteJournalEntry")
 							deleteContactMenuItem.SetActionAndTargetValue("app.deleteJournalEntry", glib.NewVariantInt64(*journalEntry.Id))
 							menu.AppendItem(deleteContactMenuItem)
 
-							editContactMenuItem := gio.NewMenuItem(gcore.Local("Edit journal entry"), "app.editJournalEntry")
+							editContactMenuItem := gio.NewMenuItem(L("Edit journal entry"), "app.editJournalEntry")
 							editContactMenuItem.SetActionAndTargetValue("app.editJournalEntry", glib.NewVariantInt64(*journalEntry.Id))
 							menu.AppendItem(editContactMenuItem)
 
@@ -4031,13 +3879,13 @@ func main() {
 					subtitle := glib.NewDateTimeFromGo(*res.JSON200.Date).Format("%x") + " | "
 					switch *res.JSON200.Rating {
 					case 3:
-						subtitle += gcore.Local("Great")
+						subtitle += L("Great")
 
 					case 2:
-						subtitle += gcore.Local("OK")
+						subtitle += L("OK")
 
 					case 1:
-						subtitle += gcore.Local("Bad")
+						subtitle += L("Bad")
 					}
 					journalEntriesViewPageTitle.SetSubtitle(subtitle)
 
@@ -4050,58 +3898,9 @@ func main() {
 						return
 					}
 
-					bg := gdk.NewRGBA(0, 0, 0, 0)
-					journalEntriesViewPageBodyWebView.SetBackgroundColor(&bg)
-
-					journalEntriesViewPageBodyWebView.ConnectDecidePolicy(func(decision webkit.PolicyDecisioner, decisionType webkit.PolicyDecisionType) (ok bool) {
-						if decisionType == webkit.PolicyDecisionTypeNavigationAction {
-							u, err := url.Parse(decision.(*webkit.NavigationPolicyDecision).NavigationAction().Request().URI())
-							if err != nil {
-								log.Warn("Could not parse journal entry view WebView", "err", err)
-
-								handleJournalEntriesViewError(err)
-
-								return true
-							}
-
-							openExternally := u.Scheme != "about"
-
-							log.Debug("Handling navigation in journal entry view WebView", "openExternally", openExternally, "url", u.String())
-
-							if openExternally {
-								go func() {
-									var (
-										fl = gtk.NewURILauncher(u.String())
-										cc = make(chan error)
-									)
-									fl.Launch(ctx, &w.Window, func(res gio.AsyncResulter) {
-										if err := fl.LaunchFinish(res); err != nil {
-											cc <- err
-
-											return
-										}
-
-										cc <- nil
-									})
-
-									if err := <-cc; err != nil {
-										handlePanic(err)
-
-										return
-									}
-								}()
-
-								return true
-							}
-
-							return false
-						}
-
-						return false
-					})
-
+					// TODO: Replace with WebView once puregotk has WebKit bindings
 					glib.IdleAdd(func() {
-						journalEntriesViewPageBodyWebView.LoadHtml(renderedMarkdownHTMLPrefix+buf.String(), "about:blank")
+						journalEntriesViewPageBodyWebView.SetLabel(buf.String())
 					})
 
 					defer clearJournalEntriesViewError()
@@ -4274,7 +4073,7 @@ func main() {
 			handleHomeNavigation()
 
 			var (
-				tag = page.Tag()
+				tag = page.GetTag()
 				log = log.With("tag", tag)
 			)
 
@@ -4338,12 +4137,12 @@ func main() {
 		homeNavigation.ConnectReplaced(handleHomeNavigation)
 
 		homeSidebarListbox.ConnectRowActivated(func(row *gtk.ListBoxRow) {
-			homeNavigation.ReplaceWithTags([]string{row.Cast().(*adw.ActionRow).Name()})
+			homeNavigation.ReplaceWithTags([]string{row.Cast().(*adw.ActionRow).Name()}, 1)
 		})
 
 		handleNavigation := func() {
 			var (
-				tag = nv.VisiblePage().Tag()
+				tag = nv.GetVisiblePage().GetTag()
 				log = log.With("tag", tag)
 			)
 
@@ -4385,7 +4184,7 @@ func main() {
 						return
 					}
 
-					if settings.Boolean(resources.SettingAnonymousMode) {
+					if settings.GetBoolean(resources.SettingAnonymousMode) {
 						nv.PushByTag(resources.PagePreview)
 
 						return
@@ -4474,7 +4273,7 @@ func main() {
 					contactsRow.GrabFocus()
 					homeSidebarListbox.SelectRow(contactsRow)
 
-					homeNavigation.ReplaceWithTags([]string{resources.PageContacts})
+					homeNavigation.ReplaceWithTags([]string{resources.PageContacts}, 1)
 				}()
 			}
 		}
@@ -4483,7 +4282,7 @@ func main() {
 			handleNavigation()
 
 			var (
-				tag = page.Tag()
+				tag = page.GetTag()
 				log = log.With("tag", tag)
 			)
 
@@ -4500,17 +4299,27 @@ func main() {
 		handleNavigation()
 
 		a.AddWindow(&w.Window)
-	})
+	}
+	a.ConnectActivate(&activateCallback)
 
-	a.ConnectOpen(func(files []gio.Filer, hint string) {
+	openCallback := func(_ gio.Application, filesPtr uintptr, nFiles int, hint string) {
 		if w == nil {
 			a.Activate()
 		} else {
 			w.Present()
 		}
 
-		for _, r := range files {
-			u, err := url.Parse(r.URI())
+		// TODO: Properly iterate over files using unsafe pointer arithmetic
+		// For now, we handle the first file only if nFiles > 0
+		if nFiles == 0 {
+			return
+		}
+
+		// Get first file from the array
+		file := gio.FileNewForUri("")
+		file.SetGoPointer(filesPtr)
+
+		u, err := url.Parse(file.GetUri())
 			if err != nil {
 				handlePanic(err)
 
@@ -4641,11 +4450,11 @@ func main() {
 				nextURL = resources.PageIndex
 			}
 
-			nv.ReplaceWithTags([]string{nextURL})
-		}
-	})
+			nv.ReplaceWithTags([]string{nextURL}, 1)
+	}
+	a.ConnectOpen(&openCallback)
 
-	if code := a.Run(os.Args); code > 0 {
+	if code := a.Run(len(os.Args), os.Args); code > 0 {
 		os.Exit(code)
 	}
 }
