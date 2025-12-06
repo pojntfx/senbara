@@ -10,7 +10,6 @@ import (
 	"io/fs"
 	"log/slog"
 	"math"
-	"mime/multipart"
 	"net/http"
 	"net/mail"
 	"net/url"
@@ -21,6 +20,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/jwijenbergh/puregotk/v4/adw"
@@ -73,9 +73,119 @@ type userData struct {
 	LogoutURL string
 }
 
-const gettextPackage = "default"
+const gettextPackage = "senbara-gnome"
 
 var LocaleDir = "/usr/share/locale"
+
+func glibDateTimeFromGo(t time.Time) *glib.DateTime {
+	return glib.NewDateTimeLocal(t.Year(), int(t.Month()), t.Day(), t.Hour(), t.Minute(), float64(t.Second()))
+}
+
+func connectButtonClicked(button *gtk.Button, fn func()) {
+	cb := func(_ gtk.Button) { fn() }
+	button.ConnectClicked(&cb)
+}
+
+func connectSimpleActionActivate(action *gio.SimpleAction, fn func()) {
+	cb := func(_ gio.SimpleAction, _ uintptr) { fn() }
+	action.ConnectActivate(&cb)
+}
+
+func connectSimpleActionActivateWithParam(action *gio.SimpleAction, fn func(parameter *glib.Variant)) {
+	cb := func(_ gio.SimpleAction, paramPtr uintptr) {
+		var param *glib.Variant
+		if paramPtr != 0 {
+			param = (*glib.Variant)(unsafe.Pointer(paramPtr))
+		}
+		fn(param)
+	}
+	action.ConnectActivate(&cb)
+}
+
+func connectSettingsChanged(settings *gio.Settings, fn func(key string)) {
+	cb := func(_ gio.Settings, key string) { fn(key) }
+	settings.ConnectChanged(&cb)
+}
+
+func connectEntryRowChanged(row *adw.EntryRow, fn func()) {
+	cb := func() { fn() }
+	row.PreferencesRow.ListBoxRow.Widget.InitiallyUnowned.Object.ConnectSignal("changed", &cb)
+}
+
+func connectPasswordEntryRowChanged(row *adw.PasswordEntryRow, fn func()) {
+	cb := func() { fn() }
+	row.EntryRow.PreferencesRow.ListBoxRow.Widget.InitiallyUnowned.Object.ConnectSignal("changed", &cb)
+}
+
+func connectSearchEntryChanged(entry *gtk.SearchEntry, fn func()) {
+	cb := func(_ gtk.SearchEntry) { fn() }
+	entry.ConnectSearchChanged(&cb)
+}
+
+func setListBoxFilterFunc(listBox *gtk.ListBox, fn func(row *gtk.ListBoxRow) bool) {
+	filterFunc := gtk.ListBoxFilterFunc(func(rowPtr uintptr, _ uintptr) bool {
+		row := gtk.ListBoxRowNewFromInternalPtr(rowPtr)
+		return fn(row)
+	})
+	destroyNotify := glib.DestroyNotify(func(_ uintptr) {})
+	listBox.SetFilterFunc(&filterFunc, 0, &destroyNotify)
+}
+
+func connectTextBufferChanged(buffer *gtk.TextBuffer, fn func()) {
+	cb := func(_ gtk.TextBuffer) { fn() }
+	buffer.ConnectChanged(&cb)
+}
+
+func connectDialogClosed(dialog *adw.Dialog, fn func()) {
+	cb := func(_ adw.Dialog) { fn() }
+	dialog.ConnectClosed(&cb)
+}
+
+func getTextBufferText(buffer *gtk.TextBuffer) string {
+	var startIter, endIter gtk.TextIter
+	buffer.GetStartIter(&startIter)
+	buffer.GetEndIter(&endIter)
+	return buffer.GetText(&startIter, &endIter, true)
+}
+
+func connectAlertDialogResponse(dialog *adw.AlertDialog, fn func(response string)) {
+	cb := func(_ adw.AlertDialog, response string) { fn(response) }
+	dialog.ConnectResponse(&cb)
+}
+
+func idleAdd(fn func()) {
+	sourceFn := glib.SourceFunc(func(_ uintptr) bool {
+		fn()
+		return false // Return false to stop the idle source after first run
+	})
+	glib.IdleAdd(&sourceFn, 0)
+}
+
+func connectListBoxRowActivated(listBox *gtk.ListBox, fn func(row *gtk.ListBoxRow)) {
+	cb := func(_ gtk.ListBox, rowPtr uintptr) {
+		row := gtk.ListBoxRowNewFromInternalPtr(rowPtr)
+		fn(row)
+	}
+	listBox.ConnectRowActivated(&cb)
+}
+
+func connectNavigationViewPopped(nv *adw.NavigationView, fn func(page *adw.NavigationPage)) {
+	cb := func(_ adw.NavigationView, pagePtr uintptr) {
+		page := adw.NavigationPageNewFromInternalPtr(pagePtr)
+		fn(page)
+	}
+	nv.ConnectPopped(&cb)
+}
+
+func connectNavigationViewPushed(nv *adw.NavigationView, fn func()) {
+	cb := func(_ adw.NavigationView) { fn() }
+	nv.ConnectPushed(&cb)
+}
+
+func connectNavigationViewReplaced(nv *adw.NavigationView, fn func()) {
+	cb := func(_ adw.NavigationView) { fn() }
+	nv.ConnectReplaced(&cb)
+}
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -151,9 +261,9 @@ func main() {
 	a := adw.NewApplication(resources.AppID, gio.GApplicationHandlesOpenValue)
 
 	var (
-		w       *adw.ApplicationWindow
-		nv      *adw.NavigationView
-		mto     *adw.ToastOverlay
+		w       adw.ApplicationWindow
+		nv      adw.NavigationView
+		mto     adw.ToastOverlay
 		authner *authn.Authner
 		u       userData
 	)
@@ -328,281 +438,459 @@ func main() {
 		activitiesCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ActivitiesDebtsCreateDialogUIPath)
 		journalEntriesCreateDialogBuilder := gtk.NewBuilderFromResource(resources.JournalEntriesCreateDialogUIPath)
 
-		w = b.GetObject("main_window").Cast().(*adw.ApplicationWindow)
+		b.GetObject("main_window").Cast(&w)
 
-		nv = b.GetObject("main_navigation").Cast().(*adw.NavigationView)
+		b.GetObject("main_navigation").Cast(&nv)
 
-		mto = b.GetObject("main_toasts_overlay").Cast().(*adw.ToastOverlay)
+		b.GetObject("main_toasts_overlay").Cast(&mto)
 
 		var (
-			preferencesDialog              = preferencesDialogBuilder.GetObject("preferences_dialog").Cast().(*adw.PreferencesDialog)
-			preferencesDialogVerboseSwitch = preferencesDialogBuilder.GetObject("preferences_dialog_verbose_switch").Cast().(*gtk.Switch)
+			preferencesDialog              adw.PreferencesDialog
+			preferencesDialogVerboseSwitch gtk.Switch
 
-			helpOverlayShortcutsWindow = helpOverlayBuilder.GetObject("help_overlay").Cast().(*gtk.ShortcutsWindow)
+			helpOverlayShortcutsWindow gtk.ShortcutsWindow
 
-			welcomeGetStartedButton  = b.GetObject("welcome_get_started_button").Cast().(*gtk.Button)
-			welcomeGetStartedSpinner = b.GetObject("welcome_get_started_spinner").Cast().(*adw.Spinner)
+			welcomeGetStartedButton  gtk.Button
+			welcomeGetStartedSpinner adw.Spinner
 
-			configServerURLInput           = b.GetObject("config_server_url_input").Cast().(*adw.EntryRow)
-			configServerURLContinueButton  = b.GetObject("config_server_url_continue_button").Cast().(*gtk.Button)
-			configServerURLContinueSpinner = b.GetObject("config_server_url_continue_spinner").Cast().(*adw.Spinner)
+			configServerURLInput           adw.EntryRow
+			configServerURLContinueButton  gtk.Button
+			configServerURLContinueSpinner adw.Spinner
 
 			spec openapi3.T
 
-			previewLoginButton  = b.GetObject("preview_login_button").Cast().(*gtk.Button)
-			previewLoginSpinner = b.GetObject("preview_login_spinner").Cast().(*adw.Spinner)
+			previewLoginButton  gtk.Button
+			previewLoginSpinner adw.Spinner
 
-			previewContactsCountLabel   = b.GetObject("preview_contacts_count_label").Cast().(*gtk.Label)
-			previewContactsCountSpinner = b.GetObject("preview_contacts_count_spinner").Cast().(*adw.Spinner)
+			previewContactsCountLabel   gtk.Label
+			previewContactsCountSpinner adw.Spinner
 
-			previewJournalEntriesCountLabel   = b.GetObject("preview_journal_entries_count_label").Cast().(*gtk.Label)
-			previewJournalEntriesCountSpinner = b.GetObject("preview_journal_entries_count_spinner").Cast().(*adw.Spinner)
+			previewJournalEntriesCountLabel   gtk.Label
+			previewJournalEntriesCountSpinner adw.Spinner
 
 			oidcDcrInitialAccessTokenPortalUrl string
 
-			registerRegisterButton = b.GetObject("register_register_button").Cast().(*gtk.Button)
+			registerRegisterButton gtk.Button
 
-			configInitialAccessTokenInput        = b.GetObject("config_initial_access_token_input").Cast().(*adw.PasswordEntryRow)
-			configInitialAccessTokenLoginButton  = b.GetObject("config_initial_access_token_login_button").Cast().(*gtk.Button)
-			configInitialAccessTokenLoginSpinner = b.GetObject("config_initial_access_token_login_spinner").Cast().(*adw.Spinner)
+			configInitialAccessTokenInput        adw.PasswordEntryRow
+			configInitialAccessTokenLoginButton  gtk.Button
+			configInitialAccessTokenLoginSpinner adw.Spinner
 
-			exchangeLoginCancelButton  = b.GetObject("exchange_login_cancel_button").Cast().(*gtk.Button)
-			exchangeLogoutCancelButton = b.GetObject("exchange_logout_cancel_button").Cast().(*gtk.Button)
+			exchangeLoginCancelButton  gtk.Button
+			exchangeLogoutCancelButton gtk.Button
 
-			homeSplitView      = b.GetObject("home_split_view").Cast().(*adw.NavigationSplitView)
-			homeNavigation     = b.GetObject("home_navigation").Cast().(*adw.NavigationView)
-			homeSidebarListbox = b.GetObject("home_sidebar_listbox").Cast().(*gtk.ListBox)
-			homeContentPage    = b.GetObject("home_content_page").Cast().(*adw.NavigationPage)
+			homeSplitView      adw.NavigationSplitView
+			homeNavigation     adw.NavigationView
+			homeSidebarListbox gtk.ListBox
+			homeContentPage    adw.NavigationPage
 
-			homeUserMenuButton  = b.GetObject("home_user_menu_button").Cast().(*gtk.MenuButton)
-			homeUserMenuAvatar  = b.GetObject("home_user_menu_avatar").Cast().(*adw.Avatar)
-			homeUserMenuSpinner = b.GetObject("home_user_menu_spinner").Cast().(*adw.Spinner)
+			homeUserMenuButton  gtk.MenuButton
+			homeUserMenuAvatar  adw.Avatar
+			homeUserMenuSpinner adw.Spinner
 
-			homeHamburgerMenuButton  = b.GetObject("home_hamburger_menu_button").Cast().(*gtk.MenuButton)
-			homeHamburgerMenuIcon    = b.GetObject("home_hamburger_menu_icon").Cast().(*gtk.Image)
-			homeHamburgerMenuSpinner = b.GetObject("home_hamburger_menu_spinner").Cast().(*adw.Spinner)
+			homeHamburgerMenuButton  gtk.MenuButton
+			homeHamburgerMenuIcon    gtk.Image
+			homeHamburgerMenuSpinner adw.Spinner
 
-			homeSidebarContactsCountLabel   = b.GetObject("home_sidebar_contacts_count_label").Cast().(*gtk.Label)
-			homeSidebarContactsCountSpinner = b.GetObject("home_sidebar_contacts_count_spinner").Cast().(*adw.Spinner)
+			homeSidebarContactsCountLabel   gtk.Label
+			homeSidebarContactsCountSpinner adw.Spinner
 
-			homeSidebarJournalEntriesCountLabel   = b.GetObject("home_sidebar_journal_entries_count_label").Cast().(*gtk.Label)
-			homeSidebarJournalEntriesCountSpinner = b.GetObject("home_sidebar_journal_entries_count_spinner").Cast().(*adw.Spinner)
+			homeSidebarJournalEntriesCountLabel   gtk.Label
+			homeSidebarJournalEntriesCountSpinner adw.Spinner
 
-			contactsStack       = b.GetObject("contacts_stack").Cast().(*gtk.Stack)
-			contactsListBox     = b.GetObject("contacts_list").Cast().(*gtk.ListBox)
-			contactsSearchEntry = b.GetObject("contacts_searchentry").Cast().(*gtk.SearchEntry)
+			contactsStack       gtk.Stack
+			contactsListBox     gtk.ListBox
+			contactsSearchEntry gtk.SearchEntry
 
-			contactsAddButton    = b.GetObject("contacts_add_button").Cast().(*gtk.Button)
-			contactsSearchButton = b.GetObject("contacts_search_button").Cast().(*gtk.ToggleButton)
+			contactsAddButton    gtk.Button
+			contactsSearchButton gtk.ToggleButton
 
-			contactsEmptyAddButton = b.GetObject("contacts_empty_add_button").Cast().(*gtk.Button)
+			contactsEmptyAddButton gtk.Button
 
-			contactsCreateDialog = contactsCreateDialogBuilder.GetObject("contacts_create_dialog").Cast().(*adw.Dialog)
+			contactsCreateDialog adw.Dialog
 
-			contactsCreateDialogAddButton  = contactsCreateDialogBuilder.GetObject("contacts_create_dialog_add_button").Cast().(*gtk.Button)
-			contactsCreateDialogAddSpinner = contactsCreateDialogBuilder.GetObject("contacts_create_dialog_add_spinner").Cast().(*adw.Spinner)
+			contactsCreateDialogAddButton  gtk.Button
+			contactsCreateDialogAddSpinner adw.Spinner
 
-			contactsCreateDialogFirstNameInput = contactsCreateDialogBuilder.GetObject("contacts_create_dialog_first_name_input").Cast().(*adw.EntryRow)
-			contactsCreateDialogLastNameInput  = contactsCreateDialogBuilder.GetObject("contacts_create_dialog_last_name_input").Cast().(*adw.EntryRow)
-			contactsCreateDialogNicknameInput  = contactsCreateDialogBuilder.GetObject("contacts_create_dialog_nickname_input").Cast().(*adw.EntryRow)
-			contactsCreateDialogEmailInput     = contactsCreateDialogBuilder.GetObject("contacts_create_dialog_email_input").Cast().(*adw.EntryRow)
-			contactsCreateDialogPronounsInput  = contactsCreateDialogBuilder.GetObject("contacts_create_dialog_pronouns_input").Cast().(*adw.EntryRow)
+			contactsCreateDialogFirstNameInput adw.EntryRow
+			contactsCreateDialogLastNameInput  adw.EntryRow
+			contactsCreateDialogNicknameInput  adw.EntryRow
+			contactsCreateDialogEmailInput     adw.EntryRow
+			contactsCreateDialogPronounsInput  adw.EntryRow
 
-			contactsCreateDialogEmailWarningButton = contactsCreateDialogBuilder.GetObject("contacts_create_dialog_email_warning_button").Cast().(*gtk.MenuButton)
+			contactsCreateDialogEmailWarningButton gtk.MenuButton
 
-			contactsErrorStatusPage        = b.GetObject("contacts_error_status_page").Cast().(*adw.StatusPage)
-			contactsErrorRefreshButton     = b.GetObject("contacts_error_refresh_button").Cast().(*gtk.Button)
-			contactsErrorCopyDetailsButton = b.GetObject("contacts_error_copy_details").Cast().(*gtk.Button)
+			contactsErrorStatusPage        adw.StatusPage
+			contactsErrorRefreshButton     gtk.Button
+			contactsErrorCopyDetailsButton gtk.Button
 
-			contactsViewPageTitle              = b.GetObject("contacts_view_page_title").Cast().(*adw.WindowTitle)
-			contactsViewStack                  = b.GetObject("contacts_view_stack").Cast().(*gtk.Stack)
-			contactsViewErrorStatusPage        = b.GetObject("contacts_view_error_status_page").Cast().(*adw.StatusPage)
-			contactsViewErrorRefreshButton     = b.GetObject("contacts_view_error_refresh_button").Cast().(*gtk.Button)
-			contactsViewErrorCopyDetailsButton = b.GetObject("contacts_view_error_copy_details").Cast().(*gtk.Button)
+			contactsViewPageTitle              adw.WindowTitle
+			contactsViewStack                  gtk.Stack
+			contactsViewErrorStatusPage        adw.StatusPage
+			contactsViewErrorRefreshButton     gtk.Button
+			contactsViewErrorCopyDetailsButton gtk.Button
 
-			contactsViewEditButton   = b.GetObject("contacts_view_edit_button").Cast().(*gtk.Button)
-			contactsViewDeleteButton = b.GetObject("contacts_view_delete_button").Cast().(*gtk.Button)
+			contactsViewEditButton   gtk.Button
+			contactsViewDeleteButton gtk.Button
 
-			contactsViewOptionalFieldsPreferencesGroup = b.GetObject("contacts_view_optional_fields").Cast().(*adw.PreferencesGroup)
+			contactsViewOptionalFieldsPreferencesGroup adw.PreferencesGroup
 
-			contactsViewBirthdayRow = b.GetObject("contacts_view_birthday").Cast().(*adw.ActionRow)
-			contactsViewAddressRow  = b.GetObject("contacts_view_address").Cast().(*adw.ActionRow)
-			contactsViewNotesRow    = b.GetObject("contacts_view_notes").Cast().(*adw.ActionRow)
+			contactsViewBirthdayRow adw.ActionRow
+			contactsViewAddressRow  adw.ActionRow
+			contactsViewNotesRow    adw.ActionRow
 
-			contactsViewDebtsListBox      = b.GetObject("contacts_view_debts").Cast().(*gtk.ListBox)
-			contactsViewActivitiesListBox = b.GetObject("contacts_view_activities").Cast().(*gtk.ListBox)
+			contactsViewDebtsListBox      gtk.ListBox
+			contactsViewActivitiesListBox gtk.ListBox
 
-			activitiesViewPageTitle              = b.GetObject("activities_view_page_title").Cast().(*adw.WindowTitle)
-			activitiesViewStack                  = b.GetObject("activities_view_stack").Cast().(*gtk.Stack)
-			activitiesViewErrorStatusPage        = b.GetObject("activities_view_error_status_page").Cast().(*adw.StatusPage)
-			activitiesViewErrorRefreshButton     = b.GetObject("activities_view_error_refresh_button").Cast().(*gtk.Button)
-			activitiesViewErrorCopyDetailsButton = b.GetObject("activities_view_error_copy_details").Cast().(*gtk.Button)
+			activitiesViewPageTitle              adw.WindowTitle
+			activitiesViewStack                  gtk.Stack
+			activitiesViewErrorStatusPage        adw.StatusPage
+			activitiesViewErrorRefreshButton     gtk.Button
+			activitiesViewErrorCopyDetailsButton gtk.Button
 
-			activitiesViewEditButton   = b.GetObject("activities_view_edit_button").Cast().(*gtk.Button)
-			activitiesViewDeleteButton = b.GetObject("activities_view_delete_button").Cast().(*gtk.Button)
+			activitiesViewEditButton   gtk.Button
+			activitiesViewDeleteButton gtk.Button
 
-			activitiesViewPageBodyWebView = b.GetObject("activities_view_body").Cast().(*gtk.Label)
+			activitiesViewPageBodyWebView gtk.Label
 
-			activitiesEditPageTitle              = b.GetObject("activities_edit_page_title").Cast().(*adw.WindowTitle)
-			activitiesEditStack                  = b.GetObject("activities_edit_stack").Cast().(*gtk.Stack)
-			activitiesEditErrorStatusPage        = b.GetObject("activities_edit_error_status_page").Cast().(*adw.StatusPage)
-			activitiesEditErrorRefreshButton     = b.GetObject("activities_edit_error_refresh_button").Cast().(*gtk.Button)
-			activitiesEditErrorCopyDetailsButton = b.GetObject("activities_edit_error_copy_details").Cast().(*gtk.Button)
+			activitiesEditPageTitle              adw.WindowTitle
+			activitiesEditStack                  gtk.Stack
+			activitiesEditErrorStatusPage        adw.StatusPage
+			activitiesEditErrorRefreshButton     gtk.Button
+			activitiesEditErrorCopyDetailsButton gtk.Button
 
-			activitiesEditPageSaveButton  = b.GetObject("activities_edit_save_button").Cast().(*gtk.Button)
-			activitiesEditPageSaveSpinner = b.GetObject("activities_edit_save_spinner").Cast().(*adw.Spinner)
+			activitiesEditPageSaveButton  gtk.Button
+			activitiesEditPageSaveSpinner adw.Spinner
 
-			activitiesEditPageNameInput           = b.GetObject("activities_edit_page_name_input").Cast().(*adw.EntryRow)
-			activitiesEditPageDateInput           = b.GetObject("activities_edit_page_date_input").Cast().(*adw.EntryRow)
-			activitiesEditPageDescriptionExpander = b.GetObject("activities_edit_page_description_expander").Cast().(*adw.ExpanderRow)
-			activitiesEditPageDescriptionInput    = b.GetObject("activities_edit_page_description_input").Cast().(*gtk.TextView)
+			activitiesEditPageNameInput           adw.EntryRow
+			activitiesEditPageDateInput           adw.EntryRow
+			activitiesEditPageDescriptionExpander adw.ExpanderRow
+			activitiesEditPageDescriptionInput    gtk.TextView
 
-			activitiesEditPageDateWarningButton = b.GetObject("activities_edit_page_date_warning_button").Cast().(*gtk.MenuButton)
+			activitiesEditPageDateWarningButton gtk.MenuButton
 
-			activitiesEditPagePopoverLabel = b.GetObject("activities_edit_page_date_popover_label").Cast().(*gtk.Label)
+			activitiesEditPagePopoverLabel gtk.Label
 
-			debtsEditPageTitle              = b.GetObject("debts_edit_page_title").Cast().(*adw.WindowTitle)
-			debtsEditStack                  = b.GetObject("debts_edit_stack").Cast().(*gtk.Stack)
-			debtsEditErrorStatusPage        = b.GetObject("debts_edit_error_status_page").Cast().(*adw.StatusPage)
-			debtsEditErrorRefreshButton     = b.GetObject("debts_edit_error_refresh_button").Cast().(*gtk.Button)
-			debtsEditErrorCopyDetailsButton = b.GetObject("debts_edit_error_copy_details").Cast().(*gtk.Button)
+			debtsEditPageTitle              adw.WindowTitle
+			debtsEditStack                  gtk.Stack
+			debtsEditErrorStatusPage        adw.StatusPage
+			debtsEditErrorRefreshButton     gtk.Button
+			debtsEditErrorCopyDetailsButton gtk.Button
 
-			debtsEditPageSaveButton  = b.GetObject("debts_edit_save_button").Cast().(*gtk.Button)
-			debtsEditPageSaveSpinner = b.GetObject("debts_edit_save_spinner").Cast().(*adw.Spinner)
+			debtsEditPageSaveButton  gtk.Button
+			debtsEditPageSaveSpinner adw.Spinner
 
-			debtsEditPageYouOweRadio         = b.GetObject("debts_edit_page_you_owe_radio").Cast().(*gtk.CheckButton)
-			debtsEditPageAmountInput         = b.GetObject("debts_edit_page_amount_input").Cast().(*adw.SpinRow)
-			debtsEditPageCurrencyInput       = b.GetObject("debts_edit_page_currency_input").Cast().(*adw.EntryRow)
-			debtsEditPageDescriptionExpander = b.GetObject("debts_edit_page_description_expander").Cast().(*adw.ExpanderRow)
-			debtsEditPageDescriptionInput    = b.GetObject("debts_edit_page_description_input").Cast().(*gtk.TextView)
+			debtsEditPageYouOweRadio         gtk.CheckButton
+			debtsEditPageAmountInput         adw.SpinRow
+			debtsEditPageCurrencyInput       adw.EntryRow
+			debtsEditPageDescriptionExpander adw.ExpanderRow
+			debtsEditPageDescriptionInput    gtk.TextView
 
-			debtsEditPageYouOweActionRow  = b.GetObject("debts_edit_page_debt_type_you_owe_row").Cast().(*adw.ActionRow)
-			debtsEditPageTheyOweActionRow = b.GetObject("debts_edit_page_debt_type_they_owe_row").Cast().(*adw.ActionRow)
+			debtsEditPageYouOweActionRow  adw.ActionRow
+			debtsEditPageTheyOweActionRow adw.ActionRow
 
-			contactsEditPageTitle              = b.GetObject("contacts_edit_page_title").Cast().(*adw.WindowTitle)
-			contactsEditStack                  = b.GetObject("contacts_edit_stack").Cast().(*gtk.Stack)
-			contactsEditErrorStatusPage        = b.GetObject("contacts_edit_error_status_page").Cast().(*adw.StatusPage)
-			contactsEditErrorRefreshButton     = b.GetObject("contacts_edit_error_refresh_button").Cast().(*gtk.Button)
-			contactsEditErrorCopyDetailsButton = b.GetObject("contacts_edit_error_copy_details").Cast().(*gtk.Button)
+			contactsEditPageTitle              adw.WindowTitle
+			contactsEditStack                  gtk.Stack
+			contactsEditErrorStatusPage        adw.StatusPage
+			contactsEditErrorRefreshButton     gtk.Button
+			contactsEditErrorCopyDetailsButton gtk.Button
 
-			contactsEditPageSaveButton  = b.GetObject("contacts_edit_save_button").Cast().(*gtk.Button)
-			contactsEditPageSaveSpinner = b.GetObject("contacts_edit_save_spinner").Cast().(*adw.Spinner)
+			contactsEditPageSaveButton  gtk.Button
+			contactsEditPageSaveSpinner adw.Spinner
 
-			contactsEditPageFirstNameInput = b.GetObject("contacts_edit_page_first_name_input").Cast().(*adw.EntryRow)
-			contactsEditPageLastNameInput  = b.GetObject("contacts_edit_page_last_name_input").Cast().(*adw.EntryRow)
-			contactsEditPageNicknameInput  = b.GetObject("contacts_edit_page_nickname_input").Cast().(*adw.EntryRow)
-			contactsEditPageEmailInput     = b.GetObject("contacts_edit_page_email_input").Cast().(*adw.EntryRow)
-			contactsEditPagePronounsInput  = b.GetObject("contacts_edit_page_pronouns_input").Cast().(*adw.EntryRow)
+			contactsEditPageFirstNameInput adw.EntryRow
+			contactsEditPageLastNameInput  adw.EntryRow
+			contactsEditPageNicknameInput  adw.EntryRow
+			contactsEditPageEmailInput     adw.EntryRow
+			contactsEditPagePronounsInput  adw.EntryRow
 
-			contactsEditPageBirthdayInput   = b.GetObject("contacts_edit_page_birthday_input").Cast().(*adw.EntryRow)
-			contactsEditPageAddressExpander = b.GetObject("contacts_edit_page_address_expander").Cast().(*adw.ExpanderRow)
-			contactsEditPageAddressInput    = b.GetObject("contacts_edit_page_address_input").Cast().(*gtk.TextView)
-			contactsEditPageNotesExpander   = b.GetObject("contacts_edit_page_notes_expander").Cast().(*adw.ExpanderRow)
-			contactsEditPageNotesInput      = b.GetObject("contacts_edit_page_notes_input").Cast().(*gtk.TextView)
+			contactsEditPageBirthdayInput   adw.EntryRow
+			contactsEditPageAddressExpander adw.ExpanderRow
+			contactsEditPageAddressInput    gtk.TextView
+			contactsEditPageNotesExpander   adw.ExpanderRow
+			contactsEditPageNotesInput      gtk.TextView
 
-			contactsEditPageEmailWarningButton    = b.GetObject("contacts_edit_page_email_warning_button").Cast().(*gtk.MenuButton)
-			contactsEditPageBirthdayWarningButton = b.GetObject("contacts_edit_page_birthday_warning_button").Cast().(*gtk.MenuButton)
+			contactsEditPageEmailWarningButton    gtk.MenuButton
+			contactsEditPageBirthdayWarningButton gtk.MenuButton
 
-			contactsEditPagePopoverLabel = b.GetObject("contacts_edit_page_birthday_popover_label").Cast().(*gtk.Label)
+			contactsEditPagePopoverLabel gtk.Label
 
-			debtsCreateDialog = debtsCreateDialogBuilder.GetObject("debts_create_dialog").Cast().(*adw.Dialog)
+			debtsCreateDialog adw.Dialog
 
-			debtsCreateDialogAddButton  = debtsCreateDialogBuilder.GetObject("debts_create_dialog_add_button").Cast().(*gtk.Button)
-			debtsCreateDialogAddSpinner = debtsCreateDialogBuilder.GetObject("debts_create_dialog_add_spinner").Cast().(*adw.Spinner)
+			debtsCreateDialogAddButton  gtk.Button
+			debtsCreateDialogAddSpinner adw.Spinner
 
-			debtsCreateDialogTitle = debtsCreateDialogBuilder.GetObject("debts_create_dialog_title").Cast().(*adw.WindowTitle)
+			debtsCreateDialogTitle adw.WindowTitle
 
-			debtsCreateDialogYouOweRadio         = debtsCreateDialogBuilder.GetObject("debts_create_dialog_you_owe_radio").Cast().(*gtk.CheckButton)
-			debtsCreateDialogAmountInput         = debtsCreateDialogBuilder.GetObject("debts_create_dialog_amount_input").Cast().(*adw.SpinRow)
-			debtsCreateDialogCurrencyInput       = debtsCreateDialogBuilder.GetObject("debts_create_dialog_currency_input").Cast().(*adw.EntryRow)
-			debtsCreateDialogDescriptionExpander = debtsCreateDialogBuilder.GetObject("debts_create_dialog_description_expander").Cast().(*adw.ExpanderRow)
-			debtsCreateDialogDescriptionInput    = debtsCreateDialogBuilder.GetObject("debts_create_dialog_description_input").Cast().(*gtk.TextView)
+			debtsCreateDialogYouOweRadio         gtk.CheckButton
+			debtsCreateDialogAmountInput         adw.SpinRow
+			debtsCreateDialogCurrencyInput       adw.EntryRow
+			debtsCreateDialogDescriptionExpander adw.ExpanderRow
+			debtsCreateDialogDescriptionInput    gtk.TextView
 
-			debtsCreateDialogYouOweActionRow  = debtsCreateDialogBuilder.GetObject("debts_create_dialog_debt_type_you_owe_row").Cast().(*adw.ActionRow)
-			debtsCreateDialogTheyOweActionRow = debtsCreateDialogBuilder.GetObject("debts_create_dialog_debt_type_they_owe_row").Cast().(*adw.ActionRow)
+			debtsCreateDialogYouOweActionRow  adw.ActionRow
+			debtsCreateDialogTheyOweActionRow adw.ActionRow
 
-			activitiesCreateDialog = activitiesCreateDialogBuilder.GetObject("activities_create_dialog").Cast().(*adw.Dialog)
+			activitiesCreateDialog adw.Dialog
 
-			activitiesCreateDialogAddButton  = activitiesCreateDialogBuilder.GetObject("activities_create_dialog_add_button").Cast().(*gtk.Button)
-			activitiesCreateDialogAddSpinner = activitiesCreateDialogBuilder.GetObject("activities_create_dialog_add_spinner").Cast().(*adw.Spinner)
+			activitiesCreateDialogAddButton  gtk.Button
+			activitiesCreateDialogAddSpinner adw.Spinner
 
-			activitiesCreateDialogTitle = activitiesCreateDialogBuilder.GetObject("activities_create_dialog_title").Cast().(*adw.WindowTitle)
+			activitiesCreateDialogTitle adw.WindowTitle
 
-			activitiesCreateDialogNameInput           = activitiesCreateDialogBuilder.GetObject("activities_create_dialog_name_input").Cast().(*adw.EntryRow)
-			activitiesCreateDialogDateInput           = activitiesCreateDialogBuilder.GetObject("activities_create_dialog_date_input").Cast().(*adw.EntryRow)
-			activitiesCreateDialogDescriptionExpander = activitiesCreateDialogBuilder.GetObject("activities_create_dialog_description_expander").Cast().(*adw.ExpanderRow)
-			activitiesCreateDialogDescriptionInput    = activitiesCreateDialogBuilder.GetObject("activities_create_dialog_description_input").Cast().(*gtk.TextView)
+			activitiesCreateDialogNameInput           adw.EntryRow
+			activitiesCreateDialogDateInput           adw.EntryRow
+			activitiesCreateDialogDescriptionExpander adw.ExpanderRow
+			activitiesCreateDialogDescriptionInput    gtk.TextView
 
-			activitiesCreateDialogDateWarningButton = activitiesCreateDialogBuilder.GetObject("activities_create_dialog_date_warning_button").Cast().(*gtk.MenuButton)
+			activitiesCreateDialogDateWarningButton gtk.MenuButton
 
-			activitiesCreateDialogPopoverLabel = activitiesCreateDialogBuilder.GetObject("activities_create_dialog_date_popover_label").Cast().(*gtk.Label)
+			activitiesCreateDialogPopoverLabel gtk.Label
 
-			journalEntriesStack       = b.GetObject("journal_entries_stack").Cast().(*gtk.Stack)
-			journalEntriesListBox     = b.GetObject("journal_entries_list").Cast().(*gtk.ListBox)
-			journalEntriesSearchEntry = b.GetObject("journal_entries_searchentry").Cast().(*gtk.SearchEntry)
+			journalEntriesStack       gtk.Stack
+			journalEntriesListBox     gtk.ListBox
+			journalEntriesSearchEntry gtk.SearchEntry
 
-			journalEntriesAddButton    = b.GetObject("journal_entries_add_button").Cast().(*gtk.Button)
-			journalEntriesSearchButton = b.GetObject("journal_entries_search_button").Cast().(*gtk.ToggleButton)
+			journalEntriesAddButton    gtk.Button
+			journalEntriesSearchButton gtk.ToggleButton
 
-			journalEntriesEmptyAddButton = b.GetObject("journal_entries_empty_add_button").Cast().(*gtk.Button)
+			journalEntriesEmptyAddButton gtk.Button
 
-			journalEntriesErrorStatusPage        = b.GetObject("journal_entries_error_status_page").Cast().(*adw.StatusPage)
-			journalEntriesErrorRefreshButton     = b.GetObject("journal_entries_error_refresh_button").Cast().(*gtk.Button)
-			journalEntriesErrorCopyDetailsButton = b.GetObject("journal_entries_error_copy_details").Cast().(*gtk.Button)
+			journalEntriesErrorStatusPage        adw.StatusPage
+			journalEntriesErrorRefreshButton     gtk.Button
+			journalEntriesErrorCopyDetailsButton gtk.Button
 
-			journalEntriesCreateDialog = journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog").Cast().(*adw.Dialog)
+			journalEntriesCreateDialog adw.Dialog
 
-			journalEntriesCreateDialogAddButton  = journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_add_button").Cast().(*gtk.Button)
-			journalEntriesCreateDialogAddSpinner = journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_add_spinner").Cast().(*adw.Spinner)
+			journalEntriesCreateDialogAddButton  gtk.Button
+			journalEntriesCreateDialogAddSpinner adw.Spinner
 
-			journalEntriesCreateDialogRatingToggleGroup = journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_rating").Cast().(*adw.ToggleGroup)
-			journalEntriesCreateDialogTitleInput        = journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_title_input").Cast().(*adw.EntryRow)
-			journalEntriesCreateDialogBodyExpander      = journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_body_expander").Cast().(*adw.ExpanderRow)
-			journalEntriesCreateDialogBodyInput         = journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_body_input").Cast().(*gtk.TextView)
+			journalEntriesCreateDialogRatingToggleGroup adw.ToggleGroup
+			journalEntriesCreateDialogTitleInput        adw.EntryRow
+			journalEntriesCreateDialogBodyExpander      adw.ExpanderRow
+			journalEntriesCreateDialogBodyInput         gtk.TextView
 
-			journalEntriesViewPageTitle              = b.GetObject("journal_entries_view_page_title").Cast().(*adw.WindowTitle)
-			journalEntriesViewStack                  = b.GetObject("journal_entries_view_stack").Cast().(*gtk.Stack)
-			journalEntriesViewErrorStatusPage        = b.GetObject("journal_entries_view_error_status_page").Cast().(*adw.StatusPage)
-			journalEntriesViewErrorRefreshButton     = b.GetObject("journal_entries_view_error_refresh_button").Cast().(*gtk.Button)
-			journalEntriesViewErrorCopyDetailsButton = b.GetObject("journal_entries_view_error_copy_details").Cast().(*gtk.Button)
+			journalEntriesViewPageTitle              adw.WindowTitle
+			journalEntriesViewStack                  gtk.Stack
+			journalEntriesViewErrorStatusPage        adw.StatusPage
+			journalEntriesViewErrorRefreshButton     gtk.Button
+			journalEntriesViewErrorCopyDetailsButton gtk.Button
 
-			journalEntriesViewEditButton   = b.GetObject("journal_entries_view_edit_button").Cast().(*gtk.Button)
-			journalEntriesViewDeleteButton = b.GetObject("journal_entries_view_delete_button").Cast().(*gtk.Button)
+			journalEntriesViewEditButton   gtk.Button
+			journalEntriesViewDeleteButton gtk.Button
 
-			journalEntriesViewPageBodyWebView = b.GetObject("journal_entries_view_body").Cast().(*gtk.Label)
+			journalEntriesViewPageBodyWebView gtk.Label
 
-			journalEntriesEditPageTitle              = b.GetObject("journal_entries_edit_page_title").Cast().(*adw.WindowTitle)
-			journalEntriesEditStack                  = b.GetObject("journal_entries_edit_stack").Cast().(*gtk.Stack)
-			journalEntriesEditErrorStatusPage        = b.GetObject("journal_entries_edit_error_status_page").Cast().(*adw.StatusPage)
-			journalEntriesEditErrorRefreshButton     = b.GetObject("journal_entries_edit_error_refresh_button").Cast().(*gtk.Button)
-			journalEntriesEditErrorCopyDetailsButton = b.GetObject("journal_entries_edit_error_copy_details").Cast().(*gtk.Button)
+			journalEntriesEditPageTitle              adw.WindowTitle
+			journalEntriesEditStack                  gtk.Stack
+			journalEntriesEditErrorStatusPage        adw.StatusPage
+			journalEntriesEditErrorRefreshButton     gtk.Button
+			journalEntriesEditErrorCopyDetailsButton gtk.Button
 
-			journalEntriesEditPageSaveButton  = b.GetObject("journal_entries_edit_save_button").Cast().(*gtk.Button)
-			journalEntriesEditPageSaveSpinner = b.GetObject("journal_entries_edit_save_spinner").Cast().(*adw.Spinner)
+			journalEntriesEditPageSaveButton  gtk.Button
+			journalEntriesEditPageSaveSpinner adw.Spinner
 
-			journalEntriesEditPageRatingToggleGroup = b.GetObject("journal_entries_edit_page_rating").Cast().(*adw.ToggleGroup)
-			journalEntriesEditPageTitleInput        = b.GetObject("journal_entries_edit_page_title_input").Cast().(*adw.EntryRow)
-			journalEntriesEditPageBodyExpander      = b.GetObject("journal_entries_edit_page_body_expander").Cast().(*adw.ExpanderRow)
-			journalEntriesEditPageBodyInput         = b.GetObject("journal_entries_edit_page_body_input").Cast().(*gtk.TextView)
+			journalEntriesEditPageRatingToggleGroup adw.ToggleGroup
+			journalEntriesEditPageTitleInput        adw.EntryRow
+			journalEntriesEditPageBodyExpander      adw.ExpanderRow
+			journalEntriesEditPageBodyInput         gtk.TextView
 		)
 
-		settings.Bind(resources.SettingVerboseKey, preferencesDialogVerboseSwitch.Object, "active", gio.GSettingsBindDefaultValue)
+		preferencesDialogBuilder.GetObject("preferences_dialog").Cast(&preferencesDialog)
+		preferencesDialogBuilder.GetObject("preferences_dialog_verbose_switch").Cast(&preferencesDialogVerboseSwitch)
+		helpOverlayBuilder.GetObject("help_overlay").Cast(&helpOverlayShortcutsWindow)
+		b.GetObject("welcome_get_started_button").Cast(&welcomeGetStartedButton)
+		b.GetObject("welcome_get_started_spinner").Cast(&welcomeGetStartedSpinner)
+		b.GetObject("config_server_url_input").Cast(&configServerURLInput)
+		b.GetObject("config_server_url_continue_button").Cast(&configServerURLContinueButton)
+		b.GetObject("config_server_url_continue_spinner").Cast(&configServerURLContinueSpinner)
+		b.GetObject("preview_login_button").Cast(&previewLoginButton)
+		b.GetObject("preview_login_spinner").Cast(&previewLoginSpinner)
+		b.GetObject("preview_contacts_count_label").Cast(&previewContactsCountLabel)
+		b.GetObject("preview_contacts_count_spinner").Cast(&previewContactsCountSpinner)
+		b.GetObject("preview_journal_entries_count_label").Cast(&previewJournalEntriesCountLabel)
+		b.GetObject("preview_journal_entries_count_spinner").Cast(&previewJournalEntriesCountSpinner)
+		b.GetObject("register_register_button").Cast(&registerRegisterButton)
+		b.GetObject("config_initial_access_token_input").Cast(&configInitialAccessTokenInput)
+		b.GetObject("config_initial_access_token_login_button").Cast(&configInitialAccessTokenLoginButton)
+		b.GetObject("config_initial_access_token_login_spinner").Cast(&configInitialAccessTokenLoginSpinner)
+		b.GetObject("exchange_login_cancel_button").Cast(&exchangeLoginCancelButton)
+		b.GetObject("exchange_logout_cancel_button").Cast(&exchangeLogoutCancelButton)
+		b.GetObject("home_split_view").Cast(&homeSplitView)
+		b.GetObject("home_navigation").Cast(&homeNavigation)
+		b.GetObject("home_sidebar_listbox").Cast(&homeSidebarListbox)
+		b.GetObject("home_content_page").Cast(&homeContentPage)
+		b.GetObject("home_user_menu_button").Cast(&homeUserMenuButton)
+		b.GetObject("home_user_menu_avatar").Cast(&homeUserMenuAvatar)
+		b.GetObject("home_user_menu_spinner").Cast(&homeUserMenuSpinner)
+		b.GetObject("home_hamburger_menu_button").Cast(&homeHamburgerMenuButton)
+		b.GetObject("home_hamburger_menu_icon").Cast(&homeHamburgerMenuIcon)
+		b.GetObject("home_hamburger_menu_spinner").Cast(&homeHamburgerMenuSpinner)
+		b.GetObject("home_sidebar_contacts_count_label").Cast(&homeSidebarContactsCountLabel)
+		b.GetObject("home_sidebar_contacts_count_spinner").Cast(&homeSidebarContactsCountSpinner)
+		b.GetObject("home_sidebar_journal_entries_count_label").Cast(&homeSidebarJournalEntriesCountLabel)
+		b.GetObject("home_sidebar_journal_entries_count_spinner").Cast(&homeSidebarJournalEntriesCountSpinner)
+		b.GetObject("contacts_stack").Cast(&contactsStack)
+		b.GetObject("contacts_list").Cast(&contactsListBox)
+		b.GetObject("contacts_searchentry").Cast(&contactsSearchEntry)
+		b.GetObject("contacts_add_button").Cast(&contactsAddButton)
+		b.GetObject("contacts_search_button").Cast(&contactsSearchButton)
+		b.GetObject("contacts_empty_add_button").Cast(&contactsEmptyAddButton)
+		contactsCreateDialogBuilder.GetObject("contacts_create_dialog").Cast(&contactsCreateDialog)
+		contactsCreateDialogBuilder.GetObject("contacts_create_dialog_add_button").Cast(&contactsCreateDialogAddButton)
+		contactsCreateDialogBuilder.GetObject("contacts_create_dialog_add_spinner").Cast(&contactsCreateDialogAddSpinner)
+		contactsCreateDialogBuilder.GetObject("contacts_create_dialog_first_name_input").Cast(&contactsCreateDialogFirstNameInput)
+		contactsCreateDialogBuilder.GetObject("contacts_create_dialog_last_name_input").Cast(&contactsCreateDialogLastNameInput)
+		contactsCreateDialogBuilder.GetObject("contacts_create_dialog_nickname_input").Cast(&contactsCreateDialogNicknameInput)
+		contactsCreateDialogBuilder.GetObject("contacts_create_dialog_email_input").Cast(&contactsCreateDialogEmailInput)
+		contactsCreateDialogBuilder.GetObject("contacts_create_dialog_pronouns_input").Cast(&contactsCreateDialogPronounsInput)
+		contactsCreateDialogBuilder.GetObject("contacts_create_dialog_email_warning_button").Cast(&contactsCreateDialogEmailWarningButton)
+		b.GetObject("contacts_error_status_page").Cast(&contactsErrorStatusPage)
+		b.GetObject("contacts_error_refresh_button").Cast(&contactsErrorRefreshButton)
+		b.GetObject("contacts_error_copy_details").Cast(&contactsErrorCopyDetailsButton)
+		b.GetObject("contacts_view_page_title").Cast(&contactsViewPageTitle)
+		b.GetObject("contacts_view_stack").Cast(&contactsViewStack)
+		b.GetObject("contacts_view_error_status_page").Cast(&contactsViewErrorStatusPage)
+		b.GetObject("contacts_view_error_refresh_button").Cast(&contactsViewErrorRefreshButton)
+		b.GetObject("contacts_view_error_copy_details").Cast(&contactsViewErrorCopyDetailsButton)
+		b.GetObject("contacts_view_edit_button").Cast(&contactsViewEditButton)
+		b.GetObject("contacts_view_delete_button").Cast(&contactsViewDeleteButton)
+		b.GetObject("contacts_view_optional_fields").Cast(&contactsViewOptionalFieldsPreferencesGroup)
+		b.GetObject("contacts_view_birthday").Cast(&contactsViewBirthdayRow)
+		b.GetObject("contacts_view_address").Cast(&contactsViewAddressRow)
+		b.GetObject("contacts_view_notes").Cast(&contactsViewNotesRow)
+		b.GetObject("contacts_view_debts").Cast(&contactsViewDebtsListBox)
+		b.GetObject("contacts_view_activities").Cast(&contactsViewActivitiesListBox)
+		b.GetObject("activities_view_page_title").Cast(&activitiesViewPageTitle)
+		b.GetObject("activities_view_stack").Cast(&activitiesViewStack)
+		b.GetObject("activities_view_error_status_page").Cast(&activitiesViewErrorStatusPage)
+		b.GetObject("activities_view_error_refresh_button").Cast(&activitiesViewErrorRefreshButton)
+		b.GetObject("activities_view_error_copy_details").Cast(&activitiesViewErrorCopyDetailsButton)
+		b.GetObject("activities_view_edit_button").Cast(&activitiesViewEditButton)
+		b.GetObject("activities_view_delete_button").Cast(&activitiesViewDeleteButton)
+		b.GetObject("activities_view_body").Cast(&activitiesViewPageBodyWebView)
+		b.GetObject("activities_edit_page_title").Cast(&activitiesEditPageTitle)
+		b.GetObject("activities_edit_stack").Cast(&activitiesEditStack)
+		b.GetObject("activities_edit_error_status_page").Cast(&activitiesEditErrorStatusPage)
+		b.GetObject("activities_edit_error_refresh_button").Cast(&activitiesEditErrorRefreshButton)
+		b.GetObject("activities_edit_error_copy_details").Cast(&activitiesEditErrorCopyDetailsButton)
+		b.GetObject("activities_edit_save_button").Cast(&activitiesEditPageSaveButton)
+		b.GetObject("activities_edit_save_spinner").Cast(&activitiesEditPageSaveSpinner)
+		b.GetObject("activities_edit_page_name_input").Cast(&activitiesEditPageNameInput)
+		b.GetObject("activities_edit_page_date_input").Cast(&activitiesEditPageDateInput)
+		b.GetObject("activities_edit_page_description_expander").Cast(&activitiesEditPageDescriptionExpander)
+		b.GetObject("activities_edit_page_description_input").Cast(&activitiesEditPageDescriptionInput)
+		b.GetObject("activities_edit_page_date_warning_button").Cast(&activitiesEditPageDateWarningButton)
+		b.GetObject("activities_edit_page_date_popover_label").Cast(&activitiesEditPagePopoverLabel)
+		b.GetObject("debts_edit_page_title").Cast(&debtsEditPageTitle)
+		b.GetObject("debts_edit_stack").Cast(&debtsEditStack)
+		b.GetObject("debts_edit_error_status_page").Cast(&debtsEditErrorStatusPage)
+		b.GetObject("debts_edit_error_refresh_button").Cast(&debtsEditErrorRefreshButton)
+		b.GetObject("debts_edit_error_copy_details").Cast(&debtsEditErrorCopyDetailsButton)
+		b.GetObject("debts_edit_save_button").Cast(&debtsEditPageSaveButton)
+		b.GetObject("debts_edit_save_spinner").Cast(&debtsEditPageSaveSpinner)
+		b.GetObject("debts_edit_page_you_owe_radio").Cast(&debtsEditPageYouOweRadio)
+		b.GetObject("debts_edit_page_amount_input").Cast(&debtsEditPageAmountInput)
+		b.GetObject("debts_edit_page_currency_input").Cast(&debtsEditPageCurrencyInput)
+		b.GetObject("debts_edit_page_description_expander").Cast(&debtsEditPageDescriptionExpander)
+		b.GetObject("debts_edit_page_description_input").Cast(&debtsEditPageDescriptionInput)
+		b.GetObject("debts_edit_page_debt_type_you_owe_row").Cast(&debtsEditPageYouOweActionRow)
+		b.GetObject("debts_edit_page_debt_type_they_owe_row").Cast(&debtsEditPageTheyOweActionRow)
+		b.GetObject("contacts_edit_page_title").Cast(&contactsEditPageTitle)
+		b.GetObject("contacts_edit_stack").Cast(&contactsEditStack)
+		b.GetObject("contacts_edit_error_status_page").Cast(&contactsEditErrorStatusPage)
+		b.GetObject("contacts_edit_error_refresh_button").Cast(&contactsEditErrorRefreshButton)
+		b.GetObject("contacts_edit_error_copy_details").Cast(&contactsEditErrorCopyDetailsButton)
+		b.GetObject("contacts_edit_save_button").Cast(&contactsEditPageSaveButton)
+		b.GetObject("contacts_edit_save_spinner").Cast(&contactsEditPageSaveSpinner)
+		b.GetObject("contacts_edit_page_first_name_input").Cast(&contactsEditPageFirstNameInput)
+		b.GetObject("contacts_edit_page_last_name_input").Cast(&contactsEditPageLastNameInput)
+		b.GetObject("contacts_edit_page_nickname_input").Cast(&contactsEditPageNicknameInput)
+		b.GetObject("contacts_edit_page_email_input").Cast(&contactsEditPageEmailInput)
+		b.GetObject("contacts_edit_page_pronouns_input").Cast(&contactsEditPagePronounsInput)
+		b.GetObject("contacts_edit_page_birthday_input").Cast(&contactsEditPageBirthdayInput)
+		b.GetObject("contacts_edit_page_address_expander").Cast(&contactsEditPageAddressExpander)
+		b.GetObject("contacts_edit_page_address_input").Cast(&contactsEditPageAddressInput)
+		b.GetObject("contacts_edit_page_notes_expander").Cast(&contactsEditPageNotesExpander)
+		b.GetObject("contacts_edit_page_notes_input").Cast(&contactsEditPageNotesInput)
+		b.GetObject("contacts_edit_page_email_warning_button").Cast(&contactsEditPageEmailWarningButton)
+		b.GetObject("contacts_edit_page_birthday_warning_button").Cast(&contactsEditPageBirthdayWarningButton)
+		b.GetObject("contacts_edit_page_birthday_popover_label").Cast(&contactsEditPagePopoverLabel)
+		debtsCreateDialogBuilder.GetObject("debts_create_dialog").Cast(&debtsCreateDialog)
+		debtsCreateDialogBuilder.GetObject("debts_create_dialog_add_button").Cast(&debtsCreateDialogAddButton)
+		debtsCreateDialogBuilder.GetObject("debts_create_dialog_add_spinner").Cast(&debtsCreateDialogAddSpinner)
+		debtsCreateDialogBuilder.GetObject("debts_create_dialog_title").Cast(&debtsCreateDialogTitle)
+		debtsCreateDialogBuilder.GetObject("debts_create_dialog_you_owe_radio").Cast(&debtsCreateDialogYouOweRadio)
+		debtsCreateDialogBuilder.GetObject("debts_create_dialog_amount_input").Cast(&debtsCreateDialogAmountInput)
+		debtsCreateDialogBuilder.GetObject("debts_create_dialog_currency_input").Cast(&debtsCreateDialogCurrencyInput)
+		debtsCreateDialogBuilder.GetObject("debts_create_dialog_description_expander").Cast(&debtsCreateDialogDescriptionExpander)
+		debtsCreateDialogBuilder.GetObject("debts_create_dialog_description_input").Cast(&debtsCreateDialogDescriptionInput)
+		debtsCreateDialogBuilder.GetObject("debts_create_dialog_debt_type_you_owe_row").Cast(&debtsCreateDialogYouOweActionRow)
+		debtsCreateDialogBuilder.GetObject("debts_create_dialog_debt_type_they_owe_row").Cast(&debtsCreateDialogTheyOweActionRow)
+		activitiesCreateDialogBuilder.GetObject("activities_create_dialog").Cast(&activitiesCreateDialog)
+		activitiesCreateDialogBuilder.GetObject("activities_create_dialog_add_button").Cast(&activitiesCreateDialogAddButton)
+		activitiesCreateDialogBuilder.GetObject("activities_create_dialog_add_spinner").Cast(&activitiesCreateDialogAddSpinner)
+		activitiesCreateDialogBuilder.GetObject("activities_create_dialog_title").Cast(&activitiesCreateDialogTitle)
+		activitiesCreateDialogBuilder.GetObject("activities_create_dialog_name_input").Cast(&activitiesCreateDialogNameInput)
+		activitiesCreateDialogBuilder.GetObject("activities_create_dialog_date_input").Cast(&activitiesCreateDialogDateInput)
+		activitiesCreateDialogBuilder.GetObject("activities_create_dialog_description_expander").Cast(&activitiesCreateDialogDescriptionExpander)
+		activitiesCreateDialogBuilder.GetObject("activities_create_dialog_description_input").Cast(&activitiesCreateDialogDescriptionInput)
+		activitiesCreateDialogBuilder.GetObject("activities_create_dialog_date_warning_button").Cast(&activitiesCreateDialogDateWarningButton)
+		activitiesCreateDialogBuilder.GetObject("activities_create_dialog_date_popover_label").Cast(&activitiesCreateDialogPopoverLabel)
+		b.GetObject("journal_entries_stack").Cast(&journalEntriesStack)
+		b.GetObject("journal_entries_list").Cast(&journalEntriesListBox)
+		b.GetObject("journal_entries_searchentry").Cast(&journalEntriesSearchEntry)
+		b.GetObject("journal_entries_add_button").Cast(&journalEntriesAddButton)
+		b.GetObject("journal_entries_search_button").Cast(&journalEntriesSearchButton)
+		b.GetObject("journal_entries_empty_add_button").Cast(&journalEntriesEmptyAddButton)
+		b.GetObject("journal_entries_error_status_page").Cast(&journalEntriesErrorStatusPage)
+		b.GetObject("journal_entries_error_refresh_button").Cast(&journalEntriesErrorRefreshButton)
+		b.GetObject("journal_entries_error_copy_details").Cast(&journalEntriesErrorCopyDetailsButton)
+		journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog").Cast(&journalEntriesCreateDialog)
+		journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_add_button").Cast(&journalEntriesCreateDialogAddButton)
+		journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_add_spinner").Cast(&journalEntriesCreateDialogAddSpinner)
+		journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_rating").Cast(&journalEntriesCreateDialogRatingToggleGroup)
+		journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_title_input").Cast(&journalEntriesCreateDialogTitleInput)
+		journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_body_expander").Cast(&journalEntriesCreateDialogBodyExpander)
+		journalEntriesCreateDialogBuilder.GetObject("journal_entries_create_dialog_body_input").Cast(&journalEntriesCreateDialogBodyInput)
+		b.GetObject("journal_entries_view_page_title").Cast(&journalEntriesViewPageTitle)
+		b.GetObject("journal_entries_view_stack").Cast(&journalEntriesViewStack)
+		b.GetObject("journal_entries_view_error_status_page").Cast(&journalEntriesViewErrorStatusPage)
+		b.GetObject("journal_entries_view_error_refresh_button").Cast(&journalEntriesViewErrorRefreshButton)
+		b.GetObject("journal_entries_view_error_copy_details").Cast(&journalEntriesViewErrorCopyDetailsButton)
+		b.GetObject("journal_entries_view_edit_button").Cast(&journalEntriesViewEditButton)
+		b.GetObject("journal_entries_view_delete_button").Cast(&journalEntriesViewDeleteButton)
+		b.GetObject("journal_entries_view_body").Cast(&journalEntriesViewPageBodyWebView)
+		b.GetObject("journal_entries_edit_page_title").Cast(&journalEntriesEditPageTitle)
+		b.GetObject("journal_entries_edit_stack").Cast(&journalEntriesEditStack)
+		b.GetObject("journal_entries_edit_error_status_page").Cast(&journalEntriesEditErrorStatusPage)
+		b.GetObject("journal_entries_edit_error_refresh_button").Cast(&journalEntriesEditErrorRefreshButton)
+		b.GetObject("journal_entries_edit_error_copy_details").Cast(&journalEntriesEditErrorCopyDetailsButton)
+		b.GetObject("journal_entries_edit_save_button").Cast(&journalEntriesEditPageSaveButton)
+		b.GetObject("journal_entries_edit_save_spinner").Cast(&journalEntriesEditPageSaveSpinner)
+		b.GetObject("journal_entries_edit_page_rating").Cast(&journalEntriesEditPageRatingToggleGroup)
+		b.GetObject("journal_entries_edit_page_title_input").Cast(&journalEntriesEditPageTitleInput)
+		b.GetObject("journal_entries_edit_page_body_expander").Cast(&journalEntriesEditPageBodyExpander)
+		b.GetObject("journal_entries_edit_page_body_input").Cast(&journalEntriesEditPageBodyInput)
+
+		settings.Bind(resources.SettingVerboseKey, &preferencesDialogVerboseSwitch.Object, "active", gio.GSettingsBindDefaultValue)
 
 		setValidationSuffixVisible := func(input *adw.EntryRow, suffix *gtk.MenuButton, visible bool) {
-			if visible && suffix.Parent() == nil {
-				input.AddSuffix(suffix)
-				input.AddCSSClass("error")
-			} else if !visible && suffix.Parent() != nil {
-				input.RemoveCSSClass("error")
-				input.Remove(suffix)
+			if visible && suffix.GetParent() == nil {
+				input.AddSuffix(&suffix.Widget)
+				input.AddCssClass("error")
+			} else if !visible && suffix.GetParent() != nil {
+				input.RemoveCssClass("error")
+				input.Remove(&suffix.Widget)
 			}
 		}
 
-		welcomeGetStartedButton.ConnectClicked(func() {
+		onWelcomeGetStartedClicked := func(_ gtk.Button) {
 			nv.PushByTag(resources.PageConfigServerURL)
-		})
+		}
+		welcomeGetStartedButton.ConnectClicked(&onWelcomeGetStartedClicked)
 
-		settings.Bind(resources.SettingServerURLKey, configServerURLInput.Object, "text", gio.GSettingsBindDefaultValue)
+		settings.Bind(resources.SettingServerURLKey, &configServerURLInput.PreferencesRow.ListBoxRow.Widget.InitiallyUnowned.Object, "text", gio.GSettingsBindDefaultValue)
 
 		updateConfigServerURLContinueButtonSensitive := func() {
 			if len(settings.GetString(resources.SettingServerURLKey)) > 0 {
@@ -613,10 +901,10 @@ func main() {
 		}
 
 		parseLocaleDate := func(localeDate string) (time.Time, error) {
-			return time.Parse(glib.NewDateTimeFromGo(time.Date(2006, 1, 2, 0, 0, 0, 0, time.UTC)).Format("%x"), localeDate)
+			return time.Parse(glibDateTimeFromGo(time.Date(2006, 1, 2, 0, 0, 0, 0, time.UTC)).Format("%x"), localeDate)
 		}
 
-		invalidDateLabel := fmt.Sprintf("Not a valid date (format: %v)", glib.NewDateTimeFromGo(time.Date(2006, 1, 2, 0, 0, 0, 0, time.UTC)).Format("%x"))
+		invalidDateLabel := fmt.Sprintf("Not a valid date (format: %v)", glibDateTimeFromGo(time.Date(2006, 1, 2, 0, 0, 0, 0, time.UTC)).Format("%x"))
 		activitiesCreateDialogPopoverLabel.SetLabel(L(invalidDateLabel))
 		activitiesEditPagePopoverLabel.SetLabel(L(invalidDateLabel))
 		contactsEditPagePopoverLabel.SetLabel(L(invalidDateLabel))
@@ -662,12 +950,12 @@ func main() {
 			return nil
 		}
 
-		w.SetHelpOverlay(helpOverlayShortcutsWindow)
+		w.SetHelpOverlay(&helpOverlayShortcutsWindow)
 		a.SetAccelsForAction("win.show-help-overlay", []string{`<Primary>question`})
 
 		openPreferencesAction := gio.NewSimpleAction("openPreferences", nil)
-		openPreferencesAction.ConnectActivate(func(parameter *glib.Variant) {
-			preferencesDialog.Present(w)
+		connectSimpleActionActivate(openPreferencesAction, func() {
+			preferencesDialog.Present(&w.ApplicationWindow.Window.Widget)
 		})
 		a.SetAccelsForAction("app.openPreferences", []string{`<Primary>comma`})
 		a.AddAction(openPreferencesAction)
@@ -678,7 +966,7 @@ func main() {
 			deregisterClientAction.SetEnabled(settings.GetString(resources.SettingOIDCClientIDKey) != "")
 		}
 
-		deregisterClientAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(deregisterClientAction, func() {
 			configServerURLContinueButton.SetSensitive(false)
 			welcomeGetStartedButton.SetSensitive(false)
 			configServerURLContinueSpinner.SetVisible(true)
@@ -701,7 +989,7 @@ func main() {
 		})
 		a.AddAction(deregisterClientAction)
 
-		settings.ConnectChanged(func(key string) {
+		connectSettingsChanged(settings, func(key string) {
 			switch key {
 			case resources.SettingVerboseKey:
 				if settings.GetBoolean(resources.SettingVerboseKey) {
@@ -783,7 +1071,7 @@ func main() {
 					"Senbara GNOME",
 					redirectURL,
 
-					configInitialAccessTokenInput.Text(),
+					configInitialAccessTokenInput.GetText(),
 				)
 				if err != nil {
 					return err
@@ -823,7 +1111,7 @@ func main() {
 			return nil
 		}
 
-		configServerURLContinueButton.ConnectClicked(func() {
+		connectButtonClicked(&configServerURLContinueButton, func() {
 			configServerURLContinueButton.SetSensitive(false)
 			configServerURLContinueSpinner.SetVisible(true)
 
@@ -840,7 +1128,7 @@ func main() {
 			}()
 		})
 
-		previewLoginButton.ConnectClicked(func() {
+		connectButtonClicked(&previewLoginButton, func() {
 			previewLoginButton.SetSensitive(false)
 			previewLoginSpinner.SetVisible(true)
 
@@ -875,7 +1163,7 @@ func main() {
 			}()
 		})
 
-		registerRegisterButton.ConnectClicked(func() {
+		connectButtonClicked(&registerRegisterButton, func() {
 			go func() {
 				if _, err := gio.AppInfoLaunchDefaultForUri(oidcDcrInitialAccessTokenPortalUrl, nil); err != nil {
 					handlePanic(err)
@@ -887,15 +1175,15 @@ func main() {
 			}()
 		})
 
-		configInitialAccessTokenInput.ConnectChanged(func() {
-			if configInitialAccessTokenInput.TextLength() > 0 {
+		connectPasswordEntryRowChanged(&configInitialAccessTokenInput, func() {
+			if configInitialAccessTokenInput.GetTextLength() > 0 {
 				configInitialAccessTokenLoginButton.SetSensitive(true)
 			} else {
 				configInitialAccessTokenLoginButton.SetSensitive(false)
 			}
 		})
 
-		configInitialAccessTokenLoginButton.ConnectClicked(func() {
+		connectButtonClicked(&configInitialAccessTokenLoginButton, func() {
 			configInitialAccessTokenLoginButton.SetSensitive(false)
 			configInitialAccessTokenLoginSpinner.SetVisible(true)
 
@@ -920,16 +1208,16 @@ func main() {
 		})
 
 		selectDifferentServerAction := gio.NewSimpleAction("selectDifferentServer", nil)
-		selectDifferentServerAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(selectDifferentServerAction, func() {
 			nv.ReplaceWithTags([]string{resources.PageWelcome}, 1)
 		})
 		a.AddAction(selectDifferentServerAction)
 
-		exchangeLoginCancelButton.ConnectClicked(func() {
+		connectButtonClicked(&exchangeLoginCancelButton, func() {
 			nv.ReplaceWithTags([]string{resources.PageWelcome}, 1)
 		})
 
-		exchangeLogoutCancelButton.ConnectClicked(func() {
+		connectButtonClicked(&exchangeLogoutCancelButton, func() {
 			nv.ReplaceWithTags([]string{resources.PageHome}, 1)
 		})
 
@@ -994,7 +1282,7 @@ func main() {
 			visibleContactsCount = 0
 		)
 
-		contactsSearchEntry.ConnectSearchChanged(func() {
+		connectSearchEntryChanged(&contactsSearchEntry, func() {
 			go func() {
 				contactsStack.SetVisibleChildName(resources.PageContactsLoading)
 
@@ -1015,7 +1303,7 @@ func main() {
 			visibleJournalEntriesCount = 0
 		)
 
-		journalEntriesSearchEntry.ConnectSearchChanged(func() {
+		connectSearchEntryChanged(&journalEntriesSearchEntry, func() {
 			go func() {
 				journalEntriesStack.SetVisibleChildName(resources.PageJournalEntriesLoading)
 
@@ -1031,13 +1319,14 @@ func main() {
 			}()
 		})
 
-		journalEntriesListBox.SetFilterFunc(func(row *gtk.ListBoxRow) (ok bool) {
+		setListBoxFilterFunc(&journalEntriesListBox, func(row *gtk.ListBoxRow) bool {
+			var r adw.ActionRow
+			row.Cast(&r)
 			var (
-				r = row.Cast().(*adw.ActionRow)
-				f = strings.ToLower(journalEntriesSearchEntry.Text())
+				f = strings.ToLower(journalEntriesSearchEntry.GetText())
 
-				rt = strings.ToLower(r.Title())
-				rs = strings.ToLower(r.Subtitle())
+				rt = strings.ToLower(r.PreferencesRow.GetTitle())
+				rs = strings.ToLower(r.GetSubtitle())
 			)
 
 			log.Debug(
@@ -1056,20 +1345,20 @@ func main() {
 			return false
 		})
 
-		contactsAddButton.ConnectClicked(func() {
-			contactsCreateDialog.Present(w)
+		connectButtonClicked(&contactsAddButton, func() {
+			contactsCreateDialog.Present(&w.ApplicationWindow.Window.Widget)
 			contactsCreateDialogFirstNameInput.GrabFocus()
 		})
 
-		contactsEmptyAddButton.ConnectClicked(func() {
-			contactsCreateDialog.Present(w)
+		connectButtonClicked(&contactsEmptyAddButton, func() {
+			contactsCreateDialog.Present(&w.ApplicationWindow.Window.Widget)
 			contactsCreateDialogFirstNameInput.GrabFocus()
 		})
 
 		validateContactsCreateDialogForm := func() {
-			if email := contactsCreateDialogEmailInput.Text(); email != "" {
+			if email := contactsCreateDialogEmailInput.GetText(); email != "" {
 				if _, err := mail.ParseAddress(email); err != nil {
-					setValidationSuffixVisible(contactsCreateDialogEmailInput, contactsCreateDialogEmailWarningButton, true)
+					setValidationSuffixVisible(&contactsCreateDialogEmailInput, &contactsCreateDialogEmailWarningButton, true)
 
 					contactsCreateDialogAddButton.SetSensitive(false)
 
@@ -1077,55 +1366,55 @@ func main() {
 				}
 			}
 
-			setValidationSuffixVisible(contactsCreateDialogEmailInput, contactsCreateDialogEmailWarningButton, false)
+			setValidationSuffixVisible(&contactsCreateDialogEmailInput, &contactsCreateDialogEmailWarningButton, false)
 
-			if contactsCreateDialogFirstNameInput.Text() != "" &&
-				contactsCreateDialogLastNameInput.Text() != "" &&
-				contactsCreateDialogEmailInput.Text() != "" &&
-				contactsCreateDialogPronounsInput.Text() != "" {
+			if contactsCreateDialogFirstNameInput.GetText() != "" &&
+				contactsCreateDialogLastNameInput.GetText() != "" &&
+				contactsCreateDialogEmailInput.GetText() != "" &&
+				contactsCreateDialogPronounsInput.GetText() != "" {
 				contactsCreateDialogAddButton.SetSensitive(true)
 			} else {
 				contactsCreateDialogAddButton.SetSensitive(false)
 			}
 		}
 
-		contactsCreateDialogFirstNameInput.ConnectChanged(validateContactsCreateDialogForm)
-		contactsCreateDialogLastNameInput.ConnectChanged(validateContactsCreateDialogForm)
-		contactsCreateDialogNicknameInput.ConnectChanged(validateContactsCreateDialogForm)
-		contactsCreateDialogEmailInput.ConnectChanged(validateContactsCreateDialogForm)
-		contactsCreateDialogPronounsInput.ConnectChanged(validateContactsCreateDialogForm)
+		connectEntryRowChanged(&contactsCreateDialogFirstNameInput, validateContactsCreateDialogForm)
+		connectEntryRowChanged(&contactsCreateDialogLastNameInput, validateContactsCreateDialogForm)
+		connectEntryRowChanged(&contactsCreateDialogNicknameInput, validateContactsCreateDialogForm)
+		connectEntryRowChanged(&contactsCreateDialogEmailInput, validateContactsCreateDialogForm)
+		connectEntryRowChanged(&contactsCreateDialogPronounsInput, validateContactsCreateDialogForm)
 
-		contactsCreateDialog.ConnectClosed(func() {
+		connectDialogClosed(&contactsCreateDialog, func() {
 			contactsCreateDialogFirstNameInput.SetText("")
 			contactsCreateDialogLastNameInput.SetText("")
 			contactsCreateDialogNicknameInput.SetText("")
 			contactsCreateDialogEmailInput.SetText("")
 			contactsCreateDialogPronounsInput.SetText("")
 
-			setValidationSuffixVisible(contactsCreateDialogEmailInput, contactsCreateDialogEmailWarningButton, false)
+			setValidationSuffixVisible(&contactsCreateDialogEmailInput, &contactsCreateDialogEmailWarningButton, false)
 		})
 
 		validateDebtsCreateDialogForm := func() {
-			if debtsCreateDialogCurrencyInput.Text() != "" {
+			if debtsCreateDialogCurrencyInput.GetText() != "" {
 				debtsCreateDialogAddButton.SetSensitive(true)
 			} else {
 				debtsCreateDialogAddButton.SetSensitive(false)
 			}
 		}
 
-		debtsCreateDialogCurrencyInput.ConnectChanged(validateDebtsCreateDialogForm)
+		connectEntryRowChanged(&debtsCreateDialogCurrencyInput, validateDebtsCreateDialogForm)
 
 		validateDebtsEditPageForm := func() {
-			if debtsEditPageCurrencyInput.Text() != "" {
+			if debtsEditPageCurrencyInput.GetText() != "" {
 				debtsEditPageSaveButton.SetSensitive(true)
 			} else {
 				debtsEditPageSaveButton.SetSensitive(false)
 			}
 		}
 
-		debtsEditPageCurrencyInput.ConnectChanged(validateDebtsEditPageForm)
+		connectEntryRowChanged(&debtsEditPageCurrencyInput, validateDebtsEditPageForm)
 
-		debtsCreateDialog.ConnectClosed(func() {
+		connectDialogClosed(&debtsCreateDialog, func() {
 			debtsCreateDialogTitle.SetSubtitle("")
 
 			debtsCreateDialogYouOweActionRow.SetTitle("")
@@ -1137,13 +1426,13 @@ func main() {
 			debtsCreateDialogCurrencyInput.SetText("")
 
 			debtsCreateDialogDescriptionExpander.SetExpanded(false)
-			debtsCreateDialogDescriptionInput.Buffer().SetText("")
+			debtsCreateDialogDescriptionInput.GetBuffer().SetText("", 0)
 		})
 
 		validateActivitiesCreateDialogForm := func() {
-			if date := activitiesCreateDialogDateInput.Text(); date != "" {
+			if date := activitiesCreateDialogDateInput.GetText(); date != "" {
 				if _, err := parseLocaleDate(date); err != nil {
-					setValidationSuffixVisible(activitiesCreateDialogDateInput, activitiesCreateDialogDateWarningButton, true)
+					setValidationSuffixVisible(&activitiesCreateDialogDateInput, &activitiesCreateDialogDateWarningButton, true)
 
 					activitiesCreateDialogAddButton.SetSensitive(false)
 
@@ -1151,33 +1440,33 @@ func main() {
 				}
 			}
 
-			setValidationSuffixVisible(activitiesCreateDialogDateInput, activitiesCreateDialogDateWarningButton, false)
+			setValidationSuffixVisible(&activitiesCreateDialogDateInput, &activitiesCreateDialogDateWarningButton, false)
 
-			if activitiesCreateDialogNameInput.Text() != "" &&
-				activitiesCreateDialogDateInput.Text() != "" {
+			if activitiesCreateDialogNameInput.GetText() != "" &&
+				activitiesCreateDialogDateInput.GetText() != "" {
 				activitiesCreateDialogAddButton.SetSensitive(true)
 			} else {
 				activitiesCreateDialogAddButton.SetSensitive(false)
 			}
 		}
 
-		activitiesCreateDialogNameInput.ConnectChanged(validateActivitiesCreateDialogForm)
-		activitiesCreateDialogDateInput.ConnectChanged(validateActivitiesCreateDialogForm)
+		connectEntryRowChanged(&activitiesCreateDialogNameInput, validateActivitiesCreateDialogForm)
+		connectEntryRowChanged(&activitiesCreateDialogDateInput, validateActivitiesCreateDialogForm)
 
-		activitiesCreateDialog.ConnectClosed(func() {
+		connectDialogClosed(&activitiesCreateDialog, func() {
 			activitiesCreateDialogNameInput.SetText("")
 			activitiesCreateDialogDateInput.SetText("")
 
-			setValidationSuffixVisible(activitiesCreateDialogDateInput, activitiesCreateDialogDateWarningButton, false)
+			setValidationSuffixVisible(&activitiesCreateDialogDateInput, &activitiesCreateDialogDateWarningButton, false)
 
 			activitiesCreateDialogDescriptionExpander.SetExpanded(false)
-			activitiesCreateDialogDescriptionInput.Buffer().SetText("")
+			activitiesCreateDialogDescriptionInput.GetBuffer().SetText("", 0)
 		})
 
 		validateActivitiesEditPageForm := func() {
-			if date := activitiesEditPageDateInput.Text(); date != "" {
+			if date := activitiesEditPageDateInput.GetText(); date != "" {
 				if _, err := parseLocaleDate(date); err != nil {
-					setValidationSuffixVisible(activitiesEditPageDateInput, activitiesEditPageDateWarningButton, true)
+					setValidationSuffixVisible(&activitiesEditPageDateInput, &activitiesEditPageDateWarningButton, true)
 
 					activitiesEditPageSaveButton.SetSensitive(false)
 
@@ -1185,23 +1474,23 @@ func main() {
 				}
 			}
 
-			setValidationSuffixVisible(activitiesEditPageDateInput, activitiesEditPageDateWarningButton, false)
+			setValidationSuffixVisible(&activitiesEditPageDateInput, &activitiesEditPageDateWarningButton, false)
 
-			if activitiesEditPageNameInput.Text() != "" &&
-				activitiesEditPageDateInput.Text() != "" {
+			if activitiesEditPageNameInput.GetText() != "" &&
+				activitiesEditPageDateInput.GetText() != "" {
 				activitiesEditPageSaveButton.SetSensitive(true)
 			} else {
 				activitiesEditPageSaveButton.SetSensitive(false)
 			}
 		}
 
-		activitiesEditPageNameInput.ConnectChanged(validateActivitiesEditPageForm)
-		activitiesEditPageDateInput.ConnectChanged(validateActivitiesEditPageForm)
+		connectEntryRowChanged(&activitiesEditPageNameInput, validateActivitiesEditPageForm)
+		connectEntryRowChanged(&activitiesEditPageDateInput, validateActivitiesEditPageForm)
 
 		validateContactsEditPageForm := func() {
-			if email := contactsEditPageEmailInput.Text(); email != "" {
+			if email := contactsEditPageEmailInput.GetText(); email != "" {
 				if _, err := mail.ParseAddress(email); err != nil {
-					setValidationSuffixVisible(contactsEditPageEmailInput, contactsEditPageEmailWarningButton, true)
+					setValidationSuffixVisible(&contactsEditPageEmailInput, &contactsEditPageEmailWarningButton, true)
 
 					contactsEditPageSaveButton.SetSensitive(false)
 
@@ -1209,11 +1498,11 @@ func main() {
 				}
 			}
 
-			setValidationSuffixVisible(contactsEditPageEmailInput, contactsEditPageEmailWarningButton, false)
+			setValidationSuffixVisible(&contactsEditPageEmailInput, &contactsEditPageEmailWarningButton, false)
 
-			if date := contactsEditPageBirthdayInput.Text(); date != "" {
+			if date := contactsEditPageBirthdayInput.GetText(); date != "" {
 				if _, err := parseLocaleDate(date); err != nil {
-					setValidationSuffixVisible(contactsEditPageBirthdayInput, contactsEditPageBirthdayWarningButton, true)
+					setValidationSuffixVisible(&contactsEditPageBirthdayInput, &contactsEditPageBirthdayWarningButton, true)
 
 					contactsEditPageSaveButton.SetSensitive(false)
 
@@ -1221,76 +1510,68 @@ func main() {
 				}
 			}
 
-			setValidationSuffixVisible(contactsEditPageBirthdayInput, contactsEditPageBirthdayWarningButton, false)
+			setValidationSuffixVisible(&contactsEditPageBirthdayInput, &contactsEditPageBirthdayWarningButton, false)
 
-			if contactsEditPageFirstNameInput.Text() != "" &&
-				contactsEditPageLastNameInput.Text() != "" &&
-				contactsEditPageEmailInput.Text() != "" &&
-				contactsEditPagePronounsInput.Text() != "" {
+			if contactsEditPageFirstNameInput.GetText() != "" &&
+				contactsEditPageLastNameInput.GetText() != "" &&
+				contactsEditPageEmailInput.GetText() != "" &&
+				contactsEditPagePronounsInput.GetText() != "" {
 				contactsEditPageSaveButton.SetSensitive(true)
 			} else {
 				contactsEditPageSaveButton.SetSensitive(false)
 			}
 		}
 
-		contactsEditPageFirstNameInput.ConnectChanged(validateContactsEditPageForm)
-		contactsEditPageLastNameInput.ConnectChanged(validateContactsEditPageForm)
-		contactsEditPageNicknameInput.ConnectChanged(validateContactsEditPageForm)
-		contactsEditPageEmailInput.ConnectChanged(validateContactsEditPageForm)
-		contactsEditPagePronounsInput.ConnectChanged(validateContactsEditPageForm)
+		connectEntryRowChanged(&contactsEditPageFirstNameInput, validateContactsEditPageForm)
+		connectEntryRowChanged(&contactsEditPageLastNameInput, validateContactsEditPageForm)
+		connectEntryRowChanged(&contactsEditPageNicknameInput, validateContactsEditPageForm)
+		connectEntryRowChanged(&contactsEditPageEmailInput, validateContactsEditPageForm)
+		connectEntryRowChanged(&contactsEditPagePronounsInput, validateContactsEditPageForm)
 
-		contactsEditPageBirthdayInput.ConnectChanged(validateContactsEditPageForm)
+		connectEntryRowChanged(&contactsEditPageBirthdayInput, validateContactsEditPageForm)
 
-		journalEntriesAddButton.ConnectClicked(func() {
-			journalEntriesCreateDialog.Present(w)
+		connectButtonClicked(&journalEntriesAddButton, func() {
+			journalEntriesCreateDialog.Present(&w.ApplicationWindow.Window.Widget)
 			journalEntriesCreateDialogTitleInput.GrabFocus()
 		})
 
-		journalEntriesEmptyAddButton.ConnectClicked(func() {
-			journalEntriesCreateDialog.Present(w)
+		connectButtonClicked(&journalEntriesEmptyAddButton, func() {
+			journalEntriesCreateDialog.Present(&w.ApplicationWindow.Window.Widget)
 			journalEntriesCreateDialogTitleInput.GrabFocus()
 		})
 
 		validateJournalEntriesCreateDialogForm := func() {
-			if journalEntriesCreateDialogTitleInput.Text() != "" &&
-				journalEntriesCreateDialogBodyInput.Buffer().Text(
-					journalEntriesCreateDialogBodyInput.Buffer().StartIter(),
-					journalEntriesCreateDialogBodyInput.Buffer().EndIter(),
-					true,
-				) != "" {
+			if journalEntriesCreateDialogTitleInput.GetText() != "" &&
+				getTextBufferText(journalEntriesCreateDialogBodyInput.GetBuffer()) != "" {
 				journalEntriesCreateDialogAddButton.SetSensitive(true)
 			} else {
 				journalEntriesCreateDialogAddButton.SetSensitive(false)
 			}
 		}
 
-		journalEntriesCreateDialogTitleInput.ConnectChanged(validateJournalEntriesCreateDialogForm)
-		journalEntriesCreateDialogBodyInput.Buffer().ConnectChanged(validateJournalEntriesCreateDialogForm)
+		connectEntryRowChanged(&journalEntriesCreateDialogTitleInput, validateJournalEntriesCreateDialogForm)
+		connectTextBufferChanged(journalEntriesCreateDialogBodyInput.GetBuffer(), validateJournalEntriesCreateDialogForm)
 
-		journalEntriesCreateDialog.ConnectClosed(func() {
+		connectDialogClosed(&journalEntriesCreateDialog, func() {
 			journalEntriesCreateDialogRatingToggleGroup.SetActive(0)
 
 			journalEntriesCreateDialogTitleInput.SetText("")
 
 			journalEntriesCreateDialogBodyExpander.SetExpanded(true)
-			journalEntriesCreateDialogBodyInput.Buffer().SetText("")
+			journalEntriesCreateDialogBodyInput.GetBuffer().SetText("", 0)
 		})
 
 		validateJournalEntriesEditPageForm := func() {
-			if journalEntriesEditPageTitleInput.Text() != "" &&
-				journalEntriesEditPageBodyInput.Buffer().Text(
-					journalEntriesEditPageBodyInput.Buffer().StartIter(),
-					journalEntriesEditPageBodyInput.Buffer().EndIter(),
-					true,
-				) != "" {
+			if journalEntriesEditPageTitleInput.GetText() != "" &&
+				getTextBufferText(journalEntriesEditPageBodyInput.GetBuffer()) != "" {
 				journalEntriesEditPageSaveButton.SetSensitive(true)
 			} else {
 				journalEntriesEditPageSaveButton.SetSensitive(false)
 			}
 		}
 
-		journalEntriesEditPageTitleInput.ConnectChanged(validateJournalEntriesEditPageForm)
-		journalEntriesEditPageBodyInput.Buffer().ConnectChanged(validateJournalEntriesEditPageForm)
+		connectEntryRowChanged(&journalEntriesEditPageTitleInput, validateJournalEntriesEditPageForm)
+		connectTextBufferChanged(journalEntriesEditPageBodyInput.GetBuffer(), validateJournalEntriesEditPageForm)
 
 		createErrAndLoadingHandlers := func(
 			errorStatusPage *adw.StatusPage,
@@ -1321,10 +1602,10 @@ func main() {
 				errorStatusPage.SetDescription(i18nErr)
 			}
 
-			errorRefreshButton.ConnectClicked(handleRefresh)
+			connectButtonClicked(errorRefreshButton, handleRefresh)
 
-			errorCopyDetailsButton.ConnectClicked(func() {
-				w.Clipboard().SetText(rawErr)
+			connectButtonClicked(errorCopyDetailsButton, func() {
+				w.GetClipboard().SetText(rawErr)
 			})
 
 			enableLoading = handleEnableLoading
@@ -1345,9 +1626,9 @@ func main() {
 			enableContactsLoading,
 			disableContactsLoading,
 			clearContactsError := createErrAndLoadingHandlers(
-			contactsErrorStatusPage,
-			contactsErrorRefreshButton,
-			contactsErrorCopyDetailsButton,
+			&contactsErrorStatusPage,
+			&contactsErrorRefreshButton,
+			&contactsErrorCopyDetailsButton,
 
 			func() {
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts}, 1)
@@ -1381,9 +1662,9 @@ func main() {
 			enableContactsViewLoading,
 			disableContactsViewLoading,
 			clearContactsViewError := createErrAndLoadingHandlers(
-			contactsViewErrorStatusPage,
-			contactsViewErrorRefreshButton,
-			contactsViewErrorCopyDetailsButton,
+			&contactsViewErrorStatusPage,
+			&contactsViewErrorRefreshButton,
+			&contactsViewErrorCopyDetailsButton,
 
 			func() {
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView}, 2)
@@ -1405,9 +1686,9 @@ func main() {
 			enableActivitiesViewLoading,
 			disableActivitiesViewLoading,
 			clearActivitiesViewError := createErrAndLoadingHandlers(
-			activitiesViewErrorStatusPage,
-			activitiesViewErrorRefreshButton,
-			activitiesViewErrorCopyDetailsButton,
+			&activitiesViewErrorStatusPage,
+			&activitiesViewErrorRefreshButton,
+			&activitiesViewErrorCopyDetailsButton,
 
 			func() {
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageActivitiesView}, 3)
@@ -1429,9 +1710,9 @@ func main() {
 			enableActivitiesEditLoading,
 			disableActivitiesEditLoading,
 			clearActivitiesEditError := createErrAndLoadingHandlers(
-			activitiesEditErrorStatusPage,
-			activitiesEditErrorRefreshButton,
-			activitiesEditErrorCopyDetailsButton,
+			&activitiesEditErrorStatusPage,
+			&activitiesEditErrorRefreshButton,
+			&activitiesEditErrorCopyDetailsButton,
 
 			func() {
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageActivitiesView, resources.PageActivitiesEdit}, 4)
@@ -1454,9 +1735,9 @@ func main() {
 			enableDebtsEditLoading,
 			disableDebtsEditLoading,
 			clearDebtsEditError := createErrAndLoadingHandlers(
-			debtsEditErrorStatusPage,
-			debtsEditErrorRefreshButton,
-			debtsEditErrorCopyDetailsButton,
+			&debtsEditErrorStatusPage,
+			&debtsEditErrorRefreshButton,
+			&debtsEditErrorCopyDetailsButton,
 
 			func() {
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageDebtsEdit}, 3)
@@ -1479,9 +1760,9 @@ func main() {
 			enableContactsEditLoading,
 			disableContactsEditLoading,
 			clearContactsEditError := createErrAndLoadingHandlers(
-			contactsEditErrorStatusPage,
-			contactsEditErrorRefreshButton,
-			contactsEditErrorCopyDetailsButton,
+			&contactsEditErrorStatusPage,
+			&contactsEditErrorRefreshButton,
+			&contactsEditErrorCopyDetailsButton,
 
 			func() {
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageContactsEdit}, 3)
@@ -1504,9 +1785,9 @@ func main() {
 			enableJournalEntriesLoading,
 			disableJournalEntriesLoading,
 			clearJournalEntriesError := createErrAndLoadingHandlers(
-			journalEntriesErrorStatusPage,
-			journalEntriesErrorRefreshButton,
-			journalEntriesErrorCopyDetailsButton,
+			&journalEntriesErrorStatusPage,
+			&journalEntriesErrorRefreshButton,
+			&journalEntriesErrorCopyDetailsButton,
 
 			func() {
 				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries}, 1)
@@ -1540,9 +1821,9 @@ func main() {
 			enableJournalEntriesViewLoading,
 			disableJournalEntriesViewLoading,
 			clearJournalEntriesViewError := createErrAndLoadingHandlers(
-			journalEntriesViewErrorStatusPage,
-			journalEntriesViewErrorRefreshButton,
-			journalEntriesViewErrorCopyDetailsButton,
+			&journalEntriesViewErrorStatusPage,
+			&journalEntriesViewErrorRefreshButton,
+			&journalEntriesViewErrorCopyDetailsButton,
 
 			func() {
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageJournalEntriesView}, 3)
@@ -1564,9 +1845,9 @@ func main() {
 			enableJournalEntriesEditLoading,
 			disableJournalEntriesEditLoading,
 			clearJournalEntriesEditError := createErrAndLoadingHandlers(
-			journalEntriesEditErrorStatusPage,
-			journalEntriesEditErrorRefreshButton,
-			journalEntriesEditErrorCopyDetailsButton,
+			&journalEntriesEditErrorStatusPage,
+			&journalEntriesEditErrorRefreshButton,
+			&journalEntriesEditErrorCopyDetailsButton,
 
 			func() {
 				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries, resources.PageJournalEntriesView, resources.PageJournalEntriesEdit}, 3)
@@ -1585,7 +1866,7 @@ func main() {
 			},
 		)
 
-		contactsCreateDialogAddButton.ConnectClicked(func() {
+		connectButtonClicked(&contactsCreateDialogAddButton, func() {
 			log.Info("Handling contact creation")
 
 			contactsCreateDialogAddButton.SetSensitive(false)
@@ -1611,16 +1892,16 @@ func main() {
 				}
 
 				var nickname *string
-				if v := contactsCreateDialogNicknameInput.Text(); v != "" {
+				if v := contactsCreateDialogNicknameInput.GetText(); v != "" {
 					nickname = &v
 				}
 
 				req := api.CreateContactJSONRequestBody{
-					Email:     (types.Email)(contactsCreateDialogEmailInput.Text()),
-					FirstName: contactsCreateDialogFirstNameInput.Text(),
-					LastName:  contactsCreateDialogLastNameInput.Text(),
+					Email:     (types.Email)(contactsCreateDialogEmailInput.GetText()),
+					FirstName: contactsCreateDialogFirstNameInput.GetText(),
+					LastName:  contactsCreateDialogLastNameInput.GetText(),
 					Nickname:  nickname,
-					Pronouns:  contactsCreateDialogPronounsInput.Text(),
+					Pronouns:  contactsCreateDialogPronounsInput.GetText(),
 				}
 
 				log.Debug("Creating contact", "request", req)
@@ -1648,8 +1929,8 @@ func main() {
 			}()
 		})
 
-		debtsCreateDialogAddButton.ConnectClicked(func() {
-			id := debtsCreateDialogAddButton.ActionTargetValue().Int64()
+		connectButtonClicked(&debtsCreateDialogAddButton, func() {
+			id := debtsCreateDialogAddButton.GetActionTargetValue().GetInt64()
 
 			log := log.With(
 				"id", id,
@@ -1680,20 +1961,16 @@ func main() {
 				}
 
 				var description *string
-				if v := debtsCreateDialogDescriptionInput.Buffer().Text(
-					debtsCreateDialogDescriptionInput.Buffer().StartIter(),
-					debtsCreateDialogDescriptionInput.Buffer().EndIter(),
-					true,
-				); v != "" {
+				if v := getTextBufferText(debtsCreateDialogDescriptionInput.GetBuffer()); v != "" {
 					description = &v
 				}
 
 				req := api.CreateDebtJSONRequestBody{
-					Amount:      float32(debtsCreateDialogAmountInput.Value()),
+					Amount:      float32(debtsCreateDialogAmountInput.GetValue()),
 					ContactId:   id,
-					Currency:    debtsCreateDialogCurrencyInput.Text(),
+					Currency:    debtsCreateDialogCurrencyInput.GetText(),
 					Description: description,
-					YouOwe:      debtsCreateDialogYouOweRadio.Active(),
+					YouOwe:      debtsCreateDialogYouOweRadio.GetActive(),
 				}
 
 				log.Debug("Creating debt", "request", req)
@@ -1721,8 +1998,8 @@ func main() {
 			}()
 		})
 
-		activitiesCreateDialogAddButton.ConnectClicked(func() {
-			id := activitiesCreateDialogAddButton.ActionTargetValue().Int64()
+		connectButtonClicked(&activitiesCreateDialogAddButton, func() {
+			id := activitiesCreateDialogAddButton.GetActionTargetValue().GetInt64()
 
 			log := log.With(
 				"id", id,
@@ -1753,15 +2030,11 @@ func main() {
 				}
 
 				var description *string
-				if v := activitiesCreateDialogDescriptionInput.Buffer().Text(
-					activitiesCreateDialogDescriptionInput.Buffer().StartIter(),
-					activitiesCreateDialogDescriptionInput.Buffer().EndIter(),
-					true,
-				); v != "" {
+				if v := getTextBufferText(activitiesCreateDialogDescriptionInput.GetBuffer()); v != "" {
 					description = &v
 				}
 
-				localeDate, err := parseLocaleDate(activitiesCreateDialogDateInput.Text())
+				localeDate, err := parseLocaleDate(activitiesCreateDialogDateInput.GetText())
 				if err != nil {
 					handlePanic(err)
 
@@ -1774,7 +2047,7 @@ func main() {
 						Time: localeDate,
 					},
 					Description: description,
-					Name:        activitiesCreateDialogNameInput.Text(),
+					Name:        activitiesCreateDialogNameInput.GetText(),
 				}
 
 				log.Debug("Creating activity", "request", req)
@@ -1802,8 +2075,8 @@ func main() {
 			}()
 		})
 
-		activitiesEditPageSaveButton.ConnectClicked(func() {
-			id := activitiesEditPageSaveButton.ActionTargetValue().Int64()
+		connectButtonClicked(&activitiesEditPageSaveButton, func() {
+			id := activitiesEditPageSaveButton.GetActionTargetValue().GetInt64()
 
 			log := log.With(
 				"id", id,
@@ -1834,15 +2107,11 @@ func main() {
 				}
 
 				var description *string
-				if v := activitiesEditPageDescriptionInput.Buffer().Text(
-					activitiesEditPageDescriptionInput.Buffer().StartIter(),
-					activitiesEditPageDescriptionInput.Buffer().EndIter(),
-					true,
-				); v != "" {
+				if v := getTextBufferText(activitiesEditPageDescriptionInput.GetBuffer()); v != "" {
 					description = &v
 				}
 
-				localeDate, err := parseLocaleDate(activitiesEditPageDateInput.Text())
+				localeDate, err := parseLocaleDate(activitiesEditPageDateInput.GetText())
 				if err != nil {
 					handlePanic(err)
 
@@ -1854,7 +2123,7 @@ func main() {
 						Time: localeDate,
 					},
 					Description: description,
-					Name:        activitiesEditPageNameInput.Text(),
+					Name:        activitiesEditPageNameInput.GetText(),
 				}
 
 				log.Debug("Updating activity", "request", req)
@@ -1880,8 +2149,8 @@ func main() {
 			}()
 		})
 
-		debtsEditPageSaveButton.ConnectClicked(func() {
-			id := debtsEditPageSaveButton.ActionTargetValue().Int64()
+		connectButtonClicked(&debtsEditPageSaveButton, func() {
+			id := debtsEditPageSaveButton.GetActionTargetValue().GetInt64()
 
 			log := log.With(
 				"id", id,
@@ -1912,19 +2181,15 @@ func main() {
 				}
 
 				var description *string
-				if v := debtsEditPageDescriptionInput.Buffer().Text(
-					debtsEditPageDescriptionInput.Buffer().StartIter(),
-					debtsEditPageDescriptionInput.Buffer().EndIter(),
-					true,
-				); v != "" {
+				if v := getTextBufferText(debtsEditPageDescriptionInput.GetBuffer()); v != "" {
 					description = &v
 				}
 
 				req := api.UpdateDebtJSONRequestBody{
-					Amount:      float32(debtsEditPageAmountInput.Value()),
-					Currency:    debtsEditPageCurrencyInput.Text(),
+					Amount:      float32(debtsEditPageAmountInput.GetValue()),
+					Currency:    debtsEditPageCurrencyInput.GetText(),
 					Description: description,
-					YouOwe:      debtsEditPageYouOweRadio.Active(),
+					YouOwe:      debtsEditPageYouOweRadio.GetActive(),
 				}
 
 				log.Debug("Updating debt", "request", req)
@@ -1950,8 +2215,8 @@ func main() {
 			}()
 		})
 
-		contactsEditPageSaveButton.ConnectClicked(func() {
-			id := contactsEditPageSaveButton.ActionTargetValue().Int64()
+		connectButtonClicked(&contactsEditPageSaveButton, func() {
+			id := contactsEditPageSaveButton.GetActionTargetValue().GetInt64()
 
 			log := log.With(
 				"id", id,
@@ -1982,13 +2247,13 @@ func main() {
 				}
 
 				var nickname *string
-				if v := contactsEditPageNicknameInput.Text(); v != "" {
+				if v := contactsEditPageNicknameInput.GetText(); v != "" {
 					nickname = &v
 				}
 
 				var birthday *types.Date
-				if v := contactsEditPageBirthdayInput.Text(); v != "" {
-					localeBirthday, err := parseLocaleDate(contactsEditPageBirthdayInput.Text())
+				if v := contactsEditPageBirthdayInput.GetText(); v != "" {
+					localeBirthday, err := parseLocaleDate(contactsEditPageBirthdayInput.GetText())
 					if err != nil {
 						handlePanic(err)
 
@@ -2001,29 +2266,21 @@ func main() {
 				}
 
 				var address *string
-				if v := contactsEditPageAddressInput.Buffer().Text(
-					contactsEditPageAddressInput.Buffer().StartIter(),
-					contactsEditPageAddressInput.Buffer().EndIter(),
-					true,
-				); v != "" {
+				if v := getTextBufferText(contactsEditPageAddressInput.GetBuffer()); v != "" {
 					address = &v
 				}
 
 				var notes *string
-				if v := contactsEditPageNotesInput.Buffer().Text(
-					contactsEditPageNotesInput.Buffer().StartIter(),
-					contactsEditPageNotesInput.Buffer().EndIter(),
-					true,
-				); v != "" {
+				if v := getTextBufferText(contactsEditPageNotesInput.GetBuffer()); v != "" {
 					notes = &v
 				}
 
 				req := api.UpdateContactJSONRequestBody{
-					Email:     (types.Email)(contactsEditPageEmailInput.Text()),
-					FirstName: contactsEditPageFirstNameInput.Text(),
-					LastName:  contactsEditPageLastNameInput.Text(),
+					Email:     (types.Email)(contactsEditPageEmailInput.GetText()),
+					FirstName: contactsEditPageFirstNameInput.GetText(),
+					LastName:  contactsEditPageLastNameInput.GetText(),
 					Nickname:  nickname,
-					Pronouns:  contactsEditPagePronounsInput.Text(),
+					Pronouns:  contactsEditPagePronounsInput.GetText(),
 
 					Birthday: birthday,
 					Address:  address,
@@ -2053,7 +2310,7 @@ func main() {
 			}()
 		})
 
-		journalEntriesCreateDialogAddButton.ConnectClicked(func() {
+		connectButtonClicked(&journalEntriesCreateDialogAddButton, func() {
 			log.Info("Handling journal entry creation")
 
 			journalEntriesCreateDialogAddButton.SetSensitive(false)
@@ -2079,13 +2336,9 @@ func main() {
 				}
 
 				req := api.CreateJournalEntryJSONRequestBody{
-					Body: journalEntriesCreateDialogBodyInput.Buffer().Text(
-						journalEntriesCreateDialogBodyInput.Buffer().StartIter(),
-						journalEntriesCreateDialogBodyInput.Buffer().EndIter(),
-						true,
-					),
-					Rating: int32(3 - journalEntriesCreateDialogRatingToggleGroup.Active()), // The toggle group is zero-indexed, but the rating is one-indexed
-					Title:  journalEntriesCreateDialogTitleInput.Text(),
+					Body:   getTextBufferText(journalEntriesCreateDialogBodyInput.GetBuffer()),
+					Rating: int32(3 - journalEntriesCreateDialogRatingToggleGroup.GetActive()), // The toggle group is zero-indexed, but the rating is one-indexed
+					Title:  journalEntriesCreateDialogTitleInput.GetText(),
 				}
 
 				log.Debug("Creating journal entry", "request", req)
@@ -2113,8 +2366,8 @@ func main() {
 			}()
 		})
 
-		journalEntriesEditPageSaveButton.ConnectClicked(func() {
-			id := journalEntriesEditPageSaveButton.ActionTargetValue().Int64()
+		connectButtonClicked(&journalEntriesEditPageSaveButton, func() {
+			id := journalEntriesEditPageSaveButton.GetActionTargetValue().GetInt64()
 
 			log := log.With(
 				"id", id,
@@ -2145,13 +2398,9 @@ func main() {
 				}
 
 				req := api.UpdateJournalEntryJSONRequestBody{
-					Body: journalEntriesEditPageBodyInput.Buffer().Text(
-						journalEntriesEditPageBodyInput.Buffer().StartIter(),
-						journalEntriesEditPageBodyInput.Buffer().EndIter(),
-						true,
-					),
-					Rating: int32((3 - journalEntriesEditPageRatingToggleGroup.Active())), // The toggle group is zero-indexed, but the rating is one-indexed
-					Title:  journalEntriesEditPageTitleInput.Text(),
+					Body:   getTextBufferText(journalEntriesEditPageBodyInput.GetBuffer()),
+					Rating: int32((3 - journalEntriesEditPageRatingToggleGroup.GetActive())), // The toggle group is zero-indexed, but the rating is one-indexed
+					Title:  journalEntriesEditPageTitleInput.GetText(),
 				}
 
 				log.Debug("Creating journal entry", "request", req)
@@ -2178,7 +2427,7 @@ func main() {
 		})
 
 		logoutAction := gio.NewSimpleAction("logout", nil)
-		logoutAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(logoutAction, func() {
 			nv.ReplaceWithTags([]string{resources.PageExchangeLogout}, 1)
 
 			go func() {
@@ -2192,7 +2441,7 @@ func main() {
 		a.AddAction(logoutAction)
 
 		licenseAction := gio.NewSimpleAction("license", nil)
-		licenseAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(licenseAction, func() {
 			log.Info("Handling getting license action", "url", spec.Info.License.URL)
 
 			go func() {
@@ -2206,7 +2455,7 @@ func main() {
 		a.AddAction(licenseAction)
 
 		privacyAction := gio.NewSimpleAction("privacy", nil)
-		privacyAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(privacyAction, func() {
 			var privacyURL string
 			if v := spec.Info.Extensions[api.PrivacyPolicyExtensionKey]; v != nil {
 				vv, ok := v.(string)
@@ -2232,7 +2481,7 @@ func main() {
 		a.AddAction(privacyAction)
 
 		tosAction := gio.NewSimpleAction("tos", nil)
-		tosAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(tosAction, func() {
 			log.Info("Handling getting terms of service action", "url", spec.Info.TermsOfService)
 
 			go func() {
@@ -2246,7 +2495,7 @@ func main() {
 		a.AddAction(tosAction)
 
 		imprintAction := gio.NewSimpleAction("imprint", nil)
-		imprintAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(imprintAction, func() {
 			log.Info("Handling getting imprint action", "url", spec.Info.Contact.URL)
 
 			go func() {
@@ -2260,7 +2509,7 @@ func main() {
 		a.AddAction(imprintAction)
 
 		codeAction := gio.NewSimpleAction("code", nil)
-		codeAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(codeAction, func() {
 			log.Info("Handling getting code action")
 
 			enableHomeHamburgerMenuLoading()
@@ -2309,47 +2558,18 @@ func main() {
 
 			log.Debug("Writing code to file")
 
-			fd := gtk.NewFileDialog()
-			fd.SetTitle(L("Senbara REST source code"))
-			fd.SetInitialName("code.tar.gz")
-			fd.Save(ctx, &w.Window, func(r gio.AsyncResulter) {
-				go func() {
-					defer disableHomeHamburgerMenuLoading()
-					defer res.Body.Close()
-
-					fp, err := fd.SaveFinish(r)
-					if err != nil {
-						handlePanic(err)
-
-						return
-					}
-
-					log.Debug("Writing code to file", "path", fp.Path())
-
-					f, err := os.OpenFile(fp.Path(), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
-					if err != nil {
-						handlePanic(err)
-
-						return
-					}
-					defer f.Close()
-
-					if _, err := io.Copy(f, res.Body); err != nil {
-						handlePanic(err)
-
-						return
-					}
-
-					log.Debug("Downloaded code", "status", res.StatusCode)
-
-					mto.AddToast(adw.NewToast(L("Downloaded code")))
-				}()
-			})
+			// TODO: Port FileDialog.Save async pattern to puregotk
+			// The puregotk async callback signature is different:
+			// fd.Save(parent *gtk.Window, cancellable *gio.Cancellable, callback *gio.AsyncReadyCallback, userData uintptr)
+			// For now, just show a toast that this feature needs porting
+			disableHomeHamburgerMenuLoading()
+			res.Body.Close()
+			mto.AddToast(adw.NewToast(L("Code download not yet available (needs puregotk async port)")))
 		})
 		a.AddAction(codeAction)
 
 		exportUserDataAction := gio.NewSimpleAction("exportUserData", nil)
-		exportUserDataAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(exportUserDataAction, func() {
 			log.Info("Handling export user data action")
 
 			enableHomeUserMenuLoading()
@@ -2398,42 +2618,10 @@ func main() {
 
 			log.Debug("Writing user data to file")
 
-			fd := gtk.NewFileDialog()
-			fd.SetTitle(L("Senbara Forms userdata"))
-			fd.SetInitialName("userdata.jsonl")
-			fd.Save(ctx, &w.Window, func(r gio.AsyncResulter) {
-				go func() {
-					defer disableHomeUserMenuLoading()
-					defer res.Body.Close()
-
-					fp, err := fd.SaveFinish(r)
-					if err != nil {
-						handlePanic(err)
-
-						return
-					}
-
-					log.Debug("Writing user data to file", "path", fp.Path())
-
-					f, err := os.OpenFile(fp.Path(), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
-					if err != nil {
-						handlePanic(err)
-
-						return
-					}
-					defer f.Close()
-
-					if _, err := io.Copy(f, res.Body); err != nil {
-						handlePanic(err)
-
-						return
-					}
-
-					log.Debug("Exported user data", "status", res.StatusCode)
-
-					mto.AddToast(adw.NewToast(L("Exported user data")))
-				}()
-			})
+			// TODO: Port FileDialog.Save async pattern to puregotk
+			disableHomeUserMenuLoading()
+			res.Body.Close()
+			mto.AddToast(adw.NewToast(L("User data export not yet available (needs puregotk async port)")))
 		})
 		a.AddAction(exportUserDataAction)
 
@@ -2482,151 +2670,15 @@ func main() {
 		}
 
 		importUserDataAction := gio.NewSimpleAction("importUserData", nil)
-		importUserDataAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(importUserDataAction, func() {
 			log.Info("Handling import user data action")
-
-			fd := gtk.NewFileDialog()
-			fd.SetTitle(L("Senbara Forms userdata"))
-
-			ls := gio.NewListStore(glib.TypeObject)
-
-			{
-				fi := gtk.NewFileFilter()
-				fi.SetName(L("Senbara Forms userdata files"))
-				fi.AddPattern("*.jsonl")
-				ls.Append(fi.Object)
-			}
-
-			{
-				fi := gtk.NewFileFilter()
-				fi.SetName(L("All files"))
-				fi.AddPattern("*")
-				ls.Append(fi.Object)
-			}
-
-			fd.SetFilters(ls)
-
-			fd.Open(ctx, &w.Window, func(r gio.AsyncResulter) {
-				fp, err := fd.OpenFinish(r)
-				if err != nil {
-					handlePanic(err)
-
-					return
-				}
-
-				confirm := adw.NewAlertDialog(
-					L("Importing user data"),
-					L("Are you sure you want to import this user data into your account?"),
-				)
-				confirm.AddResponse("cancel", L("Cancel"))
-				confirm.AddResponse("import", L("Import"))
-				confirm.SetResponseAppearance("import", adw.ResponseSuggested)
-				confirm.ConnectResponse(func(response string) {
-					if response == "import" {
-						go func() {
-							enableHomeUserMenuLoading()
-							defer disableHomeUserMenuLoading()
-
-							redirected, c, _, err := authorize(
-								ctx,
-
-								false,
-							)
-							if err != nil {
-								disableHomeUserMenuLoading()
-
-								log.Warn("Could not authorize user for import user data action", "err", err)
-
-								handlePanic(err)
-
-								return
-							} else if redirected {
-								disableHomeUserMenuLoading()
-
-								return
-							}
-
-							log.Debug("Reading user data from file", "path", fp.Path())
-
-							f, err := os.OpenFile(fp.Path(), os.O_RDONLY, os.ModePerm)
-							if err != nil {
-								handlePanic(err)
-
-								return
-							}
-							defer f.Close()
-
-							log.Debug("Importing user data, reading from file and streaming to API")
-
-							reader, writer := io.Pipe()
-							enc := multipart.NewWriter(writer)
-							go func() {
-								defer writer.Close()
-
-								if err := func() error {
-									file, err := enc.CreateFormFile("userData", "")
-									if err != nil {
-										return err
-									}
-
-									if _, err := io.Copy(file, f); err != nil {
-										return err
-									}
-
-									if err := enc.Close(); err != nil {
-										return err
-									}
-
-									return nil
-								}(); err != nil {
-									log.Warn("Could not stream user data to API", "err", err)
-
-									writer.CloseWithError(err)
-
-									return
-								}
-							}()
-
-							res, err := c.ImportUserDataWithBodyWithResponse(ctx, enc.FormDataContentType(), reader)
-							if err != nil {
-								handlePanic(err)
-
-								return
-							}
-
-							log.Debug("Imported user data", "status", res.StatusCode())
-
-							if res.StatusCode() != http.StatusOK {
-								handlePanic(errors.New(res.Status()))
-
-								return
-							}
-
-							mto.AddToast(adw.NewToast(L("Imported user data")))
-
-							var (
-								navigationStack      = homeNavigation.NavigationStack()
-								navigationStackPages = []string{}
-							)
-							for i := range navigationStack.NItems() {
-								navigationStackPages = append(navigationStackPages, navigationStack.Item(i).Cast().(*adw.NavigationPage).GetTag())
-							}
-							homeNavigation.ReplaceWithTags(navigationStackPages)
-
-							go func() {
-								_ = refreshSidebarWithLatestSummary()
-							}()
-						}()
-					}
-				})
-
-				confirm.Present(w)
-			})
+			// TODO: Port FileDialog.Open async pattern to puregotk
+			mto.AddToast(adw.NewToast(L("User data import not yet available (needs puregotk async port)")))
 		})
 		a.AddAction(importUserDataAction)
 
 		deleteUserDataAction := gio.NewSimpleAction("deleteUserData", nil)
-		deleteUserDataAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(deleteUserDataAction, func() {
 			log.Info("Handling delete user data action")
 
 			confirm := adw.NewAlertDialog(
@@ -2635,8 +2687,8 @@ func main() {
 			)
 			confirm.AddResponse("cancel", L("Cancel"))
 			confirm.AddResponse("delete", L("Delete"))
-			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
-			confirm.ConnectResponse(func(response string) {
+			confirm.SetResponseAppearance("delete", adw.ResponseDestructiveValue)
+			connectAlertDialogResponse(confirm, func(response string) {
 				if response == "delete" {
 					redirected, c, _, err := authorize(
 						ctx,
@@ -2674,32 +2726,32 @@ func main() {
 				}
 			})
 
-			confirm.Present(w)
+			confirm.Present(&w.ApplicationWindow.Window.Widget)
 		})
 		a.AddAction(deleteUserDataAction)
 
 		aboutAction := gio.NewSimpleAction("about", nil)
-		aboutAction.ConnectActivate(func(parameter *glib.Variant) {
-			aboutDialog.Present(&w.Window)
+		connectSimpleActionActivate(aboutAction, func() {
+			aboutDialog.Present(&w.ApplicationWindow.Window.Widget)
 		})
 		a.AddAction(aboutAction)
 
 		quitAction := gio.NewSimpleAction("quit", nil)
-		quitAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(quitAction, func() {
 			a.Quit()
 		})
 		a.SetAccelsForAction("app.quit", []string{`<Primary>q`})
 		a.AddAction(quitAction)
 
 		copyErrorToClipboardAction := gio.NewSimpleAction("copyErrorToClipboard", nil)
-		copyErrorToClipboardAction.ConnectActivate(func(parameter *glib.Variant) {
-			w.Clipboard().SetText(rawError)
+		connectSimpleActionActivate(copyErrorToClipboardAction, func() {
+			w.GetClipboard().SetText(rawError)
 		})
 		a.AddAction(copyErrorToClipboardAction)
 
 		deleteContactAction := gio.NewSimpleAction("deleteContact", glib.NewVariantType("x"))
-		deleteContactAction.ConnectActivate(func(parameter *glib.Variant) {
-			id := parameter.Int64()
+		connectSimpleActionActivateWithParam(deleteContactAction, func(parameter *glib.Variant) {
+			id := parameter.GetInt64()
 
 			log := log.With(
 				"id", id,
@@ -2713,8 +2765,8 @@ func main() {
 			)
 			confirm.AddResponse("cancel", L("Cancel"))
 			confirm.AddResponse("delete", L("Delete"))
-			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
-			confirm.ConnectResponse(func(response string) {
+			confirm.SetResponseAppearance("delete", adw.ResponseDestructiveValue)
+			connectAlertDialogResponse(confirm, func(response string) {
 				if response == "delete" {
 					redirected, c, _, err := authorize(
 						ctx,
@@ -2754,13 +2806,13 @@ func main() {
 				}
 			})
 
-			confirm.Present(w)
+			confirm.Present(&w.ApplicationWindow.Window.Widget)
 		})
 		a.AddAction(deleteContactAction)
 
 		settleDebtAction := gio.NewSimpleAction("settleDebt", glib.NewVariantType("x"))
-		settleDebtAction.ConnectActivate(func(parameter *glib.Variant) {
-			id := parameter.Int64()
+		connectSimpleActionActivateWithParam(settleDebtAction, func(parameter *glib.Variant) {
+			id := parameter.GetInt64()
 
 			log := log.With(
 				"id", id,
@@ -2774,8 +2826,8 @@ func main() {
 			)
 			confirm.AddResponse("cancel", L("Cancel"))
 			confirm.AddResponse("delete", L("Delete"))
-			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
-			confirm.ConnectResponse(func(response string) {
+			confirm.SetResponseAppearance("delete", adw.ResponseDestructiveValue)
+			connectAlertDialogResponse(confirm, func(response string) {
 				if response == "delete" {
 					redirected, c, _, err := authorize(
 						ctx,
@@ -2815,13 +2867,13 @@ func main() {
 				}
 			})
 
-			confirm.Present(w)
+			confirm.Present(&w.ApplicationWindow.Window.Widget)
 		})
 		a.AddAction(settleDebtAction)
 
 		deleteActivityAction := gio.NewSimpleAction("deleteActivity", glib.NewVariantType("x"))
-		deleteActivityAction.ConnectActivate(func(parameter *glib.Variant) {
-			id := parameter.Int64()
+		connectSimpleActionActivateWithParam(deleteActivityAction, func(parameter *glib.Variant) {
+			id := parameter.GetInt64()
 
 			log := log.With(
 				"id", id,
@@ -2835,8 +2887,8 @@ func main() {
 			)
 			confirm.AddResponse("cancel", L("Cancel"))
 			confirm.AddResponse("delete", L("Delete"))
-			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
-			confirm.ConnectResponse(func(response string) {
+			confirm.SetResponseAppearance("delete", adw.ResponseDestructiveValue)
+			connectAlertDialogResponse(confirm, func(response string) {
 				if response == "delete" {
 					redirected, c, _, err := authorize(
 						ctx,
@@ -2876,13 +2928,13 @@ func main() {
 				}
 			})
 
-			confirm.Present(w)
+			confirm.Present(&w.ApplicationWindow.Window.Widget)
 		})
 		a.AddAction(deleteActivityAction)
 
 		deleteJournalEntryAction := gio.NewSimpleAction("deleteJournalEntry", glib.NewVariantType("x"))
-		deleteJournalEntryAction.ConnectActivate(func(parameter *glib.Variant) {
-			id := parameter.Int64()
+		connectSimpleActionActivateWithParam(deleteJournalEntryAction, func(parameter *glib.Variant) {
+			id := parameter.GetInt64()
 
 			log := log.With(
 				"id", id,
@@ -2896,8 +2948,8 @@ func main() {
 			)
 			confirm.AddResponse("cancel", L("Cancel"))
 			confirm.AddResponse("delete", L("Delete"))
-			confirm.SetResponseAppearance("delete", adw.ResponseDestructive)
-			confirm.ConnectResponse(func(response string) {
+			confirm.SetResponseAppearance("delete", adw.ResponseDestructiveValue)
+			connectAlertDialogResponse(confirm, func(response string) {
 				if response == "delete" {
 					redirected, c, _, err := authorize(
 						ctx,
@@ -2937,15 +2989,15 @@ func main() {
 				}
 			})
 
-			confirm.Present(w)
+			confirm.Present(&w.ApplicationWindow.Window.Widget)
 		})
 		a.AddAction(deleteJournalEntryAction)
 
 		var selectedActivityID = -1
 
 		editActivityAction := gio.NewSimpleAction("editActivity", glib.NewVariantType("x"))
-		editActivityAction.ConnectActivate(func(parameter *glib.Variant) {
-			id := parameter.Int64()
+		connectSimpleActionActivateWithParam(editActivityAction, func(parameter *glib.Variant) {
+			id := parameter.GetInt64()
 
 			log := log.With(
 				"id", id,
@@ -2962,8 +3014,8 @@ func main() {
 		var selectedDebtID = -1
 
 		editDebtAction := gio.NewSimpleAction("editDebt", glib.NewVariantType("x"))
-		editDebtAction.ConnectActivate(func(parameter *glib.Variant) {
-			id := parameter.Int64()
+		connectSimpleActionActivateWithParam(editDebtAction, func(parameter *glib.Variant) {
+			id := parameter.GetInt64()
 
 			log := log.With(
 				"id", id,
@@ -2980,8 +3032,8 @@ func main() {
 		var selectedContactID = -1
 
 		editContactAction := gio.NewSimpleAction("editContact", glib.NewVariantType("x"))
-		editContactAction.ConnectActivate(func(parameter *glib.Variant) {
-			id := parameter.Int64()
+		connectSimpleActionActivateWithParam(editContactAction, func(parameter *glib.Variant) {
+			id := parameter.GetInt64()
 
 			log := log.With(
 				"id", id,
@@ -2998,8 +3050,8 @@ func main() {
 		var selectedJournalEntryID = -1
 
 		editJournalEntryAction := gio.NewSimpleAction("editJournalEntry", glib.NewVariantType("x"))
-		editJournalEntryAction.ConnectActivate(func(parameter *glib.Variant) {
-			id := parameter.Int64()
+		connectSimpleActionActivateWithParam(editJournalEntryAction, func(parameter *glib.Variant) {
+			id := parameter.GetInt64()
 
 			log := log.With(
 				"id", id,
@@ -3014,7 +3066,7 @@ func main() {
 		a.AddAction(editJournalEntryAction)
 
 		createItemAction := gio.NewSimpleAction("createItem", nil)
-		createItemAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(createItemAction, func() {
 			var (
 				tag = homeNavigation.GetVisiblePage().GetTag()
 				log = log.With("tag", tag)
@@ -3024,11 +3076,11 @@ func main() {
 
 			switch tag {
 			case resources.PageContacts:
-				contactsCreateDialog.Present(w)
+				contactsCreateDialog.Present(&w.ApplicationWindow.Window.Widget)
 				contactsCreateDialogFirstNameInput.GrabFocus()
 
 			case resources.PageJournalEntries:
-				journalEntriesCreateDialog.Present(w)
+				journalEntriesCreateDialog.Present(&w.ApplicationWindow.Window.Widget)
 				journalEntriesCreateDialogTitleInput.GrabFocus()
 			}
 		})
@@ -3036,7 +3088,7 @@ func main() {
 		a.SetAccelsForAction("app.createItem", []string{`<Primary>n`})
 
 		searchListAction := gio.NewSimpleAction("searchList", nil)
-		searchListAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(searchListAction, func() {
 			var (
 				tag = homeNavigation.GetVisiblePage().GetTag()
 				log = log.With("tag", tag)
@@ -3046,17 +3098,17 @@ func main() {
 
 			switch tag {
 			case resources.PageContacts:
-				contactsSearchButton.SetActive(!contactsSearchButton.Active())
+				contactsSearchButton.SetActive(!contactsSearchButton.GetActive())
 
 			case resources.PageJournalEntries:
-				journalEntriesSearchButton.SetActive(!journalEntriesSearchButton.Active())
+				journalEntriesSearchButton.SetActive(!journalEntriesSearchButton.GetActive())
 			}
 		})
 		a.AddAction(searchListAction)
 		a.SetAccelsForAction("app.searchList", []string{`<Primary>f`})
 
 		editItemAction := gio.NewSimpleAction("editItem", nil)
-		editItemAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(editItemAction, func() {
 			var (
 				tag = homeNavigation.GetVisiblePage().GetTag()
 				log = log.With("tag", tag)
@@ -3085,7 +3137,7 @@ func main() {
 		a.SetAccelsForAction("app.editItem", []string{`<Primary>e`})
 
 		deleteItemAction := gio.NewSimpleAction("deleteItem", nil)
-		deleteItemAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(deleteItemAction, func() {
 			var (
 				tag = homeNavigation.GetVisiblePage().GetTag()
 				log = log.With("tag", tag)
@@ -3114,10 +3166,10 @@ func main() {
 		a.SetAccelsForAction("app.deleteItem", []string{`<Primary>Delete`})
 
 		navigateToContactsAction := gio.NewSimpleAction("navigateToContacts", nil)
-		navigateToContactsAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(navigateToContactsAction, func() {
 			log.Info("Handling navigate to contacts action")
 
-			contactsRow := homeSidebarListbox.RowAtIndex(0)
+			contactsRow := homeSidebarListbox.GetRowAtIndex(0)
 			contactsRow.GrabFocus()
 			homeSidebarListbox.SelectRow(contactsRow)
 
@@ -3127,10 +3179,10 @@ func main() {
 		a.SetAccelsForAction("app.navigateToContacts", []string{`<Alt>1`})
 
 		navigateToJournalAction := gio.NewSimpleAction("navigateToJournal", nil)
-		navigateToJournalAction.ConnectActivate(func(parameter *glib.Variant) {
+		connectSimpleActionActivate(navigateToJournalAction, func() {
 			log.Info("Handling navigate to journal action")
 
-			journalEntriesRow := homeSidebarListbox.RowAtIndex(1)
+			journalEntriesRow := homeSidebarListbox.GetRowAtIndex(1)
 			journalEntriesRow.GrabFocus()
 			homeSidebarListbox.SelectRow(journalEntriesRow)
 
@@ -3151,7 +3203,7 @@ func main() {
 
 			log.Info("Handling page")
 
-			homeContentPage.SetTitle(homeNavigation.GetVisiblePage().Title())
+			homeContentPage.SetTitle(homeNavigation.GetVisiblePage().GetTitle())
 
 			homeSplitView.SetShowContent(true)
 
@@ -3229,9 +3281,9 @@ func main() {
 							r.SetName("/contacts/view?id=" + strconv.Itoa(int(*contact.Id)))
 
 							menuButton := gtk.NewMenuButton()
-							menuButton.SetVAlign(gtk.AlignCenter)
+							menuButton.SetValign(gtk.AlignCenterValue)
 							menuButton.SetIconName("view-more-symbolic")
-							menuButton.AddCSSClass("flat")
+							menuButton.AddCssClass("flat")
 
 							menu := gio.NewMenu()
 
@@ -3243,15 +3295,15 @@ func main() {
 							editContactMenuItem.SetActionAndTargetValue("app.editContact", glib.NewVariantInt64(*contact.Id))
 							menu.AppendItem(editContactMenuItem)
 
-							menuButton.SetMenuModel(menu)
+							menuButton.SetMenuModel(&menu.MenuModel)
 
-							r.AddSuffix(menuButton)
+							r.AddSuffix(&menuButton.Widget)
 
-							r.AddSuffix(gtk.NewImageFromIconName("go-next-symbolic"))
+							r.AddSuffix(&gtk.NewImageFromIconName("go-next-symbolic").Widget)
 
 							r.SetActivatable(true)
 
-							contactsListBox.Append(r)
+							contactsListBox.Append(&r.PreferencesRow.ListBoxRow.Widget)
 						}
 					} else {
 						contactsAddButton.SetVisible(false)
@@ -3328,7 +3380,7 @@ func main() {
 					if (birthday != nil) || (*address != "") || (*notes != "") {
 						if birthday != nil {
 							contactsViewBirthdayRow.SetVisible(true)
-							contactsViewBirthdayRow.SetSubtitle(glib.NewDateTimeFromGo(birthday.Time).Format("%x"))
+							contactsViewBirthdayRow.SetSubtitle(glibDateTimeFromGo(birthday.Time).Format("%x"))
 						} else {
 							contactsViewBirthdayRow.SetVisible(false)
 						}
@@ -3382,9 +3434,9 @@ func main() {
 						}
 
 						menuButton := gtk.NewMenuButton()
-						menuButton.SetVAlign(gtk.AlignCenter)
+						menuButton.SetValign(gtk.AlignCenterValue)
 						menuButton.SetIconName("view-more-symbolic")
-						menuButton.AddCSSClass("flat")
+						menuButton.AddCssClass("flat")
 
 						menu := gio.NewMenu()
 
@@ -3398,11 +3450,11 @@ func main() {
 
 						menu.AppendItem(editDebtMenuItem)
 
-						menuButton.SetMenuModel(menu)
+						menuButton.SetMenuModel(&menu.MenuModel)
 
-						r.AddSuffix(menuButton)
+						r.AddSuffix(&menuButton.Widget)
 
-						contactsViewDebtsListBox.Append(r)
+						contactsViewDebtsListBox.Append(&r.PreferencesRow.ListBoxRow.Widget)
 					}
 
 					addDebtButton := adw.NewButtonRow()
@@ -3410,12 +3462,13 @@ func main() {
 					addDebtButton.SetTitle(L("Add a _debt"))
 					addDebtButton.SetUseUnderline(true)
 
-					addDebtButton.ConnectActivated(func() {
-						debtsCreateDialog.Present(w)
+					activatedCb := func(_ adw.ButtonRow) {
+						debtsCreateDialog.Present(&w.ApplicationWindow.Window.Widget)
 						debtsCreateDialogAmountInput.GrabFocus()
-					})
+					}
+					addDebtButton.ConnectActivated(&activatedCb)
 
-					contactsViewDebtsListBox.Append(addDebtButton)
+					contactsViewDebtsListBox.Append(&addDebtButton.PreferencesRow.ListBoxRow.Widget)
 
 					validateActivitiesCreateDialogForm()
 
@@ -3429,14 +3482,14 @@ func main() {
 						r := adw.NewActionRow()
 
 						r.SetTitle(*activity.Name)
-						r.SetSubtitle(glib.NewDateTimeFromGo(activity.Date.Time).Format("%x"))
+						r.SetSubtitle(glibDateTimeFromGo(activity.Date.Time).Format("%x"))
 
 						r.SetName("/activities/view?id=" + strconv.Itoa(int(*activity.Id)))
 
 						menuButton := gtk.NewMenuButton()
-						menuButton.SetVAlign(gtk.AlignCenter)
+						menuButton.SetValign(gtk.AlignCenterValue)
 						menuButton.SetIconName("view-more-symbolic")
-						menuButton.AddCSSClass("flat")
+						menuButton.AddCssClass("flat")
 
 						menu := gio.NewMenu()
 
@@ -3448,15 +3501,15 @@ func main() {
 						editActivityMenuItem.SetActionAndTargetValue("app.editActivity", glib.NewVariantInt64(*activity.Id))
 						menu.AppendItem(editActivityMenuItem)
 
-						menuButton.SetMenuModel(menu)
+						menuButton.SetMenuModel(&menu.MenuModel)
 
-						r.AddSuffix(menuButton)
+						r.AddSuffix(&menuButton.Widget)
 
-						r.AddSuffix(gtk.NewImageFromIconName("go-next-symbolic"))
+						r.AddSuffix(&gtk.NewImageFromIconName("go-next-symbolic").Widget)
 
 						r.SetActivatable(true)
 
-						contactsViewActivitiesListBox.Append(r)
+						contactsViewActivitiesListBox.Append(&r.PreferencesRow.ListBoxRow.Widget)
 					}
 
 					addActivityButton := adw.NewButtonRow()
@@ -3464,14 +3517,15 @@ func main() {
 					addActivityButton.SetTitle(L("Add an ac_tivity"))
 					addActivityButton.SetUseUnderline(true)
 
-					addActivityButton.ConnectActivated(func() {
-						activitiesCreateDialog.Present(w)
+					addActivityActivatedCb := func(_ adw.ButtonRow) {
+						activitiesCreateDialog.Present(&w.ApplicationWindow.Window.Widget)
 						activitiesCreateDialogNameInput.GrabFocus()
-					})
+					}
+					addActivityButton.ConnectActivated(&addActivityActivatedCb)
 
 					addActivityButton.SetActivatable(true)
 
-					contactsViewActivitiesListBox.Append(addActivityButton)
+					contactsViewActivitiesListBox.Append(&addActivityButton.PreferencesRow.ListBoxRow.Widget)
 				}()
 
 			case resources.PageActivitiesView:
@@ -3515,7 +3569,7 @@ func main() {
 					activitiesViewDeleteButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.ActivityId))
 
 					activitiesViewPageTitle.SetTitle(*res.JSON200.Name)
-					activitiesViewPageTitle.SetSubtitle(glib.NewDateTimeFromGo(res.JSON200.Date.Time).Format("%x"))
+					activitiesViewPageTitle.SetSubtitle(glibDateTimeFromGo(res.JSON200.Date.Time).Format("%x"))
 
 					var buf bytes.Buffer
 					if err := md.Convert([]byte(*res.JSON200.Description), &buf); err != nil {
@@ -3528,11 +3582,11 @@ func main() {
 
 					// TODO: Replace with WebView once puregotk has WebKit bindings
 					if description := *res.JSON200.Description; description != "" {
-						glib.IdleAdd(func() {
+						idleAdd(func() {
 							activitiesViewPageBodyWebView.SetLabel(buf.String())
 						})
 					} else {
-						glib.IdleAdd(func() {
+						idleAdd(func() {
 							activitiesViewPageBodyWebView.SetLabel(L("No description provided."))
 						})
 					}
@@ -3584,12 +3638,12 @@ func main() {
 					activitiesEditPageTitle.SetSubtitle(*res.JSON200.FirstName + " " + *res.JSON200.LastName)
 
 					activitiesEditPageNameInput.SetText(*res.JSON200.Name)
-					activitiesEditPageDateInput.SetText(glib.NewDateTimeFromGo(res.JSON200.Date.Time).Format("%x"))
+					activitiesEditPageDateInput.SetText(glibDateTimeFromGo(res.JSON200.Date.Time).Format("%x"))
 
-					setValidationSuffixVisible(activitiesEditPageDateInput, activitiesEditPageDateWarningButton, false)
+					setValidationSuffixVisible(&activitiesEditPageDateInput, &activitiesEditPageDateWarningButton, false)
 
 					activitiesEditPageDescriptionExpander.SetExpanded(*res.JSON200.Description != "")
-					activitiesEditPageDescriptionInput.Buffer().SetText(*res.JSON200.Description)
+					activitiesEditPageDescriptionInput.GetBuffer().SetText(*res.JSON200.Description, -1)
 				}()
 
 			case resources.PageDebtsEdit:
@@ -3660,7 +3714,7 @@ func main() {
 					debtsEditPageCurrencyInput.SetText(*debt.Currency)
 
 					debtsEditPageDescriptionExpander.SetExpanded(*debt.Description != "")
-					debtsEditPageDescriptionInput.Buffer().SetText(*debt.Description)
+					debtsEditPageDescriptionInput.GetBuffer().SetText(*debt.Description, -1)
 				}()
 
 			case resources.PageContactsEdit:
@@ -3718,19 +3772,19 @@ func main() {
 						notes    = res.JSON200.Entry.Notes
 					)
 					if birthday != nil {
-						contactsEditPageBirthdayInput.SetText(glib.NewDateTimeFromGo(birthday.Time).Format("%x"))
+						contactsEditPageBirthdayInput.SetText(glibDateTimeFromGo(birthday.Time).Format("%x"))
 					}
 
 					if *address != "" {
 						contactsEditPageAddressExpander.SetExpanded(true)
-						contactsEditPageAddressInput.Buffer().SetText(*address)
+						contactsEditPageAddressInput.GetBuffer().SetText(*address, -1)
 					} else {
 						contactsEditPageAddressExpander.SetExpanded(false)
 					}
 
 					if *notes != "" {
 						contactsEditPageNotesExpander.SetExpanded(true)
-						contactsEditPageNotesInput.Buffer().SetText(*notes)
+						contactsEditPageNotesInput.GetBuffer().SetText(*notes, -1)
 					} else {
 						contactsEditPageNotesExpander.SetExpanded(false)
 					}
@@ -3789,7 +3843,7 @@ func main() {
 
 							r.SetTitle(*journalEntry.Title)
 
-							subtitle := glib.NewDateTimeFromGo(*journalEntry.Date).Format("%x") + " | "
+							subtitle := glibDateTimeFromGo(*journalEntry.Date).Format("%x") + " | "
 							switch *journalEntry.Rating {
 							case 3:
 								subtitle += L("Great")
@@ -3805,9 +3859,9 @@ func main() {
 							r.SetName("/journal/view?id=" + strconv.Itoa(int(*journalEntry.Id)))
 
 							menuButton := gtk.NewMenuButton()
-							menuButton.SetVAlign(gtk.AlignCenter)
+							menuButton.SetValign(gtk.AlignCenterValue)
 							menuButton.SetIconName("view-more-symbolic")
-							menuButton.AddCSSClass("flat")
+							menuButton.AddCssClass("flat")
 
 							menu := gio.NewMenu()
 
@@ -3819,15 +3873,15 @@ func main() {
 							editContactMenuItem.SetActionAndTargetValue("app.editJournalEntry", glib.NewVariantInt64(*journalEntry.Id))
 							menu.AppendItem(editContactMenuItem)
 
-							menuButton.SetMenuModel(menu)
+							menuButton.SetMenuModel(&menu.MenuModel)
 
-							r.AddSuffix(menuButton)
+							r.AddSuffix(&menuButton.Widget)
 
-							r.AddSuffix(gtk.NewImageFromIconName("go-next-symbolic"))
+							r.AddSuffix(&gtk.NewImageFromIconName("go-next-symbolic").Widget)
 
 							r.SetActivatable(true)
 
-							journalEntriesListBox.Append(r)
+							journalEntriesListBox.Append(&r.PreferencesRow.ListBoxRow.Widget)
 						}
 					} else {
 						journalEntriesAddButton.SetVisible(false)
@@ -3876,7 +3930,7 @@ func main() {
 					journalEntriesViewDeleteButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Id))
 
 					journalEntriesViewPageTitle.SetTitle(*res.JSON200.Title)
-					subtitle := glib.NewDateTimeFromGo(*res.JSON200.Date).Format("%x") + " | "
+					subtitle := glibDateTimeFromGo(*res.JSON200.Date).Format("%x") + " | "
 					switch *res.JSON200.Rating {
 					case 3:
 						subtitle += L("Great")
@@ -3899,7 +3953,7 @@ func main() {
 					}
 
 					// TODO: Replace with WebView once puregotk has WebKit bindings
-					glib.IdleAdd(func() {
+					idleAdd(func() {
 						journalEntriesViewPageBodyWebView.SetLabel(buf.String())
 					})
 
@@ -3954,14 +4008,16 @@ func main() {
 					journalEntriesEditPageTitleInput.SetText(*res.JSON200.Title)
 
 					journalEntriesEditPageBodyExpander.SetExpanded(true)
-					journalEntriesEditPageBodyInput.Buffer().SetText(*res.JSON200.Body)
+					journalEntriesEditPageBodyInput.GetBuffer().SetText(*res.JSON200.Body, -1)
 				}()
 			}
 		}
 
-		contactsListBox.ConnectRowActivated(func(row *gtk.ListBoxRow) {
+		connectListBoxRowActivated(&contactsListBox, func(row *gtk.ListBoxRow) {
 			if row != nil {
-				u, err := url.Parse(row.Cast().(*adw.ActionRow).Name())
+				var actionRow adw.ActionRow
+				row.Cast(&actionRow)
+				u, err := url.Parse(actionRow.GetName())
 				if err != nil {
 					log.Warn("Could not parse contact row URL", "err", err)
 
@@ -3994,14 +4050,12 @@ func main() {
 			}
 		})
 
-		contactsViewActivitiesListBox.ConnectRowActivated(func(row *gtk.ListBoxRow) {
+		connectListBoxRowActivated(&contactsViewActivitiesListBox, func(row *gtk.ListBoxRow) {
 			if row != nil {
-				row, ok := row.Cast().(*adw.ActionRow)
-				if !ok {
-					return
-				}
+				var actionRow adw.ActionRow
+				row.Cast(&actionRow)
 
-				u, err := url.Parse(row.Cast().(*adw.ActionRow).Name())
+				u, err := url.Parse(actionRow.GetName())
 				if err != nil {
 					log.Warn("Could not parse activity row URL", "err", err)
 
@@ -4034,9 +4088,11 @@ func main() {
 			}
 		})
 
-		journalEntriesListBox.ConnectRowActivated(func(row *gtk.ListBoxRow) {
+		connectListBoxRowActivated(&journalEntriesListBox, func(row *gtk.ListBoxRow) {
 			if row != nil {
-				u, err := url.Parse(row.Cast().(*adw.ActionRow).Name())
+				var actionRow adw.ActionRow
+				row.Cast(&actionRow)
+				u, err := url.Parse(actionRow.GetName())
 				if err != nil {
 					log.Warn("Could not parse journal entry row URL", "err", err)
 
@@ -4069,7 +4125,7 @@ func main() {
 			}
 		})
 
-		homeNavigation.ConnectPopped(func(page *adw.NavigationPage) {
+		connectNavigationViewPopped(&homeNavigation, func(page *adw.NavigationPage) {
 			handleHomeNavigation()
 
 			var (
@@ -4094,10 +4150,10 @@ func main() {
 				activitiesEditPageNameInput.SetText("")
 				activitiesEditPageDateInput.SetText("")
 
-				setValidationSuffixVisible(activitiesEditPageDateInput, activitiesEditPageDateWarningButton, false)
+				setValidationSuffixVisible(&activitiesEditPageDateInput, &activitiesEditPageDateWarningButton, false)
 
 				activitiesEditPageDescriptionExpander.SetExpanded(false)
-				activitiesEditPageDescriptionInput.Buffer().SetText("")
+				activitiesEditPageDescriptionInput.GetBuffer().SetText("", 0)
 
 			case resources.PageDebtsEdit:
 				debtsEditPageTitle.SetSubtitle("")
@@ -4111,7 +4167,7 @@ func main() {
 				debtsEditPageCurrencyInput.SetText("")
 
 				debtsEditPageDescriptionExpander.SetExpanded(false)
-				debtsEditPageDescriptionInput.Buffer().SetText("")
+				debtsEditPageDescriptionInput.GetBuffer().SetText("", 0)
 
 			case resources.PageContactsEdit:
 				contactsEditPageTitle.SetSubtitle("")
@@ -4125,19 +4181,21 @@ func main() {
 				contactsEditPageBirthdayInput.SetText("")
 
 				contactsEditPageAddressExpander.SetExpanded(false)
-				contactsEditPageAddressInput.Buffer().SetText("")
+				contactsEditPageAddressInput.GetBuffer().SetText("", 0)
 
 				contactsEditPageNotesExpander.SetExpanded(false)
-				contactsEditPageNotesInput.Buffer().SetText("")
+				contactsEditPageNotesInput.GetBuffer().SetText("", 0)
 
-				setValidationSuffixVisible(contactsEditPageEmailInput, contactsEditPageEmailWarningButton, false)
+				setValidationSuffixVisible(&contactsEditPageEmailInput, &contactsEditPageEmailWarningButton, false)
 			}
 		})
-		homeNavigation.ConnectPushed(handleHomeNavigation)
-		homeNavigation.ConnectReplaced(handleHomeNavigation)
+		connectNavigationViewPushed(&homeNavigation, handleHomeNavigation)
+		connectNavigationViewReplaced(&homeNavigation, handleHomeNavigation)
 
-		homeSidebarListbox.ConnectRowActivated(func(row *gtk.ListBoxRow) {
-			homeNavigation.ReplaceWithTags([]string{row.Cast().(*adw.ActionRow).Name()}, 1)
+		connectListBoxRowActivated(&homeSidebarListbox, func(row *gtk.ListBoxRow) {
+			var actionRow adw.ActionRow
+			row.Cast(&actionRow)
+			homeNavigation.ReplaceWithTags([]string{actionRow.GetName()}, 1)
 		})
 
 		handleNavigation := func() {
@@ -4269,7 +4327,7 @@ func main() {
 						return
 					}
 
-					contactsRow := homeSidebarListbox.RowAtIndex(0)
+					contactsRow := homeSidebarListbox.GetRowAtIndex(0)
 					contactsRow.GrabFocus()
 					homeSidebarListbox.SelectRow(contactsRow)
 
@@ -4278,7 +4336,7 @@ func main() {
 			}
 		}
 
-		nv.ConnectPopped(func(page *adw.NavigationPage) {
+		connectNavigationViewPopped(&nv, func(page *adw.NavigationPage) {
 			handleNavigation()
 
 			var (
@@ -4293,8 +4351,8 @@ func main() {
 				enablePreviewLoading()
 			}
 		})
-		nv.ConnectPushed(handleNavigation)
-		nv.ConnectReplaced(handleNavigation)
+		connectNavigationViewPushed(&nv, handleNavigation)
+		connectNavigationViewReplaced(&nv, handleNavigation)
 
 		handleNavigation()
 
@@ -4303,7 +4361,7 @@ func main() {
 	a.ConnectActivate(&activateCallback)
 
 	openCallback := func(_ gio.Application, filesPtr uintptr, nFiles int, hint string) {
-		if w == nil {
+		if w.GoPointer() == 0 {
 			a.Activate()
 		} else {
 			w.Present()
@@ -4320,137 +4378,137 @@ func main() {
 		file.SetGoPointer(filesPtr)
 
 		u, err := url.Parse(file.GetUri())
-			if err != nil {
-				handlePanic(err)
+		if err != nil {
+			handlePanic(err)
+
+			return
+		}
+
+		authCode := u.Query().Get("code")
+		state := u.Query().Get("state")
+
+		log := log.With(
+			"authCode", authCode != "",
+			"state", state,
+		)
+
+		log.Debug("Handling user auth exchange")
+
+		var (
+			stateNonce,
+			pkceCodeVerifier,
+			oidcNonce string
+		)
+		sn, err := keyring.Get(resources.AppID, resources.SecretStateNonceKey)
+		if err != nil {
+			if !errors.Is(err, keyring.ErrNotFound) {
+				log.Debug("Failed to read state nonce cookie", "error", err)
+
+				handlePanic(errors.Join(errCouldNotLogin, err))
 
 				return
 			}
+		} else {
+			stateNonce = sn
+		}
 
-			authCode := u.Query().Get("code")
-			state := u.Query().Get("state")
+		pcv, err := keyring.Get(resources.AppID, resources.SecretPKCECodeVerifierKey)
+		if err != nil {
+			if !errors.Is(err, keyring.ErrNotFound) {
+				log.Debug("Failed to read PKCE code verifier cookie", "error", err)
 
-			log := log.With(
-				"authCode", authCode != "",
-				"state", state,
-			)
-
-			log.Debug("Handling user auth exchange")
-
-			var (
-				stateNonce,
-				pkceCodeVerifier,
-				oidcNonce string
-			)
-			sn, err := keyring.Get(resources.AppID, resources.SecretStateNonceKey)
-			if err != nil {
-				if !errors.Is(err, keyring.ErrNotFound) {
-					log.Debug("Failed to read state nonce cookie", "error", err)
-
-					handlePanic(errors.Join(errCouldNotLogin, err))
-
-					return
-				}
-			} else {
-				stateNonce = sn
-			}
-
-			pcv, err := keyring.Get(resources.AppID, resources.SecretPKCECodeVerifierKey)
-			if err != nil {
-				if !errors.Is(err, keyring.ErrNotFound) {
-					log.Debug("Failed to read PKCE code verifier cookie", "error", err)
-
-					handlePanic(errors.Join(errCouldNotLogin, err))
-
-					return
-				}
-			} else {
-				pkceCodeVerifier = pcv
-			}
-
-			on, err := keyring.Get(resources.AppID, resources.SecretOIDCNonceKey)
-			if err != nil {
-				if !errors.Is(err, keyring.ErrNotFound) {
-					log.Debug("Failed to read OIDC nonce cookie", "error", err)
-
-					handlePanic(errors.Join(errCouldNotLogin, err))
-
-					return
-				}
-			} else {
-				oidcNonce = on
-			}
-
-			nextURL, signedOut, err := authner.Exchange(
-				ctx,
-
-				authCode,
-				state,
-
-				stateNonce,
-				pkceCodeVerifier,
-				oidcNonce,
-
-				func(s string, t time.Time) error {
-					// TODO: Handle expiry time
-					return keyring.Set(resources.AppID, resources.SecretRefreshTokenKey, s)
-				},
-				func(s string, t time.Time) error {
-					// TODO: Handle expiry time
-					return keyring.Set(resources.AppID, resources.SecretIDTokenKey, s)
-				},
-
-				func() error {
-					if err := keyring.Delete(resources.AppID, resources.SecretRefreshTokenKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
-						return err
-					}
-
-					return nil
-				},
-				func() error {
-					if err := keyring.Delete(resources.AppID, resources.SecretIDTokenKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
-						return err
-					}
-
-					return nil
-				},
-
-				func() error {
-					if err := keyring.Delete(resources.AppID, resources.SecretStateNonceKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
-						return err
-					}
-
-					return nil
-				},
-				func() error {
-					if err := keyring.Delete(resources.AppID, resources.SecretPKCECodeVerifierKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
-						return err
-					}
-
-					return nil
-				},
-				func() error {
-					if err := keyring.Delete(resources.AppID, resources.SecretOIDCNonceKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
-						return err
-					}
-
-					return nil
-				},
-			)
-			if err != nil {
-				handlePanic(err)
+				handlePanic(errors.Join(errCouldNotLogin, err))
 
 				return
 			}
+		} else {
+			pkceCodeVerifier = pcv
+		}
 
-			// In the web version, redirecting to the home page after signing out is possible without
-			// authn. In the GNOME version, that is not the case since the unauthenticated
-			// page is a separate page from home, so we need to rewrite the path to distinguish
-			// between the two manually
-			if signedOut && nextURL == resources.PageHome {
-				nextURL = resources.PageIndex
+		on, err := keyring.Get(resources.AppID, resources.SecretOIDCNonceKey)
+		if err != nil {
+			if !errors.Is(err, keyring.ErrNotFound) {
+				log.Debug("Failed to read OIDC nonce cookie", "error", err)
+
+				handlePanic(errors.Join(errCouldNotLogin, err))
+
+				return
 			}
+		} else {
+			oidcNonce = on
+		}
 
-			nv.ReplaceWithTags([]string{nextURL}, 1)
+		nextURL, signedOut, err := authner.Exchange(
+			ctx,
+
+			authCode,
+			state,
+
+			stateNonce,
+			pkceCodeVerifier,
+			oidcNonce,
+
+			func(s string, t time.Time) error {
+				// TODO: Handle expiry time
+				return keyring.Set(resources.AppID, resources.SecretRefreshTokenKey, s)
+			},
+			func(s string, t time.Time) error {
+				// TODO: Handle expiry time
+				return keyring.Set(resources.AppID, resources.SecretIDTokenKey, s)
+			},
+
+			func() error {
+				if err := keyring.Delete(resources.AppID, resources.SecretRefreshTokenKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
+					return err
+				}
+
+				return nil
+			},
+			func() error {
+				if err := keyring.Delete(resources.AppID, resources.SecretIDTokenKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
+					return err
+				}
+
+				return nil
+			},
+
+			func() error {
+				if err := keyring.Delete(resources.AppID, resources.SecretStateNonceKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
+					return err
+				}
+
+				return nil
+			},
+			func() error {
+				if err := keyring.Delete(resources.AppID, resources.SecretPKCECodeVerifierKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
+					return err
+				}
+
+				return nil
+			},
+			func() error {
+				if err := keyring.Delete(resources.AppID, resources.SecretOIDCNonceKey); err != nil && !errors.Is(err, keyring.ErrNotFound) {
+					return err
+				}
+
+				return nil
+			},
+		)
+		if err != nil {
+			handlePanic(err)
+
+			return
+		}
+
+		// In the web version, redirecting to the home page after signing out is possible without
+		// authn. In the GNOME version, that is not the case since the unauthenticated
+		// page is a separate page from home, so we need to rewrite the path to distinguish
+		// between the two manually
+		if signedOut && nextURL == resources.PageHome {
+			nextURL = resources.PageIndex
+		}
+
+		nv.ReplaceWithTags([]string{nextURL}, 1)
 	}
 	a.ConnectOpen(&openCallback)
 
