@@ -23,9 +23,11 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/jwijenbergh/puregotk/v4/adw"
+	"github.com/jwijenbergh/puregotk/v4/gdk"
 	"github.com/jwijenbergh/puregotk/v4/gio"
 	"github.com/jwijenbergh/puregotk/v4/glib"
 	"github.com/jwijenbergh/puregotk/v4/gtk"
+	"github.com/jwijenbergh/puregotk/v4/webkit"
 	"github.com/oapi-codegen/oapi-codegen/v2/pkg/securityprovider"
 	"github.com/oapi-codegen/runtime/types"
 	. "github.com/pojntfx/go-gettext/pkg/i18n"
@@ -407,7 +409,7 @@ func main() {
 			activitiesViewEditButton   gtk.Button
 			activitiesViewDeleteButton gtk.Button
 
-			activitiesViewPageBodyWebView gtk.Label
+			activitiesViewPageBodyWebView webkit.WebView
 
 			activitiesEditPageTitle              adw.WindowTitle
 			activitiesEditStack                  gtk.Stack
@@ -535,7 +537,7 @@ func main() {
 			journalEntriesViewEditButton   gtk.Button
 			journalEntriesViewDeleteButton gtk.Button
 
-			journalEntriesViewPageBodyWebView gtk.Label
+			journalEntriesViewPageBodyWebView webkit.WebView
 
 			journalEntriesEditPageTitle              adw.WindowTitle
 			journalEntriesEditStack                  gtk.Stack
@@ -625,6 +627,35 @@ func main() {
 		b.GetObject("activities_view_edit_button").Cast(&activitiesViewEditButton)
 		b.GetObject("activities_view_delete_button").Cast(&activitiesViewDeleteButton)
 		b.GetObject("activities_view_body").Cast(&activitiesViewPageBodyWebView)
+		{
+			// Set transparent background for WebView
+			bg := gdk.RGBA{Alpha: 0}
+			activitiesViewPageBodyWebView.SetBackgroundColor(&bg)
+
+			// Handle navigation policy - open external links in browser
+			decidePolicyCb := func(_ webkit.WebView, decisionPtr uintptr, decisionType webkit.PolicyDecisionType) bool {
+				if decisionType == webkit.PolicyDecisionTypeNavigationActionValue {
+					decision := webkit.NavigationPolicyDecisionNewFromInternalPtr(decisionPtr)
+					u, err := url.Parse(decision.GetNavigationAction().GetRequest().GetUri())
+					if err != nil {
+						log.Warn("Could not parse activity view WebView URL", "err", err)
+						return true
+					}
+
+					openExternally := u.Scheme != "about"
+					log.Debug("Handling navigation in activity view WebView", "openExternally", openExternally, "url", u.String())
+
+					if openExternally {
+						gtk.ShowUri(&w.ApplicationWindow.Window, u.String(), uint32(gdk.CURRENT_TIME))
+						return true
+					}
+
+					return false
+				}
+				return false
+			}
+			activitiesViewPageBodyWebView.ConnectDecidePolicy(&decidePolicyCb)
+		}
 		b.GetObject("activities_edit_page_title").Cast(&activitiesEditPageTitle)
 		b.GetObject("activities_edit_stack").Cast(&activitiesEditStack)
 		b.GetObject("activities_edit_error_status_page").Cast(&activitiesEditErrorStatusPage)
@@ -717,6 +748,33 @@ func main() {
 		b.GetObject("journal_entries_view_edit_button").Cast(&journalEntriesViewEditButton)
 		b.GetObject("journal_entries_view_delete_button").Cast(&journalEntriesViewDeleteButton)
 		b.GetObject("journal_entries_view_body").Cast(&journalEntriesViewPageBodyWebView)
+
+		bg := gdk.RGBA{Alpha: 0}
+		journalEntriesViewPageBodyWebView.SetBackgroundColor(&bg)
+
+		decidePolicyCb := func(_ webkit.WebView, decisionPtr uintptr, decisionType webkit.PolicyDecisionType) bool {
+			if decisionType == webkit.PolicyDecisionTypeNavigationActionValue {
+				decision := webkit.NavigationPolicyDecisionNewFromInternalPtr(decisionPtr)
+				u, err := url.Parse(decision.GetNavigationAction().GetRequest().GetUri())
+				if err != nil {
+					log.Warn("Could not parse journal entry view WebView URL", "err", err)
+					return true
+				}
+
+				openExternally := u.Scheme != "about"
+				log.Debug("Handling navigation in journal entry view WebView", "openExternally", openExternally, "url", u.String())
+
+				if openExternally {
+					gtk.ShowUri(&w.ApplicationWindow.Window, u.String(), uint32(gdk.CURRENT_TIME))
+					return true
+				}
+
+				return false
+			}
+			return false
+		}
+		journalEntriesViewPageBodyWebView.ConnectDecidePolicy(&decidePolicyCb)
+
 		b.GetObject("journal_entries_edit_page_title").Cast(&journalEntriesEditPageTitle)
 		b.GetObject("journal_entries_edit_stack").Cast(&journalEntriesEditStack)
 		b.GetObject("journal_entries_edit_error_status_page").Cast(&journalEntriesEditErrorStatusPage)
@@ -3436,14 +3494,13 @@ func main() {
 						return
 					}
 
-					// TODO: Replace with WebView once puregotk has WebKit bindings
 					if description := *res.JSON200.Description; description != "" {
 						idleAdd(func() {
-							activitiesViewPageBodyWebView.SetLabel(buf.String())
+							activitiesViewPageBodyWebView.LoadHtml(renderedMarkdownHTMLPrefix+buf.String(), "about:blank")
 						})
 					} else {
 						idleAdd(func() {
-							activitiesViewPageBodyWebView.SetLabel(L("No description provided."))
+							activitiesViewPageBodyWebView.LoadHtml(renderedMarkdownHTMLPrefix+L("No description provided."), "about:blank")
 						})
 					}
 
@@ -3808,9 +3865,8 @@ func main() {
 						return
 					}
 
-					// TODO: Replace with WebView once puregotk has WebKit bindings
 					idleAdd(func() {
-						journalEntriesViewPageBodyWebView.SetLabel(buf.String())
+						journalEntriesViewPageBodyWebView.LoadHtml(renderedMarkdownHTMLPrefix+buf.String(), "about:blank")
 					})
 
 					defer clearJournalEntriesViewError()

@@ -1,5 +1,6 @@
 using Gtk 4.0;
 using Adw 1;
+using WebKit 6.0;
 
 Adw.ApplicationWindow main_window {
     default-width: 960;
@@ -888,19 +889,7 @@ Adw.ApplicationWindow main_window {
                                             StackPage {
                                                 name: "/activities/view/data";
 
-                                                // TODO: Replace with WebKit.WebView once puregotk has bindings
-                                                child: ScrolledWindow {
-                                                    Label activities_view_body {
-                                                        wrap: true;
-                                                        xalign: 0;
-                                                        yalign: 0;
-                                                        selectable: true;
-                                                        margin-start: 12;
-                                                        margin-end: 12;
-                                                        margin-top: 12;
-                                                        margin-bottom: 12;
-                                                    }
-                                                };
+                                                child: WebKit.WebView activities_view_body {};
                                             }
 
                                             StackPage {
@@ -1618,19 +1607,7 @@ Adw.ApplicationWindow main_window {
                                             StackPage {
                                                 name: "/journal/view/data";
 
-                                                // TODO: Replace with WebKit.WebView once puregotk has bindings
-                                                child: ScrolledWindow {
-                                                    Label journal_entries_view_body {
-                                                        wrap: true;
-                                                        xalign: 0;
-                                                        yalign: 0;
-                                                        selectable: true;
-                                                        margin-start: 12;
-                                                        margin-end: 12;
-                                                        margin-top: 12;
-                                                        margin-bottom: 12;
-                                                    }
-                                                };
+                                                child: WebKit.WebView journal_entries_view_body {};
                                             }
 
                                             StackPage {
