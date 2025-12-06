@@ -20,7 +20,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"unsafe"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/jwijenbergh/puregotk/v4/adw"
@@ -39,152 +38,9 @@ import (
 	"github.com/zalando/go-keyring"
 )
 
-var (
-	errCouldNotLogin            = errors.New("could not login")
-	errCouldNotWriteSettingsKey = errors.New("could not write settings key")
-	errMissingPrivacyURL        = errors.New("missing privacy policy URL")
-	errMissingContactID         = errors.New("missing contact ID")
-	errInvalidContactID         = errors.New("invalid contact ID")
-	errMissingActivityID        = errors.New("missing activity ID")
-	errInvalidActivityID        = errors.New("invalid activity ID")
-	errDebtDoesNotExist         = errors.New("debt does not exist")
-	errMissingJournalEntryID    = errors.New("missing journal entry ID")
-	errInvalidJournaEntrylID    = errors.New("invalid journal entry ID")
-)
-
-const (
-	redirectURL = "senbara:///authorize"
-
-	renderedMarkdownHTMLPrefix = `<meta name="color-scheme" content="light dark" />
-<style>
-  body {
-    max-width: 600px;
-    margin: 0 auto;
-    padding-bottom: 24px;
-    padding-right: 12px;
-    padding-left: 12px;
-    padding-top: 24px;
-  }
-</style>`
-)
-
 type userData struct {
 	Email     string
 	LogoutURL string
-}
-
-const gettextPackage = "senbara-gnome"
-
-var LocaleDir = "/usr/share/locale"
-
-func glibDateTimeFromGo(t time.Time) *glib.DateTime {
-	return glib.NewDateTimeLocal(t.Year(), int(t.Month()), t.Day(), t.Hour(), t.Minute(), float64(t.Second()))
-}
-
-func connectButtonClicked(button *gtk.Button, fn func()) {
-	cb := func(_ gtk.Button) { fn() }
-	button.ConnectClicked(&cb)
-}
-
-func connectSimpleActionActivate(action *gio.SimpleAction, fn func()) {
-	cb := func(_ gio.SimpleAction, _ uintptr) { fn() }
-	action.ConnectActivate(&cb)
-}
-
-func connectSimpleActionActivateWithParam(action *gio.SimpleAction, fn func(parameter *glib.Variant)) {
-	cb := func(_ gio.SimpleAction, paramPtr uintptr) {
-		var param *glib.Variant
-		if paramPtr != 0 {
-			param = (*glib.Variant)(unsafe.Pointer(paramPtr))
-		}
-		fn(param)
-	}
-	action.ConnectActivate(&cb)
-}
-
-func connectSettingsChanged(settings *gio.Settings, fn func(key string)) {
-	cb := func(_ gio.Settings, key string) { fn(key) }
-	settings.ConnectChanged(&cb)
-}
-
-func connectEntryRowChanged(row *adw.EntryRow, fn func()) {
-	cb := func() { fn() }
-	row.PreferencesRow.ListBoxRow.Widget.InitiallyUnowned.Object.ConnectSignal("changed", &cb)
-}
-
-func connectPasswordEntryRowChanged(row *adw.PasswordEntryRow, fn func()) {
-	cb := func() { fn() }
-	row.EntryRow.PreferencesRow.ListBoxRow.Widget.InitiallyUnowned.Object.ConnectSignal("changed", &cb)
-}
-
-func connectSearchEntryChanged(entry *gtk.SearchEntry, fn func()) {
-	cb := func(_ gtk.SearchEntry) { fn() }
-	entry.ConnectSearchChanged(&cb)
-}
-
-func setListBoxFilterFunc(listBox *gtk.ListBox, fn func(row *gtk.ListBoxRow) bool) {
-	filterFunc := gtk.ListBoxFilterFunc(func(rowPtr uintptr, _ uintptr) bool {
-		row := gtk.ListBoxRowNewFromInternalPtr(rowPtr)
-		return fn(row)
-	})
-	destroyNotify := glib.DestroyNotify(func(_ uintptr) {})
-	listBox.SetFilterFunc(&filterFunc, 0, &destroyNotify)
-}
-
-func connectTextBufferChanged(buffer *gtk.TextBuffer, fn func()) {
-	cb := func(_ gtk.TextBuffer) { fn() }
-	buffer.ConnectChanged(&cb)
-}
-
-func connectDialogClosed(dialog *adw.Dialog, fn func()) {
-	cb := func(_ adw.Dialog) { fn() }
-	dialog.ConnectClosed(&cb)
-}
-
-func getTextBufferText(buffer *gtk.TextBuffer) string {
-	var startIter, endIter gtk.TextIter
-	buffer.GetStartIter(&startIter)
-	buffer.GetEndIter(&endIter)
-	return buffer.GetText(&startIter, &endIter, true)
-}
-
-func connectAlertDialogResponse(dialog *adw.AlertDialog, fn func(response string)) {
-	cb := func(_ adw.AlertDialog, response string) { fn(response) }
-	dialog.ConnectResponse(&cb)
-}
-
-func idleAdd(fn func()) {
-	sourceFn := glib.SourceFunc(func(_ uintptr) bool {
-		fn()
-		return false // Return false to stop the idle source after first run
-	})
-	glib.IdleAdd(&sourceFn, 0)
-}
-
-func connectListBoxRowActivated(listBox *gtk.ListBox, fn func(row *gtk.ListBoxRow)) {
-	cb := func(_ gtk.ListBox, rowPtr uintptr) {
-		row := gtk.ListBoxRowNewFromInternalPtr(rowPtr)
-		fn(row)
-	}
-	listBox.ConnectRowActivated(&cb)
-}
-
-func connectNavigationViewPopped(nv *adw.NavigationView, fn func(page *adw.NavigationPage)) {
-	cb := func(_ adw.NavigationView, pagePtr uintptr) {
-		page := adw.NavigationPageNewFromInternalPtr(pagePtr)
-		fn(page)
-	}
-	nv.ConnectPopped(&cb)
-}
-
-func connectNavigationViewPushed(nv *adw.NavigationView, fn func()) {
-	cb := func(_ adw.NavigationView) { fn() }
-	nv.ConnectPushed(&cb)
-}
-
-func connectNavigationViewReplaced(nv *adw.NavigationView, fn func()) {
-	cb := func(_ adw.NavigationView) { fn() }
-	nv.ConnectReplaced(&cb)
 }
 
 func main() {
