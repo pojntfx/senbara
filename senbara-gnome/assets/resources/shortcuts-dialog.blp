@@ -1,0 +1,70 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.ShortcutsDialog shortcuts_dialog {
+  Adw.ShortcutsSection {
+    title: _("General");
+
+    Adw.ShortcutsItem {
+      title: _("Open menu");
+      accelerator: "F10";
+    }
+
+    Adw.ShortcutsItem {
+      title: _("Show shortcuts");
+      action-name: "app.shortcuts";
+    }
+
+    Adw.ShortcutsItem {
+      title: _("Quit");
+      action-name: "app.quit";
+    }
+
+    Adw.ShortcutsItem {
+      title: _("Show preferences");
+      action-name: "app.openPreferences";
+    }
+  }
+
+  Adw.ShortcutsSection {
+    title: _("Navigation");
+
+    Adw.ShortcutsItem {
+      title: _("Navigate to contacts");
+      action-name: "app.navigateToContacts";
+    }
+
+    Adw.ShortcutsItem {
+      title: _("Navigate to journal");
+      action-name: "app.navigateToJournal";
+    }
+  }
+
+  Adw.ShortcutsSection {
+    title: _("Lists");
+
+    Adw.ShortcutsItem {
+      title: _("Search in current list");
+      action-name: "app.searchList";
+    }
+
+    Adw.ShortcutsItem {
+      title: _("Create new item in current list");
+      action-name: "app.createItem";
+    }
+  }
+
+  Adw.ShortcutsSection {
+    title: _("Items");
+
+    Adw.ShortcutsItem {
+      title: _("Edit current item");
+      action-name: "app.editItem";
+    }
+
+    Adw.ShortcutsItem {
+      title: _("Delete current item");
+      action-name: "app.deleteItem";
+    }
+  }
+}

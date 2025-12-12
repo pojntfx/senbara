@@ -112,7 +112,6 @@ var (
 
 	ResourceWindowUIPath               = path.Join(AppPath, "window.ui")
 	ResourcePreferencesDialogUIPath    = path.Join(AppPath, "preferences-dialog.ui")
-	ResourceHelpOverviewUIPath         = path.Join(AppPath, "help-overlay.ui")
 	ResourceContactsCreateDialogUIPath = path.Join(AppPath, "contacts-create-dialog.ui")
 	ResourceDebtsCreateDialogUIPath    = path.Join(AppPath, "debts-create-dialog.ui")
 	ActivitiesDebtsCreateDialogUIPath  = path.Join(AppPath, "activities-create-dialog.ui")

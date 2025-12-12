@@ -290,7 +290,6 @@ func main() {
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
 
 		preferencesDialogBuilder := gtk.NewBuilderFromResource(resources.ResourcePreferencesDialogUIPath)
-		helpOverlayBuilder := gtk.NewBuilderFromResource(resources.ResourceHelpOverviewUIPath)
 		contactsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceContactsCreateDialogUIPath)
 		debtsCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ResourceDebtsCreateDialogUIPath)
 		activitiesCreateDialogBuilder := gtk.NewBuilderFromResource(resources.ActivitiesDebtsCreateDialogUIPath)
@@ -305,8 +304,6 @@ func main() {
 		var (
 			preferencesDialog              adw.PreferencesDialog
 			preferencesDialogVerboseSwitch gtk.Switch
-
-			helpOverlayShortcutsWindow gtk.ShortcutsWindow
 
 			welcomeGetStartedButton  gtk.Button
 			welcomeGetStartedSpinner adw.Spinner
@@ -556,7 +553,6 @@ func main() {
 
 		preferencesDialogBuilder.GetObject("preferences_dialog").Cast(&preferencesDialog)
 		preferencesDialogBuilder.GetObject("preferences_dialog_verbose_switch").Cast(&preferencesDialogVerboseSwitch)
-		helpOverlayBuilder.GetObject("help_overlay").Cast(&helpOverlayShortcutsWindow)
 		b.GetObject("welcome_get_started_button").Cast(&welcomeGetStartedButton)
 		b.GetObject("welcome_get_started_spinner").Cast(&welcomeGetStartedSpinner)
 		b.GetObject("config_server_url_input").Cast(&configServerURLInput)
@@ -863,9 +859,6 @@ func main() {
 
 			return nil
 		}
-
-		w.SetHelpOverlay(&helpOverlayShortcutsWindow)
-		a.SetAccelsForAction("win.show-help-overlay", []string{`<Primary>question`})
 
 		openPreferencesAction := gio.NewSimpleAction("openPreferences", nil)
 		connectSimpleActionActivate(openPreferencesAction, func() {
