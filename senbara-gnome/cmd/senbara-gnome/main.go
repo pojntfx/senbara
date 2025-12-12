@@ -20,6 +20,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/jwijenbergh/puregotk/v4/adw"
@@ -4272,15 +4273,13 @@ func main() {
 			w.Present()
 		}
 
-		// TODO: Properly iterate over files using unsafe pointer arithmetic
-		// For now, we handle the first file only if nFiles > 0
 		if nFiles == 0 {
 			return
 		}
 
-		// Get first file from the array
-		file := gio.FileNewForUri("")
-		file.SetGoPointer(filesPtr)
+		file := &gio.FileBase{
+			Ptr: *(*uintptr)(unsafe.Pointer(filesPtr)), // Get first file from the array
+		}
 
 		u, err := url.Parse(file.GetUri())
 		if err != nil {
