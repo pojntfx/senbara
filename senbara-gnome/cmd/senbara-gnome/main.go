@@ -49,8 +49,6 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	_ = webkit.WebViewGLibType() // TODO: WebKit should initialize itself automatically
-
 	level := new(slog.LevelVar)
 	log := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		Level: level,
