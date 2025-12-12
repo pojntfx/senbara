@@ -897,14 +897,19 @@ func main() {
 		})
 		a.AddAction(deregisterClientAction)
 
-		connectSettingsChanged(settings, func(key string) {
-			switch key {
-			case resources.SettingVerboseKey:
-				if settings.GetBoolean(resources.SettingVerboseKey) {
+		setLogLevel := func(verbose bool) {
+			if verbose {
 					level.Set(slog.LevelDebug)
 				} else {
 					level.Set(slog.LevelInfo)
 				}
+		}
+		setLogLevel(settings.GetBoolean(resources.SettingVerboseKey))
+
+		connectSettingsChanged(settings, func(key string) {
+			switch key {
+			case resources.SettingVerboseKey:
+				setLogLevel(settings.GetBoolean(resources.SettingVerboseKey))
 
 			case resources.SettingServerURLKey:
 				configServerURLContinueButton.SetSensitive(false)
