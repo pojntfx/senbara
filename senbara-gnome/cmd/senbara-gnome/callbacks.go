@@ -119,3 +119,21 @@ func connectNavigationViewReplaced(nv *adw.NavigationView, fn func()) {
 	cb := func(_ adw.NavigationView) { fn() }
 	nv.ConnectReplaced(&cb)
 }
+
+func fileDialogSave(fd *gtk.FileDialog, parent *gtk.Window, fn func(file *gio.FileBase, err error)) {
+	cb := gio.AsyncReadyCallback(func(_ uintptr, resultPtr uintptr, _ uintptr) {
+		result := gio.AsyncResultBase{Ptr: resultPtr}
+		file, err := fd.SaveFinish(&result)
+		fn(file, err)
+	})
+	fd.Save(parent, nil, &cb, 0)
+}
+
+func fileDialogOpen(fd *gtk.FileDialog, parent *gtk.Window, fn func(file *gio.FileBase, err error)) {
+	cb := gio.AsyncReadyCallback(func(_ uintptr, resultPtr uintptr, _ uintptr) {
+		result := gio.AsyncResultBase{Ptr: resultPtr}
+		file, err := fd.OpenFinish(&result)
+		fn(file, err)
+	})
+	fd.Open(parent, nil, &cb, 0)
+}

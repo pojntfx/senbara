@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"log/slog"
 	"math"
+	"mime/multipart"
 	"net/http"
 	"net/mail"
 	"net/url"
@@ -27,6 +28,7 @@ import (
 	"github.com/jwijenbergh/puregotk/v4/gdk"
 	"github.com/jwijenbergh/puregotk/v4/gio"
 	"github.com/jwijenbergh/puregotk/v4/glib"
+	"github.com/jwijenbergh/puregotk/v4/gobject"
 	"github.com/jwijenbergh/puregotk/v4/gtk"
 	"github.com/jwijenbergh/puregotk/v4/webkit"
 	"github.com/oapi-codegen/oapi-codegen/v2/pkg/securityprovider"
@@ -899,10 +901,10 @@ func main() {
 
 		setLogLevel := func(verbose bool) {
 			if verbose {
-					level.Set(slog.LevelDebug)
-				} else {
-					level.Set(slog.LevelInfo)
-				}
+				level.Set(slog.LevelDebug)
+			} else {
+				level.Set(slog.LevelInfo)
+			}
 		}
 		setLogLevel(settings.GetBoolean(resources.SettingVerboseKey))
 
@@ -2471,13 +2473,41 @@ func main() {
 
 			log.Debug("Writing code to file")
 
-			// TODO: Port FileDialog.Save async pattern to puregotk
-			// The puregotk async callback signature is different:
-			// fd.Save(parent *gtk.Window, cancellable *gio.Cancellable, callback *gio.AsyncReadyCallback, userData uintptr)
-			// For now, just show a toast that this feature needs porting
-			disableHomeHamburgerMenuLoading()
-			res.Body.Close()
-			mto.AddToast(adw.NewToast(L("Code download not yet available (needs puregotk async port)")))
+			fd := gtk.NewFileDialog()
+			fd.SetTitle(L("Senbara REST source code"))
+			fd.SetInitialName("code.tar.gz")
+			fileDialogSave(fd, &w.Window, func(file *gio.FileBase, err error) {
+				go func() {
+					defer disableHomeHamburgerMenuLoading()
+					defer res.Body.Close()
+
+					if err != nil {
+						handlePanic(err)
+
+						return
+					}
+
+					log.Debug("Writing code to file", "path", file.GetPath())
+
+					f, err := os.OpenFile(file.GetPath(), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+					if err != nil {
+						handlePanic(err)
+
+						return
+					}
+					defer f.Close()
+
+					if _, err := io.Copy(f, res.Body); err != nil {
+						handlePanic(err)
+
+						return
+					}
+
+					log.Debug("Downloaded code", "status", res.StatusCode)
+
+					mto.AddToast(adw.NewToast(L("Downloaded code")))
+				}()
+			})
 		})
 		a.AddAction(codeAction)
 
@@ -2531,10 +2561,41 @@ func main() {
 
 			log.Debug("Writing user data to file")
 
-			// TODO: Port FileDialog.Save async pattern to puregotk
-			disableHomeUserMenuLoading()
-			res.Body.Close()
-			mto.AddToast(adw.NewToast(L("User data export not yet available (needs puregotk async port)")))
+			fd := gtk.NewFileDialog()
+			fd.SetTitle(L("Senbara Forms userdata"))
+			fd.SetInitialName("userdata.jsonl")
+			fileDialogSave(fd, &w.Window, func(file *gio.FileBase, err error) {
+				go func() {
+					defer disableHomeUserMenuLoading()
+					defer res.Body.Close()
+
+					if err != nil {
+						handlePanic(err)
+
+						return
+					}
+
+					log.Debug("Writing user data to file", "path", file.GetPath())
+
+					f, err := os.OpenFile(file.GetPath(), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+					if err != nil {
+						handlePanic(err)
+
+						return
+					}
+					defer f.Close()
+
+					if _, err := io.Copy(f, res.Body); err != nil {
+						handlePanic(err)
+
+						return
+					}
+
+					log.Debug("Exported user data", "status", res.StatusCode)
+
+					mto.AddToast(adw.NewToast(L("Exported user data")))
+				}()
+			})
 		})
 		a.AddAction(exportUserDataAction)
 
@@ -2585,8 +2646,134 @@ func main() {
 		importUserDataAction := gio.NewSimpleAction("importUserData", nil)
 		connectSimpleActionActivate(importUserDataAction, func() {
 			log.Info("Handling import user data action")
-			// TODO: Port FileDialog.Open async pattern to puregotk
-			mto.AddToast(adw.NewToast(L("User data import not yet available (needs puregotk async port)")))
+
+			fd := gtk.NewFileDialog()
+			fd.SetTitle(L("Senbara Forms userdata"))
+
+			ls := gio.NewListStore(gobject.ObjectGLibType())
+
+			{
+				fi := gtk.NewFileFilter()
+				fi.SetName(L("Senbara Forms userdata files"))
+				fi.AddPattern("*.jsonl")
+				ls.Append(&fi.Filter.Object)
+			}
+
+			{
+				fi := gtk.NewFileFilter()
+				fi.SetName(L("All files"))
+				fi.AddPattern("*")
+				ls.Append(&fi.Filter.Object)
+			}
+
+			fd.SetFilters(ls)
+
+			fileDialogOpen(fd, &w.Window, func(file *gio.FileBase, err error) {
+				if err != nil {
+					handlePanic(err)
+
+					return
+				}
+
+				confirm := adw.NewAlertDialog(
+					L("Importing user data"),
+					L("Are you sure you want to import this user data into your account?"),
+				)
+				confirm.AddResponse("cancel", L("Cancel"))
+				confirm.AddResponse("import", L("Import"))
+				confirm.SetResponseAppearance("import", adw.ResponseSuggestedValue)
+				connectAlertDialogResponse(confirm, func(response string) {
+					if response == "import" {
+						go func() {
+							enableHomeUserMenuLoading()
+							defer disableHomeUserMenuLoading()
+
+							redirected, c, _, err := authorize(
+								ctx,
+
+								false,
+							)
+							if err != nil {
+								disableHomeUserMenuLoading()
+
+								log.Warn("Could not authorize user for import user data action", "err", err)
+
+								handlePanic(err)
+
+								return
+							} else if redirected {
+								disableHomeUserMenuLoading()
+
+								return
+							}
+
+							log.Debug("Reading user data from file", "path", file.GetPath())
+
+							f, err := os.OpenFile(file.GetPath(), os.O_RDONLY, os.ModePerm)
+							if err != nil {
+								handlePanic(err)
+
+								return
+							}
+							defer f.Close()
+
+							log.Debug("Importing user data, reading from file and streaming to API")
+
+							reader, writer := io.Pipe()
+							enc := multipart.NewWriter(writer)
+							go func() {
+								defer writer.Close()
+
+								if err := func() error {
+									formFile, err := enc.CreateFormFile("userData", "")
+									if err != nil {
+										return err
+									}
+
+									if _, err := io.Copy(formFile, f); err != nil {
+										return err
+									}
+
+									if err := enc.Close(); err != nil {
+										return err
+									}
+
+									return nil
+								}(); err != nil {
+									log.Warn("Could not stream user data to API", "err", err)
+
+									writer.CloseWithError(err)
+
+									return
+								}
+							}()
+
+							res, err := c.ImportUserDataWithBodyWithResponse(ctx, enc.FormDataContentType(), reader)
+							if err != nil {
+								handlePanic(err)
+
+								return
+							}
+
+							log.Debug("Imported user data", "status", res.StatusCode())
+
+							if res.StatusCode() != http.StatusOK {
+								handlePanic(errors.New(res.Status()))
+
+								return
+							}
+
+							mto.AddToast(adw.NewToast(L("Imported user data")))
+
+							go func() {
+								_ = refreshSidebarWithLatestSummary()
+							}()
+						}()
+					}
+				})
+
+				confirm.Present(&w.ApplicationWindow.Window.Widget)
+			})
 		})
 		a.AddAction(importUserDataAction)
 
