@@ -611,7 +611,9 @@ func main() {
 		b.GetObject("contacts_view_error_refresh_button").Cast(&contactsViewErrorRefreshButton)
 		b.GetObject("contacts_view_error_copy_details").Cast(&contactsViewErrorCopyDetailsButton)
 		b.GetObject("contacts_view_edit_button").Cast(&contactsViewEditButton)
+		contactsViewEditButton.SetActionTargetValue(glib.NewVariantInt64(0))
 		b.GetObject("contacts_view_delete_button").Cast(&contactsViewDeleteButton)
+		contactsViewDeleteButton.SetActionTargetValue(glib.NewVariantInt64(0))
 		b.GetObject("contacts_view_optional_fields").Cast(&contactsViewOptionalFieldsPreferencesGroup)
 		b.GetObject("contacts_view_birthday").Cast(&contactsViewBirthdayRow)
 		b.GetObject("contacts_view_address").Cast(&contactsViewAddressRow)
@@ -624,7 +626,9 @@ func main() {
 		b.GetObject("activities_view_error_refresh_button").Cast(&activitiesViewErrorRefreshButton)
 		b.GetObject("activities_view_error_copy_details").Cast(&activitiesViewErrorCopyDetailsButton)
 		b.GetObject("activities_view_edit_button").Cast(&activitiesViewEditButton)
+		activitiesViewEditButton.SetActionTargetValue(glib.NewVariantInt64(0))
 		b.GetObject("activities_view_delete_button").Cast(&activitiesViewDeleteButton)
+		activitiesViewDeleteButton.SetActionTargetValue(glib.NewVariantInt64(0))
 		b.GetObject("activities_view_body").Cast(&activitiesViewPageBodyWebView)
 		{
 			// Set transparent background for WebView
@@ -745,7 +749,9 @@ func main() {
 		b.GetObject("journal_entries_view_error_refresh_button").Cast(&journalEntriesViewErrorRefreshButton)
 		b.GetObject("journal_entries_view_error_copy_details").Cast(&journalEntriesViewErrorCopyDetailsButton)
 		b.GetObject("journal_entries_view_edit_button").Cast(&journalEntriesViewEditButton)
+		journalEntriesViewEditButton.SetActionTargetValue(glib.NewVariantInt64(0))
 		b.GetObject("journal_entries_view_delete_button").Cast(&journalEntriesViewDeleteButton)
+		journalEntriesViewDeleteButton.SetActionTargetValue(glib.NewVariantInt64(0))
 		b.GetObject("journal_entries_view_body").Cast(&journalEntriesViewPageBodyWebView)
 
 		bg := gdk.RGBA{Alpha: 0}
