@@ -267,7 +267,7 @@ func main() {
 	}
 
 	var rawError string
-	handlePanic := func(err error) {
+	onPanic := func(err error) {
 		rawError = err.Error()
 		i18nErr := L(rawError)
 
@@ -284,7 +284,7 @@ func main() {
 		mto.AddToast(toast)
 	}
 
-	activateCallback := func(_ gio.Application) {
+	onActivate := func(_ gio.Application) {
 		aboutDialog := adw.NewAboutDialogFromAppdata(resources.ResourceMetainfoPath, resources.AppVersion)
 		aboutDialog.SetDevelopers(resources.AppDevelopers)
 		aboutDialog.SetArtists(resources.AppArtists)
@@ -636,7 +636,7 @@ func main() {
 			activitiesViewPageBodyWebView.SetBackgroundColor(&bg)
 
 			// Handle navigation policy - open external links in browser
-			decidePolicyCb := func(_ webkit.WebView, decisionPtr uintptr, decisionType webkit.PolicyDecisionType) bool {
+			onDecidePolicy := func(_ webkit.WebView, decisionPtr uintptr, decisionType webkit.PolicyDecisionType) bool {
 				if decisionType == webkit.PolicyDecisionTypeNavigationActionValue {
 					decision := webkit.NavigationPolicyDecisionNewFromInternalPtr(decisionPtr)
 					u, err := url.Parse(decision.GetNavigationAction().GetRequest().GetUri())
@@ -657,7 +657,7 @@ func main() {
 				}
 				return false
 			}
-			activitiesViewPageBodyWebView.ConnectDecidePolicy(&decidePolicyCb)
+			activitiesViewPageBodyWebView.ConnectDecidePolicy(&onDecidePolicy)
 		}
 		b.GetObject("activities_edit_page_title").Cast(&activitiesEditPageTitle)
 		b.GetObject("activities_edit_stack").Cast(&activitiesEditStack)
@@ -757,7 +757,7 @@ func main() {
 		bg := gdk.RGBA{Alpha: 0}
 		journalEntriesViewPageBodyWebView.SetBackgroundColor(&bg)
 
-		decidePolicyCb := func(_ webkit.WebView, decisionPtr uintptr, decisionType webkit.PolicyDecisionType) bool {
+		onDecidePolicy := func(_ webkit.WebView, decisionPtr uintptr, decisionType webkit.PolicyDecisionType) bool {
 			if decisionType == webkit.PolicyDecisionTypeNavigationActionValue {
 				decision := webkit.NavigationPolicyDecisionNewFromInternalPtr(decisionPtr)
 				u, err := url.Parse(decision.GetNavigationAction().GetRequest().GetUri())
@@ -778,7 +778,7 @@ func main() {
 			}
 			return false
 		}
-		journalEntriesViewPageBodyWebView.ConnectDecidePolicy(&decidePolicyCb)
+		journalEntriesViewPageBodyWebView.ConnectDecidePolicy(&onDecidePolicy)
 
 		b.GetObject("journal_entries_edit_page_title").Cast(&journalEntriesEditPageTitle)
 		b.GetObject("journal_entries_edit_stack").Cast(&journalEntriesEditStack)
@@ -894,7 +894,7 @@ func main() {
 				defer welcomeGetStartedSpinner.SetVisible(false)
 
 				if err := deregisterOIDCClient(); err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -905,19 +905,19 @@ func main() {
 		})
 		a.AddAction(deregisterClientAction)
 
-		setLogLevel := func(verbose bool) {
+		onSetLogLevel := func(verbose bool) {
 			if verbose {
 				level.Set(slog.LevelDebug)
 			} else {
 				level.Set(slog.LevelInfo)
 			}
 		}
-		setLogLevel(settings.GetBoolean(resources.SettingVerboseKey))
+		onSetLogLevel(settings.GetBoolean(resources.SettingVerboseKey))
 
 		connectSettingsChanged(settings, func(key string) {
 			switch key {
 			case resources.SettingVerboseKey:
-				setLogLevel(settings.GetBoolean(resources.SettingVerboseKey))
+				onSetLogLevel(settings.GetBoolean(resources.SettingVerboseKey))
 
 			case resources.SettingServerURLKey:
 				configServerURLContinueButton.SetSensitive(false)
@@ -927,7 +927,7 @@ func main() {
 					defer configServerURLContinueSpinner.SetVisible(false)
 
 					if err := deregisterOIDCClient(); err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
@@ -1040,7 +1040,7 @@ func main() {
 				defer configServerURLContinueSpinner.SetVisible(false)
 
 				if err := checkSenbaraServerConfiguration(); err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -1058,13 +1058,13 @@ func main() {
 				defer previewLoginSpinner.SetVisible(false)
 
 				if err := checkSenbaraServerConfiguration(); err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
 
 				if err := setupAuthn(true); err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -1087,7 +1087,7 @@ func main() {
 		connectButtonClicked(&registerRegisterButton, func() {
 			go func() {
 				if _, err := gio.AppInfoLaunchDefaultForUri(oidcDcrInitialAccessTokenPortalUrl, nil); err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -1113,13 +1113,13 @@ func main() {
 				defer configInitialAccessTokenLoginSpinner.SetVisible(false)
 
 				if err := checkSenbaraServerConfiguration(); err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
 
 				if err := setupAuthn(true); err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -1276,7 +1276,7 @@ func main() {
 			contactsCreateDialogFirstNameInput.GrabFocus()
 		})
 
-		validateContactsCreateDialogForm := func() {
+		onValidateContactsCreateDialogForm := func() {
 			if email := contactsCreateDialogEmailInput.GetText(); email != "" {
 				if _, err := mail.ParseAddress(email); err != nil {
 					setValidationSuffixVisible(&contactsCreateDialogEmailInput, &contactsCreateDialogEmailWarningButton, true)
@@ -1299,11 +1299,11 @@ func main() {
 			}
 		}
 
-		connectEntryRowChanged(&contactsCreateDialogFirstNameInput, validateContactsCreateDialogForm)
-		connectEntryRowChanged(&contactsCreateDialogLastNameInput, validateContactsCreateDialogForm)
-		connectEntryRowChanged(&contactsCreateDialogNicknameInput, validateContactsCreateDialogForm)
-		connectEntryRowChanged(&contactsCreateDialogEmailInput, validateContactsCreateDialogForm)
-		connectEntryRowChanged(&contactsCreateDialogPronounsInput, validateContactsCreateDialogForm)
+		connectEntryRowChanged(&contactsCreateDialogFirstNameInput, onValidateContactsCreateDialogForm)
+		connectEntryRowChanged(&contactsCreateDialogLastNameInput, onValidateContactsCreateDialogForm)
+		connectEntryRowChanged(&contactsCreateDialogNicknameInput, onValidateContactsCreateDialogForm)
+		connectEntryRowChanged(&contactsCreateDialogEmailInput, onValidateContactsCreateDialogForm)
+		connectEntryRowChanged(&contactsCreateDialogPronounsInput, onValidateContactsCreateDialogForm)
 
 		connectDialogClosed(&contactsCreateDialog, func() {
 			contactsCreateDialogFirstNameInput.SetText("")
@@ -1315,7 +1315,7 @@ func main() {
 			setValidationSuffixVisible(&contactsCreateDialogEmailInput, &contactsCreateDialogEmailWarningButton, false)
 		})
 
-		validateDebtsCreateDialogForm := func() {
+		onValidateDebtsCreateDialogForm := func() {
 			if debtsCreateDialogCurrencyInput.GetText() != "" {
 				debtsCreateDialogAddButton.SetSensitive(true)
 			} else {
@@ -1323,9 +1323,9 @@ func main() {
 			}
 		}
 
-		connectEntryRowChanged(&debtsCreateDialogCurrencyInput, validateDebtsCreateDialogForm)
+		connectEntryRowChanged(&debtsCreateDialogCurrencyInput, onValidateDebtsCreateDialogForm)
 
-		validateDebtsEditPageForm := func() {
+		onValidateDebtsEditPageForm := func() {
 			if debtsEditPageCurrencyInput.GetText() != "" {
 				debtsEditPageSaveButton.SetSensitive(true)
 			} else {
@@ -1333,7 +1333,7 @@ func main() {
 			}
 		}
 
-		connectEntryRowChanged(&debtsEditPageCurrencyInput, validateDebtsEditPageForm)
+		connectEntryRowChanged(&debtsEditPageCurrencyInput, onValidateDebtsEditPageForm)
 
 		connectDialogClosed(&debtsCreateDialog, func() {
 			debtsCreateDialogTitle.SetSubtitle("")
@@ -1350,7 +1350,7 @@ func main() {
 			debtsCreateDialogDescriptionInput.GetBuffer().SetText("", 0)
 		})
 
-		validateActivitiesCreateDialogForm := func() {
+		onValidateActivitiesCreateDialogForm := func() {
 			if date := activitiesCreateDialogDateInput.GetText(); date != "" {
 				if _, err := parseLocaleDate(date); err != nil {
 					setValidationSuffixVisible(&activitiesCreateDialogDateInput, &activitiesCreateDialogDateWarningButton, true)
@@ -1371,8 +1371,8 @@ func main() {
 			}
 		}
 
-		connectEntryRowChanged(&activitiesCreateDialogNameInput, validateActivitiesCreateDialogForm)
-		connectEntryRowChanged(&activitiesCreateDialogDateInput, validateActivitiesCreateDialogForm)
+		connectEntryRowChanged(&activitiesCreateDialogNameInput, onValidateActivitiesCreateDialogForm)
+		connectEntryRowChanged(&activitiesCreateDialogDateInput, onValidateActivitiesCreateDialogForm)
 
 		connectDialogClosed(&activitiesCreateDialog, func() {
 			activitiesCreateDialogNameInput.SetText("")
@@ -1384,7 +1384,7 @@ func main() {
 			activitiesCreateDialogDescriptionInput.GetBuffer().SetText("", 0)
 		})
 
-		validateActivitiesEditPageForm := func() {
+		onValidateActivitiesEditPageForm := func() {
 			if date := activitiesEditPageDateInput.GetText(); date != "" {
 				if _, err := parseLocaleDate(date); err != nil {
 					setValidationSuffixVisible(&activitiesEditPageDateInput, &activitiesEditPageDateWarningButton, true)
@@ -1405,10 +1405,10 @@ func main() {
 			}
 		}
 
-		connectEntryRowChanged(&activitiesEditPageNameInput, validateActivitiesEditPageForm)
-		connectEntryRowChanged(&activitiesEditPageDateInput, validateActivitiesEditPageForm)
+		connectEntryRowChanged(&activitiesEditPageNameInput, onValidateActivitiesEditPageForm)
+		connectEntryRowChanged(&activitiesEditPageDateInput, onValidateActivitiesEditPageForm)
 
-		validateContactsEditPageForm := func() {
+		onValidateContactsEditPageForm := func() {
 			if email := contactsEditPageEmailInput.GetText(); email != "" {
 				if _, err := mail.ParseAddress(email); err != nil {
 					setValidationSuffixVisible(&contactsEditPageEmailInput, &contactsEditPageEmailWarningButton, true)
@@ -1443,13 +1443,13 @@ func main() {
 			}
 		}
 
-		connectEntryRowChanged(&contactsEditPageFirstNameInput, validateContactsEditPageForm)
-		connectEntryRowChanged(&contactsEditPageLastNameInput, validateContactsEditPageForm)
-		connectEntryRowChanged(&contactsEditPageNicknameInput, validateContactsEditPageForm)
-		connectEntryRowChanged(&contactsEditPageEmailInput, validateContactsEditPageForm)
-		connectEntryRowChanged(&contactsEditPagePronounsInput, validateContactsEditPageForm)
+		connectEntryRowChanged(&contactsEditPageFirstNameInput, onValidateContactsEditPageForm)
+		connectEntryRowChanged(&contactsEditPageLastNameInput, onValidateContactsEditPageForm)
+		connectEntryRowChanged(&contactsEditPageNicknameInput, onValidateContactsEditPageForm)
+		connectEntryRowChanged(&contactsEditPageEmailInput, onValidateContactsEditPageForm)
+		connectEntryRowChanged(&contactsEditPagePronounsInput, onValidateContactsEditPageForm)
 
-		connectEntryRowChanged(&contactsEditPageBirthdayInput, validateContactsEditPageForm)
+		connectEntryRowChanged(&contactsEditPageBirthdayInput, onValidateContactsEditPageForm)
 
 		connectButtonClicked(&journalEntriesAddButton, func() {
 			journalEntriesCreateDialog.Present(&w.ApplicationWindow.Window.Widget)
@@ -1461,7 +1461,7 @@ func main() {
 			journalEntriesCreateDialogTitleInput.GrabFocus()
 		})
 
-		validateJournalEntriesCreateDialogForm := func() {
+		onValidateJournalEntriesCreateDialogForm := func() {
 			if journalEntriesCreateDialogTitleInput.GetText() != "" &&
 				getTextBufferText(journalEntriesCreateDialogBodyInput.GetBuffer()) != "" {
 				journalEntriesCreateDialogAddButton.SetSensitive(true)
@@ -1470,8 +1470,8 @@ func main() {
 			}
 		}
 
-		connectEntryRowChanged(&journalEntriesCreateDialogTitleInput, validateJournalEntriesCreateDialogForm)
-		connectTextBufferChanged(journalEntriesCreateDialogBodyInput.GetBuffer(), validateJournalEntriesCreateDialogForm)
+		connectEntryRowChanged(&journalEntriesCreateDialogTitleInput, onValidateJournalEntriesCreateDialogForm)
+		connectTextBufferChanged(journalEntriesCreateDialogBodyInput.GetBuffer(), onValidateJournalEntriesCreateDialogForm)
 
 		connectDialogClosed(&journalEntriesCreateDialog, func() {
 			journalEntriesCreateDialogRatingToggleGroup.SetActive(0)
@@ -1482,7 +1482,7 @@ func main() {
 			journalEntriesCreateDialogBodyInput.GetBuffer().SetText("", 0)
 		})
 
-		validateJournalEntriesEditPageForm := func() {
+		onValidateJournalEntriesEditPageForm := func() {
 			if journalEntriesEditPageTitleInput.GetText() != "" &&
 				getTextBufferText(journalEntriesEditPageBodyInput.GetBuffer()) != "" {
 				journalEntriesEditPageSaveButton.SetSensitive(true)
@@ -1491,26 +1491,26 @@ func main() {
 			}
 		}
 
-		connectEntryRowChanged(&journalEntriesEditPageTitleInput, validateJournalEntriesEditPageForm)
-		connectTextBufferChanged(journalEntriesEditPageBodyInput.GetBuffer(), validateJournalEntriesEditPageForm)
+		connectEntryRowChanged(&journalEntriesEditPageTitleInput, onValidateJournalEntriesEditPageForm)
+		connectTextBufferChanged(journalEntriesEditPageBodyInput.GetBuffer(), onValidateJournalEntriesEditPageForm)
 
 		createErrAndLoadingHandlers := func(
 			errorStatusPage *adw.StatusPage,
 			errorRefreshButton *gtk.Button,
 			errorCopyDetailsButton *gtk.Button,
 
-			handleRefresh func(),
+			onRefresh func(),
 
-			handleEnableLoading func(),
-			handleDisableLoading func(err string),
+			onEnableLoading func(),
+			onDisableLoading func(err string),
 		) (
-			handleError func(error),
+			onError func(error),
 			enableLoading func(),
 			disableLoading func(),
 			clearError func(),
 		) {
 			var rawErr string
-			handleError = func(err error) {
+			onError = func(err error) {
 				rawErr = err.Error()
 				i18nErr := L(rawErr)
 
@@ -1523,19 +1523,19 @@ func main() {
 				errorStatusPage.SetDescription(i18nErr)
 			}
 
-			connectButtonClicked(errorRefreshButton, handleRefresh)
+			connectButtonClicked(errorRefreshButton, onRefresh)
 
 			connectButtonClicked(errorCopyDetailsButton, func() {
 				w.GetClipboard().SetText(rawErr)
 			})
 
-			enableLoading = handleEnableLoading
+			enableLoading = onEnableLoading
 
 			disableLoading = func() {
-				handleDisableLoading(rawErr)
+				onDisableLoading(rawErr)
 			}
 
-			return handleError,
+			return onError,
 				enableLoading,
 				disableLoading,
 				func() {
@@ -1805,7 +1805,7 @@ func main() {
 				if err != nil {
 					log.Warn("Could not authorize user for create contact action", "err", err)
 
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				} else if redirected {
@@ -1829,7 +1829,7 @@ func main() {
 
 				res, err := c.CreateContactWithResponse(ctx, req)
 				if err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -1837,7 +1837,7 @@ func main() {
 				log.Debug("Created contact", "status", res.StatusCode())
 
 				if res.StatusCode() != http.StatusOK {
-					handlePanic(errors.New(res.Status()))
+					onPanic(errors.New(res.Status()))
 
 					return
 				}
@@ -1874,7 +1874,7 @@ func main() {
 				if err != nil {
 					log.Warn("Could not authorize user for create debt action", "err", err)
 
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				} else if redirected {
@@ -1898,7 +1898,7 @@ func main() {
 
 				res, err := c.CreateDebtWithResponse(ctx, req)
 				if err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -1906,7 +1906,7 @@ func main() {
 				log.Debug("Created debt", "status", res.StatusCode())
 
 				if res.StatusCode() != http.StatusOK {
-					handlePanic(errors.New(res.Status()))
+					onPanic(errors.New(res.Status()))
 
 					return
 				}
@@ -1943,7 +1943,7 @@ func main() {
 				if err != nil {
 					log.Warn("Could not authorize user for create activity action", "err", err)
 
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				} else if redirected {
@@ -1957,7 +1957,7 @@ func main() {
 
 				localeDate, err := parseLocaleDate(activitiesCreateDialogDateInput.GetText())
 				if err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -1975,7 +1975,7 @@ func main() {
 
 				res, err := c.CreateActivityWithResponse(ctx, req)
 				if err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -1983,7 +1983,7 @@ func main() {
 				log.Debug("Created activity", "status", res.StatusCode())
 
 				if res.StatusCode() != http.StatusOK {
-					handlePanic(errors.New(res.Status()))
+					onPanic(errors.New(res.Status()))
 
 					return
 				}
@@ -2020,7 +2020,7 @@ func main() {
 				if err != nil {
 					log.Warn("Could not authorize user for update activity action", "err", err)
 
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				} else if redirected {
@@ -2034,7 +2034,7 @@ func main() {
 
 				localeDate, err := parseLocaleDate(activitiesEditPageDateInput.GetText())
 				if err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -2051,7 +2051,7 @@ func main() {
 
 				res, err := c.UpdateActivityWithResponse(ctx, id, req)
 				if err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -2059,7 +2059,7 @@ func main() {
 				log.Debug("Updated activity", "status", res.StatusCode())
 
 				if res.StatusCode() != http.StatusOK {
-					handlePanic(errors.New(res.Status()))
+					onPanic(errors.New(res.Status()))
 
 					return
 				}
@@ -2094,7 +2094,7 @@ func main() {
 				if err != nil {
 					log.Warn("Could not authorize user for update debt action", "err", err)
 
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				} else if redirected {
@@ -2117,7 +2117,7 @@ func main() {
 
 				res, err := c.UpdateDebtWithResponse(ctx, id, req)
 				if err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -2125,7 +2125,7 @@ func main() {
 				log.Debug("Updated debt", "status", res.StatusCode())
 
 				if res.StatusCode() != http.StatusOK {
-					handlePanic(errors.New(res.Status()))
+					onPanic(errors.New(res.Status()))
 
 					return
 				}
@@ -2160,7 +2160,7 @@ func main() {
 				if err != nil {
 					log.Warn("Could not authorize user for update contact action", "err", err)
 
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				} else if redirected {
@@ -2176,7 +2176,7 @@ func main() {
 				if v := contactsEditPageBirthdayInput.GetText(); v != "" {
 					localeBirthday, err := parseLocaleDate(contactsEditPageBirthdayInput.GetText())
 					if err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
@@ -2212,7 +2212,7 @@ func main() {
 
 				res, err := c.UpdateContactWithResponse(ctx, id, req)
 				if err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -2220,7 +2220,7 @@ func main() {
 				log.Debug("Updated contact", "status", res.StatusCode())
 
 				if res.StatusCode() != http.StatusOK {
-					handlePanic(errors.New(res.Status()))
+					onPanic(errors.New(res.Status()))
 
 					return
 				}
@@ -2249,7 +2249,7 @@ func main() {
 				if err != nil {
 					log.Warn("Could not authorize user for create journal entry action", "err", err)
 
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				} else if redirected {
@@ -2266,7 +2266,7 @@ func main() {
 
 				res, err := c.CreateJournalEntryWithResponse(ctx, req)
 				if err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -2274,7 +2274,7 @@ func main() {
 				log.Debug("Created journal entry", "status", res.StatusCode())
 
 				if res.StatusCode() != http.StatusOK {
-					handlePanic(errors.New(res.Status()))
+					onPanic(errors.New(res.Status()))
 
 					return
 				}
@@ -2311,7 +2311,7 @@ func main() {
 				if err != nil {
 					log.Warn("Could not authorize user for update journal entry action", "err", err)
 
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				} else if redirected {
@@ -2328,7 +2328,7 @@ func main() {
 
 				res, err := c.UpdateJournalEntryWithResponse(ctx, id, req)
 				if err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -2336,7 +2336,7 @@ func main() {
 				log.Debug("Updated journal entry", "status", res.StatusCode())
 
 				if res.StatusCode() != http.StatusOK {
-					handlePanic(errors.New(res.Status()))
+					onPanic(errors.New(res.Status()))
 
 					return
 				}
@@ -2353,7 +2353,7 @@ func main() {
 
 			go func() {
 				if _, err := gio.AppInfoLaunchDefaultForUri(u.LogoutURL, nil); err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -2367,7 +2367,7 @@ func main() {
 
 			go func() {
 				if _, err := gio.AppInfoLaunchDefaultForUri(spec.Info.License.URL, nil); err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -2383,7 +2383,7 @@ func main() {
 				if ok {
 					privacyURL = vv
 				} else {
-					handlePanic(errMissingPrivacyURL)
+					onPanic(errMissingPrivacyURL)
 
 					return
 				}
@@ -2393,7 +2393,7 @@ func main() {
 
 			go func() {
 				if _, err := gio.AppInfoLaunchDefaultForUri(privacyURL, nil); err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -2407,7 +2407,7 @@ func main() {
 
 			go func() {
 				if _, err := gio.AppInfoLaunchDefaultForUri(spec.Info.TermsOfService, nil); err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -2421,7 +2421,7 @@ func main() {
 
 			go func() {
 				if _, err := gio.AppInfoLaunchDefaultForUri(spec.Info.Contact.URL, nil); err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -2445,7 +2445,7 @@ func main() {
 
 				log.Warn("Could not authorize user for getting code action", "err", err)
 
-				handlePanic(err)
+				onPanic(err)
 
 				return
 			} else if redirected {
@@ -2460,7 +2460,7 @@ func main() {
 			if err != nil {
 				disableHomeHamburgerMenuLoading()
 
-				handlePanic(err)
+				onPanic(err)
 
 				return
 			}
@@ -2472,7 +2472,7 @@ func main() {
 
 				disableHomeHamburgerMenuLoading()
 
-				handlePanic(errors.New(res.Status))
+				onPanic(errors.New(res.Status))
 
 				return
 			}
@@ -2488,7 +2488,7 @@ func main() {
 					defer res.Body.Close()
 
 					if err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
@@ -2497,14 +2497,14 @@ func main() {
 
 					f, err := os.OpenFile(file.GetPath(), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
 					if err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
 					defer f.Close()
 
 					if _, err := io.Copy(f, res.Body); err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
@@ -2533,7 +2533,7 @@ func main() {
 
 				log.Warn("Could not authorize user for export user data action", "err", err)
 
-				handlePanic(err)
+				onPanic(err)
 
 				return
 			} else if redirected {
@@ -2548,7 +2548,7 @@ func main() {
 			if err != nil {
 				disableHomeUserMenuLoading()
 
-				handlePanic(err)
+				onPanic(err)
 
 				return
 			}
@@ -2560,7 +2560,7 @@ func main() {
 
 				disableHomeUserMenuLoading()
 
-				handlePanic(errors.New(res.Status))
+				onPanic(errors.New(res.Status))
 
 				return
 			}
@@ -2576,7 +2576,7 @@ func main() {
 					defer res.Body.Close()
 
 					if err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
@@ -2585,14 +2585,14 @@ func main() {
 
 					f, err := os.OpenFile(file.GetPath(), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
 					if err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
 					defer f.Close()
 
 					if _, err := io.Copy(f, res.Body); err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
@@ -2617,7 +2617,7 @@ func main() {
 			if err != nil {
 				log.Warn("Could not authorize user for home page", "err", err)
 
-				handlePanic(err)
+				onPanic(err)
 
 				return false
 			} else if redirected {
@@ -2630,7 +2630,7 @@ func main() {
 
 			res, err := c.GetSummaryWithResponse(ctx)
 			if err != nil {
-				handlePanic(err)
+				onPanic(err)
 
 				return false
 			}
@@ -2638,7 +2638,7 @@ func main() {
 			log.Debug("Got summary", "status", res.StatusCode())
 
 			if res.StatusCode() != http.StatusOK {
-				handlePanic(errors.New(res.Status()))
+				onPanic(errors.New(res.Status()))
 
 				return false
 			}
@@ -2676,7 +2676,7 @@ func main() {
 
 			fileDialogOpen(fd, &w.Window, func(file *gio.FileBase, err error) {
 				if err != nil {
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -2704,7 +2704,7 @@ func main() {
 
 								log.Warn("Could not authorize user for import user data action", "err", err)
 
-								handlePanic(err)
+								onPanic(err)
 
 								return
 							} else if redirected {
@@ -2717,7 +2717,7 @@ func main() {
 
 							f, err := os.OpenFile(file.GetPath(), os.O_RDONLY, os.ModePerm)
 							if err != nil {
-								handlePanic(err)
+								onPanic(err)
 
 								return
 							}
@@ -2756,7 +2756,7 @@ func main() {
 
 							res, err := c.ImportUserDataWithBodyWithResponse(ctx, enc.FormDataContentType(), reader)
 							if err != nil {
-								handlePanic(err)
+								onPanic(err)
 
 								return
 							}
@@ -2764,7 +2764,7 @@ func main() {
 							log.Debug("Imported user data", "status", res.StatusCode())
 
 							if res.StatusCode() != http.StatusOK {
-								handlePanic(errors.New(res.Status()))
+								onPanic(errors.New(res.Status()))
 
 								return
 							}
@@ -2804,7 +2804,7 @@ func main() {
 					if err != nil {
 						log.Warn("Could not authorize user for delete user data action", "err", err)
 
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					} else if redirected {
@@ -2815,7 +2815,7 @@ func main() {
 
 					res, err := c.DeleteUserDataWithResponse(ctx)
 					if err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
@@ -2823,7 +2823,7 @@ func main() {
 					log.Debug("Deleted user data", "status", res.StatusCode())
 
 					if res.StatusCode() != http.StatusOK {
-						handlePanic(errors.New(res.Status()))
+						onPanic(errors.New(res.Status()))
 
 						return
 					}
@@ -2882,7 +2882,7 @@ func main() {
 					if err != nil {
 						log.Warn("Could not authorize user for delete contact action", "err", err)
 
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					} else if redirected {
@@ -2893,7 +2893,7 @@ func main() {
 
 					res, err := c.DeleteContactWithResponse(ctx, int64(id))
 					if err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
@@ -2901,7 +2901,7 @@ func main() {
 					log.Debug("Deleted contact", "status", res.StatusCode())
 
 					if res.StatusCode() != http.StatusOK {
-						handlePanic(errors.New(res.Status()))
+						onPanic(errors.New(res.Status()))
 
 						return
 					}
@@ -2943,7 +2943,7 @@ func main() {
 					if err != nil {
 						log.Warn("Could not authorize user for settle debt action", "err", err)
 
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					} else if redirected {
@@ -2954,7 +2954,7 @@ func main() {
 
 					res, err := c.SettleDebtWithResponse(ctx, int64(id))
 					if err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
@@ -2962,7 +2962,7 @@ func main() {
 					log.Debug("Settled debt", "status", res.StatusCode())
 
 					if res.StatusCode() != http.StatusOK {
-						handlePanic(errors.New(res.Status()))
+						onPanic(errors.New(res.Status()))
 
 						return
 					}
@@ -3004,7 +3004,7 @@ func main() {
 					if err != nil {
 						log.Warn("Could not authorize user for delete activity action", "err", err)
 
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					} else if redirected {
@@ -3015,7 +3015,7 @@ func main() {
 
 					res, err := c.DeleteActivityWithResponse(ctx, int64(id))
 					if err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
@@ -3023,7 +3023,7 @@ func main() {
 					log.Debug("Deleted activity", "status", res.StatusCode())
 
 					if res.StatusCode() != http.StatusOK {
-						handlePanic(errors.New(res.Status()))
+						onPanic(errors.New(res.Status()))
 
 						return
 					}
@@ -3065,7 +3065,7 @@ func main() {
 					if err != nil {
 						log.Warn("Could not authorize user for delete journal entry action", "err", err)
 
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					} else if redirected {
@@ -3076,7 +3076,7 @@ func main() {
 
 					res, err := c.DeleteJournalEntryWithResponse(ctx, int64(id))
 					if err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
@@ -3084,7 +3084,7 @@ func main() {
 					log.Debug("Deleted journal entry", "status", res.StatusCode())
 
 					if res.StatusCode() != http.StatusOK {
-						handlePanic(errors.New(res.Status()))
+						onPanic(errors.New(res.Status()))
 
 						return
 					}
@@ -3301,7 +3301,7 @@ func main() {
 			goldmark.WithExtensions(extension.GFM),
 		)
 
-		handleHomeNavigation := func() {
+		onHomeNavigation := func() {
 			var (
 				tag = homeNavigation.GetVisiblePage().GetTag()
 				log = log.With("tag", tag)
@@ -3353,7 +3353,7 @@ func main() {
 
 					defer clearContactsError()
 
-					validateContactsCreateDialogForm()
+					onValidateContactsCreateDialogForm()
 
 					contactsListBox.RemoveAll()
 
@@ -3510,7 +3510,7 @@ func main() {
 						contactsViewOptionalFieldsPreferencesGroup.SetVisible(false)
 					}
 
-					validateDebtsCreateDialogForm()
+					onValidateDebtsCreateDialogForm()
 
 					debtsCreateDialogAddButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Entry.Id))
 
@@ -3568,15 +3568,15 @@ func main() {
 					addDebtButton.SetTitle(L("Add a _debt"))
 					addDebtButton.SetUseUnderline(true)
 
-					activatedCb := func(_ adw.ButtonRow) {
+					onActivated := func(_ adw.ButtonRow) {
 						debtsCreateDialog.Present(&w.ApplicationWindow.Window.Widget)
 						debtsCreateDialogAmountInput.GrabFocus()
 					}
-					addDebtButton.ConnectActivated(&activatedCb)
+					addDebtButton.ConnectActivated(&onActivated)
 
 					contactsViewDebtsListBox.Append(&addDebtButton.PreferencesRow.ListBoxRow.Widget)
 
-					validateActivitiesCreateDialogForm()
+					onValidateActivitiesCreateDialogForm()
 
 					activitiesCreateDialogAddButton.SetActionTargetValue(glib.NewVariantInt64(*res.JSON200.Entry.Id))
 
@@ -3623,11 +3623,11 @@ func main() {
 					addActivityButton.SetTitle(L("Add an ac_tivity"))
 					addActivityButton.SetUseUnderline(true)
 
-					addActivityActivatedCb := func(_ adw.ButtonRow) {
+					onAddActivityActivated := func(_ adw.ButtonRow) {
 						activitiesCreateDialog.Present(&w.ApplicationWindow.Window.Widget)
 						activitiesCreateDialogNameInput.GrabFocus()
 					}
-					addActivityButton.ConnectActivated(&addActivityActivatedCb)
+					addActivityButton.ConnectActivated(&onAddActivityActivated)
 
 					addActivityButton.SetActivatable(true)
 
@@ -3934,7 +3934,7 @@ func main() {
 
 					defer clearJournalEntriesError()
 
-					validateJournalEntriesCreateDialogForm()
+					onValidateJournalEntriesCreateDialogForm()
 
 					journalEntriesListBox.RemoveAll()
 
@@ -4125,7 +4125,7 @@ func main() {
 				if err != nil {
 					log.Warn("Could not parse contact row URL", "err", err)
 
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -4134,7 +4134,7 @@ func main() {
 				if strings.TrimSpace(rid) == "" {
 					log.Warn("Could not get ID from contact row URL", "err", errMissingContactID)
 
-					handlePanic(errMissingContactID)
+					onPanic(errMissingContactID)
 
 					return
 				}
@@ -4143,7 +4143,7 @@ func main() {
 				if err != nil {
 					log.Warn("Could not parse ID from contact row URL", "err", errInvalidContactID)
 
-					handlePanic(errInvalidContactID)
+					onPanic(errInvalidContactID)
 
 					return
 				}
@@ -4163,7 +4163,7 @@ func main() {
 				if err != nil {
 					log.Warn("Could not parse activity row URL", "err", err)
 
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -4172,7 +4172,7 @@ func main() {
 				if strings.TrimSpace(rid) == "" {
 					log.Warn("Could not get ID from activity row URL", "err", errMissingActivityID)
 
-					handlePanic(errMissingActivityID)
+					onPanic(errMissingActivityID)
 
 					return
 				}
@@ -4181,7 +4181,7 @@ func main() {
 				if err != nil {
 					log.Warn("Could not parse ID from activity row URL", "err", errInvalidActivityID)
 
-					handlePanic(errInvalidActivityID)
+					onPanic(errInvalidActivityID)
 
 					return
 				}
@@ -4200,7 +4200,7 @@ func main() {
 				if err != nil {
 					log.Warn("Could not parse journal entry row URL", "err", err)
 
-					handlePanic(err)
+					onPanic(err)
 
 					return
 				}
@@ -4209,7 +4209,7 @@ func main() {
 				if strings.TrimSpace(rid) == "" {
 					log.Warn("Could not get ID from journal entry row URL", "err", errMissingJournalEntryID)
 
-					handlePanic(errMissingJournalEntryID)
+					onPanic(errMissingJournalEntryID)
 
 					return
 				}
@@ -4218,7 +4218,7 @@ func main() {
 				if err != nil {
 					log.Warn("Could not parse ID from journal entry row URL", "err", errInvalidJournaEntrylID)
 
-					handlePanic(errInvalidJournaEntrylID)
+					onPanic(errInvalidJournaEntrylID)
 
 					return
 				}
@@ -4230,7 +4230,7 @@ func main() {
 		})
 
 		connectNavigationViewPopped(&homeNavigation, func(page *adw.NavigationPage) {
-			handleHomeNavigation()
+			onHomeNavigation()
 
 			var (
 				tag = page.GetTag()
@@ -4293,8 +4293,8 @@ func main() {
 				setValidationSuffixVisible(&contactsEditPageEmailInput, &contactsEditPageEmailWarningButton, false)
 			}
 		})
-		connectNavigationViewPushed(&homeNavigation, handleHomeNavigation)
-		connectNavigationViewReplaced(&homeNavigation, handleHomeNavigation)
+		connectNavigationViewPushed(&homeNavigation, onHomeNavigation)
+		connectNavigationViewReplaced(&homeNavigation, onHomeNavigation)
 
 		connectListBoxRowActivated(&homeSidebarListbox, func(row *gtk.ListBoxRow) {
 			var actionRow adw.ActionRow
@@ -4302,7 +4302,7 @@ func main() {
 			homeNavigation.ReplaceWithTags([]string{actionRow.GetName()}, 1)
 		})
 
-		handleNavigation := func() {
+		onNavigation := func() {
 			var (
 				tag = nv.GetVisiblePage().GetTag()
 				log = log.With("tag", tag)
@@ -4339,7 +4339,7 @@ func main() {
 					if err != nil {
 						log.Warn("Could not authorize user for index page", "err", err)
 
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					} else if redirected {
@@ -4370,7 +4370,7 @@ func main() {
 					defer configServerURLContinueSpinner.SetVisible(false)
 
 					if err := deregisterOIDCClient(); err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
@@ -4392,7 +4392,7 @@ func main() {
 					if err != nil {
 						log.Warn("Could not authorize user for preview page", "err", err)
 
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					} else if redirected {
@@ -4405,7 +4405,7 @@ func main() {
 
 					res, err := c.GetStatisticsWithResponse(ctx)
 					if err != nil {
-						handlePanic(err)
+						onPanic(err)
 
 						return
 					}
@@ -4413,7 +4413,7 @@ func main() {
 					log.Debug("Got statistics", "status", res.StatusCode())
 
 					if res.StatusCode() != http.StatusOK {
-						handlePanic(errors.New(res.Status()))
+						onPanic(errors.New(res.Status()))
 
 						return
 					}
@@ -4441,7 +4441,7 @@ func main() {
 		}
 
 		connectNavigationViewPopped(&nv, func(page *adw.NavigationPage) {
-			handleNavigation()
+			onNavigation()
 
 			var (
 				tag = page.GetTag()
@@ -4455,16 +4455,16 @@ func main() {
 				enablePreviewLoading()
 			}
 		})
-		connectNavigationViewPushed(&nv, handleNavigation)
-		connectNavigationViewReplaced(&nv, handleNavigation)
+		connectNavigationViewPushed(&nv, onNavigation)
+		connectNavigationViewReplaced(&nv, onNavigation)
 
-		handleNavigation()
+		onNavigation()
 
 		a.AddWindow(&w.Window)
 	}
-	a.ConnectActivate(&activateCallback)
+	a.ConnectActivate(&onActivate)
 
-	openCallback := func(_ gio.Application, filesPtr uintptr, nFiles int, hint string) {
+	onOpen := func(_ gio.Application, filesPtr uintptr, nFiles int, hint string) {
 		if w.GoPointer() == 0 {
 			a.Activate()
 		} else {
@@ -4481,7 +4481,7 @@ func main() {
 
 		u, err := url.Parse(file.GetUri())
 		if err != nil {
-			handlePanic(err)
+			onPanic(err)
 
 			return
 		}
@@ -4506,7 +4506,7 @@ func main() {
 			if !errors.Is(err, keyring.ErrNotFound) {
 				log.Debug("Failed to read state nonce cookie", "error", err)
 
-				handlePanic(errors.Join(errCouldNotLogin, err))
+				onPanic(errors.Join(errCouldNotLogin, err))
 
 				return
 			}
@@ -4519,7 +4519,7 @@ func main() {
 			if !errors.Is(err, keyring.ErrNotFound) {
 				log.Debug("Failed to read PKCE code verifier cookie", "error", err)
 
-				handlePanic(errors.Join(errCouldNotLogin, err))
+				onPanic(errors.Join(errCouldNotLogin, err))
 
 				return
 			}
@@ -4532,7 +4532,7 @@ func main() {
 			if !errors.Is(err, keyring.ErrNotFound) {
 				log.Debug("Failed to read OIDC nonce cookie", "error", err)
 
-				handlePanic(errors.Join(errCouldNotLogin, err))
+				onPanic(errors.Join(errCouldNotLogin, err))
 
 				return
 			}
@@ -4597,7 +4597,7 @@ func main() {
 			},
 		)
 		if err != nil {
-			handlePanic(err)
+			onPanic(err)
 
 			return
 		}
@@ -4612,7 +4612,7 @@ func main() {
 
 		nv.ReplaceWithTags([]string{nextURL}, 1)
 	}
-	a.ConnectOpen(&openCallback)
+	a.ConnectOpen(&onOpen)
 
 	if code := a.Run(len(os.Args), os.Args); code > 0 {
 		os.Exit(code)
