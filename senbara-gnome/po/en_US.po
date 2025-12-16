@@ -2,7 +2,6 @@ msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8\n"
 
 #: ../assets/resources/activities-create-dialog.blp:5
-#: ../assets/resources/activities-create-dialog.ui:10
 msgid "Create an activity"
 msgstr "Create an activity"
 
@@ -13,13 +12,6 @@ msgstr "Create an activity"
 #: ../assets/resources/window.blp:406 ../assets/resources/window.blp:947
 #: ../assets/resources/window.blp:1114 ../assets/resources/window.blp:1257
 #: ../assets/resources/window.blp:1665 ../assets/resources/window.blp:1829
-#: ../assets/resources/activities-create-dialog.ui:24
-#: ../assets/resources/contacts-create-dialog.ui:19
-#: ../assets/resources/debts-create-dialog.ui:24
-#: ../assets/resources/journal-entries-create-dialog.ui:19
-#: ../assets/resources/window.ui:457 ../assets/resources/window.ui:1081
-#: ../assets/resources/window.ui:1283 ../assets/resources/window.ui:1456
-#: ../assets/resources/window.ui:1940 ../assets/resources/window.ui:2140
 msgid "_Cancel"
 msgstr "Cancel"
 
@@ -27,40 +19,27 @@ msgstr "Cancel"
 #: ../assets/resources/contacts-create-dialog.blp:32
 #: ../assets/resources/debts-create-dialog.blp:36
 #: ../assets/resources/journal-entries-create-dialog.blp:32
-#: ../assets/resources/activities-create-dialog.ui:42
-#: ../assets/resources/contacts-create-dialog.ui:37
-#: ../assets/resources/debts-create-dialog.ui:42
-#: ../assets/resources/journal-entries-create-dialog.ui:37
 msgid "_Add"
 msgstr ""
 
 #: ../assets/resources/activities-create-dialog.blp:50
 #: ../assets/resources/window.blp:1166
-#: ../assets/resources/activities-create-dialog.ui:61
-#: ../assets/resources/window.ui:1346
 msgid "_Name"
 msgstr "Name"
 
 #: ../assets/resources/activities-create-dialog.blp:56
 #: ../assets/resources/window.blp:1171
-#: ../assets/resources/activities-create-dialog.ui:68
-#: ../assets/resources/window.ui:1352
 msgid "_Date"
 msgstr "Date"
 
 #: ../assets/resources/activities-create-dialog.blp:63
 #: ../assets/resources/window.blp:1178
-#: ../assets/resources/activities-create-dialog.ui:78
-#: ../assets/resources/window.ui:1362
 msgid "D_escription (optional)"
 msgstr "Description (optional)"
 
 #: ../assets/resources/activities-create-dialog.blp:65
 #: ../assets/resources/journal-entries-create-dialog.blp:80
 #: ../assets/resources/window.blp:1180 ../assets/resources/window.blp:1750
-#: ../assets/resources/activities-create-dialog.ui:80
-#: ../assets/resources/journal-entries-create-dialog.ui:98
-#: ../assets/resources/window.ui:1364 ../assets/resources/window.ui:2044
 msgid ""
 "You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>"
 msgstr ""
@@ -70,161 +49,116 @@ msgstr ""
 #: ../assets/resources/contacts-create-dialog.blp:80
 #: ../assets/resources/window.blp:2049 ../assets/resources/window.blp:2061
 #: ../assets/resources/window.blp:2073
-#: ../assets/resources/activities-create-dialog.ui:115
-#: ../assets/resources/contacts-create-dialog.ui:97
-#: ../assets/resources/window.ui:2332 ../assets/resources/window.ui:2342
-#: ../assets/resources/window.ui:2352
 msgid "Show error"
 msgstr "Show error"
 
 #: ../assets/resources/contacts-create-dialog.blp:5
-#: ../assets/resources/contacts-create-dialog.ui:10
 msgid "Create a contact"
 msgstr "Create a contact"
 
 #: ../assets/resources/contacts-create-dialog.blp:46
 #: ../assets/resources/window.blp:1309
-#: ../assets/resources/contacts-create-dialog.ui:56
-#: ../assets/resources/window.ui:1519
 msgid "_First name"
 msgstr "First name"
 
 #: ../assets/resources/contacts-create-dialog.blp:53
 #: ../assets/resources/window.blp:1315
-#: ../assets/resources/contacts-create-dialog.ui:64
-#: ../assets/resources/window.ui:1526
 msgid "_Last name"
 msgstr "Last name"
 
 #: ../assets/resources/contacts-create-dialog.blp:59
 #: ../assets/resources/window.blp:1321
-#: ../assets/resources/contacts-create-dialog.ui:71
-#: ../assets/resources/window.ui:1533
 msgid "_Nickname (optional)"
 msgstr "Nickname (optional)"
 
 #: ../assets/resources/contacts-create-dialog.blp:64
 #: ../assets/resources/window.blp:1326
-#: ../assets/resources/contacts-create-dialog.ui:77
-#: ../assets/resources/window.ui:1539
 msgid "_Email"
 msgstr "Email"
 
 #: ../assets/resources/contacts-create-dialog.blp:70
 #: ../assets/resources/window.blp:1332
-#: ../assets/resources/contacts-create-dialog.ui:84
-#: ../assets/resources/window.ui:1546
 msgid "_Pronouns"
 msgstr "Pronouns"
 
 #: ../assets/resources/contacts-create-dialog.blp:92
 #: ../assets/resources/window.blp:2092
-#: ../assets/resources/contacts-create-dialog.ui:108
-#: ../assets/resources/window.ui:2371
 msgid "Not a valid email"
 msgstr "Not a valid email"
 
 #: ../assets/resources/debts-create-dialog.blp:5
-#: ../assets/resources/debts-create-dialog.ui:10
 msgid "Create a debt"
 msgstr "Create a debt"
 
 #: ../assets/resources/debts-create-dialog.blp:70
 #: ../assets/resources/window.blp:1019
-#: ../assets/resources/debts-create-dialog.ui:85
-#: ../assets/resources/window.ui:1168
 msgid "_Amount"
 msgstr "Amount"
 
 #: ../assets/resources/debts-create-dialog.blp:82
 #: ../assets/resources/window.blp:1030
-#: ../assets/resources/debts-create-dialog.ui:99
-#: ../assets/resources/window.ui:1181
 msgid "C_urrency"
 msgstr "Currency"
 
 #: ../assets/resources/debts-create-dialog.blp:89
 #: ../assets/resources/window.blp:1037
-#: ../assets/resources/debts-create-dialog.ui:109
-#: ../assets/resources/window.ui:1191
 msgid "_Description (optional)"
 msgstr "Description (optional)"
 
 #: ../assets/resources/journal-entries-create-dialog.blp:5
-#: ../assets/resources/journal-entries-create-dialog.ui:10
 msgid "Create a journal entry"
 msgstr "Total journal entries"
 
 #: ../assets/resources/journal-entries-create-dialog.blp:46
 #: ../assets/resources/window.blp:1717
-#: ../assets/resources/journal-entries-create-dialog.ui:56
-#: ../assets/resources/window.ui:2003
 msgid "_How was your day?"
 msgstr ""
 
 #: ../assets/resources/journal-entries-create-dialog.blp:53
 #: ../assets/resources/window.blp:1724
-#: ../assets/resources/journal-entries-create-dialog.ui:63
-#: ../assets/resources/window.ui:2010
 msgid "_Great"
 msgstr ""
 
 #: ../assets/resources/journal-entries-create-dialog.blp:58
 #: ../assets/resources/window.blp:1729
-#: ../assets/resources/journal-entries-create-dialog.ui:69
-#: ../assets/resources/window.ui:2016
 msgid "_OK"
 msgstr ""
 
 #: ../assets/resources/journal-entries-create-dialog.blp:63
 #: ../assets/resources/window.blp:1734
-#: ../assets/resources/journal-entries-create-dialog.ui:75
-#: ../assets/resources/window.ui:2022
 msgid "Ba_d"
 msgstr ""
 
 #: ../assets/resources/journal-entries-create-dialog.blp:72
 #: ../assets/resources/window.blp:1743
-#: ../assets/resources/journal-entries-create-dialog.ui:89
-#: ../assets/resources/window.ui:2036
 msgid "_Title"
 msgstr ""
 
 #: ../assets/resources/journal-entries-create-dialog.blp:78
 #: ../assets/resources/window.blp:1748
-#: ../assets/resources/journal-entries-create-dialog.ui:96
-#: ../assets/resources/window.ui:2042
 msgid "_Body"
 msgstr ""
 
 #: ../assets/resources/preferences-dialog.blp:5
 #: ../assets/resources/window.blp:1864 ../assets/resources/window.blp:1912
 #: ../assets/resources/window.blp:1955 ../assets/resources/window.blp:2031
-#: ../assets/resources/preferences-dialog.ui:10
-#: ../assets/resources/window.ui:2181 ../assets/resources/window.ui:2220
-#: ../assets/resources/window.ui:2255 ../assets/resources/window.ui:2317
 msgid "Preferences"
 msgstr "Preferences"
 
 #: ../assets/resources/preferences-dialog.blp:9
 #: ../assets/resources/shortcuts-dialog.blp:6
-#: ../assets/resources/preferences-dialog.ui:14
-#: ../assets/resources/shortcuts-dialog.ui:12
 msgid "General"
 msgstr "General"
 
 #: ../assets/resources/preferences-dialog.blp:12
-#: ../assets/resources/preferences-dialog.ui:17
 msgid "Advanced"
 msgstr "Advanced"
 
 #: ../assets/resources/preferences-dialog.blp:15
-#: ../assets/resources/preferences-dialog.ui:20
 msgid "_Verbose"
 msgstr "Verbose"
 
 #: ../assets/resources/preferences-dialog.blp:17
-#: ../assets/resources/preferences-dialog.ui:22
 msgid "Whether to enable verbose logging"
 msgstr "Whether to enable verbose logging"
 
@@ -232,25 +166,21 @@ msgstr "Whether to enable verbose logging"
 #: ../assets/resources/window.blp:69 ../assets/resources/window.blp:156
 #: ../assets/resources/window.blp:194 ../assets/resources/window.blp:431
 #: ../assets/meta/com.pojtinger.felicitas.Senbara.desktop.in:4
-#: ../assets/resources/metainfo.xml.in:4 ../assets/resources/window.ui:12
-#: ../assets/resources/window.ui:60 ../assets/resources/window.ui:79
-#: ../assets/resources/window.ui:182 ../assets/resources/window.ui:224
-#: ../assets/resources/window.ui:488
+#: ../assets/resources/metainfo.xml.in:4
 msgid "Senbara Forms"
 msgstr "Senbara Forms"
 
 #: ../assets/resources/window.blp:22 ../assets/resources/window.blp:39
-#: ../assets/resources/window.ui:26 ../assets/resources/window.ui:44
 msgid "Loading Senbara Forms"
 msgstr "Senbara Forms"
 
-#: ../assets/resources/window.blp:40 ../assets/resources/window.ui:45
+#: ../assets/resources/window.blp:40
 msgid "Checking configuration ..."
 msgstr "Checking configuration ..."
 
 #: ../assets/resources/window.blp:70
 #: ../assets/meta/com.pojtinger.felicitas.Senbara.desktop.in:5
-#: ../assets/resources/metainfo.xml.in:49 ../assets/resources/window.ui:80
+#: ../assets/resources/metainfo.xml.in:49
 msgid ""
 "GNOME app to interact with the Senbara REST API. Designed as a reference for "
 "modern GNOME/GTK development with Go."
@@ -259,36 +189,35 @@ msgstr ""
 "modern GNOME/GTK development with Go.GNOME app to interact with the Senbara "
 "REST API. Designed as a reference for modern GNOME/GTK development with Go."
 
-#: ../assets/resources/window.blp:84 ../assets/resources/window.ui:95
+#: ../assets/resources/window.blp:84
 msgid "_Get started"
 msgstr "Get started"
 
-#: ../assets/resources/window.blp:98 ../assets/resources/window.ui:114
+#: ../assets/resources/window.blp:98
 msgid "Select Senbara server"
 msgstr "Select Senbara server"
 
-#: ../assets/resources/window.blp:125 ../assets/resources/window.ui:141
+#: ../assets/resources/window.blp:125
 msgid "_Continue"
 msgstr "Continue"
 
-#: ../assets/resources/window.blp:137 ../assets/resources/window.ui:156
+#: ../assets/resources/window.blp:137
 msgid "Where is your Senbara server?"
 msgstr "Where is your Senbara server?"
 
-#: ../assets/resources/window.blp:138 ../assets/resources/window.ui:157
+#: ../assets/resources/window.blp:138
 msgid "Enter the configuration for the Senbara server you want to connect to."
 msgstr "Enter the configuration for the Senbara server you want to connect to."
 
-#: ../assets/resources/window.blp:146 ../assets/resources/window.ui:166
+#: ../assets/resources/window.blp:146
 msgid "_Senbara Server URL (e.g. https://rest.senbara.p8.lu/)"
 msgstr "Senbara Server URL (e.g. https://rest.senbara.p8.lu/)"
 
 #: ../assets/resources/window.blp:182 ../assets/resources/window.blp:366
-#: ../assets/resources/window.ui:209 ../assets/resources/window.ui:408
 msgid "_Login"
 msgstr "Login"
 
-#: ../assets/resources/window.blp:195 ../assets/resources/window.ui:225
+#: ../assets/resources/window.blp:195
 msgid ""
 "(Preview) GNOME app to interact with the Senbara REST API. Designed as a "
 "reference for modern GNOME/GTK development with Go."
@@ -298,30 +227,28 @@ msgstr ""
 "with the Senbara REST API. Designed as a reference for modern GNOME/GTK "
 "development with Go."
 
-#: ../assets/resources/window.blp:223 ../assets/resources/window.ui:253
+#: ../assets/resources/window.blp:223
 msgid "Total contacts"
 msgstr "Total contacts"
 
 #: ../assets/resources/window.blp:232 ../assets/resources/window.blp:278
 #: ../assets/resources/window.blp:503 ../assets/resources/window.blp:530
-#: ../assets/resources/window.ui:262 ../assets/resources/window.ui:310
-#: ../assets/resources/window.ui:568 ../assets/resources/window.ui:597
 msgid "0"
 msgstr "0"
 
-#: ../assets/resources/window.blp:269 ../assets/resources/window.ui:301
+#: ../assets/resources/window.blp:269
 msgid "Total journal entries"
 msgstr "Total journal entries"
 
-#: ../assets/resources/window.blp:304 ../assets/resources/window.ui:342
+#: ../assets/resources/window.blp:304
 msgid "Register Senbara Forms"
 msgstr "Senbara Forms"
 
-#: ../assets/resources/window.blp:321 ../assets/resources/window.ui:360
+#: ../assets/resources/window.blp:321
 msgid "Registration required"
 msgstr "Registration required"
 
-#: ../assets/resources/window.blp:322 ../assets/resources/window.ui:361
+#: ../assets/resources/window.blp:322
 msgid ""
 "You need to manually register Senbara Forms before you can sign in to this "
 "server."
@@ -329,77 +256,72 @@ msgstr ""
 "You need to manually register Senbara Forms before you can sign in to this "
 "server."
 
-#: ../assets/resources/window.blp:327 ../assets/resources/window.ui:366
+#: ../assets/resources/window.blp:327
 msgid "_Register"
 msgstr "Register"
 
-#: ../assets/resources/window.blp:339 ../assets/resources/window.ui:381
+#: ../assets/resources/window.blp:339
 msgid "What's your initial access token?"
 msgstr "What's your initial access token?"
 
-#: ../assets/resources/window.blp:378 ../assets/resources/window.ui:423
+#: ../assets/resources/window.blp:378
 msgid "Set initial access token"
 msgstr "Set initial access token"
 
-#: ../assets/resources/window.blp:379 ../assets/resources/window.ui:424
+#: ../assets/resources/window.blp:379
 msgid "Enter the initial access token you've received from the Senbara server."
 msgstr ""
 "Enter the initial access token you've received from the Senbara server."
 
-#: ../assets/resources/window.blp:387 ../assets/resources/window.ui:433
+#: ../assets/resources/window.blp:387
 msgid "Initial access token"
 msgstr "Initial access token"
 
 #: ../assets/resources/window.blp:396 ../assets/resources/window.blp:419
-#: ../assets/resources/window.ui:448 ../assets/resources/window.ui:472
 msgid "Signing you in"
 msgstr "Signing you in"
 
 #: ../assets/resources/window.blp:420 ../assets/resources/window.blp:1843
-#: ../assets/resources/window.ui:473 ../assets/resources/window.ui:2156
 msgid "Waiting for authorization from browser ..."
 msgstr "Waiting for authorization from browser ..."
 
-#: ../assets/resources/window.blp:494 ../assets/resources/window.ui:559
+#: ../assets/resources/window.blp:494
 msgid "C_ontacts"
 msgstr "Contacts"
 
-#: ../assets/resources/window.blp:521 ../assets/resources/window.ui:588
+#: ../assets/resources/window.blp:521
 msgid "_Journal"
 msgstr "Journal"
 
-#: ../assets/resources/window.blp:558 ../assets/resources/window.ui:632
+#: ../assets/resources/window.blp:558
 msgid "Contacts"
 msgstr "Contacts"
 
-#: ../assets/resources/window.blp:567 ../assets/resources/window.ui:641
+#: ../assets/resources/window.blp:567
 msgid "Add a contact"
 msgstr "Add a contact"
 
 #: ../assets/resources/window.blp:574 ../assets/resources/window.blp:1452
-#: ../assets/resources/window.ui:648 ../assets/resources/window.ui:1686
 msgid "Search"
 msgstr "Search"
 
-#: ../assets/resources/window.blp:583 ../assets/resources/window.ui:658
+#: ../assets/resources/window.blp:583
 msgid "Search contacts"
 msgstr "Search contacts"
 
 #: ../assets/resources/window.blp:627 ../assets/resources/window.blp:637
-#: ../assets/resources/window.ui:709 ../assets/resources/window.ui:721
 msgid "No contacts found"
 msgstr "No contacts found"
 
 #: ../assets/resources/window.blp:628 ../assets/resources/window.blp:1506
-#: ../assets/resources/window.ui:710 ../assets/resources/window.ui:1748
 msgid "Try a different search"
 msgstr "Try a different search"
 
-#: ../assets/resources/window.blp:642 ../assets/resources/window.ui:726
+#: ../assets/resources/window.blp:642
 msgid "_Add a contact"
 msgstr "Add a contact"
 
-#: ../assets/resources/window.blp:656 ../assets/resources/window.ui:742
+#: ../assets/resources/window.blp:656
 msgid "Contacts could not be loaded"
 msgstr "Contacts could not be loaded"
 
@@ -407,11 +329,7 @@ msgstr "Contacts could not be loaded"
 #: ../assets/resources/window.blp:911 ../assets/resources/window.blp:1078
 #: ../assets/resources/window.blp:1221 ../assets/resources/window.blp:1413
 #: ../assets/resources/window.blp:1543 ../assets/resources/window.blp:1629
-#: ../assets/resources/window.blp:1792 ../assets/resources/window.ui:751
-#: ../assets/resources/window.ui:928 ../assets/resources/window.ui:1035
-#: ../assets/resources/window.ui:1237 ../assets/resources/window.ui:1410
-#: ../assets/resources/window.ui:1638 ../assets/resources/window.ui:1789
-#: ../assets/resources/window.ui:1894 ../assets/resources/window.ui:2091
+#: ../assets/resources/window.blp:1792
 msgid "_Refresh"
 msgstr "Refresh"
 
@@ -419,294 +337,252 @@ msgstr "Refresh"
 #: ../assets/resources/window.blp:921 ../assets/resources/window.blp:1088
 #: ../assets/resources/window.blp:1231 ../assets/resources/window.blp:1423
 #: ../assets/resources/window.blp:1553 ../assets/resources/window.blp:1639
-#: ../assets/resources/window.blp:1802 ../assets/resources/window.ui:761
-#: ../assets/resources/window.ui:938 ../assets/resources/window.ui:1045
-#: ../assets/resources/window.ui:1247 ../assets/resources/window.ui:1420
-#: ../assets/resources/window.ui:1648 ../assets/resources/window.ui:1799
-#: ../assets/resources/window.ui:1904 ../assets/resources/window.ui:2101
+#: ../assets/resources/window.blp:1802
 msgid "_Copy details"
 msgstr "Copy details"
 
-#: ../assets/resources/window.blp:687 ../assets/resources/window.ui:781
+#: ../assets/resources/window.blp:687
 msgid "Contact"
 msgstr "Contact"
 
 #: ../assets/resources/window.blp:698 ../cmd/senbara-gnome/main.go:3398
-#: ../assets/resources/window.ui:793
 msgid "Delete contact"
 msgstr "Delete contact"
 
 #: ../assets/resources/window.blp:705 ../assets/resources/window.blp:1244
-#: ../cmd/senbara-gnome/main.go:3402 ../assets/resources/window.ui:800
-#: ../assets/resources/window.ui:1442
+#: ../cmd/senbara-gnome/main.go:3402
 msgid "Edit contact"
 msgstr "Edit contact"
 
-#: ../assets/resources/window.blp:744 ../assets/resources/window.ui:846
+#: ../assets/resources/window.blp:744
 msgid "Birthday"
 msgstr "Birthday"
 
-#: ../assets/resources/window.blp:754 ../assets/resources/window.ui:856
+#: ../assets/resources/window.blp:754
 msgid "Address"
 msgstr "Address"
 
-#: ../assets/resources/window.blp:764 ../assets/resources/window.ui:866
+#: ../assets/resources/window.blp:764
 msgid "Notes"
 msgstr "Notes"
 
-#: ../assets/resources/window.blp:778 ../assets/resources/window.ui:880
+#: ../assets/resources/window.blp:778
 msgid "Debts"
 msgstr "Debts"
 
-#: ../assets/resources/window.blp:794 ../assets/resources/window.ui:896
+#: ../assets/resources/window.blp:794
 msgid "Activites"
 msgstr "Activites"
 
 #: ../assets/resources/window.blp:815 ../assets/resources/window.blp:1404
-#: ../assets/resources/window.ui:919 ../assets/resources/window.ui:1629
 msgid "Contact could not be loaded"
 msgstr "Contact could not be loaded"
 
-#: ../assets/resources/window.blp:847 ../assets/resources/window.ui:960
+#: ../assets/resources/window.blp:847
 msgid "Activity"
 msgstr "Activity"
 
 #: ../assets/resources/window.blp:858 ../cmd/senbara-gnome/main.go:3604
-#: ../assets/resources/window.ui:972
 msgid "Delete activity"
 msgstr "Delete activity"
 
 #: ../assets/resources/window.blp:865 ../assets/resources/window.blp:1101
-#: ../cmd/senbara-gnome/main.go:3608 ../assets/resources/window.ui:979
-#: ../assets/resources/window.ui:1269
+#: ../cmd/senbara-gnome/main.go:3608
 msgid "Edit activity"
 msgstr "Edit activity"
 
 #: ../assets/resources/window.blp:902 ../assets/resources/window.blp:1212
-#: ../assets/resources/window.ui:1026 ../assets/resources/window.ui:1401
 msgid "Activity could not be loaded"
 msgstr "Activity could not be loaded"
 
 #: ../assets/resources/window.blp:934 ../cmd/senbara-gnome/main.go:3556
-#: ../assets/resources/window.ui:1067
 msgid "Edit debt"
 msgstr "Edit debt"
 
 #: ../assets/resources/window.blp:964 ../assets/resources/window.blp:1131
 #: ../assets/resources/window.blp:1274 ../assets/resources/window.blp:1682
-#: ../assets/resources/window.ui:1099 ../assets/resources/window.ui:1301
-#: ../assets/resources/window.ui:1474 ../assets/resources/window.ui:1958
 msgid "_Save"
 msgstr "Save"
 
-#: ../assets/resources/window.blp:1069 ../assets/resources/window.ui:1228
+#: ../assets/resources/window.blp:1069
 msgid "Debt could not be loaded"
 msgstr "Debt could not be loaded"
 
-#: ../assets/resources/window.blp:1337 ../assets/resources/window.ui:1552
+#: ../assets/resources/window.blp:1337
 msgid "_Birthday (optional)"
 msgstr "Birthday (optional)"
 
-#: ../assets/resources/window.blp:1344 ../assets/resources/window.ui:1562
+#: ../assets/resources/window.blp:1344
 msgid "A_ddress (optional)"
 msgstr "Address (optional)"
 
-#: ../assets/resources/window.blp:1371 ../assets/resources/window.ui:1591
+#: ../assets/resources/window.blp:1371
 msgid "N_otes (optional)"
 msgstr "Notes (optional)"
 
-#: ../assets/resources/window.blp:1436 ../assets/resources/window.ui:1670
+#: ../assets/resources/window.blp:1436
 msgid "Journal"
 msgstr "Journal"
 
-#: ../assets/resources/window.blp:1445 ../assets/resources/window.ui:1679
+#: ../assets/resources/window.blp:1445
 msgid "Add a journal entry"
 msgstr "Total journal entries"
 
-#: ../assets/resources/window.blp:1461 ../assets/resources/window.ui:1696
+#: ../assets/resources/window.blp:1461
 msgid "Search journal entries"
 msgstr "Total journal entries"
 
 #: ../assets/resources/window.blp:1505 ../assets/resources/window.blp:1515
-#: ../assets/resources/window.ui:1747 ../assets/resources/window.ui:1759
 msgid "No journal entries found"
 msgstr "Total journal entries"
 
-#: ../assets/resources/window.blp:1520 ../assets/resources/window.ui:1764
+#: ../assets/resources/window.blp:1520
 msgid "_Add a journal entry"
 msgstr "Total journal entries"
 
-#: ../assets/resources/window.blp:1534 ../assets/resources/window.ui:1780
+#: ../assets/resources/window.blp:1534
 msgid "Journal entries could not be loaded"
 msgstr "Contacts could not be loaded"
 
-#: ../assets/resources/window.blp:1565 ../assets/resources/window.ui:1819
+#: ../assets/resources/window.blp:1565
 msgid "Journal Entry"
 msgstr "Total journal entries"
 
 #: ../assets/resources/window.blp:1576 ../cmd/senbara-gnome/main.go:3975
-#: ../assets/resources/window.ui:1831
 msgid "Delete journal entry"
 msgstr "Total journal entries"
 
 #: ../assets/resources/window.blp:1583 ../assets/resources/window.blp:1652
-#: ../cmd/senbara-gnome/main.go:3979 ../assets/resources/window.ui:1838
-#: ../assets/resources/window.ui:1926
+#: ../cmd/senbara-gnome/main.go:3979
 msgid "Edit journal entry"
 msgstr "Total journal entries"
 
 #: ../assets/resources/window.blp:1620 ../assets/resources/window.blp:1783
-#: ../assets/resources/window.ui:1885 ../assets/resources/window.ui:2082
 msgid "Journal entry could not be loaded"
 msgstr "Contacts could not be loaded"
 
 #: ../assets/resources/window.blp:1819 ../assets/resources/window.blp:1842
-#: ../assets/resources/window.ui:2131 ../assets/resources/window.ui:2155
 msgid "Signing you out"
 msgstr "Signing you out"
 
-#: ../assets/resources/window.blp:1858 ../assets/resources/window.ui:2176
+#: ../assets/resources/window.blp:1858
 msgid "Deregister client"
 msgstr "Deregister client"
 
 #: ../assets/resources/window.blp:1869 ../assets/resources/window.blp:1917
 #: ../assets/resources/window.blp:1960 ../assets/resources/window.blp:2036
-#: ../assets/resources/window.ui:2185 ../assets/resources/window.ui:2224
-#: ../assets/resources/window.ui:2259 ../assets/resources/window.ui:2321
 msgid "_Keyboard shortcuts"
 msgstr ""
 
 #: ../assets/resources/window.blp:1874 ../assets/resources/window.blp:1922
 #: ../assets/resources/window.blp:1965 ../assets/resources/window.blp:2041
-#: ../assets/resources/window.ui:2189 ../assets/resources/window.ui:2228
-#: ../assets/resources/window.ui:2263 ../assets/resources/window.ui:2325
 msgid "About Senbara Forms"
 msgstr "Senbara Forms"
 
-#: ../assets/resources/window.blp:1882 ../assets/resources/window.ui:2196
+#: ../assets/resources/window.blp:1882
 msgid "Select different Senbara server"
 msgstr "Select different Senbara server"
 
 #: ../assets/resources/window.blp:1887 ../assets/resources/window.blp:1930
-#: ../assets/resources/window.blp:2001 ../assets/resources/window.ui:2200
-#: ../assets/resources/window.ui:2235 ../assets/resources/window.ui:2293
+#: ../assets/resources/window.blp:2001
 msgid "About this Senbara server"
 msgstr "Select Senbara server"
 
 #: ../assets/resources/window.blp:1890 ../assets/resources/window.blp:1933
-#: ../assets/resources/window.blp:2004 ../assets/resources/window.ui:2202
-#: ../assets/resources/window.ui:2237 ../assets/resources/window.ui:2295
+#: ../assets/resources/window.blp:2004
 msgid "License"
 msgstr "License"
 
 #: ../assets/resources/window.blp:1895 ../assets/resources/window.blp:1938
-#: ../assets/resources/window.blp:2009 ../assets/resources/window.ui:2206
-#: ../assets/resources/window.ui:2241 ../assets/resources/window.ui:2299
+#: ../assets/resources/window.blp:2009
 msgid "Code"
 msgstr "Code"
 
 #: ../assets/resources/window.blp:1900 ../assets/resources/window.blp:1943
-#: ../assets/resources/window.blp:2014 ../assets/resources/window.ui:2210
-#: ../assets/resources/window.ui:2245 ../assets/resources/window.ui:2303
+#: ../assets/resources/window.blp:2014
 msgid "Privacy"
 msgstr "Privacy"
 
 #: ../assets/resources/window.blp:1905 ../assets/resources/window.blp:1948
-#: ../assets/resources/window.blp:2024 ../assets/resources/window.ui:2214
-#: ../assets/resources/window.ui:2249 ../assets/resources/window.ui:2311
+#: ../assets/resources/window.blp:2024
 msgid "Imprint"
 msgstr "Imprint"
 
-#: ../assets/resources/window.blp:1973 ../assets/resources/window.ui:2270
+#: ../assets/resources/window.blp:1973
 msgid "Logout"
 msgstr "Logout"
 
-#: ../assets/resources/window.blp:1979 ../assets/resources/window.ui:2275
+#: ../assets/resources/window.blp:1979
 msgid "Your data"
 msgstr "Your data"
 
-#: ../assets/resources/window.blp:1982 ../assets/resources/window.ui:2277
+#: ../assets/resources/window.blp:1982
 msgid "Export"
 msgstr "Export"
 
 #: ../assets/resources/window.blp:1987 ../cmd/senbara-gnome/main.go:2689
-#: ../assets/resources/window.ui:2281
 msgid "Import"
 msgstr "Import"
 
 #: ../assets/resources/window.blp:1992 ../cmd/senbara-gnome/main.go:2795
 #: ../cmd/senbara-gnome/main.go:2875 ../cmd/senbara-gnome/main.go:2936
 #: ../cmd/senbara-gnome/main.go:2997 ../cmd/senbara-gnome/main.go:3058
-#: ../assets/resources/window.ui:2285
 msgid "Delete"
 msgstr "Delete"
 
-#: ../assets/resources/window.blp:2019 ../assets/resources/window.ui:2307
+#: ../assets/resources/window.blp:2019
 msgid "Terms of Service"
 msgstr "Terms of Service"
 
 #: ../assets/resources/shortcuts-dialog.blp:9
-#: ../assets/resources/shortcuts-dialog.ui:15
 msgid "Open menu"
 msgstr ""
 
 #: ../assets/resources/shortcuts-dialog.blp:14
-#: ../assets/resources/shortcuts-dialog.ui:21
 msgid "Show shortcuts"
 msgstr ""
 
 #: ../assets/resources/shortcuts-dialog.blp:19
-#: ../assets/resources/shortcuts-dialog.ui:27
 msgid "Quit"
 msgstr ""
 
 #: ../assets/resources/shortcuts-dialog.blp:24
-#: ../assets/resources/shortcuts-dialog.ui:33
 msgid "Show preferences"
 msgstr "Preferences"
 
 #: ../assets/resources/shortcuts-dialog.blp:30
-#: ../assets/resources/shortcuts-dialog.ui:41
 msgid "Navigation"
 msgstr ""
 
 #: ../assets/resources/shortcuts-dialog.blp:33
-#: ../assets/resources/shortcuts-dialog.ui:44
 msgid "Navigate to contacts"
 msgstr "Create a contact"
 
 #: ../assets/resources/shortcuts-dialog.blp:38
-#: ../assets/resources/shortcuts-dialog.ui:50
 msgid "Navigate to journal"
 msgstr "Create a contact"
 
 #: ../assets/resources/shortcuts-dialog.blp:44
-#: ../assets/resources/shortcuts-dialog.ui:58
 msgid "Lists"
 msgstr ""
 
 #: ../assets/resources/shortcuts-dialog.blp:47
-#: ../assets/resources/shortcuts-dialog.ui:61
 msgid "Search in current list"
 msgstr "Total journal entries"
 
 #: ../assets/resources/shortcuts-dialog.blp:52
-#: ../assets/resources/shortcuts-dialog.ui:67
 msgid "Create new item in current list"
 msgstr "Delete contact"
 
 #: ../assets/resources/shortcuts-dialog.blp:58
-#: ../assets/resources/shortcuts-dialog.ui:75
 msgid "Items"
 msgstr ""
 
 #: ../assets/resources/shortcuts-dialog.blp:61
-#: ../assets/resources/shortcuts-dialog.ui:78
 msgid "Edit current item"
 msgstr "Edit contact"
 
 #: ../assets/resources/shortcuts-dialog.blp:66
-#: ../assets/resources/shortcuts-dialog.ui:84
 msgid "Delete current item"
 msgstr "Delete contact"
 
