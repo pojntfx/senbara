@@ -2829,6 +2829,8 @@ func main() {
 					}
 
 					mto.AddToast(adw.NewToast(L("Deleted user data")))
+
+					logoutAction.Activate(nil)
 				}
 			})
 
