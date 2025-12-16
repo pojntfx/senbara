@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"log/slog"
 	"math"
 	"mime/multipart"
@@ -15,8 +14,6 @@ import (
 	"net/mail"
 	"net/url"
 	"os"
-	"path"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -36,7 +33,6 @@ import (
 	. "github.com/pojntfx/go-gettext/pkg/i18n"
 	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
 	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
-	"github.com/pojntfx/senbara/senbara-gnome/po"
 	"github.com/pojntfx/senbara/senbara-rest/pkg/api"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
@@ -57,67 +53,14 @@ func main() {
 		Level: level,
 	}))
 
-	// Self-extract locale files for i18n
-	i18t, err := os.MkdirTemp("", "")
+	if err := initEmbeddedI18n(); err != nil {
+		panic(err)
+	}
+
+	settings, err := initEmbeddedSettings()
 	if err != nil {
 		panic(err)
 	}
-	defer os.RemoveAll(i18t)
-
-	if err := fs.WalkDir(po.FS, ".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if d.IsDir() {
-			if err := os.MkdirAll(filepath.Join(i18t, path), os.ModePerm); err != nil {
-				return err
-			}
-
-			return nil
-		}
-
-		src, err := po.FS.Open(path)
-		if err != nil {
-			return err
-		}
-		defer src.Close()
-
-		dst, err := os.Create(filepath.Join(i18t, path))
-		if err != nil {
-			return err
-		}
-		defer dst.Close()
-
-		if _, err := io.Copy(dst, src); err != nil {
-			return err
-		}
-
-		return nil
-	}); err != nil {
-		panic(err)
-	}
-
-	if err := InitI18n(gettextPackage, i18t); err != nil {
-		panic(err)
-	}
-
-	// Self-extract GSettings schema
-	st, err := os.MkdirTemp("", "")
-	if err != nil {
-		panic(err)
-	}
-	defer os.RemoveAll(st)
-
-	if err := os.WriteFile(filepath.Join(st, path.Base(resources.ResourceGSchemasCompiledPath)), resources.Schema, os.ModePerm); err != nil {
-		panic(err)
-	}
-
-	if err := os.Setenv("GSETTINGS_SCHEMA_DIR", st); err != nil {
-		panic(err)
-	}
-
-	settings := gio.NewSettings(resources.AppID)
 
 	a := adw.NewApplication(resources.AppID, gio.GApplicationHandlesOpenValue)
 
