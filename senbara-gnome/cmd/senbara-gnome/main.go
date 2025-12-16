@@ -28,7 +28,6 @@ import (
 	"github.com/jwijenbergh/puregotk/v4/gobject"
 	"github.com/jwijenbergh/puregotk/v4/gtk"
 	"github.com/jwijenbergh/puregotk/v4/webkit"
-	"github.com/oapi-codegen/oapi-codegen/v2/pkg/securityprovider"
 	"github.com/oapi-codegen/runtime/types"
 	. "github.com/pojntfx/go-gettext/pkg/i18n"
 	"github.com/pojntfx/senbara/senbara-common/pkg/authn"
@@ -38,11 +37,6 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/zalando/go-keyring"
 )
-
-type userData struct {
-	Email     string
-	LogoutURL string
-}
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -72,6 +66,7 @@ func main() {
 		u       userData
 	)
 
+	// TODO: Re-use the main authorizer
 	authorize := func(
 		ctx context.Context,
 
@@ -84,129 +79,27 @@ func main() {
 
 		err error,
 	) {
-		log := log.With(
-			"loginIfSignedOut", loginIfSignedOut,
-			"path", nv.GetVisiblePage().GetTag(),
-		)
+		authorizer := newAuthorizer(
+			log,
 
-		log.Debug("Handling user auth")
+			authner,
+			settings,
 
-		var (
-			refreshToken,
-			idToken *string
-		)
-		rt, err := keyring.Get(resources.AppID, resources.SecretRefreshTokenKey)
-		if err != nil {
-			if !errors.Is(err, keyring.ErrNotFound) {
-				log.Debug("Failed to read refresh token cookie", "error", err)
-
-				return false, nil, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
-			}
-		} else {
-			refreshToken = &rt
-		}
-
-		it, err := keyring.Get(resources.AppID, resources.SecretIDTokenKey)
-		if err != nil {
-			if !errors.Is(err, keyring.ErrNotFound) {
-				log.Debug("Failed to read ID token cookie", "error", err)
-
-				return false, nil, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
-			}
-		} else {
-			idToken = &it
-		}
-
-		nextURL, email, logoutURL, err := authner.Authorize(
-			ctx,
-
-			loginIfSignedOut,
-
-			nv.GetVisiblePage().GetTag(),
-			nv.GetVisiblePage().GetTag(),
-
-			refreshToken,
-			idToken,
-
-			func(s string, t time.Time) error {
-				// TODO: Handle expiry time
-				return keyring.Set(resources.AppID, resources.SecretRefreshTokenKey, s)
+			func() string {
+				return nv.GetVisiblePage().GetTag()
 			},
-			func(s string, t time.Time) error {
-				// TODO: Handle expiry time
-				return keyring.Set(resources.AppID, resources.SecretIDTokenKey, s)
+			func(tags []string, position int) {
+				nv.ReplaceWithTags(tags, position)
 			},
-
-			func(s string) error {
-				return keyring.Set(resources.AppID, resources.SecretStateNonceKey, s)
+			func(ud userData) {
+				u = ud
 			},
-			func(s string) error {
-				return keyring.Set(resources.AppID, resources.SecretPKCECodeVerifierKey, s)
-			},
-			func(s string) error {
-				return keyring.Set(resources.AppID, resources.SecretOIDCNonceKey, s)
+			func() string {
+				return settings.GetString(resources.SettingServerURLKey)
 			},
 		)
-		if err != nil {
-			if errors.Is(err, authn.ErrCouldNotLogin) {
-				return false, nil, http.StatusUnauthorized, err
-			}
 
-			return false, nil, http.StatusInternalServerError, err
-		}
-
-		redirected = nextURL != ""
-		u = userData{
-			Email:     email,
-			LogoutURL: logoutURL,
-		}
-
-		if redirected {
-			nv.ReplaceWithTags([]string{resources.PageExchangeLogin}, 1)
-
-			if _, err := gio.AppInfoLaunchDefaultForUri(nextURL, nil); err != nil {
-				log.Debug("Could not open nextURL", "error", err)
-
-				return false, nil, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
-			}
-
-			return redirected, nil, http.StatusTemporaryRedirect, nil
-		}
-
-		opts := []api.ClientOption{}
-		if strings.TrimSpace(u.Email) != "" {
-			log.Debug("Creating authenticated client")
-
-			it, err = keyring.Get(resources.AppID, resources.SecretIDTokenKey)
-			if err != nil {
-				log.Debug("Failed to read ID token cookie", "error", err)
-
-				return false, nil, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
-			}
-
-			a, err := securityprovider.NewSecurityProviderBearerToken(it)
-			if err != nil {
-				log.Debug("Could not create bearer token security provider", "error", err)
-
-				return false, nil, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
-			}
-
-			opts = append(opts, api.WithRequestEditorFn(a.Intercept))
-		} else {
-			log.Debug("Creating unauthenticated client")
-		}
-
-		client, err = api.NewClientWithResponses(
-			settings.GetString(resources.SettingServerURLKey),
-			opts...,
-		)
-		if err != nil {
-			log.Debug("Could not create authenticated API client", "error", err)
-
-			return false, nil, http.StatusUnauthorized, errors.Join(errCouldNotLogin, err)
-		}
-
-		return redirected, client, http.StatusOK, nil
+		return authorizer.authorize(ctx, loginIfSignedOut)
 	}
 
 	var rawError string

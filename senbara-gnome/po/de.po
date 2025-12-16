@@ -338,12 +338,12 @@ msgstr ""
 msgid "Contact"
 msgstr ""
 
-#: ../assets/resources/window.blp:698 ../cmd/senbara-gnome/main.go:3341
+#: ../assets/resources/window.blp:698 ../cmd/senbara-gnome/main.go:3234
 msgid "Delete contact"
 msgstr ""
 
 #: ../assets/resources/window.blp:705 ../assets/resources/window.blp:1244
-#: ../cmd/senbara-gnome/main.go:3345
+#: ../cmd/senbara-gnome/main.go:3238
 msgid "Edit contact"
 msgstr ""
 
@@ -375,12 +375,12 @@ msgstr ""
 msgid "Activity"
 msgstr ""
 
-#: ../assets/resources/window.blp:858 ../cmd/senbara-gnome/main.go:3547
+#: ../assets/resources/window.blp:858 ../cmd/senbara-gnome/main.go:3440
 msgid "Delete activity"
 msgstr ""
 
 #: ../assets/resources/window.blp:865 ../assets/resources/window.blp:1101
-#: ../cmd/senbara-gnome/main.go:3551
+#: ../cmd/senbara-gnome/main.go:3444
 msgid "Edit activity"
 msgstr ""
 
@@ -388,7 +388,7 @@ msgstr ""
 msgid "Activity could not be loaded"
 msgstr ""
 
-#: ../assets/resources/window.blp:934 ../cmd/senbara-gnome/main.go:3499
+#: ../assets/resources/window.blp:934 ../cmd/senbara-gnome/main.go:3392
 msgid "Edit debt"
 msgstr ""
 
@@ -441,12 +441,12 @@ msgstr ""
 msgid "Journal Entry"
 msgstr ""
 
-#: ../assets/resources/window.blp:1576 ../cmd/senbara-gnome/main.go:3918
+#: ../assets/resources/window.blp:1576 ../cmd/senbara-gnome/main.go:3811
 msgid "Delete journal entry"
 msgstr ""
 
 #: ../assets/resources/window.blp:1583 ../assets/resources/window.blp:1652
-#: ../cmd/senbara-gnome/main.go:3922
+#: ../cmd/senbara-gnome/main.go:3815
 msgid "Edit journal entry"
 msgstr ""
 
@@ -513,13 +513,13 @@ msgstr ""
 msgid "Export"
 msgstr ""
 
-#: ../assets/resources/window.blp:1987 ../cmd/senbara-gnome/main.go:2632
+#: ../assets/resources/window.blp:1987 ../cmd/senbara-gnome/main.go:2525
 msgid "Import"
 msgstr ""
 
-#: ../assets/resources/window.blp:1992 ../cmd/senbara-gnome/main.go:2738
-#: ../cmd/senbara-gnome/main.go:2818 ../cmd/senbara-gnome/main.go:2879
-#: ../cmd/senbara-gnome/main.go:2940 ../cmd/senbara-gnome/main.go:3001
+#: ../assets/resources/window.blp:1992 ../cmd/senbara-gnome/main.go:2631
+#: ../cmd/senbara-gnome/main.go:2711 ../cmd/senbara-gnome/main.go:2772
+#: ../cmd/senbara-gnome/main.go:2833 ../cmd/senbara-gnome/main.go:2894
 msgid "Delete"
 msgstr ""
 
@@ -579,169 +579,169 @@ msgstr ""
 msgid "Delete current item"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:224
+#: ../cmd/senbara-gnome/main.go:117
 msgid "Copy details"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:1788
+#: ../cmd/senbara-gnome/main.go:1681
 msgid "Created contact"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:1857
+#: ../cmd/senbara-gnome/main.go:1750
 msgid "Created debt"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:1934
+#: ../cmd/senbara-gnome/main.go:1827
 msgid "Created activity"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2010
+#: ../cmd/senbara-gnome/main.go:1903
 msgid "Updated activity"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2076
+#: ../cmd/senbara-gnome/main.go:1969
 msgid "Updated debt"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2171
+#: ../cmd/senbara-gnome/main.go:2064
 msgid "Updated contact"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2225
+#: ../cmd/senbara-gnome/main.go:2118
 msgid "Created journal entry"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2287
+#: ../cmd/senbara-gnome/main.go:2180
 msgid "Updated journal entry"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2426
+#: ../cmd/senbara-gnome/main.go:2319
 msgid "Senbara REST source code"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2457
+#: ../cmd/senbara-gnome/main.go:2350
 msgid "Downloaded code"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2514 ../cmd/senbara-gnome/main.go:2600
+#: ../cmd/senbara-gnome/main.go:2407 ../cmd/senbara-gnome/main.go:2493
 msgid "Senbara Forms userdata"
 msgstr "Senbara-Formulare"
 
-#: ../cmd/senbara-gnome/main.go:2545
+#: ../cmd/senbara-gnome/main.go:2438
 msgid "Exported user data"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2606
+#: ../cmd/senbara-gnome/main.go:2499
 msgid "Senbara Forms userdata files"
 msgstr "Senbara-Formulare"
 
-#: ../cmd/senbara-gnome/main.go:2613
+#: ../cmd/senbara-gnome/main.go:2506
 msgid "All files"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2628
+#: ../cmd/senbara-gnome/main.go:2521
 msgid "Importing user data"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2629
+#: ../cmd/senbara-gnome/main.go:2522
 msgid "Are you sure you want to import this user data into your account?"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2631 ../cmd/senbara-gnome/main.go:2737
-#: ../cmd/senbara-gnome/main.go:2817 ../cmd/senbara-gnome/main.go:2878
-#: ../cmd/senbara-gnome/main.go:2939 ../cmd/senbara-gnome/main.go:3000
+#: ../cmd/senbara-gnome/main.go:2524 ../cmd/senbara-gnome/main.go:2630
+#: ../cmd/senbara-gnome/main.go:2710 ../cmd/senbara-gnome/main.go:2771
+#: ../cmd/senbara-gnome/main.go:2832 ../cmd/senbara-gnome/main.go:2893
 msgid "Cancel"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2715
+#: ../cmd/senbara-gnome/main.go:2608
 msgid "Imported user data"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2734
+#: ../cmd/senbara-gnome/main.go:2627
 msgid "Deleting your data"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2735
+#: ../cmd/senbara-gnome/main.go:2628
 msgid "Are you sure you want to delete your data and your account?"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2774
+#: ../cmd/senbara-gnome/main.go:2667
 msgid "Deleted user data"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2814
+#: ../cmd/senbara-gnome/main.go:2707
 msgid "Deleting a contact"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2815
+#: ../cmd/senbara-gnome/main.go:2708
 msgid "Are you sure you want to delete this contact?"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2854
+#: ../cmd/senbara-gnome/main.go:2747
 msgid "Contact deleted"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2875
+#: ../cmd/senbara-gnome/main.go:2768
 msgid "Settling a debt"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2876
+#: ../cmd/senbara-gnome/main.go:2769
 msgid "Are you sure you want to settle this debt?"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2915
+#: ../cmd/senbara-gnome/main.go:2808
 msgid "Settled debt"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2936
+#: ../cmd/senbara-gnome/main.go:2829
 msgid "Deleting an activity"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2937
+#: ../cmd/senbara-gnome/main.go:2830
 msgid "Are you sure you want to delete this activity?"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2976
+#: ../cmd/senbara-gnome/main.go:2869
 msgid "Activity deleted"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2997
+#: ../cmd/senbara-gnome/main.go:2890
 msgid "Deleting a journal entry"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:2998
+#: ../cmd/senbara-gnome/main.go:2891
 msgid "Are you sure you want to delete this journal entry?"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3037
+#: ../cmd/senbara-gnome/main.go:2930
 msgid "Journal entry deleted"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3494
+#: ../cmd/senbara-gnome/main.go:3387
 msgid "Settle debt"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3513
+#: ../cmd/senbara-gnome/main.go:3406
 msgid "Add a _debt"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3568
+#: ../cmd/senbara-gnome/main.go:3461
 msgid "Add an ac_tivity"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3640
+#: ../cmd/senbara-gnome/main.go:3533
 msgid "No description provided."
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3899 ../cmd/senbara-gnome/main.go:3986
+#: ../cmd/senbara-gnome/main.go:3792 ../cmd/senbara-gnome/main.go:3879
 msgid "Great"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3902 ../cmd/senbara-gnome/main.go:3989
+#: ../cmd/senbara-gnome/main.go:3795 ../cmd/senbara-gnome/main.go:3882
 msgid "OK"
 msgstr ""
 
-#: ../cmd/senbara-gnome/main.go:3905 ../cmd/senbara-gnome/main.go:3992
+#: ../cmd/senbara-gnome/main.go:3798 ../cmd/senbara-gnome/main.go:3885
 msgid "Bad"
 msgstr ""
 
