@@ -7,3 +7,8 @@ Exec=senbara-gnome %u
 Icon=com.pojtinger.felicitas.Senbara
 Categories=Utility
 MimeType=x-scheme-handler/senbara;
+# Extra keywords that can be used to search for Senbara
+# TRANSLATORS: Search terms to find this application.
+#              Do NOT translate or localize the semicolons!
+#              The list MUST also end with a semicolon!
+Keywords=contacts;journal;debts;activities;

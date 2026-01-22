@@ -8,6 +8,6 @@ GNOME app to interact with the Senbara REST API. Designed as a reference for mod
 
 ## License
 
-Senbara GNOME (c) 2025 Felicitas Pojtinger and contributors
+Senbara GNOME (c) 2026 Felicitas Pojtinger and contributors
 
 SPDX-License-Identifier: AGPL-3.0

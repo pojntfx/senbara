@@ -108,7 +108,7 @@ var (
 
 	AppDevelopers = []string{"Felicitas Pojtinger"}
 	AppArtists    = AppDevelopers
-	AppCopyright  = "© 2025 " + strings.Join(AppDevelopers, ", ")
+	AppCopyright  = "© 2026 " + strings.Join(AppDevelopers, ", ")
 
 	ResourceWindowUIPath               = path.Join(AppPath, "window.ui")
 	ResourcePreferencesDialogUIPath    = path.Join(AppPath, "preferences-dialog.ui")

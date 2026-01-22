@@ -125,6 +125,8 @@ func main() {
 		aboutDialog.SetDevelopers(resources.AppDevelopers)
 		aboutDialog.SetArtists(resources.AppArtists)
 		aboutDialog.SetCopyright(resources.AppCopyright)
+		// TRANSLATORS: Replace "translator-credits" with your name/username, and optionally an email or URL.
+		aboutDialog.SetTranslatorCredits(L("translator-credits"))
 
 		b := gtk.NewBuilderFromResource(resources.ResourceWindowUIPath)
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"path"
 	"path/filepath"
@@ -21,9 +22,15 @@ func initEmbeddedSettings() (*gio.Settings, error) {
 		return nil, err
 	}
 
-	if err := os.Setenv("GSETTINGS_SCHEMA_DIR", st); err != nil {
+	source, err := gio.NewSettingsSchemaSourceFromDirectory(st, gio.SettingsSchemaSourceGetDefault(), true)
+	if err != nil {
 		return nil, err
 	}
 
-	return gio.NewSettings(resources.AppID), nil
+	schema := source.Lookup(resources.AppID, false)
+	if schema == nil {
+		return nil, errors.New("could not find schema")
+	}
+
+	return gio.NewSettingsFull(schema, nil, schema.GetPath()), nil
 }
