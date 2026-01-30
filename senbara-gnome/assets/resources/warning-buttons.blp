@@ -1,0 +1,59 @@
+using Gtk 4.0;
+
+MenuButton contacts_edit_page_birthday_warning_button {
+    icon-name: "dialog-warning-symbolic";
+    tooltip-text: _("Show error");
+    valign: center;
+    popover: contacts_edit_page_birthday_popover;
+
+    styles [
+        "flat",
+        "circular",
+    ]
+}
+
+MenuButton contacts_edit_page_email_warning_button {
+    icon-name: "dialog-warning-symbolic";
+    tooltip-text: _("Show error");
+    valign: center;
+    popover: contacts_edit_page_email_popover;
+
+    styles [
+        "flat",
+        "circular",
+    ]
+}
+
+MenuButton activities_edit_page_date_warning_button {
+    icon-name: "dialog-warning-symbolic";
+    tooltip-text: _("Show error");
+    valign: center;
+    popover: activities_edit_page_date_popover;
+
+    styles [
+        "flat",
+        "circular",
+    ]
+}
+
+Popover activities_edit_page_date_popover {
+    Label activities_edit_page_date_popover_label {
+        accessible-role: alert;
+        selectable: true;
+    }
+}
+
+Popover contacts_edit_page_email_popover {
+    Label {
+        label: _("Not a valid email");
+        accessible-role: alert;
+        selectable: true;
+    }
+}
+
+Popover contacts_edit_page_birthday_popover {
+    Label contacts_edit_page_birthday_popover_label {
+        accessible-role: alert;
+        selectable: true;
+    }
+}

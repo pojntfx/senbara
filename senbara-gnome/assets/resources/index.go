@@ -111,6 +111,7 @@ var (
 	AppCopyright  = "© 2026 " + strings.Join(AppDevelopers, ", ")
 
 	ResourceWindowUIPath               = path.Join(AppPath, "window.ui")
+	ResourceWarningButtonsUIPath       = path.Join(AppPath, "warning-buttons.ui")
 	ResourcePreferencesDialogUIPath    = path.Join(AppPath, "preferences-dialog.ui")
 	ResourceContactsCreateDialogUIPath = path.Join(AppPath, "contacts-create-dialog.ui")
 	ResourceDebtsCreateDialogUIPath    = path.Join(AppPath, "debts-create-dialog.ui")
