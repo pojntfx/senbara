@@ -1,0 +1,30 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.NavigationPage page_index {
+    title: _("Loading Senbara Forms");
+    tag: "/";
+
+    Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+            show-title: false;
+
+            [end]
+            MenuButton page_index_menu_button {
+                icon-name: "open-menu-symbolic";
+                primary: true;
+            }
+        }
+
+        Adw.StatusPage {
+            title: _("Loading Senbara Forms");
+            description: _("Checking configuration ...");
+
+            Adw.Spinner {
+                width-request: 48;
+                height-request: 48;
+            }
+        }
+    }
+}

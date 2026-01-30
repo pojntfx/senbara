@@ -1,0 +1,1466 @@
+using Gtk 4.0;
+using Adw 1;
+using WebKit 6.0;
+
+Adw.NavigationPage page_home {
+    title: _("Senbara Forms");
+    tag: "/home";
+    can-pop: false;
+
+    Adw.NavigationSplitView home_split_view {
+        min-sidebar-width: 200;
+
+        sidebar: Adw.NavigationPage home_sidebar_page {
+            tag: "/sidebar";
+
+            child: Adw.ToolbarView {
+                [top]
+                Adw.HeaderBar {
+                    [start]
+                    MenuButton home_user_menu_button {
+                        menu-model: home_user_menu;
+
+                        Box {
+                            halign: center;
+
+                            Adw.Avatar home_user_menu_avatar {
+                                size: 26;
+                            }
+
+                            Adw.Spinner home_user_menu_spinner {
+                                visible: false;
+                                halign: center;
+                            }
+                        }
+
+                        styles [
+                            "circular",
+                            "flat",
+                        ]
+                    }
+
+                    [end]
+                    MenuButton home_hamburger_menu_button {
+                        primary: true;
+                        menu-model: home_menu;
+                        has-frame: false;
+
+                        Box {
+                            halign: center;
+
+                            Gtk.Image home_hamburger_menu_icon {
+                                icon-name: "open-menu-symbolic";
+                            }
+
+                            Adw.Spinner home_hamburger_menu_spinner {
+                                visible: false;
+                                halign: center;
+                            }
+                        }
+                    }
+                }
+
+                content: Gtk.ScrolledWindow {
+                    Gtk.ListBox home_sidebar_listbox {
+                        selection-mode: single;
+
+                        Adw.ActionRow {
+                            title: _("C_ontacts");
+                            use-underline: true;
+                            icon-name: "address-book-symbolic";
+                            name: "/contacts";
+                            activatable: true;
+
+                            [suffix]
+                            Box {
+                                Gtk.Label home_sidebar_contacts_count_label {
+                                    label: _("0");
+                                    valign: center;
+                                    visible: false;
+
+                                    styles [
+                                        "status-badge",
+                                    ]
+                                }
+
+                                Adw.Spinner home_sidebar_contacts_count_spinner {}
+                            }
+
+                            styles [
+                                "sidebar-item",
+                            ]
+                        }
+
+                        Adw.ActionRow {
+                            title: _("_Journal");
+                            use-underline: true;
+                            icon-name: "open-book-symbolic";
+                            name: "/journal";
+                            activatable: true;
+
+                            [suffix]
+                            Box {
+                                Gtk.Label home_sidebar_journal_entries_count_label {
+                                    label: _("0");
+                                    valign: center;
+                                    visible: false;
+
+                                    styles [
+                                        "status-badge",
+                                    ]
+                                }
+
+                                Adw.Spinner home_sidebar_journal_entries_count_spinner {}
+                            }
+
+                            styles [
+                                "sidebar-item",
+                            ]
+                        }
+
+                        styles [
+                            "navigation-sidebar",
+                        ]
+                    }
+                };
+            };
+        };
+
+        content: Adw.NavigationPage home_content_page {
+            Adw.NavigationView home_navigation {
+                Adw.NavigationPage {
+                    title: _("Contacts");
+                    tag: "/contacts";
+
+                    Adw.ToolbarView contacts_toolbarview {
+                        [top]
+                        Adw.HeaderBar {
+                            [start]
+                            Button contacts_add_button {
+                                icon-name: "list-add-symbolic";
+                                tooltip-text: _("Add a contact");
+                            }
+
+                            [start]
+                            ToggleButton contacts_search_button {
+                                active: bind contacts_searchbar.search-mode-enabled bidirectional;
+                                icon-name: "system-search-symbolic";
+                                tooltip-text: _("Search");
+                            }
+                        }
+
+                        [top]
+                        SearchBar contacts_searchbar {
+                            key-capture-widget: contacts_toolbarview;
+
+                            SearchEntry contacts_searchentry {
+                                placeholder-text: _("Search contacts");
+                                max-width-chars: 28;
+                                search-delay: 100;
+                            }
+                        }
+
+                        Adw.Clamp {
+                            maximum-size: 600;
+
+                            Stack contacts_stack {
+                                StackPage {
+                                    name: "/contacts/loading";
+
+                                    child: Box {
+                                        halign: center;
+
+                                        Adw.Spinner {
+                                            width-request: 32;
+                                            height-request: 32;
+                                        }
+                                    };
+                                }
+
+                                StackPage {
+                                    name: "/contacts/list";
+
+                                    child: Gtk.ListBox contacts_list {
+                                        selection-mode: browse;
+                                        valign: start;
+                                        margin-top: 24;
+                                        margin-end: 12;
+                                        margin-bottom: 24;
+                                        margin-start: 12;
+
+                                        styles [
+                                            "boxed-list",
+                                        ]
+                                    };
+                                }
+
+                                StackPage {
+                                    name: "/contacts/no-results";
+
+                                    child: Adw.StatusPage {
+                                        title: _("No contacts found");
+                                        description: _("Try a different search");
+                                        icon-name: "edit-find-symbolic";
+                                    };
+                                }
+
+                                StackPage {
+                                    name: "/contacts/empty";
+
+                                    child: Adw.StatusPage {
+                                        title: _("No contacts found");
+                                        icon-name: "address-book-symbolic";
+
+                                        Button contacts_empty_add_button {
+                                            halign: center;
+                                            label: _("_Add a contact");
+                                            use-underline: true;
+
+                                            styles [
+                                                "suggested-action",
+                                            ]
+                                        }
+                                    };
+                                }
+
+                                StackPage {
+                                    name: "/contacts/error";
+
+                                    child: Adw.StatusPage contacts_error_status_page {
+                                        title: _("Contacts could not be loaded");
+                                        icon-name: "dialog-warning-symbolic";
+
+                                        Box {
+                                            spacing: 10;
+                                            halign: center;
+
+                                            Button contacts_error_refresh_button {
+                                                halign: center;
+                                                label: _("_Refresh");
+                                                use-underline: true;
+
+                                                styles [
+                                                    "suggested-action",
+                                                ]
+                                            }
+
+                                            Button contacts_error_copy_details {
+                                                halign: center;
+                                                label: _("_Copy details");
+                                                use-underline: true;
+                                            }
+                                        }
+                                    };
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Adw.NavigationPage contacts_view_page {
+                    title: _("Contact");
+                    tag: "/contacts/view";
+
+                    Adw.ToolbarView {
+                        [top]
+                        Adw.HeaderBar {
+                            title-widget: Adw.WindowTitle contacts_view_page_title {};
+
+                            [end]
+                            Button contacts_view_delete_button {
+                                icon-name: "user-trash-symbolic";
+                                tooltip-text: _("Delete contact");
+                                action-name: "app.deleteContact";
+                            }
+
+                            [end]
+                            Button contacts_view_edit_button {
+                                icon-name: "document-edit-symbolic";
+                                tooltip-text: _("Edit contact");
+                                action-name: "app.editContact";
+                            }
+                        }
+
+                        ScrolledWindow {
+                            Adw.Clamp {
+                                maximum-size: 600;
+
+                                Stack contacts_view_stack {
+                                    StackPage {
+                                        name: "/contacts/view/loading";
+
+                                        child: Box {
+                                            halign: center;
+
+                                            Adw.Spinner {
+                                                width-request: 32;
+                                                height-request: 32;
+                                            }
+                                        };
+                                    }
+
+                                    StackPage {
+                                        name: "/contacts/view/data";
+
+                                        child: Box {
+                                            spacing: 10;
+                                            orientation: vertical;
+                                            margin-top: 24;
+                                            margin-end: 12;
+                                            margin-bottom: 24;
+                                            margin-start: 12;
+
+                                            Adw.PreferencesGroup contacts_view_optional_fields {
+                                                visible: false;
+
+                                                Adw.ActionRow contacts_view_birthday {
+                                                    icon-name: "birthday-symbolic";
+                                                    tooltip-text: _("Birthday");
+                                                    visible: false;
+
+                                                    styles [
+                                                        "property",
+                                                    ]
+                                                }
+
+                                                Adw.ActionRow contacts_view_address {
+                                                    icon-name: "mark-location-symbolic";
+                                                    tooltip-text: _("Address");
+                                                    visible: false;
+
+                                                    styles [
+                                                        "property",
+                                                    ]
+                                                }
+
+                                                Adw.ActionRow contacts_view_notes {
+                                                    icon-name: "accessories-text-editor-symbolic";
+                                                    tooltip-text: _("Notes");
+                                                    visible: false;
+
+                                                    styles [
+                                                        "property",
+                                                    ]
+                                                }
+
+                                                styles [
+                                                    "boxed-list",
+                                                ]
+                                            }
+
+                                            Adw.PreferencesGroup {
+                                                title: _("Debts");
+
+                                                Gtk.ListBox contacts_view_debts {
+                                                    selection-mode: none;
+
+                                                    styles [
+                                                        "boxed-list",
+                                                    ]
+                                                }
+
+                                                styles [
+                                                    "boxed-list",
+                                                ]
+                                            }
+
+                                            Adw.PreferencesGroup {
+                                                title: _("Activites");
+
+                                                Gtk.ListBox contacts_view_activities {
+                                                    selection-mode: browse;
+
+                                                    styles [
+                                                        "boxed-list",
+                                                    ]
+                                                }
+
+                                                styles [
+                                                    "boxed-list",
+                                                ]
+                                            }
+                                        };
+                                    }
+
+                                    StackPage {
+                                        name: "/contacts/view/error";
+
+                                        child: Adw.StatusPage contacts_view_error_status_page {
+                                            title: _("Contact could not be loaded");
+                                            icon-name: "dialog-warning-symbolic";
+
+                                            Box {
+                                                spacing: 10;
+                                                halign: center;
+
+                                                Button contacts_view_error_refresh_button {
+                                                    halign: center;
+                                                    label: _("_Refresh");
+                                                    use-underline: true;
+
+                                                    styles [
+                                                        "suggested-action",
+                                                    ]
+                                                }
+
+                                                Button contacts_view_error_copy_details {
+                                                    halign: center;
+                                                    label: _("_Copy details");
+                                                    use-underline: true;
+                                                }
+                                            }
+                                        };
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Adw.NavigationPage activities_view_page {
+                    title: _("Activity");
+                    tag: "/activities/view";
+
+                    Adw.ToolbarView {
+                        [top]
+                        Adw.HeaderBar {
+                            title-widget: Adw.WindowTitle activities_view_page_title {};
+
+                            [end]
+                            Button activities_view_delete_button {
+                                icon-name: "user-trash-symbolic";
+                                tooltip-text: _("Delete activity");
+                                action-name: "app.deleteActivity";
+                            }
+
+                            [end]
+                            Button activities_view_edit_button {
+                                icon-name: "document-edit-symbolic";
+                                tooltip-text: _("Edit activity");
+                                action-name: "app.editActivity";
+                            }
+                        }
+
+                        ScrolledWindow {
+                            Stack activities_view_stack {
+                                StackPage {
+                                    name: "/activities/view/loading";
+
+                                    child: Adw.Clamp {
+                                        maximum-size: 600;
+
+                                        Box {
+                                            halign: center;
+
+                                            Adw.Spinner {
+                                                width-request: 32;
+                                                height-request: 32;
+                                            }
+                                        }
+                                    };
+                                }
+
+                                StackPage {
+                                    name: "/activities/view/data";
+
+                                    child: WebKit.WebView activities_view_body {};
+                                }
+
+                                StackPage {
+                                    name: "/activities/view/error";
+
+                                    child: Adw.Clamp {
+                                        maximum-size: 600;
+
+                                        Adw.StatusPage activities_view_error_status_page {
+                                            title: _("Activity could not be loaded");
+                                            icon-name: "dialog-warning-symbolic";
+
+                                            Box {
+                                                spacing: 10;
+                                                halign: center;
+
+                                                Button activities_view_error_refresh_button {
+                                                    halign: center;
+                                                    label: _("_Refresh");
+                                                    use-underline: true;
+
+                                                    styles [
+                                                        "suggested-action",
+                                                    ]
+                                                }
+
+                                                Button activities_view_error_copy_details {
+                                                    halign: center;
+                                                    label: _("_Copy details");
+                                                    use-underline: true;
+                                                }
+                                            }
+                                        }
+                                    };
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Adw.NavigationPage debts_edit_page {
+                    title: _("Edit debt");
+                    tag: "/debts/edit";
+                    can-pop: false;
+
+                    Adw.ToolbarView {
+                        [top]
+                        Adw.HeaderBar {
+                            title-widget: Adw.WindowTitle debts_edit_page_title {
+                                title: bind debts_edit_page.title;
+                            };
+
+                            [start]
+                            Button {
+                                label: _("_Cancel");
+                                use-underline: true;
+                                action-name: "navigation.pop";
+                            }
+
+                            [end]
+                            Button debts_edit_save_button {
+                                sensitive: false;
+
+                                Box {
+                                    spacing: 10;
+
+                                    Adw.Spinner debts_edit_save_spinner {
+                                        visible: false;
+                                    }
+
+                                    Label {
+                                        label: _("_Save");
+                                        use-underline: true;
+                                    }
+                                }
+
+                                styles [
+                                    "suggested-action",
+                                ]
+                            }
+                        }
+
+                        ScrolledWindow {
+                            Adw.Clamp {
+                                maximum-size: 600;
+
+                                Stack debts_edit_stack {
+                                    StackPage {
+                                        name: "/debts/edit/loading";
+
+                                        child: Box {
+                                            halign: center;
+
+                                            Adw.Spinner {
+                                                width-request: 32;
+                                                height-request: 32;
+                                            }
+                                        };
+                                    }
+
+                                    StackPage {
+                                        name: "/debts/edit/data";
+
+                                        child: Adw.PreferencesPage {
+                                            Adw.PreferencesGroup {
+                                                Adw.ActionRow debts_edit_page_debt_type_you_owe_row {
+                                                    activatable-widget: debts_edit_page_you_owe_radio;
+
+                                                    [prefix]
+                                                    CheckButton debts_edit_page_you_owe_radio {
+                                                        active: true;
+                                                    }
+                                                }
+
+                                                Adw.ActionRow debts_edit_page_debt_type_they_owe_row {
+                                                    activatable-widget: debts_edit_page_they_owe_radio;
+
+                                                    [prefix]
+                                                    CheckButton debts_edit_page_they_owe_radio {
+                                                        group: debts_edit_page_you_owe_radio;
+                                                    }
+                                                }
+                                            }
+
+                                            Adw.PreferencesGroup {
+                                                Adw.SpinRow debts_edit_page_amount_input {
+                                                    title: _("_Amount");
+                                                    use-underline: true;
+
+                                                    adjustment: Gtk.Adjustment {
+                                                        lower: 0;
+                                                        upper: 2147483647;
+                                                        step-increment: 1;
+                                                    };
+                                                }
+
+                                                Adw.EntryRow debts_edit_page_currency_input {
+                                                    title: _("C_urrency");
+                                                    use-underline: true;
+                                                }
+                                            }
+
+                                            Adw.PreferencesGroup {
+                                                Adw.ExpanderRow debts_edit_page_description_expander {
+                                                    title: _("_Description (optional)");
+                                                    use-underline: true;
+
+                                                    ScrolledWindow {
+                                                        height-request: 100;
+                                                        margin-top: 6;
+                                                        margin-bottom: 6;
+                                                        margin-start: 6;
+                                                        margin-end: 6;
+
+                                                        TextView debts_edit_page_description_input {
+                                                            wrap-mode: word;
+                                                            left-margin: 12;
+                                                            right-margin: 12;
+                                                            top-margin: 12;
+                                                            bottom-margin: 12;
+                                                            accepts-tab: false;
+
+                                                            styles [
+                                                                "card",
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        };
+                                    }
+
+                                    StackPage {
+                                        name: "/debts/edit/error";
+
+                                        child: Adw.StatusPage debts_edit_error_status_page {
+                                            title: _("Debt could not be loaded");
+                                            icon-name: "dialog-warning-symbolic";
+
+                                            Box {
+                                                spacing: 10;
+                                                halign: center;
+
+                                                Button debts_edit_error_refresh_button {
+                                                    halign: center;
+                                                    label: _("_Refresh");
+                                                    use-underline: true;
+
+                                                    styles [
+                                                        "suggested-action",
+                                                    ]
+                                                }
+
+                                                Button debts_edit_error_copy_details {
+                                                    halign: center;
+                                                    label: _("_Copy details");
+                                                    use-underline: true;
+                                                }
+                                            }
+                                        };
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Adw.NavigationPage activities_edit_page {
+                    title: _("Edit activity");
+                    tag: "/activities/edit";
+                    can-pop: false;
+
+                    Adw.ToolbarView {
+                        [top]
+                        Adw.HeaderBar {
+                            title-widget: Adw.WindowTitle activities_edit_page_title {
+                                title: bind activities_edit_page.title;
+                            };
+
+                            [start]
+                            Button {
+                                label: _("_Cancel");
+                                use-underline: true;
+                                action-name: "navigation.pop";
+                            }
+
+                            [end]
+                            Button activities_edit_save_button {
+                                sensitive: false;
+
+                                Box {
+                                    spacing: 10;
+
+                                    Adw.Spinner activities_edit_save_spinner {
+                                        visible: false;
+                                    }
+
+                                    Label {
+                                        label: _("_Save");
+                                        use-underline: true;
+                                    }
+                                }
+
+                                styles [
+                                    "suggested-action",
+                                ]
+                            }
+                        }
+
+                        ScrolledWindow {
+                            Adw.Clamp {
+                                maximum-size: 600;
+
+                                Stack activities_edit_stack {
+                                    StackPage {
+                                        name: "/activities/edit/loading";
+
+                                        child: Box {
+                                            halign: center;
+
+                                            Adw.Spinner {
+                                                width-request: 32;
+                                                height-request: 32;
+                                            }
+                                        };
+                                    }
+
+                                    StackPage {
+                                        name: "/activities/edit/data";
+
+                                        child: Adw.PreferencesPage {
+                                            Adw.PreferencesGroup {
+                                                Adw.EntryRow activities_edit_page_name_input {
+                                                    title: _("_Name");
+                                                    use-underline: true;
+                                                }
+
+                                                Adw.EntryRow activities_edit_page_date_input {
+                                                    title: _("_Date");
+                                                    use-underline: true;
+                                                }
+                                            }
+
+                                            Adw.PreferencesGroup {
+                                                Adw.ExpanderRow activities_edit_page_description_expander {
+                                                    title: _("D_escription (optional)");
+                                                    use-underline: true;
+                                                    subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
+
+                                                    ScrolledWindow {
+                                                        height-request: 100;
+                                                        margin-top: 6;
+                                                        margin-bottom: 6;
+                                                        margin-start: 6;
+                                                        margin-end: 6;
+
+                                                        TextView activities_edit_page_description_input {
+                                                            wrap-mode: word;
+                                                            left-margin: 12;
+                                                            right-margin: 12;
+                                                            top-margin: 12;
+                                                            bottom-margin: 12;
+                                                            accepts-tab: false;
+
+                                                            styles [
+                                                                "card",
+                                                                "monospace",
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        };
+                                    }
+
+                                    StackPage {
+                                        name: "/activities/edit/error";
+
+                                        child: Adw.StatusPage activities_edit_error_status_page {
+                                            title: _("Activity could not be loaded");
+                                            icon-name: "dialog-warning-symbolic";
+
+                                            Box {
+                                                spacing: 10;
+                                                halign: center;
+
+                                                Button activities_edit_error_refresh_button {
+                                                    halign: center;
+                                                    label: _("_Refresh");
+                                                    use-underline: true;
+
+                                                    styles [
+                                                        "suggested-action",
+                                                    ]
+                                                }
+
+                                                Button activities_edit_error_copy_details {
+                                                    halign: center;
+                                                    label: _("_Copy details");
+                                                    use-underline: true;
+                                                }
+                                            }
+                                        };
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Adw.NavigationPage contacts_edit_page {
+                    title: _("Edit contact");
+                    tag: "/contacts/edit";
+                    can-pop: false;
+
+                    Adw.ToolbarView {
+                        [top]
+                        Adw.HeaderBar {
+                            title-widget: Adw.WindowTitle contacts_edit_page_title {
+                                title: bind contacts_edit_page.title;
+                            };
+
+                            [start]
+                            Button {
+                                label: _("_Cancel");
+                                use-underline: true;
+                                action-name: "navigation.pop";
+                            }
+
+                            [end]
+                            Button contacts_edit_save_button {
+                                sensitive: false;
+
+                                Box {
+                                    spacing: 10;
+
+                                    Adw.Spinner contacts_edit_save_spinner {
+                                        visible: false;
+                                    }
+
+                                    Label {
+                                        label: _("_Save");
+                                        use-underline: true;
+                                    }
+                                }
+
+                                styles [
+                                    "suggested-action",
+                                ]
+                            }
+                        }
+
+                        ScrolledWindow {
+                            Adw.Clamp {
+                                maximum-size: 600;
+
+                                Stack contacts_edit_stack {
+                                    StackPage {
+                                        name: "/contacts/edit/loading";
+
+                                        child: Box {
+                                            halign: center;
+
+                                            Adw.Spinner {
+                                                width-request: 32;
+                                                height-request: 32;
+                                            }
+                                        };
+                                    }
+
+                                    StackPage {
+                                        name: "/contacts/edit/data";
+
+                                        child: Adw.PreferencesPage {
+                                            Adw.PreferencesGroup {
+                                                Adw.EntryRow contacts_edit_page_first_name_input {
+                                                    title: _("_First name");
+                                                    use-underline: true;
+                                                    input-purpose: name;
+                                                }
+
+                                                Adw.EntryRow contacts_edit_page_last_name_input {
+                                                    title: _("_Last name");
+                                                    use-underline: true;
+                                                    input-purpose: name;
+                                                }
+
+                                                Adw.EntryRow contacts_edit_page_nickname_input {
+                                                    title: _("_Nickname (optional)");
+                                                    use-underline: true;
+                                                }
+
+                                                Adw.EntryRow contacts_edit_page_email_input {
+                                                    title: _("_Email");
+                                                    use-underline: true;
+                                                    input-purpose: email;
+                                                }
+
+                                                Adw.EntryRow contacts_edit_page_pronouns_input {
+                                                    title: _("_Pronouns");
+                                                    use-underline: true;
+                                                }
+
+                                                Adw.EntryRow contacts_edit_page_birthday_input {
+                                                    title: _("_Birthday (optional)");
+                                                    use-underline: true;
+                                                }
+                                            }
+
+                                            Adw.PreferencesGroup {
+                                                Adw.ExpanderRow contacts_edit_page_address_expander {
+                                                    title: _("A_ddress (optional)");
+                                                    use-underline: true;
+
+                                                    ScrolledWindow {
+                                                        height-request: 100;
+                                                        margin-top: 6;
+                                                        margin-bottom: 6;
+                                                        margin-start: 6;
+                                                        margin-end: 6;
+
+                                                        TextView contacts_edit_page_address_input {
+                                                            wrap-mode: word;
+                                                            left-margin: 12;
+                                                            right-margin: 12;
+                                                            top-margin: 12;
+                                                            bottom-margin: 12;
+                                                            accepts-tab: false;
+
+                                                            styles [
+                                                                "card",
+                                                                "monospace",
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+
+                                                Adw.ExpanderRow contacts_edit_page_notes_expander {
+                                                    title: _("N_otes (optional)");
+                                                    use-underline: true;
+
+                                                    ScrolledWindow {
+                                                        height-request: 100;
+                                                        margin-top: 6;
+                                                        margin-bottom: 6;
+                                                        margin-start: 6;
+                                                        margin-end: 6;
+
+                                                        TextView contacts_edit_page_notes_input {
+                                                            wrap-mode: word;
+                                                            left-margin: 12;
+                                                            right-margin: 12;
+                                                            top-margin: 12;
+                                                            bottom-margin: 12;
+                                                            accepts-tab: false;
+
+                                                            styles [
+                                                                "card",
+                                                                "monospace",
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        };
+                                    }
+
+                                    StackPage {
+                                        name: "/contacts/edit/error";
+
+                                        child: Adw.StatusPage contacts_edit_error_status_page {
+                                            title: _("Contact could not be loaded");
+                                            icon-name: "dialog-warning-symbolic";
+
+                                            Box {
+                                                spacing: 10;
+                                                halign: center;
+
+                                                Button contacts_edit_error_refresh_button {
+                                                    halign: center;
+                                                    label: _("_Refresh");
+                                                    use-underline: true;
+
+                                                    styles [
+                                                        "suggested-action",
+                                                    ]
+                                                }
+
+                                                Button contacts_edit_error_copy_details {
+                                                    halign: center;
+                                                    label: _("_Copy details");
+                                                    use-underline: true;
+                                                }
+                                            }
+                                        };
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Adw.NavigationPage {
+                    title: _("Journal");
+                    tag: "/journal";
+
+                    Adw.ToolbarView journal_entries_toolbarview {
+                        [top]
+                        Adw.HeaderBar {
+                            [start]
+                            Button journal_entries_add_button {
+                                icon-name: "list-add-symbolic";
+                                tooltip-text: _("Add a journal entry");
+                            }
+
+                            [start]
+                            ToggleButton journal_entries_search_button {
+                                active: bind journal_entries_searchbar.search-mode-enabled bidirectional;
+                                icon-name: "system-search-symbolic";
+                                tooltip-text: _("Search");
+                            }
+                        }
+
+                        [top]
+                        SearchBar journal_entries_searchbar {
+                            key-capture-widget: journal_entries_toolbarview;
+
+                            SearchEntry journal_entries_searchentry {
+                                placeholder-text: _("Search journal entries");
+                                max-width-chars: 28;
+                                search-delay: 100;
+                            }
+                        }
+
+                        Adw.Clamp {
+                            maximum-size: 600;
+
+                            Stack journal_entries_stack {
+                                StackPage {
+                                    name: "/journal/loading";
+
+                                    child: Box {
+                                        halign: center;
+
+                                        Adw.Spinner {
+                                            width-request: 32;
+                                            height-request: 32;
+                                        }
+                                    };
+                                }
+
+                                StackPage {
+                                    name: "/journal/list";
+
+                                    child: Gtk.ListBox journal_entries_list {
+                                        selection-mode: browse;
+                                        valign: start;
+                                        margin-top: 24;
+                                        margin-end: 12;
+                                        margin-bottom: 24;
+                                        margin-start: 12;
+
+                                        styles [
+                                            "boxed-list",
+                                        ]
+                                    };
+                                }
+
+                                StackPage {
+                                    name: "/journal/no-results";
+
+                                    child: Adw.StatusPage {
+                                        title: _("No journal entries found");
+                                        description: _("Try a different search");
+                                        icon-name: "edit-find-symbolic";
+                                    };
+                                }
+
+                                StackPage {
+                                    name: "/journal/empty";
+
+                                    child: Adw.StatusPage {
+                                        title: _("No journal entries found");
+                                        icon-name: "open-book-symbolic";
+
+                                        Button journal_entries_empty_add_button {
+                                            halign: center;
+                                            label: _("_Add a journal entry");
+                                            use-underline: true;
+
+                                            styles [
+                                                "suggested-action",
+                                            ]
+                                        }
+                                    };
+                                }
+
+                                StackPage {
+                                    name: "/journal/error";
+
+                                    child: Adw.StatusPage journal_entries_error_status_page {
+                                        title: _("Journal entries could not be loaded");
+                                        icon-name: "dialog-warning-symbolic";
+
+                                        Box {
+                                            spacing: 10;
+                                            halign: center;
+
+                                            Button journal_entries_error_refresh_button {
+                                                halign: center;
+                                                label: _("_Refresh");
+                                                use-underline: true;
+
+                                                styles [
+                                                    "suggested-action",
+                                                ]
+                                            }
+
+                                            Button journal_entries_error_copy_details {
+                                                halign: center;
+                                                label: _("_Copy details");
+                                                use-underline: true;
+                                            }
+                                        }
+                                    };
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Adw.NavigationPage journal_entries_view_page {
+                    title: _("Journal Entry");
+                    tag: "/journal/view";
+
+                    Adw.ToolbarView {
+                        [top]
+                        Adw.HeaderBar {
+                            title-widget: Adw.WindowTitle journal_entries_view_page_title {};
+
+                            [end]
+                            Button journal_entries_view_delete_button {
+                                icon-name: "user-trash-symbolic";
+                                tooltip-text: _("Delete journal entry");
+                                action-name: "app.deleteJournalEntry";
+                            }
+
+                            [end]
+                            Button journal_entries_view_edit_button {
+                                icon-name: "document-edit-symbolic";
+                                tooltip-text: _("Edit journal entry");
+                                action-name: "app.editJournalEntry";
+                            }
+                        }
+
+                        ScrolledWindow {
+                            Stack journal_entries_view_stack {
+                                StackPage {
+                                    name: "/journal/view/loading";
+
+                                    child: Adw.Clamp {
+                                        maximum-size: 600;
+
+                                        Box {
+                                            halign: center;
+
+                                            Adw.Spinner {
+                                                width-request: 32;
+                                                height-request: 32;
+                                            }
+                                        }
+                                    };
+                                }
+
+                                StackPage {
+                                    name: "/journal/view/data";
+
+                                    child: WebKit.WebView journal_entries_view_body {};
+                                }
+
+                                StackPage {
+                                    name: "/journal/view/error";
+
+                                    child: Adw.Clamp {
+                                        maximum-size: 600;
+
+                                        Adw.StatusPage journal_entries_view_error_status_page {
+                                            title: _("Journal entry could not be loaded");
+                                            icon-name: "dialog-warning-symbolic";
+
+                                            Box {
+                                                spacing: 10;
+                                                halign: center;
+
+                                                Button journal_entries_view_error_refresh_button {
+                                                    halign: center;
+                                                    label: _("_Refresh");
+                                                    use-underline: true;
+
+                                                    styles [
+                                                        "suggested-action",
+                                                    ]
+                                                }
+
+                                                Button journal_entries_view_error_copy_details {
+                                                    halign: center;
+                                                    label: _("_Copy details");
+                                                    use-underline: true;
+                                                }
+                                            }
+                                        }
+                                    };
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Adw.NavigationPage journal_entries_edit_page {
+                    title: _("Edit journal entry");
+                    tag: "/journal/edit";
+                    can-pop: false;
+
+                    Adw.ToolbarView {
+                        [top]
+                        Adw.HeaderBar {
+                            title-widget: Adw.WindowTitle journal_entries_edit_page_title {
+                                title: bind journal_entries_edit_page.title;
+                            };
+
+                            [start]
+                            Button {
+                                label: _("_Cancel");
+                                use-underline: true;
+                                action-name: "navigation.pop";
+                            }
+
+                            [end]
+                            Button journal_entries_edit_save_button {
+                                sensitive: false;
+
+                                Box {
+                                    spacing: 10;
+
+                                    Adw.Spinner journal_entries_edit_save_spinner {
+                                        visible: false;
+                                    }
+
+                                    Label {
+                                        label: _("_Save");
+                                        use-underline: true;
+                                    }
+                                }
+
+                                styles [
+                                    "suggested-action",
+                                ]
+                            }
+                        }
+
+                        ScrolledWindow {
+                            Adw.Clamp {
+                                maximum-size: 600;
+
+                                Stack journal_entries_edit_stack {
+                                    StackPage {
+                                        name: "/journal/edit/loading";
+
+                                        child: Box {
+                                            halign: center;
+
+                                            Adw.Spinner {
+                                                width-request: 32;
+                                                height-request: 32;
+                                            }
+                                        };
+                                    }
+
+                                    StackPage {
+                                        name: "/journal/edit/data";
+
+                                        child: Adw.PreferencesPage {
+                                            Adw.PreferencesGroup {
+                                                Adw.ActionRow {
+                                                    title: _("_How was your day?");
+                                                    use-underline: true;
+
+                                                    Adw.ToggleGroup journal_entries_edit_page_rating {
+                                                        valign: center;
+
+                                                        Adw.Toggle {
+                                                            label: _("_Great");
+                                                            use-underline: true;
+                                                        }
+
+                                                        Adw.Toggle {
+                                                            label: _("_OK");
+                                                            use-underline: true;
+                                                        }
+
+                                                        Adw.Toggle {
+                                                            label: _("Ba_d");
+                                                            use-underline: true;
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            Adw.PreferencesGroup {
+                                                Adw.EntryRow journal_entries_edit_page_title_input {
+                                                    title: _("_Title");
+                                                    use-underline: true;
+                                                }
+
+                                                Adw.ExpanderRow journal_entries_edit_page_body_expander {
+                                                    title: _("_Body");
+                                                    use-underline: true;
+                                                    subtitle: _("You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>");
+                                                    expanded: true;
+
+                                                    ScrolledWindow {
+                                                        height-request: 100;
+                                                        margin-top: 6;
+                                                        margin-bottom: 6;
+                                                        margin-start: 6;
+                                                        margin-end: 6;
+
+                                                        TextView journal_entries_edit_page_body_input {
+                                                            wrap-mode: word;
+                                                            left-margin: 12;
+                                                            right-margin: 12;
+                                                            top-margin: 12;
+                                                            bottom-margin: 12;
+                                                            accepts-tab: false;
+
+                                                            styles [
+                                                                "card",
+                                                                "monospace",
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        };
+                                    }
+
+                                    StackPage {
+                                        name: "/journal/edit/error";
+
+                                        child: Adw.StatusPage journal_entries_edit_error_status_page {
+                                            title: _("Journal entry could not be loaded");
+                                            icon-name: "dialog-warning-symbolic";
+
+                                            Box {
+                                                spacing: 10;
+                                                halign: center;
+
+                                                Button journal_entries_edit_error_refresh_button {
+                                                    halign: center;
+                                                    label: _("_Refresh");
+                                                    use-underline: true;
+
+                                                    styles [
+                                                        "suggested-action",
+                                                    ]
+                                                }
+
+                                                Button journal_entries_edit_error_copy_details {
+                                                    halign: center;
+                                                    label: _("_Copy details");
+                                                    use-underline: true;
+                                                }
+                                            }
+                                        };
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    }
+}
+
+menu home_user_menu {
+    item {
+        label: _("Logout");
+        action: "app.logout";
+    }
+
+    section {
+        submenu {
+            label: _("Your data");
+
+            item {
+                label: _("Export");
+                action: "app.exportUserData";
+            }
+
+            item {
+                label: _("Import");
+                action: "app.importUserData";
+            }
+
+            item {
+                label: _("Delete");
+                action: "app.deleteUserData";
+            }
+        }
+    }
+}
+
+menu home_menu {
+    submenu {
+        label: _("About this Senbara server");
+
+        item {
+            label: _("License");
+            action: "app.license";
+        }
+
+        item {
+            label: _("Code");
+            action: "app.code";
+        }
+
+        item {
+            label: _("Privacy");
+            action: "app.privacy";
+        }
+
+        item {
+            label: _("Terms of Service");
+            action: "app.tos";
+        }
+
+        item {
+            label: _("Imprint");
+            action: "app.imprint";
+        }
+    }
+
+    section {
+        item {
+            label: _("Preferences");
+            action: "app.openPreferences";
+        }
+
+        item {
+            label: _("_Keyboard shortcuts");
+            action: "app.shortcuts";
+        }
+
+        item {
+            label: _("About Senbara Forms");
+            action: "app.about";
+        }
+    }
+}

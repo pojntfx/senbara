@@ -1,0 +1,149 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.NavigationPage page_preview {
+    title: _("Senbara Forms");
+    tag: "/preview";
+    can-pop: false;
+
+    Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+            show-title: false;
+
+            [end]
+            MenuButton page_preview_menu_button {
+                icon-name: "open-menu-symbolic";
+                primary: true;
+            }
+
+            [end]
+            Button preview_login_button {
+                Box {
+                    spacing: 10;
+
+                    Adw.Spinner preview_login_spinner {
+                        visible: false;
+                    }
+
+                    Label {
+                        label: _("_Login");
+                        use-underline: true;
+                    }
+                }
+
+                styles [
+                    "suggested-action",
+                ]
+            }
+        }
+
+        Adw.StatusPage {
+            title: _("Senbara Forms");
+            description: _("(Preview) GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
+            icon-name: "open-book-symbolic";
+
+            Gtk.FlowBox {
+                row-spacing: 21;
+                column-spacing: 21;
+                halign: center;
+                valign: fill;
+                homogeneous: true;
+                selection-mode: none;
+                max-children-per-line: 2;
+
+                Box {
+                    orientation: vertical;
+                    halign: fill;
+                    valign: center;
+
+                    Box {
+                        orientation: vertical;
+                        spacing: 10;
+                        halign: fill;
+                        valign: center;
+                        margin-top: 12;
+                        margin-bottom: 12;
+                        margin-start: 12;
+                        margin-end: 12;
+
+                        Label {
+                            label: _("Total contacts");
+                            halign: center;
+
+                            styles [
+                                "heading",
+                            ]
+                        }
+
+                        Label preview_contacts_count_label {
+                            label: _("0");
+                            halign: center;
+                            valign: center;
+                            visible: false;
+
+                            styles [
+                                "title-1",
+                            ]
+                        }
+
+                        Adw.Spinner preview_contacts_count_spinner {
+                            width-request: 37;
+                            height-request: 37;
+                        }
+                    }
+
+                    styles [
+                        "card",
+                    ]
+                }
+
+                Box {
+                    orientation: vertical;
+                    halign: fill;
+                    valign: center;
+
+                    Box {
+                        orientation: vertical;
+                        spacing: 10;
+                        halign: fill;
+                        valign: center;
+                        margin-top: 12;
+                        margin-bottom: 12;
+                        margin-start: 12;
+                        margin-end: 12;
+
+                        Label {
+                            label: _("Total journal entries");
+                            halign: center;
+
+                            styles [
+                                "heading",
+                            ]
+                        }
+
+                        Label preview_journal_entries_count_label {
+                            label: _("0");
+                            halign: center;
+                            valign: center;
+                            visible: false;
+
+                            styles [
+                                "title-1",
+                            ]
+                        }
+
+                        Adw.Spinner preview_journal_entries_count_spinner {
+                            width-request: 37;
+                            height-request: 37;
+                        }
+                    }
+
+                    styles [
+                        "card",
+                    ]
+                }
+            }
+        }
+    }
+}

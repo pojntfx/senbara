@@ -1,0 +1,48 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.NavigationPage page_welcome {
+    title: _("Senbara Forms");
+    tag: "/welcome";
+    can-pop: false;
+
+    Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+            show-title: false;
+
+            [end]
+            MenuButton page_welcome_menu_button {
+                icon-name: "open-menu-symbolic";
+                primary: true;
+            }
+        }
+
+        Adw.StatusPage {
+            title: _("Senbara Forms");
+            description: _("GNOME app to interact with the Senbara REST API. Designed as a reference for modern GNOME/GTK development with Go.");
+            icon-name: "open-book-symbolic";
+
+            Button welcome_get_started_button {
+                halign: center;
+
+                Box {
+                    spacing: 10;
+
+                    Adw.Spinner welcome_get_started_spinner {
+                        visible: false;
+                    }
+
+                    Label {
+                        label: _("_Get started");
+                        use-underline: true;
+                    }
+                }
+
+                styles [
+                    "suggested-action",
+                ]
+            }
+        }
+    }
+}

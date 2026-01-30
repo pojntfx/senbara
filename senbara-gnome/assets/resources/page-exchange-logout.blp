@@ -1,0 +1,36 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.NavigationPage page_exchange_logout {
+    title: _("Signing you out");
+    tag: "/exchange/logout";
+
+    Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+            show-title: false;
+
+            [start]
+            Button exchange_logout_cancel_button {
+                label: _("_Cancel");
+                use-underline: true;
+            }
+
+            [end]
+            MenuButton page_exchange_logout_menu_button {
+                icon-name: "open-menu-symbolic";
+                primary: true;
+            }
+        }
+
+        Adw.StatusPage {
+            title: _("Signing you out");
+            description: _("Waiting for authorization from browser ...");
+
+            Adw.Spinner {
+                width-request: 48;
+                height-request: 48;
+            }
+        }
+    }
+}

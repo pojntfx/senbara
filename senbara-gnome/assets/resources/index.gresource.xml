@@ -2,6 +2,16 @@
 <gresources>
     <gresource prefix="/com/pojtinger/felicitas/Senbara">
         <file>window.ui</file>
+        <file>menus.ui</file>
+        <file>page-index.ui</file>
+        <file>page-welcome.ui</file>
+        <file>page-config-server-url.ui</file>
+        <file>page-preview.ui</file>
+        <file>page-register.ui</file>
+        <file>page-config-initial-access-token.ui</file>
+        <file>page-exchange-login.ui</file>
+        <file>page-home.ui</file>
+        <file>page-exchange-logout.ui</file>
         <file>warning-buttons.ui</file>
         <file>preferences-dialog.ui</file>
         <file>contacts-create-dialog.ui</file>

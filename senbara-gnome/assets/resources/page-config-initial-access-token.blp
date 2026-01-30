@@ -1,0 +1,58 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.NavigationPage page_config_initial_access_token {
+    title: _("What's your initial access token?");
+    tag: "/config/initial-access-token";
+
+    Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+            show-title: false;
+
+            [end]
+            MenuButton page_config_initial_access_token_menu_button {
+                icon-name: "open-menu-symbolic";
+                primary: true;
+            }
+
+            [end]
+            Button config_initial_access_token_login_button {
+                sensitive: false;
+
+                Box {
+                    spacing: 10;
+
+                    Adw.Spinner config_initial_access_token_login_spinner {
+                        visible: false;
+                    }
+
+                    Label {
+                        label: _("_Login");
+                        use-underline: true;
+                    }
+                }
+
+                styles [
+                    "suggested-action",
+                ]
+            }
+        }
+
+        Adw.StatusPage {
+            title: _("Set initial access token");
+            description: _("Enter the initial access token you've received from the Senbara server.");
+            icon-name: "network-server-symbolic";
+
+            Adw.Clamp {
+                maximum-size: 400;
+
+                Adw.PreferencesGroup {
+                    Adw.PasswordEntryRow config_initial_access_token_input {
+                        title: _("Initial access token");
+                    }
+                }
+            }
+        }
+    }
+}

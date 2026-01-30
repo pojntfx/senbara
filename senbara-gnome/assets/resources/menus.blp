@@ -1,0 +1,116 @@
+using Gtk 4.0;
+
+menu server_setup_menu {
+    item {
+        label: _("Deregister client");
+        action: "app.deregisterClient";
+    }
+
+    section {
+        item {
+            label: _("Preferences");
+            action: "app.openPreferences";
+        }
+
+        item {
+            label: _("_Keyboard shortcuts");
+            action: "app.shortcuts";
+        }
+
+        item {
+            label: _("About Senbara Forms");
+            action: "app.about";
+        }
+    }
+}
+
+menu preview_menu {
+    item {
+        label: _("Select different Senbara server");
+        action: "app.selectDifferentServer";
+    }
+
+    submenu {
+        label: _("About this Senbara server");
+
+        item {
+            label: _("License");
+            action: "app.license";
+        }
+
+        item {
+            label: _("Code");
+            action: "app.code";
+        }
+
+        item {
+            label: _("Privacy");
+            action: "app.privacy";
+        }
+
+        item {
+            label: _("Imprint");
+            action: "app.imprint";
+        }
+    }
+
+    section {
+        item {
+            label: _("Preferences");
+            action: "app.openPreferences";
+        }
+
+        item {
+            label: _("_Keyboard shortcuts");
+            action: "app.shortcuts";
+        }
+
+        item {
+            label: _("About Senbara Forms");
+            action: "app.about";
+        }
+    }
+}
+
+menu auth_setup_menu {
+    submenu {
+        label: _("About this Senbara server");
+
+        item {
+            label: _("License");
+            action: "app.license";
+        }
+
+        item {
+            label: _("Code");
+            action: "app.code";
+        }
+
+        item {
+            label: _("Privacy");
+            action: "app.privacy";
+        }
+
+        item {
+            label: _("Imprint");
+            action: "app.imprint";
+        }
+    }
+
+    section {
+        item {
+            label: _("Preferences");
+            action: "app.openPreferences";
+        }
+
+        item {
+            label: _("_Keyboard shortcuts");
+            action: "app.shortcuts";
+        }
+
+        item {
+            label: _("About Senbara Forms");
+            action: "app.about";
+        }
+    }
+}

@@ -1,0 +1,36 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.NavigationPage page_exchange_login {
+    title: _("Signing you in");
+    tag: "/exchange/login";
+
+    Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+            show-title: false;
+
+            [start]
+            Button exchange_login_cancel_button {
+                label: _("_Cancel");
+                use-underline: true;
+            }
+
+            [end]
+            MenuButton page_exchange_login_menu_button {
+                icon-name: "open-menu-symbolic";
+                primary: true;
+            }
+        }
+
+        Adw.StatusPage {
+            title: _("Signing you in");
+            description: _("Waiting for authorization from browser ...");
+
+            Adw.Spinner {
+                width-request: 48;
+                height-request: 48;
+            }
+        }
+    }
+}

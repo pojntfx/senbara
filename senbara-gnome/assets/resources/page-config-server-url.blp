@@ -1,0 +1,59 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.NavigationPage page_config_server_url {
+    title: _("Select Senbara server");
+    tag: "/config/server-url";
+
+    Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+            show-title: false;
+
+            [end]
+            MenuButton page_config_server_url_menu_button {
+                icon-name: "open-menu-symbolic";
+                primary: true;
+            }
+
+            [end]
+            Button config_server_url_continue_button {
+                sensitive: false;
+
+                Box {
+                    spacing: 10;
+
+                    Adw.Spinner config_server_url_continue_spinner {
+                        visible: false;
+                    }
+
+                    Label {
+                        label: _("_Continue");
+                        use-underline: true;
+                    }
+                }
+
+                styles [
+                    "suggested-action",
+                ]
+            }
+        }
+
+        Adw.StatusPage {
+            title: _("Where is your Senbara server?");
+            description: _("Enter the configuration for the Senbara server you want to connect to.");
+            icon-name: "network-server-symbolic";
+
+            Adw.Clamp {
+                maximum-size: 400;
+
+                Adw.PreferencesGroup {
+                    Adw.EntryRow config_server_url_input {
+                        title: _("_Senbara Server URL (e.g. https://rest.senbara.p8.lu/)");
+                        use-underline: true;
+                    }
+                }
+            }
+        }
+    }
+}
