@@ -32,10 +32,6 @@ github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+
 github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8HmY=
 github.com/josharian/intern v1.0.0/go.mod h1:5DoeVV0s6jJacbCEi61lwdGj/aVlrQvzHFFd8Hwg//Y=
 github.com/juju/gnuflag v0.0.0-20171113085948-2ce1bb71843d/go.mod h1:2PavIy+JPciBPrBUjwbNvtwB6RQlve+hkpll6QSNmOE=
-github.com/jwijenbergh/purego v0.0.0-20251017112123-b71757b9ba42 h1:kQ0LX4ffJvtONhymro3HzrB8XUa6dIGgrbnkl38Rgl0=
-github.com/jwijenbergh/purego v0.0.0-20251017112123-b71757b9ba42/go.mod h1:amE5lVGstyh2GTEIHFEbgJHmoMD0llIuapnzIlZx7Fc=
-github.com/jwijenbergh/puregotk v0.0.0-20251201161753-28ec1479c381 h1:Cy6in3ph8eGnl0w71S0NnH8ZCj0YhZZHzrwYEgtbtII=
-github.com/jwijenbergh/puregotk v0.0.0-20251201161753-28ec1479c381/go.mod h1:mZu8qSvCSqtVL+xoiebZuicnJijwrLfGRs6/eTVgFlc=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
@@ -59,6 +55,10 @@ github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRI
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pojntfx/go-gettext v0.2.0 h1:Nw3Hyy0Fef3pOuvYYPZESmbOT+IdnYjqx9/ywFo46GU=
 github.com/pojntfx/go-gettext v0.2.0/go.mod h1:eGt2r0JKvlPZjiz+GqEDtg92//F30LEV/IB0h42bk40=
+github.com/pojntfx/purego v0.0.0-20260128031338-5429b1e47a6d h1:f4fm8/eZJvaE/tfBomboi8CQByYmbXKxHcP6PBwAM04=
+github.com/pojntfx/purego v0.0.0-20260128031338-5429b1e47a6d/go.mod h1:amE5lVGstyh2GTEIHFEbgJHmoMD0llIuapnzIlZx7Fc=
+github.com/pojntfx/puregotk v0.0.0-20260220051800-f8a38f1e0894 h1:pPTVC5Q/5DJ46RzXKISgtUbZgHl/xampBJtBaPOd1ZQ=
+github.com/pojntfx/puregotk v0.0.0-20260220051800-f8a38f1e0894/go.mod h1:mZu8qSvCSqtVL+xoiebZuicnJijwrLfGRs6/eTVgFlc=
 github.com/pojntfx/senbara/senbara-common v0.0.0-20250520062435-d85e71a7a89f h1:oK4Sg9qjfW3XKPqwbkIVtj3CaQtl5xy98EnSF7GIUKs=
 github.com/pojntfx/senbara/senbara-common v0.0.0-20250520062435-d85e71a7a89f/go.mod h1:qOP28T7iYf/hUUHckc8QUdeSBv+wx0hrzvtXUuPwMe4=
 github.com/pojntfx/senbara/senbara-rest v0.0.0-20250520062435-d85e71a7a89f h1:WwMvnNYJtch1GdA6E/EjrBs5E6c/IXEqYN4EXf0VT2A=

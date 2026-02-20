@@ -11,7 +11,7 @@ import (
 )
 
 func glibDateTimeFromGo(t time.Time) *glib.DateTime {
-	return glib.NewDateTimeLocal(t.Year(), int(t.Month()), t.Day(), t.Hour(), t.Minute(), float64(t.Second()))
+	return glib.NewDateTimeLocal(int32(t.Year()), int32(t.Month()), int32(t.Day()), int32(t.Hour()), int32(t.Minute()), float64(t.Second()))
 }
 
 func connectButtonClicked(button *gtk.Button, fn func()) {

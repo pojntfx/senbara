@@ -89,7 +89,7 @@ func main() {
 				return nv.GetVisiblePage().GetTag()
 			},
 			func(tags []string, position int) {
-				nv.ReplaceWithTags(tags, position)
+				nv.ReplaceWithTags(tags, int32(position))
 			},
 			func(ud userData) {
 				u = ud
@@ -4041,7 +4041,7 @@ func main() {
 
 					journalEntriesEditPageTitle.SetSubtitle(*res.JSON200.Title)
 
-					journalEntriesEditPageRatingToggleGroup.SetActive(3 - uint(*res.JSON200.Rating)) // The toggle group is zero-indexed, but the rating is one-indexed
+					journalEntriesEditPageRatingToggleGroup.SetActive(uint32(3 - uint(*res.JSON200.Rating))) // The toggle group is zero-indexed, but the rating is one-indexed
 
 					journalEntriesEditPageTitleInput.SetText(*res.JSON200.Title)
 
@@ -4398,7 +4398,7 @@ func main() {
 	}
 	a.ConnectActivate(&onActivate)
 
-	onOpen := func(_ gio.Application, filesPtr uintptr, nFiles int, hint string) {
+	onOpen := func(_ gio.Application, filesPtr uintptr, nFiles int32, hint string) {
 		if w.GoPointer() == 0 {
 			a.Activate()
 		} else {
@@ -4544,11 +4544,11 @@ func main() {
 			nextURL = resources.PageIndex
 		}
 
-		nv.ReplaceWithTags([]string{nextURL}, 1)
+		nv.ReplaceWithTags([]string{nextURL}, int32(1))
 	}
 	a.ConnectOpen(&onOpen)
 
-	if code := a.Run(len(os.Args), os.Args); code > 0 {
-		os.Exit(code)
+	if code := a.Run(int32(len(os.Args)), os.Args); code > 0 {
+		os.Exit(int(code))
 	}
 }
