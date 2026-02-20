@@ -7,7 +7,7 @@ require (
 	github.com/jwijenbergh/puregotk v0.0.0-20251201161753-28ec1479c381
 	github.com/oapi-codegen/oapi-codegen/v2 v2.4.1
 	github.com/oapi-codegen/runtime v1.1.1
-	github.com/pojntfx/go-gettext v0.2.0
+	github.com/pojntfx/go-gettext v0.3.0
 	github.com/pojntfx/senbara/senbara-common v0.0.0-20250520062435-d85e71a7a89f
 	github.com/pojntfx/senbara/senbara-rest v0.0.0-20250520062435-d85e71a7a89f
 	github.com/yuin/goldmark v1.7.12

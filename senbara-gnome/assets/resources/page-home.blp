@@ -41,6 +41,7 @@ Adw.NavigationPage page_home {
 
                     [end]
                     MenuButton home_hamburger_menu_button {
+                        tooltip-text: _("Main Menu");
                         primary: true;
                         menu-model: home_menu;
                         has-frame: false;
@@ -138,7 +139,7 @@ Adw.NavigationPage page_home {
                             [start]
                             Button contacts_add_button {
                                 icon-name: "list-add-symbolic";
-                                tooltip-text: _("Add a contact");
+                                tooltip-text: _("Add a Contact");
                             }
 
                             [start]
@@ -213,7 +214,7 @@ Adw.NavigationPage page_home {
 
                                         Button contacts_empty_add_button {
                                             halign: center;
-                                            label: _("_Add a contact");
+                                            label: _("_Add a Contact");
                                             use-underline: true;
 
                                             styles [
@@ -246,7 +247,7 @@ Adw.NavigationPage page_home {
 
                                             Button contacts_error_copy_details {
                                                 halign: center;
-                                                label: _("_Copy details");
+                                                label: _("_Copy Details");
                                                 use-underline: true;
                                             }
                                         }
@@ -269,14 +270,14 @@ Adw.NavigationPage page_home {
                             [end]
                             Button contacts_view_delete_button {
                                 icon-name: "user-trash-symbolic";
-                                tooltip-text: _("Delete contact");
+                                tooltip-text: _("Delete Contact");
                                 action-name: "app.deleteContact";
                             }
 
                             [end]
                             Button contacts_view_edit_button {
                                 icon-name: "document-edit-symbolic";
-                                tooltip-text: _("Edit contact");
+                                tooltip-text: _("Edit Contact");
                                 action-name: "app.editContact";
                             }
                         }
@@ -405,7 +406,7 @@ Adw.NavigationPage page_home {
 
                                                 Button contacts_view_error_copy_details {
                                                     halign: center;
-                                                    label: _("_Copy details");
+                                                    label: _("_Copy Details");
                                                     use-underline: true;
                                                 }
                                             }
@@ -429,14 +430,14 @@ Adw.NavigationPage page_home {
                             [end]
                             Button activities_view_delete_button {
                                 icon-name: "user-trash-symbolic";
-                                tooltip-text: _("Delete activity");
+                                tooltip-text: _("Delete Activity");
                                 action-name: "app.deleteActivity";
                             }
 
                             [end]
                             Button activities_view_edit_button {
                                 icon-name: "document-edit-symbolic";
-                                tooltip-text: _("Edit activity");
+                                tooltip-text: _("Edit Activity");
                                 action-name: "app.editActivity";
                             }
                         }
@@ -492,7 +493,7 @@ Adw.NavigationPage page_home {
 
                                                 Button activities_view_error_copy_details {
                                                     halign: center;
-                                                    label: _("_Copy details");
+                                                    label: _("_Copy Details");
                                                     use-underline: true;
                                                 }
                                             }
@@ -659,7 +660,7 @@ Adw.NavigationPage page_home {
 
                                                 Button debts_edit_error_copy_details {
                                                     halign: center;
-                                                    label: _("_Copy details");
+                                                    label: _("_Copy Details");
                                                     use-underline: true;
                                                 }
                                             }
@@ -802,7 +803,7 @@ Adw.NavigationPage page_home {
 
                                                 Button activities_edit_error_copy_details {
                                                     halign: center;
-                                                    label: _("_Copy details");
+                                                    label: _("_Copy Details");
                                                     use-underline: true;
                                                 }
                                             }
@@ -994,7 +995,7 @@ Adw.NavigationPage page_home {
 
                                                 Button contacts_edit_error_copy_details {
                                                     halign: center;
-                                                    label: _("_Copy details");
+                                                    label: _("_Copy Details");
                                                     use-underline: true;
                                                 }
                                             }
@@ -1016,7 +1017,7 @@ Adw.NavigationPage page_home {
                             [start]
                             Button journal_entries_add_button {
                                 icon-name: "list-add-symbolic";
-                                tooltip-text: _("Add a journal entry");
+                                tooltip-text: _("Add a Journal Entry");
                             }
 
                             [start]
@@ -1091,7 +1092,7 @@ Adw.NavigationPage page_home {
 
                                         Button journal_entries_empty_add_button {
                                             halign: center;
-                                            label: _("_Add a journal entry");
+                                            label: _("_Add a Journal Entry");
                                             use-underline: true;
 
                                             styles [
@@ -1124,7 +1125,7 @@ Adw.NavigationPage page_home {
 
                                             Button journal_entries_error_copy_details {
                                                 halign: center;
-                                                label: _("_Copy details");
+                                                label: _("_Copy Details");
                                                 use-underline: true;
                                             }
                                         }
@@ -1147,14 +1148,14 @@ Adw.NavigationPage page_home {
                             [end]
                             Button journal_entries_view_delete_button {
                                 icon-name: "user-trash-symbolic";
-                                tooltip-text: _("Delete journal entry");
+                                tooltip-text: _("Delete Journal Entry");
                                 action-name: "app.deleteJournalEntry";
                             }
 
                             [end]
                             Button journal_entries_view_edit_button {
                                 icon-name: "document-edit-symbolic";
-                                tooltip-text: _("Edit journal entry");
+                                tooltip-text: _("Edit Journal Entry");
                                 action-name: "app.editJournalEntry";
                             }
                         }
@@ -1210,7 +1211,7 @@ Adw.NavigationPage page_home {
 
                                                 Button journal_entries_view_error_copy_details {
                                                     halign: center;
-                                                    label: _("_Copy details");
+                                                    label: _("_Copy Details");
                                                     use-underline: true;
                                                 }
                                             }
@@ -1373,7 +1374,7 @@ Adw.NavigationPage page_home {
 
                                                 Button journal_entries_edit_error_copy_details {
                                                     halign: center;
-                                                    label: _("_Copy details");
+                                                    label: _("_Copy Details");
                                                     use-underline: true;
                                                 }
                                             }
@@ -1391,26 +1392,26 @@ Adw.NavigationPage page_home {
 
 menu home_user_menu {
     item {
-        label: _("Logout");
+        label: _("_Logout");
         action: "app.logout";
     }
 
     section {
         submenu {
-            label: _("Your data");
+            label: _("Your Data");
 
             item {
-                label: _("Export");
+                label: _("_Export");
                 action: "app.exportUserData";
             }
 
             item {
-                label: _("Import");
+                label: _("_Import");
                 action: "app.importUserData";
             }
 
             item {
-                label: _("Delete");
+                label: _("_Delete");
                 action: "app.deleteUserData";
             }
         }
@@ -1449,17 +1450,17 @@ menu home_menu {
 
     section {
         item {
-            label: _("Preferences");
+            label: _("_Preferences");
             action: "app.openPreferences";
         }
 
         item {
-            label: _("_Keyboard shortcuts");
+            label: _("_Keyboard Shortcuts");
             action: "app.shortcuts";
         }
 
         item {
-            label: _("About Senbara Forms");
+            label: _("_About Senbara Forms");
             action: "app.about";
         }
     }

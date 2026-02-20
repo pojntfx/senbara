@@ -114,7 +114,7 @@ func main() {
 		)
 
 		toast := adw.NewToast(i18nErr)
-		toast.SetButtonLabel(L("Copy details"))
+		toast.SetButtonLabel(L("Copy Details"))
 		toast.SetActionName("app.copyErrorToClipboard")
 
 		mto.AddToast(toast)
@@ -1774,7 +1774,7 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(L("Created contact")))
+				mto.AddToast(adw.NewToast(L("Created Contact")))
 
 				contactsCreateDialog.Close()
 
@@ -1843,7 +1843,7 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(L("Created debt")))
+				mto.AddToast(adw.NewToast(L("Created Debt")))
 
 				debtsCreateDialog.Close()
 
@@ -1920,7 +1920,7 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(L("Created activity")))
+				mto.AddToast(adw.NewToast(L("Created Activity")))
 
 				activitiesCreateDialog.Close()
 
@@ -1996,7 +1996,7 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(L("Updated activity")))
+				mto.AddToast(adw.NewToast(L("Updated Activity")))
 
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView, resources.PageActivitiesView}, 3)
 			}()
@@ -2062,7 +2062,7 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(L("Updated debt")))
+				mto.AddToast(adw.NewToast(L("Updated Debt")))
 
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView}, 2)
 			}()
@@ -2157,7 +2157,7 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(L("Updated contact")))
+				mto.AddToast(adw.NewToast(L("Updated Contact")))
 
 				homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView}, 2)
 			}()
@@ -2211,7 +2211,7 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(L("Created journal entry")))
+				mto.AddToast(adw.NewToast(L("Created Journal Entry")))
 
 				journalEntriesCreateDialog.Close()
 
@@ -2273,7 +2273,7 @@ func main() {
 					return
 				}
 
-				mto.AddToast(adw.NewToast(L("Updated journal entry")))
+				mto.AddToast(adw.NewToast(L("Updated Journal Entry")))
 
 				homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries, resources.PageJournalEntriesView}, 2)
 			}()
@@ -2443,7 +2443,7 @@ func main() {
 
 					log.Debug("Downloaded code", "status", res.StatusCode)
 
-					mto.AddToast(adw.NewToast(L("Downloaded code")))
+					mto.AddToast(adw.NewToast(L("Downloaded Code")))
 				}()
 			})
 		})
@@ -2531,7 +2531,7 @@ func main() {
 
 					log.Debug("Exported user data", "status", res.StatusCode)
 
-					mto.AddToast(adw.NewToast(L("Exported user data")))
+					mto.AddToast(adw.NewToast(L("Exported User Data")))
 				}()
 			})
 		})
@@ -2701,7 +2701,7 @@ func main() {
 								return
 							}
 
-							mto.AddToast(adw.NewToast(L("Imported user data")))
+							mto.AddToast(adw.NewToast(L("Imported User Data")))
 
 							go func() {
 								_ = refreshSidebarWithLatestSummary()
@@ -2760,7 +2760,7 @@ func main() {
 						return
 					}
 
-					mto.AddToast(adw.NewToast(L("Deleted user data")))
+					mto.AddToast(adw.NewToast(L("Deleted User Data")))
 
 					logoutAction.Activate(nil)
 				}
@@ -2840,7 +2840,7 @@ func main() {
 						return
 					}
 
-					mto.AddToast(adw.NewToast(L("Contact deleted")))
+					mto.AddToast(adw.NewToast(L("Contact Deleted")))
 
 					homeNavigation.ReplaceWithTags([]string{resources.PageContacts}, 1)
 				}
@@ -2901,7 +2901,7 @@ func main() {
 						return
 					}
 
-					mto.AddToast(adw.NewToast(L("Settled debt")))
+					mto.AddToast(adw.NewToast(L("Settled Debt")))
 
 					homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView}, 2)
 				}
@@ -2962,7 +2962,7 @@ func main() {
 						return
 					}
 
-					mto.AddToast(adw.NewToast(L("Activity deleted")))
+					mto.AddToast(adw.NewToast(L("Activity Deleted")))
 
 					homeNavigation.ReplaceWithTags([]string{resources.PageContacts, resources.PageContactsView}, 2)
 				}
@@ -3023,7 +3023,7 @@ func main() {
 						return
 					}
 
-					mto.AddToast(adw.NewToast(L("Journal entry deleted")))
+					mto.AddToast(adw.NewToast(L("Journal Entry Deleted")))
 
 					homeNavigation.ReplaceWithTags([]string{resources.PageJournalEntries}, 1)
 				}

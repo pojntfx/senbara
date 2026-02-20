@@ -10,8 +10,8 @@ msgstr ""
 #: ../assets/resources/debts-create-dialog.blp:19
 #: ../assets/resources/journal-entries-create-dialog.blp:15
 #: ../assets/resources/page-exchange-login.blp:15
-#: ../assets/resources/page-home.blp:521 ../assets/resources/page-home.blp:688
-#: ../assets/resources/page-home.blp:831 ../assets/resources/page-home.blp:1239
+#: ../assets/resources/page-home.blp:522 ../assets/resources/page-home.blp:689
+#: ../assets/resources/page-home.blp:832 ../assets/resources/page-home.blp:1240
 #: ../assets/resources/page-exchange-logout.blp:15
 msgid "_Cancel"
 msgstr ""
@@ -24,23 +24,23 @@ msgid "_Add"
 msgstr ""
 
 #: ../assets/resources/activities-create-dialog.blp:50
-#: ../assets/resources/page-home.blp:740
+#: ../assets/resources/page-home.blp:741
 msgid "_Name"
 msgstr ""
 
 #: ../assets/resources/activities-create-dialog.blp:56
-#: ../assets/resources/page-home.blp:745
+#: ../assets/resources/page-home.blp:746
 msgid "_Date"
 msgstr ""
 
 #: ../assets/resources/activities-create-dialog.blp:63
-#: ../assets/resources/page-home.blp:752
+#: ../assets/resources/page-home.blp:753
 msgid "D_escription (optional)"
 msgstr ""
 
 #: ../assets/resources/activities-create-dialog.blp:65
 #: ../assets/resources/journal-entries-create-dialog.blp:80
-#: ../assets/resources/page-home.blp:754 ../assets/resources/page-home.blp:1324
+#: ../assets/resources/page-home.blp:755 ../assets/resources/page-home.blp:1325
 msgid ""
 "You can use <a href=\"https://en.wikipedia.org/wiki/Markdown\">Markdown</a>"
 msgstr ""
@@ -50,7 +50,7 @@ msgstr ""
 #: ../assets/resources/warning-buttons.blp:5
 #: ../assets/resources/warning-buttons.blp:17
 #: ../assets/resources/warning-buttons.blp:29
-msgid "Show error"
+msgid "Show Error"
 msgstr ""
 
 #: ../assets/resources/contacts-create-dialog.blp:5
@@ -58,27 +58,27 @@ msgid "Create a contact"
 msgstr ""
 
 #: ../assets/resources/contacts-create-dialog.blp:46
-#: ../assets/resources/page-home.blp:883
+#: ../assets/resources/page-home.blp:884
 msgid "_First name"
 msgstr ""
 
 #: ../assets/resources/contacts-create-dialog.blp:53
-#: ../assets/resources/page-home.blp:889
+#: ../assets/resources/page-home.blp:890
 msgid "_Last name"
 msgstr ""
 
 #: ../assets/resources/contacts-create-dialog.blp:59
-#: ../assets/resources/page-home.blp:895
+#: ../assets/resources/page-home.blp:896
 msgid "_Nickname (optional)"
 msgstr ""
 
 #: ../assets/resources/contacts-create-dialog.blp:64
-#: ../assets/resources/page-home.blp:900
+#: ../assets/resources/page-home.blp:901
 msgid "_Email"
 msgstr ""
 
 #: ../assets/resources/contacts-create-dialog.blp:70
-#: ../assets/resources/page-home.blp:906
+#: ../assets/resources/page-home.blp:907
 msgid "_Pronouns"
 msgstr ""
 
@@ -92,17 +92,17 @@ msgid "Create a debt"
 msgstr ""
 
 #: ../assets/resources/debts-create-dialog.blp:70
-#: ../assets/resources/page-home.blp:593
+#: ../assets/resources/page-home.blp:594
 msgid "_Amount"
 msgstr ""
 
 #: ../assets/resources/debts-create-dialog.blp:82
-#: ../assets/resources/page-home.blp:604
+#: ../assets/resources/page-home.blp:605
 msgid "C_urrency"
 msgstr ""
 
 #: ../assets/resources/debts-create-dialog.blp:89
-#: ../assets/resources/page-home.blp:611
+#: ../assets/resources/page-home.blp:612
 msgid "_Description (optional)"
 msgstr ""
 
@@ -111,38 +111,36 @@ msgid "Create a journal entry"
 msgstr ""
 
 #: ../assets/resources/journal-entries-create-dialog.blp:46
-#: ../assets/resources/page-home.blp:1291
+#: ../assets/resources/page-home.blp:1292
 msgid "_How was your day?"
 msgstr ""
 
 #: ../assets/resources/journal-entries-create-dialog.blp:53
-#: ../assets/resources/page-home.blp:1298
+#: ../assets/resources/page-home.blp:1299
 msgid "_Great"
 msgstr ""
 
 #: ../assets/resources/journal-entries-create-dialog.blp:58
-#: ../assets/resources/page-home.blp:1303
+#: ../assets/resources/page-home.blp:1304
 msgid "_OK"
 msgstr ""
 
 #: ../assets/resources/journal-entries-create-dialog.blp:63
-#: ../assets/resources/page-home.blp:1308
+#: ../assets/resources/page-home.blp:1309
 msgid "Ba_d"
 msgstr ""
 
 #: ../assets/resources/journal-entries-create-dialog.blp:72
-#: ../assets/resources/page-home.blp:1317
+#: ../assets/resources/page-home.blp:1318
 msgid "_Title"
 msgstr ""
 
 #: ../assets/resources/journal-entries-create-dialog.blp:78
-#: ../assets/resources/page-home.blp:1322
+#: ../assets/resources/page-home.blp:1323
 msgid "_Body"
 msgstr ""
 
 #: ../assets/resources/preferences-dialog.blp:5
-#: ../assets/resources/menus.blp:11 ../assets/resources/menus.blp:59
-#: ../assets/resources/menus.blp:102 ../assets/resources/page-home.blp:1452
 msgid "Preferences"
 msgstr ""
 
@@ -216,26 +214,32 @@ msgid "Delete current item"
 msgstr ""
 
 #: ../assets/resources/window.blp:7 ../assets/resources/page-welcome.blp:5
-#: ../assets/resources/page-welcome.blp:22
+#: ../assets/resources/page-welcome.blp:23
 #: ../assets/resources/page-preview.blp:5
-#: ../assets/resources/page-preview.blp:42 ../assets/resources/page-home.blp:6
+#: ../assets/resources/page-preview.blp:43 ../assets/resources/page-home.blp:6
 #: ../assets/meta/com.pojtinger.felicitas.Senbara.desktop.in:4
 #: ../assets/resources/metainfo.xml.in:4
 msgid "Senbara Forms"
 msgstr "Senbara-Formulare"
 
 #: ../assets/resources/menus.blp:5
-msgid "Deregister client"
+msgid "_Deregister Client"
+msgstr ""
+
+#: ../assets/resources/menus.blp:11 ../assets/resources/menus.blp:59
+#: ../assets/resources/menus.blp:102 ../assets/resources/page-home.blp:1453
+msgid "_Preferences"
 msgstr ""
 
 #: ../assets/resources/menus.blp:16 ../assets/resources/menus.blp:64
-#: ../assets/resources/menus.blp:107 ../assets/resources/page-home.blp:1457
-msgid "_Keyboard shortcuts"
+#: ../assets/resources/menus.blp:107 ../assets/resources/page-home.blp:1458
+msgid "_Keyboard Shortcuts"
 msgstr ""
 
 #: ../assets/resources/menus.blp:21 ../assets/resources/menus.blp:69
-#: ../assets/resources/menus.blp:112 ../assets/resources/page-home.blp:1462
-msgid "About Senbara Forms"
+#: ../assets/resources/menus.blp:112 ../assets/resources/page-home.blp:1463
+#, fuzzy
+msgid "_About Senbara Forms"
 msgstr "Senbara-Formulare"
 
 #: ../assets/resources/menus.blp:29
@@ -243,39 +247,51 @@ msgid "Select different Senbara server"
 msgstr ""
 
 #: ../assets/resources/menus.blp:34 ../assets/resources/menus.blp:77
-#: ../assets/resources/page-home.blp:1422
+#: ../assets/resources/page-home.blp:1423
 msgid "About this Senbara server"
 msgstr "Senbara-Formulare"
 
 #: ../assets/resources/menus.blp:37 ../assets/resources/menus.blp:80
-#: ../assets/resources/page-home.blp:1425
+#: ../assets/resources/page-home.blp:1426
 msgid "License"
 msgstr ""
 
 #: ../assets/resources/menus.blp:42 ../assets/resources/menus.blp:85
-#: ../assets/resources/page-home.blp:1430
+#: ../assets/resources/page-home.blp:1431
 msgid "Code"
 msgstr ""
 
 #: ../assets/resources/menus.blp:47 ../assets/resources/menus.blp:90
-#: ../assets/resources/page-home.blp:1435
+#: ../assets/resources/page-home.blp:1436
 msgid "Privacy"
 msgstr ""
 
 #: ../assets/resources/menus.blp:52 ../assets/resources/menus.blp:95
-#: ../assets/resources/page-home.blp:1445
+#: ../assets/resources/page-home.blp:1446
 msgid "Imprint"
 msgstr ""
 
-#: ../assets/resources/page-index.blp:5 ../assets/resources/page-index.blp:21
+#: ../assets/resources/page-index.blp:5 ../assets/resources/page-index.blp:22
 msgid "Loading Senbara Forms"
 msgstr "Senbara-Formulare"
 
-#: ../assets/resources/page-index.blp:22
+#: ../assets/resources/page-index.blp:16
+#: ../assets/resources/page-welcome.blp:17
+#: ../assets/resources/page-config-server-url.blp:16
+#: ../assets/resources/page-preview.blp:17
+#: ../assets/resources/page-register.blp:16
+#: ../assets/resources/page-config-initial-access-token.blp:16
+#: ../assets/resources/page-exchange-login.blp:22
+#: ../assets/resources/page-home.blp:44
+#: ../assets/resources/page-exchange-logout.blp:22
+msgid "Main Menu"
+msgstr ""
+
+#: ../assets/resources/page-index.blp:23
 msgid "Checking configuration ..."
 msgstr ""
 
-#: ../assets/resources/page-welcome.blp:23
+#: ../assets/resources/page-welcome.blp:24
 #: ../assets/meta/com.pojtinger.felicitas.Senbara.desktop.in:5
 #: ../assets/resources/metainfo.xml.in:49
 msgid ""
@@ -285,36 +301,36 @@ msgstr ""
 "GNOME-Anwendung zur Interaktion mit der Senbara REST API. Konzipiert als "
 "Referenz für moderne GNOME/GTK-Entwicklung mit Go."
 
-#: ../assets/resources/page-welcome.blp:37
-msgid "_Get started"
+#: ../assets/resources/page-welcome.blp:38
+msgid "_Get Started"
 msgstr ""
 
 #: ../assets/resources/page-config-server-url.blp:5
 msgid "Select Senbara server"
 msgstr ""
 
-#: ../assets/resources/page-config-server-url.blp:31
+#: ../assets/resources/page-config-server-url.blp:32
 msgid "_Continue"
 msgstr ""
 
-#: ../assets/resources/page-config-server-url.blp:43
+#: ../assets/resources/page-config-server-url.blp:44
 msgid "Where is your Senbara server?"
 msgstr ""
 
-#: ../assets/resources/page-config-server-url.blp:44
+#: ../assets/resources/page-config-server-url.blp:45
 msgid "Enter the configuration for the Senbara server you want to connect to."
 msgstr ""
 
-#: ../assets/resources/page-config-server-url.blp:52
+#: ../assets/resources/page-config-server-url.blp:53
 msgid "_Senbara Server URL (e.g. https://rest.senbara.p8.lu/)"
 msgstr ""
 
-#: ../assets/resources/page-preview.blp:30
-#: ../assets/resources/page-config-initial-access-token.blp:31
+#: ../assets/resources/page-preview.blp:31
+#: ../assets/resources/page-config-initial-access-token.blp:32
 msgid "_Login"
 msgstr ""
 
-#: ../assets/resources/page-preview.blp:43
+#: ../assets/resources/page-preview.blp:44
 msgid ""
 "(Preview) GNOME app to interact with the Senbara REST API. Designed as a "
 "reference for modern GNOME/GTK development with Go."
@@ -322,17 +338,17 @@ msgstr ""
 "GNOME-Anwendung zur Interaktion mit der Senbara REST API. Konzipiert als "
 "Referenz für moderne GNOME/GTK-Entwicklung mit Go."
 
-#: ../assets/resources/page-preview.blp:71
+#: ../assets/resources/page-preview.blp:72
 msgid "Total contacts"
 msgstr ""
 
-#: ../assets/resources/page-preview.blp:80
-#: ../assets/resources/page-preview.blp:126
-#: ../assets/resources/page-home.blp:77 ../assets/resources/page-home.blp:104
+#: ../assets/resources/page-preview.blp:81
+#: ../assets/resources/page-preview.blp:127
+#: ../assets/resources/page-home.blp:78 ../assets/resources/page-home.blp:105
 msgid "0"
 msgstr ""
 
-#: ../assets/resources/page-preview.blp:117
+#: ../assets/resources/page-preview.blp:118
 msgid "Total journal entries"
 msgstr ""
 
@@ -340,17 +356,17 @@ msgstr ""
 msgid "Register Senbara Forms"
 msgstr "Senbara-Formulare"
 
-#: ../assets/resources/page-register.blp:21
+#: ../assets/resources/page-register.blp:22
 msgid "Registration required"
 msgstr ""
 
-#: ../assets/resources/page-register.blp:22
+#: ../assets/resources/page-register.blp:23
 msgid ""
 "You need to manually register Senbara Forms before you can sign in to this "
 "server."
 msgstr ""
 
-#: ../assets/resources/page-register.blp:27
+#: ../assets/resources/page-register.blp:28
 msgid "_Register"
 msgstr ""
 
@@ -358,241 +374,248 @@ msgstr ""
 msgid "What's your initial access token?"
 msgstr ""
 
-#: ../assets/resources/page-config-initial-access-token.blp:43
+#: ../assets/resources/page-config-initial-access-token.blp:44
 msgid "Set initial access token"
 msgstr ""
 
-#: ../assets/resources/page-config-initial-access-token.blp:44
+#: ../assets/resources/page-config-initial-access-token.blp:45
 msgid "Enter the initial access token you've received from the Senbara server."
 msgstr ""
 
-#: ../assets/resources/page-config-initial-access-token.blp:52
+#: ../assets/resources/page-config-initial-access-token.blp:53
 msgid "Initial access token"
 msgstr ""
 
 #: ../assets/resources/page-exchange-login.blp:5
-#: ../assets/resources/page-exchange-login.blp:27
+#: ../assets/resources/page-exchange-login.blp:28
 msgid "Signing you in"
 msgstr ""
 
-#: ../assets/resources/page-exchange-login.blp:28
-#: ../assets/resources/page-exchange-logout.blp:28
+#: ../assets/resources/page-exchange-login.blp:29
+#: ../assets/resources/page-exchange-logout.blp:29
 msgid "Waiting for authorization from browser ..."
 msgstr ""
 
-#: ../assets/resources/page-home.blp:68
+#: ../assets/resources/page-home.blp:69
 msgid "C_ontacts"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:95
+#: ../assets/resources/page-home.blp:96
 msgid "_Journal"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:132
+#: ../assets/resources/page-home.blp:133
 msgid "Contacts"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:141
-msgid "Add a contact"
+#: ../assets/resources/page-home.blp:142
+msgid "Add a Contact"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:148 ../assets/resources/page-home.blp:1026
+#: ../assets/resources/page-home.blp:149 ../assets/resources/page-home.blp:1027
 msgid "Search"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:157
+#: ../assets/resources/page-home.blp:158
 msgid "Search contacts"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:201 ../assets/resources/page-home.blp:211
+#: ../assets/resources/page-home.blp:202 ../assets/resources/page-home.blp:212
 msgid "No contacts found"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:202 ../assets/resources/page-home.blp:1080
+#: ../assets/resources/page-home.blp:203 ../assets/resources/page-home.blp:1081
 msgid "Try a different search"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:216
-msgid "_Add a contact"
+#: ../assets/resources/page-home.blp:217
+msgid "_Add a Contact"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:230
+#: ../assets/resources/page-home.blp:231
 msgid "Contacts could not be loaded"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:239 ../assets/resources/page-home.blp:398
-#: ../assets/resources/page-home.blp:485 ../assets/resources/page-home.blp:652
-#: ../assets/resources/page-home.blp:795 ../assets/resources/page-home.blp:987
-#: ../assets/resources/page-home.blp:1117
-#: ../assets/resources/page-home.blp:1203
-#: ../assets/resources/page-home.blp:1366
+#: ../assets/resources/page-home.blp:240 ../assets/resources/page-home.blp:399
+#: ../assets/resources/page-home.blp:486 ../assets/resources/page-home.blp:653
+#: ../assets/resources/page-home.blp:796 ../assets/resources/page-home.blp:988
+#: ../assets/resources/page-home.blp:1118
+#: ../assets/resources/page-home.blp:1204
+#: ../assets/resources/page-home.blp:1367
 msgid "_Refresh"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:249 ../assets/resources/page-home.blp:408
-#: ../assets/resources/page-home.blp:495 ../assets/resources/page-home.blp:662
-#: ../assets/resources/page-home.blp:805 ../assets/resources/page-home.blp:997
-#: ../assets/resources/page-home.blp:1127
-#: ../assets/resources/page-home.blp:1213
-#: ../assets/resources/page-home.blp:1376
-msgid "_Copy details"
+#: ../assets/resources/page-home.blp:250 ../assets/resources/page-home.blp:409
+#: ../assets/resources/page-home.blp:496 ../assets/resources/page-home.blp:663
+#: ../assets/resources/page-home.blp:806 ../assets/resources/page-home.blp:998
+#: ../assets/resources/page-home.blp:1128
+#: ../assets/resources/page-home.blp:1214
+#: ../assets/resources/page-home.blp:1377
+msgid "_Copy Details"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:261
+#: ../assets/resources/page-home.blp:262
 msgid "Contact"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:272 ../cmd/senbara-gnome/main.go:3330
-msgid "Delete contact"
+#: ../assets/resources/page-home.blp:273
+msgid "Delete Contact"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:279 ../assets/resources/page-home.blp:818
-#: ../cmd/senbara-gnome/main.go:3334
-msgid "Edit contact"
+#: ../assets/resources/page-home.blp:280
+msgid "Edit Contact"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:318
+#: ../assets/resources/page-home.blp:319
 msgid "Birthday"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:328
+#: ../assets/resources/page-home.blp:329
 msgid "Address"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:338
+#: ../assets/resources/page-home.blp:339
 msgid "Notes"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:352
+#: ../assets/resources/page-home.blp:353
 msgid "Debts"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:368
+#: ../assets/resources/page-home.blp:369
 msgid "Activites"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:389 ../assets/resources/page-home.blp:978
+#: ../assets/resources/page-home.blp:390 ../assets/resources/page-home.blp:979
 msgid "Contact could not be loaded"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:421
+#: ../assets/resources/page-home.blp:422
 msgid "Activity"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:432 ../cmd/senbara-gnome/main.go:3536
-msgid "Delete activity"
+#: ../assets/resources/page-home.blp:433
+msgid "Delete Activity"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:439 ../assets/resources/page-home.blp:675
-#: ../cmd/senbara-gnome/main.go:3540
-msgid "Edit activity"
+#: ../assets/resources/page-home.blp:440
+msgid "Edit Activity"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:476 ../assets/resources/page-home.blp:786
+#: ../assets/resources/page-home.blp:477 ../assets/resources/page-home.blp:787
 msgid "Activity could not be loaded"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:508 ../cmd/senbara-gnome/main.go:3488
+#: ../assets/resources/page-home.blp:509 ../cmd/senbara-gnome/main.go:3488
 msgid "Edit debt"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:538 ../assets/resources/page-home.blp:705
-#: ../assets/resources/page-home.blp:848 ../assets/resources/page-home.blp:1256
+#: ../assets/resources/page-home.blp:539 ../assets/resources/page-home.blp:706
+#: ../assets/resources/page-home.blp:849 ../assets/resources/page-home.blp:1257
 msgid "_Save"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:643
+#: ../assets/resources/page-home.blp:644
 msgid "Debt could not be loaded"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:911
+#: ../assets/resources/page-home.blp:676 ../cmd/senbara-gnome/main.go:3540
+msgid "Edit activity"
+msgstr ""
+
+#: ../assets/resources/page-home.blp:819 ../cmd/senbara-gnome/main.go:3334
+msgid "Edit contact"
+msgstr ""
+
+#: ../assets/resources/page-home.blp:912
 msgid "_Birthday (optional)"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:918
+#: ../assets/resources/page-home.blp:919
 msgid "A_ddress (optional)"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:945
+#: ../assets/resources/page-home.blp:946
 msgid "N_otes (optional)"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1010
+#: ../assets/resources/page-home.blp:1011
 msgid "Journal"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1019
-msgid "Add a journal entry"
+#: ../assets/resources/page-home.blp:1020
+msgid "Add a Journal Entry"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1035
+#: ../assets/resources/page-home.blp:1036
 msgid "Search journal entries"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1079
-#: ../assets/resources/page-home.blp:1089
+#: ../assets/resources/page-home.blp:1080
+#: ../assets/resources/page-home.blp:1090
 msgid "No journal entries found"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1094
-msgid "_Add a journal entry"
+#: ../assets/resources/page-home.blp:1095
+msgid "_Add a Journal Entry"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1108
+#: ../assets/resources/page-home.blp:1109
 msgid "Journal entries could not be loaded"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1139
+#: ../assets/resources/page-home.blp:1140
 msgid "Journal Entry"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1150 ../cmd/senbara-gnome/main.go:3907
-msgid "Delete journal entry"
+#: ../assets/resources/page-home.blp:1151
+msgid "Delete Journal Entry"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1157
-#: ../assets/resources/page-home.blp:1226 ../cmd/senbara-gnome/main.go:3911
-msgid "Edit journal entry"
+#: ../assets/resources/page-home.blp:1158
+msgid "Edit Journal Entry"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1194
-#: ../assets/resources/page-home.blp:1357
+#: ../assets/resources/page-home.blp:1195
+#: ../assets/resources/page-home.blp:1358
 msgid "Journal entry could not be loaded"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1394
-msgid "Logout"
+#: ../assets/resources/page-home.blp:1227 ../cmd/senbara-gnome/main.go:3911
+msgid "Edit journal entry"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1400
-msgid "Your data"
+#: ../assets/resources/page-home.blp:1395
+msgid "_Logout"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1403
-msgid "Export"
+#: ../assets/resources/page-home.blp:1401
+msgid "Your Data"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1408 ../cmd/senbara-gnome/main.go:2621
-msgid "Import"
+#: ../assets/resources/page-home.blp:1404
+msgid "_Export"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1413 ../cmd/senbara-gnome/main.go:2727
-#: ../cmd/senbara-gnome/main.go:2807 ../cmd/senbara-gnome/main.go:2868
-#: ../cmd/senbara-gnome/main.go:2929 ../cmd/senbara-gnome/main.go:2990
-msgid "Delete"
+#: ../assets/resources/page-home.blp:1409
+msgid "_Import"
 msgstr ""
 
-#: ../assets/resources/page-home.blp:1440
+#: ../assets/resources/page-home.blp:1414
+msgid "_Delete"
+msgstr ""
+
+#: ../assets/resources/page-home.blp:1441
 msgid "Terms of Service"
 msgstr ""
 
 #: ../assets/resources/page-exchange-logout.blp:5
-#: ../assets/resources/page-exchange-logout.blp:27
+#: ../assets/resources/page-exchange-logout.blp:28
 msgid "Signing you out"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:117
-msgid "Copy details"
+msgid "Copy Details"
 msgstr ""
 
 #. TRANSLATORS: Replace "translator-credits" with your name/username, and optionally an email or URL.
@@ -601,35 +624,35 @@ msgid "translator-credits"
 msgstr "Felicitas Pojtinger <felicitas@pojtinger.com>"
 
 #: ../cmd/senbara-gnome/main.go:1777
-msgid "Created contact"
+msgid "Created Contact"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:1846
-msgid "Created debt"
+msgid "Created Debt"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:1923
-msgid "Created activity"
+msgid "Created Activity"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:1999
-msgid "Updated activity"
+msgid "Updated Activity"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2065
-msgid "Updated debt"
+msgid "Updated Debt"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2160
-msgid "Updated contact"
+msgid "Updated Contact"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2214
-msgid "Created journal entry"
+msgid "Created Journal Entry"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2276
-msgid "Updated journal entry"
+msgid "Updated Journal Entry"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2415
@@ -637,7 +660,7 @@ msgid "Senbara REST source code"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2446
-msgid "Downloaded code"
+msgid "Downloaded Code"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2503 ../cmd/senbara-gnome/main.go:2589
@@ -645,7 +668,7 @@ msgid "Senbara Forms userdata"
 msgstr "Senbara-Formulare"
 
 #: ../cmd/senbara-gnome/main.go:2534
-msgid "Exported user data"
+msgid "Exported User Data"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2595
@@ -670,8 +693,12 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
+#: ../cmd/senbara-gnome/main.go:2621
+msgid "Import"
+msgstr ""
+
 #: ../cmd/senbara-gnome/main.go:2704
-msgid "Imported user data"
+msgid "Imported User Data"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2723
@@ -682,8 +709,14 @@ msgstr ""
 msgid "Are you sure you want to delete your data and your account?"
 msgstr ""
 
+#: ../cmd/senbara-gnome/main.go:2727 ../cmd/senbara-gnome/main.go:2807
+#: ../cmd/senbara-gnome/main.go:2868 ../cmd/senbara-gnome/main.go:2929
+#: ../cmd/senbara-gnome/main.go:2990
+msgid "Delete"
+msgstr ""
+
 #: ../cmd/senbara-gnome/main.go:2763
-msgid "Deleted user data"
+msgid "Deleted User Data"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2803
@@ -695,7 +728,7 @@ msgid "Are you sure you want to delete this contact?"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2843
-msgid "Contact deleted"
+msgid "Contact Deleted"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2864
@@ -707,7 +740,7 @@ msgid "Are you sure you want to settle this debt?"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2904
-msgid "Settled debt"
+msgid "Settled Debt"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2925
@@ -719,7 +752,7 @@ msgid "Are you sure you want to delete this activity?"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2965
-msgid "Activity deleted"
+msgid "Activity Deleted"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:2986
@@ -731,7 +764,11 @@ msgid "Are you sure you want to delete this journal entry?"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:3026
-msgid "Journal entry deleted"
+msgid "Journal Entry Deleted"
+msgstr ""
+
+#: ../cmd/senbara-gnome/main.go:3330
+msgid "Delete contact"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:3483
@@ -740,6 +777,10 @@ msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:3502
 msgid "Add a _debt"
+msgstr ""
+
+#: ../cmd/senbara-gnome/main.go:3536
+msgid "Delete activity"
 msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:3557
@@ -760,6 +801,10 @@ msgstr ""
 
 #: ../cmd/senbara-gnome/main.go:3894 ../cmd/senbara-gnome/main.go:3981
 msgid "Bad"
+msgstr ""
+
+#: ../cmd/senbara-gnome/main.go:3907
+msgid "Delete journal entry"
 msgstr ""
 
 #. TRANSLATORS: Search terms to find this application.

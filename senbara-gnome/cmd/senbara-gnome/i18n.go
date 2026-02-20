@@ -3,6 +3,7 @@ package main
 import (
 	"io"
 	"io/fs"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -52,5 +53,5 @@ func initEmbeddedI18n() error {
 		return err
 	}
 
-	return i18n.InitI18n(gettextPackage, i18t)
+	return i18n.InitI18n(gettextPackage, i18t, slog.Default())
 }

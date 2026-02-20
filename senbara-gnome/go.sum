@@ -53,8 +53,8 @@ github.com/perimeterx/marshmallow v1.1.5/go.mod h1:dsXbUu8CRzfYP5a87xpp0xq9S3u0V
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/pojntfx/go-gettext v0.2.0 h1:Nw3Hyy0Fef3pOuvYYPZESmbOT+IdnYjqx9/ywFo46GU=
-github.com/pojntfx/go-gettext v0.2.0/go.mod h1:eGt2r0JKvlPZjiz+GqEDtg92//F30LEV/IB0h42bk40=
+github.com/pojntfx/go-gettext v0.3.0 h1:f+0O046uP84PNusW3ou3/1qSF4Q7NIjL84pqQy+VXqw=
+github.com/pojntfx/go-gettext v0.3.0/go.mod h1:eGt2r0JKvlPZjiz+GqEDtg92//F30LEV/IB0h42bk40=
 github.com/pojntfx/purego v0.0.0-20260128031338-5429b1e47a6d h1:f4fm8/eZJvaE/tfBomboi8CQByYmbXKxHcP6PBwAM04=
 github.com/pojntfx/purego v0.0.0-20260128031338-5429b1e47a6d/go.mod h1:amE5lVGstyh2GTEIHFEbgJHmoMD0llIuapnzIlZx7Fc=
 github.com/pojntfx/puregotk v0.0.0-20260220051800-f8a38f1e0894 h1:pPTVC5Q/5DJ46RzXKISgtUbZgHl/xampBJtBaPOd1ZQ=
