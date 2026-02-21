@@ -1,3 +1,3 @@
-package main
+package components
 
 const gettextPackage = "senbara-gnome"

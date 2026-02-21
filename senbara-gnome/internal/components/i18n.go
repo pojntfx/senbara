@@ -1,4 +1,4 @@
-package main
+package components
 
 import (
 	"io"
@@ -11,7 +11,7 @@ import (
 	"github.com/pojntfx/senbara/senbara-gnome/po"
 )
 
-func initEmbeddedI18n() error {
+func InitEmbeddedI18n() error {
 	// Self-extract locale files for i18n
 	i18t, err := os.MkdirTemp("", "")
 	if err != nil {

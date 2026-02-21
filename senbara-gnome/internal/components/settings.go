@@ -1,4 +1,4 @@
-package main
+package components
 
 import (
 	"errors"
@@ -10,7 +10,7 @@ import (
 	"github.com/pojntfx/senbara/senbara-gnome/assets/resources"
 )
 
-func initEmbeddedSettings() (*gio.Settings, error) {
+func InitEmbeddedSettings() (*gio.Settings, error) {
 	// Self-extract GSettings schema
 	st, err := os.MkdirTemp("", "")
 	if err != nil {

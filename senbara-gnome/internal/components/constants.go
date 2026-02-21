@@ -1,6 +1,8 @@
-package main
+package components
 
 const (
+	dataKeyGoInstance = "go_instance"
+
 	redirectURL = "senbara:///authorize"
 
 	renderedMarkdownHTMLPrefix = `<meta name="color-scheme" content="light dark" />
