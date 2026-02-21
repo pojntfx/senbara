@@ -581,7 +581,7 @@ func (a *application) onActivate(app *gio.Application) {
 
 	pageHomeBuilder.GetObject("page_home").Cast(&pageHome)
 	pageHomeBuilder.GetObject("home_sidebar_page").Cast(&homeSidebarPage)
-	homeSidebarPage.SetTitle(a.w.GetTitle())
+	a.w.BindProperty("title", &homeSidebarPage.Object, "title", gobject.GBindingSyncCreateValue)
 	pageHomeBuilder.GetObject("home_split_view").Cast(&homeSplitView)
 	pageHomeBuilder.GetObject("home_navigation").Cast(&homeNavigation)
 	pageHomeBuilder.GetObject("home_sidebar_listbox").Cast(&homeSidebarListbox)
